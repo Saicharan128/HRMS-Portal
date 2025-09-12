@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en" class="{% if theme == 'dark' %}dark{% endif %}">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title or "PeopleOps Portal" }}</title>
+
+    <!-- Tailwind via CDN; dark mode is handled by the 'dark' class on <html> -->
+    <script>window.tailwind = window.tailwind || {}; window.tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        /* ---------- THEME TOKENS ---------- */
+        :root {
+            --bg: #f8fafc;
+            /* page background */
+            --card: #ffffff;
+            /* surfaces/cards/nav/modals */
+            --text: #0f172a;
+            /* main text */
+            --muted: #475569;
+            /* secondary text */
+            --border: #e2e8f0;
+            /* borders/dividers */
+            --hover: rgba(15, 23, 42, 0.04);
+            --tableHead: #f1f5f9;
+            --input: #ffffff;
+            --ring: #0f172a;
+        }
+
+        html.dark {
+            --bg: #0b1220;
+            --card: #0f172a;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --border: #334155;
+            --hover: rgba(255, 255, 255, 0.06);
+            --tableHead: #111827;
+            --input: #0f172a;
+            --ring: #e2e8f0;
+            color-scheme: dark;
+        }
+
+        /* ---------- PAGE BASE (applies to WHOLE file) ---------- */
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Surfaces & text utilities you already use */
+        .dark .bg-white {
+            background-color: var(--card) !important;
+        }
+
+        .dark .bg-slate-50 {
+            background-color: var(--bg) !important;
+        }
+
+        .dark .text-slate-900,
+        .dark .text-slate-800,
+        .dark .text-slate-700 {
+            color: var(--text) !important;
+        }
+
+        .dark .text-slate-600,
+        .dark .text-slate-500 {
+            color: var(--muted) !important;
+        }
+
+        .dark .border-slate-200,
+        .dark .border-slate-300 {
+            border-color: var(--border) !important;
+        }
+
+        .dark .hover\:bg-slate-50:hover {
+            background: var(--hover) !important;
+        }
+
+        /* Nav / footer surfaces */
+        nav {
+            background: var(--card);
+        }
+
+        .dark nav {
+            background: var(--card);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+        }
+
+        /* Neutral buttons (bordered) */
+        .dark .border:hover {
+            background: var(--hover) !important;
+        }
+
+        /* Inputs / selects / textareas */
+        input:not([type="checkbox"]):not([type="radio"]),
+        select,
+        textarea {
+            background: var(--input);
+            color: var(--text);
+        }
+
+        .dark input:not([type="checkbox"]):not([type="radio"]),
+        .dark select,
+        .dark textarea {
+            background: var(--input);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        .dark input::placeholder,
+        .dark textarea::placeholder {
+            color: #64748b;
+        }
+
+        input::file-selector-button {
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            border-radius: .5rem;
+            padding: .25rem .5rem;
+            margin-right: .5rem;
+        }
+
+        .dark input:focus,
+        .dark select:focus,
+        .dark textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .08);
+            border-color: var(--ring);
+        }
+
+        /* Tables */
+        table thead {
+            background: var(--tableHead);
+        }
+
+        .dark table thead {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        table thead th {
+            color: var(--muted);
+        }
+
+        table tbody tr:hover {
+            background: var(--hover);
+        }
+
+        /* Links that use text-indigo-700 stay readable in dark */
+        .dark a.text-indigo-700 {
+            color: #93c5fd !important;
+        }
+
+        /* Flash / Alerts */
+        .dark .bg-blue-50 {
+            background: rgba(59, 130, 246, 0.12) !important;
+        }
+
+        .dark .text-blue-800 {
+            color: #93c5fd !important;
+        }
+
+        .dark .border-blue-200 {
+            border-color: rgba(59, 130, 246, 0.35) !important;
+        }
+
+        .dark .bg-emerald-50 {
+            background: rgba(16, 185, 129, 0.12) !important;
+        }
+
+        .dark .text-emerald-800 {
+            color: #6ee7b7 !important;
+        }
+
+        .dark .border-emerald-200 {
+            border-color: rgba(16, 185, 129, 0.35) !important;
+        }
+
+        .dark .bg-red-50 {
+            background: rgba(239, 68, 68, 0.12) !important;
+        }
+
+        .dark .text-red-800 {
+            color: #fca5a5 !important;
+        }
+
+        .dark .border-red-200 {
+            border-color: rgba(239, 68, 68, 0.35) !important;
+        }
+
+        .dark .bg-amber-50 {
+            background: rgba(245, 158, 11, 0.12) !important;
+        }
+
+        .dark .text-amber-900 {
+            color: #fbbf24 !important;
+        }
+
+        .dark .border-amber-200 {
+            border-color: rgba(245, 158, 11, 0.35) !important;
+        }
+
+        /* Optional: logo inversion for simple monochrome logos */
+        .brand-logo {
+            transition: filter .2s ease;
+        }
+
+        .dark .brand-logo.theme-invert {
+            filter: invert(1) hue-rotate(180deg) brightness(1.1) contrast(0.95);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Nav -->
+    <nav class="border-b border-slate-200">
+        <div class="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
+            <a href="{{ url_for('index') }}" class="text-xl font-semibold">PeopleOps</a>
+            <div class="flex items-center gap-2">
+                <!-- Button text only (no emoji) -->
+                <button id="themeToggle" class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                    <i id="themeIcon" class="fa-solid {% if theme=='dark' %}fa-sun{% else %}fa-moon{% endif %} mr-1"></i>
+                    <span id="themeLabel">{{ 'Light Mode' if theme == 'dark' else 'Dark Mode' }}</span>
+                </button>
+
+                {% if session.get('username') %}
+                <span class="text-sm">Hello, <strong>{{ session.get('username') }}</strong></span>
+                <a href="{{ url_for('dashboard') }}" class="text-sm px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                    <i class="fa-solid fa-gauge-high mr-1"></i> Dashboard
+                </a>
+                <a href="{{ url_for('logout') }}" class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}"
+                    class="text-sm px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                    <i class="fa-solid fa-right-to-bracket mr-1"></i>
+                    Login</a>
+                <a href="{{ url_for('register') }}"
+                    class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                    <i class="fa-solid fa-user-plus mr-1"></i>
+                    Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% if get_flashed_messages(with_categories=true) %}
+    <div class="mx-auto max-w-2xl mt-6 px-4">
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+        {% set color = "bg-blue-50 text-blue-800 border-blue-200" %}
+        {% if category == "error" %}{% set color = "bg-red-50 text-red-800 border-red-200" %}{% endif %}
+        {% if category == "success" %}{% set color = "bg-emerald-50 text-emerald-800 border-emerald-200" %}{% endif %}
+        {% if category == "warning" %}{% set color = "bg-amber-50 text-amber-900 border-amber-200" %}{% endif %}
+        <div class="mb-3 rounded-xl border px-4 py-3 {{ color }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Page Content -->
+    <main class="mx-auto max-w-5xl px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="py-6">
+        <div class="mx-auto max-w-5xl px-4 text-sm text-slate-500">
+            © {{ 2025 }} PeopleOps • Demo
+        </div>
+    </footer>
+
+    <!-- Toggle logic: update session, flip <html class="dark"> immediately -->
+    <script>
+        document.getElementById('themeToggle')?.addEventListener('click', async () => {
+            try {
+                const r = await fetch('{{ url_for("theme_toggle") }}', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                const j = await r.json();
+                const dark = j.theme === 'dark';
+
+                // Flip <html class="dark">
+                document.documentElement.classList.toggle('dark', dark);
+
+                // Update only the label + icon (don't wipe out the <i>)
+                const label = document.getElementById('themeLabel');
+                const icon = document.getElementById('themeIcon');
+                label.textContent = dark ? 'Light Mode' : 'Dark Mode';
+                icon.classList.remove(dark ? 'fa-moon' : 'fa-sun');
+                icon.classList.add(dark ? 'fa-sun' : 'fa-moon');
+            } catch (e) {
+                console.error('Theme toggle failed', e);
+            }
+        });
+    </script>
+</body>
+
+</html>

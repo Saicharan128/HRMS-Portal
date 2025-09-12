@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-6xl">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">Onboarding</h1>
+            <p class="text-slate-600 text-sm">Candidates in <strong>Onboarding</strong> stage. Roll out offer letters
+                and keep PDFs on record.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Back</a>
+    </div>
+
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800">Candidates</h2>
+            <button id="refreshBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Refresh</button>
+        </div>
+
+        <div class="mt-4 overflow-auto">
+            <table class="min-w-full text-sm">
+                <thead class="text-left text-slate-600 border-b">
+                    <tr>
+                        <th class="py-2 pr-3">Name</th>
+                        <th class="py-2 pr-3">Email / Phone</th>
+                        <th class="py-2 pr-3">Job Title</th>
+                        <th class="py-2 pr-3">Offer Letter</th>
+                        <th class="py-2 pr-3">Status</th>
+                        <th class="py-2 pr-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody" class="align-top"></tbody>
+            </table>
+        </div>
+        <div id="msg" class="mt-3 text-sm"></div>
+    </div>
+</div>
+
+<script>
+    async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function postJSON(u, d) { const r = await fetch(u, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d || {}) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+
+    const tbody = document.getElementById("tbody");
+    const msg = document.getElementById("msg");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    async function loadList() {
+        try {
+            msg.textContent = "Loading...";
+            const rows = await fetchJSON("/api/onboarding");
+            tbody.innerHTML = "";
+            rows.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+        <td class="py-2 pr-3 font-medium text-slate-800">${row.name}</td>
+        <td class="py-2 pr-3">${row.email || "-"}<br><span class="text-slate-500">${row.phone || "-"}</span></td>
+        <td class="py-2 pr-3">${row.job_title || row.role_of_employment || "-"}</td>
+        <td class="py-2 pr-3">${row.offer_url ? `<a class="text-indigo-700 underline" href="${row.offer_url}" target="_blank">View PDF</a>` : "-"}</td>
+        <td class="py-2 pr-3">${row.recruited ? `Offer sent${row.onboarded_at ? ` • ${new Date(row.onboarded_at).toLocaleDateString()}` : ""}` : "Pending"}</td>
+        <td class="py-2 pr-3">
+          <button data-id="${row.id}" class="offerBtn px-3 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900" ${row.recruited ? "disabled" : ""}>
+            Roll out offer letter
+          </button>
+        </td>
+      `;
+                tbody.appendChild(tr);
+            });
+
+            document.querySelectorAll(".offerBtn").forEach(btn => {
+                btn.addEventListener("click", async (ev) => {
+                    const id = ev.currentTarget.dataset.id;
+                    ev.currentTarget.disabled = true;
+                    msg.className = "mt-3 text-sm";
+                    msg.textContent = "Generating and sending offer...";
+                    try {
+                        await postJSON(`/api/onboarding/${id}/offer`, {});
+                        msg.className = "mt-3 text-sm text-emerald-700";
+                        msg.textContent = "Offer generated and email sent.";
+                        await loadList();
+                    } catch (e) {
+                        ev.currentTarget.disabled = false;
+                        msg.className = "mt-3 text-sm text-rose-700";
+                        try { const err = JSON.parse(e.message); msg.textContent = err.error || "Failed to send offer."; }
+                        catch { msg.textContent = "Failed to send offer."; }
+                        console.error(e);
+                    }
+                });
+            });
+
+            msg.textContent = rows.length ? "" : "No candidates currently in Onboarding.";
+        } catch (e) {
+            msg.className = "mt-3 text-sm text-rose-700";
+            msg.textContent = "Failed to load list.";
+            console.error(e);
+        }
+    }
+
+    refreshBtn?.addEventListener("click", loadList);
+    loadList();
+</script>
+{% endblock %}

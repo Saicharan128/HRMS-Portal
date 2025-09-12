@@ -1,0 +1,326 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-chart-line mr-2"></i> Performance
+            </h1>
+            <p class="text-slate-600 text-sm">Drive continuous performance reviews and goal tracking.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- 1) Cycles (Managers/HR can create) -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800"><i class="fa-regular fa-calendar mr-2"></i> Cycles</h2>
+            <button id="cyNew" class="hidden px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New cycle
+            </button>
+        </div>
+        <div id="cycles" class="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </div>
+
+    <!-- 2) My Goals (or selected user) -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-bullseye mr-2"></i> Goals</h2>
+                <select id="filterCycle" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All cycles</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <input id="goUser" placeholder="username (mgr/hr)"
+                    class="hidden rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <button id="goLoad"
+                    class="hidden px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">Load</button>
+                <button id="goNew" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                    <i class="fa-solid fa-plus mr-1"></i> New goal
+                </button>
+            </div>
+        </div>
+        <div id="goals" class="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </div>
+
+    <!-- 3) Reviews -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800"><i class="fa-regular fa-clipboard mr-2"></i> Reviews</h2>
+            <div class="flex items-center gap-2">
+                <select id="rvCycle" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All cycles</option>
+                </select>
+                <button id="rvAssign"
+                    class="hidden px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-user-plus mr-1"></i> Assign review
+                </button>
+            </div>
+        </div>
+        <div id="reviews" class="mt-3 space-y-3"></div>
+    </div>
+</div>
+
+<!-- Modal (quick & simple) -->
+<div id="modal" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl border border-slate-200 p-5 w-[94%] max-w-xl">
+        <div class="flex items-center justify-between">
+            <h3 id="mTitle" class="text-lg font-semibold text-slate-800">Modal</h3>
+            <button id="mClose" class="h-8 w-8 rounded-lg border border-slate-300 hover:bg-slate-50">✕</button>
+        </div>
+        <div id="mBody" class="mt-4"></div>
+    </div>
+</div>
+
+<script>
+    const IS_MGR = ["Leaders", "HR"].includes("{{ session.get('employee_type') }}");
+
+    // ---- utils
+    async function jget(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function jpost(u, body) { const r = await fetch(u, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    function showModal(title, bodyHTML) { document.getElementById("mTitle").textContent = title; const b = document.getElementById("mBody"); b.innerHTML = bodyHTML; modal.classList.remove("hidden"); modal.classList.add("flex"); }
+    function hideModal() { modal.classList.add("hidden"); modal.classList.remove("flex"); }
+
+    const cyclesDiv = document.getElementById("cycles");
+    const filterCycle = document.getElementById("filterCycle");
+    const rvCycle = document.getElementById("rvCycle");
+    const goalsDiv = document.getElementById("goals");
+    const reviewsDiv = document.getElementById("reviews");
+    const cyNew = document.getElementById("cyNew");
+    const goNew = document.getElementById("goNew");
+    const goUser = document.getElementById("goUser");
+    const goLoad = document.getElementById("goLoad");
+    const modal = document.getElementById("modal");
+    document.getElementById("mClose").addEventListener("click", hideModal);
+
+    if (IS_MGR) { cyNew.classList.remove("hidden"); goUser.classList.remove("hidden"); goLoad.classList.remove("hidden"); document.getElementById("rvAssign").classList.remove("hidden"); }
+
+    // ---- load cycles
+    let CYCLES = [];
+    async function loadCycles() {
+        CYCLES = await jget("/api/perf/cycles");
+        cyclesDiv.innerHTML = "";
+        filterCycle.innerHTML = `<option value="">All cycles</option>`;
+        rvCycle.innerHTML = `<option value="">All cycles</option>`;
+        CYCLES.forEach(c => {
+            const card = document.createElement("div");
+            card.className = "rounded-xl border border-slate-200 bg-white p-4";
+            card.innerHTML = `<div class="text-sm text-slate-500">${c.status}</div>
+      <div class="text-lg font-semibold text-slate-800">${c.name}</div>
+      <div class="text-sm text-slate-600">${c.start_date} → ${c.end_date}</div>
+      ${IS_MGR ? `<button data-id="${c.id}" class="mt-2 px-3 py-1.5 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</button>` : ""}`;
+            cyclesDiv.appendChild(card);
+            filterCycle.insertAdjacentHTML("beforeend", `<option value="${c.id}">${c.name}</option>`);
+            rvCycle.insertAdjacentHTML("beforeend", `<option value="${c.id}">${c.name}</option>`);
+        });
+        // edit cycle
+        if (IS_MGR) {
+            cyclesDiv.querySelectorAll("button[data-id]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const c = CYCLES.find(x => x.id == btn.dataset.id);
+                    showModal("Edit cycle", `
+          <form id="cyForm" class="grid grid-cols-1 gap-3">
+            <input type="hidden" name="id" value="${c.id}">
+            <div><label class="text-sm">Name</label><input name="name" value="${c.name}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="text-sm">Start</label><input name="start_date" type="date" value="${c.start_date}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+              <div><label class="text-sm">End</label><input name="end_date" type="date" value="${c.end_date}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+            </div>
+            <div>
+              <label class="text-sm">Status</label>
+              <select name="status" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                <option ${c.status === "Active" ? "selected" : ""}>Active</option>
+                <option ${c.status === "Closed" ? "selected" : ""}>Closed</option>
+              </select>
+            </div>
+            <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Save</button></div>
+          </form>
+        `);
+                    document.getElementById("cyForm").addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const payload = Object.fromEntries(new FormData(e.target).entries());
+                        await jpost("/api/perf/cycles", payload);
+                        hideModal(); loadCycles(); loadGoals(); loadReviews();
+                    });
+                });
+            });
+        }
+    }
+    cyNew.addEventListener("click", () => {
+        showModal("New cycle", `
+    <form id="cyForm" class="grid grid-cols-1 gap-3">
+      <div><label class="text-sm">Name</label><input name="name" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="H2 2025"></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-sm">Start</label><input name="start_date" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+        <div><label class="text-sm">End</label><input name="end_date" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+      </div>
+      <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Create</button></div>
+    </form>
+  `);
+        document.getElementById("cyForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await jpost("/api/perf/cycles", Object.fromEntries(new FormData(e.target).entries()));
+            hideModal(); loadCycles();
+        });
+    });
+
+    // ---- goals
+    async function loadGoals() {
+        const params = new URLSearchParams();
+        if (filterCycle.value) params.set("cycle_id", filterCycle.value);
+        if (IS_MGR && goUser.value.trim()) params.set("user", goUser.value.trim());
+        const rows = await jget(`/api/perf/goals?${params.toString()}`);
+        goalsDiv.innerHTML = "";
+        rows.forEach(g => {
+            const card = document.createElement("div");
+            card.className = "rounded-xl border border-slate-200 bg-white p-4";
+            card.innerHTML = `
+      <div class="text-xs text-slate-500">${g.cycle_name || "—"} ${g.owner ? `• ${g.owner}` : ""}</div>
+      <div class="font-semibold text-slate-800 mt-1">${g.title}</div>
+      <div class="text-sm text-slate-600">${g.description || ""}</div>
+      <div class="mt-2 text-sm">Weight: ${g.weight}%</div>
+      <div class="mt-1 text-sm">Progress: ${g.progress}%</div>
+      <div class="mt-2 flex items-center gap-2">
+        <button data-id="${g.id}" class="px-2 py-1 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</button>
+        <button data-up="${g.id}" class="px-2 py-1 rounded-lg bg-slate-800 text-white text-sm">Update</button>
+      </div>`;
+            goalsDiv.appendChild(card);
+        });
+        // wire edit / update
+        goalsDiv.querySelectorAll("button[data-id]").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const id = btn.dataset.id;
+                const g = (await jget(`/api/perf/goals?${IS_MGR && goUser.value ? `user=${encodeURIComponent(goUser.value)}&` : ``}`)).find(x => x.id == id);
+                showModal("Edit goal", `
+        <form id="gForm" class="grid grid-cols-1 gap-3">
+          <input type="hidden" name="id" value="${g.id}">
+          <input type="hidden" name="cycle_id" value="${g.cycle_id}">
+          ${IS_MGR ? `<div><label class="text-sm">Owner</label><input name="owner" value="${g.owner}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>` : ""}
+          <div><label class="text-sm">Title</label><input name="title" value="${g.title}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+          <div><label class="text-sm">Description</label><textarea name="description" class="w-full rounded-xl border border-slate-300 px-3 py-2">${g.description || ""}</textarea></div>
+          <div><label class="text-sm">Weight (%)</label><input type="number" min="0" max="100" name="weight" value="${g.weight}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+          <div><label class="text-sm">Status</label>
+            <select name="status" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+              ${["Draft", "In Progress", "Completed", "Archived"].map(s => `<option ${g.status === s ? "selected" : ""}>${s}</option>`).join("")}
+            </select>
+          </div>
+          <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Save</button></div>
+        </form>
+      `);
+                document.getElementById("gForm").addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    await jpost("/api/perf/goals", Object.fromEntries(new FormData(e.target).entries()));
+                    hideModal(); loadGoals();
+                });
+            });
+        });
+        goalsDiv.querySelectorAll("button[data-up]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const id = btn.dataset.up;
+                showModal("Update progress", `
+        <form id="uForm" class="grid grid-cols-1 gap-3">
+          <div><label class="text-sm">Progress (0-100)</label><input name="progress" type="number" min="0" max="100" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+          <div><label class="text-sm">Note</label><textarea name="note" class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea></div>
+          <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Save</button></div>
+        </form>
+      `);
+                document.getElementById("uForm").addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    await jpost(`/api/perf/goals/${id}/update`, Object.fromEntries(new FormData(e.target).entries()));
+                    hideModal(); loadGoals();
+                });
+            });
+        });
+    }
+
+    goNew.addEventListener("click", () => {
+        const cycleOpts = CYCLES.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+        showModal("New goal", `
+    <form id="gForm" class="grid grid-cols-1 gap-3">
+      <div><label class="text-sm">Cycle</label><select name="cycle_id" class="w-full rounded-xl border border-slate-300 px-3 py-2">${cycleOpts}</select></div>
+      ${IS_MGR ? `<div><label class="text-sm">Owner</label><input name="owner" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="username"></div>` : ""}
+      <div><label class="text-sm">Title</label><input name="title" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+      <div><label class="text-sm">Description</label><textarea name="description" class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea></div>
+      <div><label class="text-sm">Weight (%)</label><input name="weight" type="number" min="0" max="100" value="20" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+      <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Create</button></div>
+    </form>
+  `);
+        document.getElementById("gForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await jpost("/api/perf/goals", Object.fromEntries(new FormData(e.target).entries()));
+            hideModal(); loadGoals();
+        });
+    });
+    goLoad.addEventListener("click", () => loadGoals());
+
+    // filter by cycle
+    filterCycle.addEventListener("change", () => loadGoals());
+
+    // ---- reviews
+    async function loadReviews() {
+        const params = new URLSearchParams();
+        if (rvCycle.value) params.set("cycle_id", rvCycle.value);
+        if (IS_MGR) params.set("scope", "all");
+        const rows = await jget(`/api/perf/reviews?${params.toString()}`);
+        reviewsDiv.innerHTML = "";
+        rows.forEach(r => {
+            const box = document.createElement("div");
+            box.className = "rounded-xl border border-slate-200 bg-white p-4";
+            box.innerHTML = `
+      <div class="text-xs text-slate-500">${r.cycle_name || "—"} • ${r.status}</div>
+      <div class="mt-1 font-semibold text-slate-800">Reviewee: ${r.reviewee}</div>
+      <div class="text-sm text-slate-600">Reviewer: ${r.reviewer}</div>
+      <div class="mt-2 text-sm">Rating: ${r.rating ?? "—"}</div>
+      <div class="text-sm">${r.comments || ""}</div>
+      ${r.status !== "Finalized" && (r.reviewer === "{{ session.get('username') }}" || IS_MGR)
+                    ? `<div class="mt-2"><button data-id="${r.id}" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white text-sm">Edit</button></div>`
+                    : ""}`;
+            reviewsDiv.appendChild(box);
+        });
+        reviewsDiv.querySelectorAll("button[data-id]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const id = btn.dataset.id;
+                showModal("Submit review", `
+        <form id="rForm" class="grid grid-cols-1 gap-3">
+          <div><label class="text-sm">Rating (1-5)</label><input name="rating" type="number" min="1" max="5" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+          <div><label class="text-sm">Comments</label><textarea name="comments" class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea></div>
+          <div><label class="text-sm">Status</label>
+            <select name="status" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+              <option>Submitted</option><option>Finalized</option>
+            </select>
+          </div>
+          <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Save</button></div>
+        </form>
+      `);
+                document.getElementById("rForm").addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    await jpost(`/api/perf/reviews/${id}`, Object.fromEntries(new FormData(e.target).entries()));
+                    hideModal(); loadReviews();
+                });
+            });
+        });
+    }
+    document.getElementById("rvAssign").addEventListener("click", () => {
+        const cycleOpts = CYCLES.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+        showModal("Assign review", `
+    <form id="aForm" class="grid grid-cols-1 gap-3">
+      <div><label class="text-sm">Cycle</label><select name="cycle_id" class="w-full rounded-xl border border-slate-300 px-3 py-2">${cycleOpts}</select></div>
+      <div><label class="text-sm">Reviewee username</label><input name="reviewee" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
+      <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Assign</button></div>
+    </form>
+  `);
+        document.getElementById("aForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await jpost("/api/perf/reviews", Object.fromEntries(new FormData(e.target).entries()));
+            hideModal(); loadReviews();
+        });
+    });
+
+    // boot
+    Promise.all([loadCycles().then(loadGoals), loadReviews()]).catch(console.error);
+</script>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-people-group mr-2"></i> Team overview
+            </h1>
+            <p class="text-slate-600 text-sm">Get a snapshot of team composition, capacity, and status.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-user-group mr-1"></i> Headcount</div>
+            <div id="headcount" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-briefcase mr-1"></i> Open Jobs</div>
+            <div id="openJobs" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-person-digging mr-1"></i> In Pipeline</div>
+            <div id="pipeline" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-user-check mr-1"></i> New Hires</div>
+            <div id="newHires" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+    </div>
+
+    <!-- Composition -->
+    <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+        <h2 class="text-lg font-semibold text-slate-800 mb-3">
+            <i class="fa-solid fa-chart-pie mr-2"></i> Composition
+        </h2>
+        <div id="composition" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+    </div>
+
+    <!-- Table -->
+    <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 class="text-lg font-semibold text-slate-800">
+                <i class="fa-solid fa-users mr-2"></i> Team members
+            </h2>
+            <div class="flex items-center gap-2">
+                <input id="q" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+                    placeholder="Search name / email / username">
+                <select id="etype" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+                    <option value="">All types</option>
+                    <option value="Employees">Employees</option>
+                    <option value="HR">HR</option>
+                    <option value="Leaders">Leaders</option>
+                    <option value="CXOs">CXOs</option>
+                </select>
+                <button id="reload"
+                    class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-rotate mr-1"></i> Reload
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full text-sm text-left text-slate-700">
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="px-4 py-2">Name</th>
+                        <th class="px-4 py-2">Employee ID</th>
+                        <th class="px-4 py-2">Type</th>
+                        <th class="px-4 py-2">Subposition</th>
+                        <th class="px-4 py-2">Designation</th>
+                        <th class="px-4 py-2">Email</th>
+                        <th class="px-4 py-2">Joined</th>
+                    </tr>
+                </thead>
+                <tbody id="rows" class="divide-y divide-slate-200"></tbody>
+            </table>
+            <div id="empty" class="text-sm text-slate-600 mt-3 hidden">No results.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+
+    function chip(label, val) {
+        const d = document.createElement("div");
+        d.className = "rounded-xl border border-slate-200 bg-white px-3 py-2";
+        d.innerHTML = `<div class="text-xs text-slate-500">${label}</div>
+               <div class="text-lg font-semibold text-slate-800 mt-0.5">${val}</div>`;
+        return d;
+    }
+
+    let USERS = [];
+    async function loadCards() {
+        const [jobs, cands] = await Promise.all([fetchJSON("/api/jobs"), fetchJSON("/api/candidates")]);
+        document.getElementById("openJobs").textContent = jobs.filter(j => j.status === "Open").length;
+        document.getElementById("pipeline").textContent = cands.filter(c => c.stage && !["Rejected"].includes(c.stage)).length;
+        document.getElementById("newHires").textContent = cands.filter(c => ["Onboarding", "Offer"].includes(c.stage)).length;
+    }
+
+    async function loadUsers() {
+        const q = encodeURIComponent(document.getElementById("q").value.trim());
+        const et = encodeURIComponent(document.getElementById("etype").value.trim());
+        const url = `/api/users${q || et ? `?${et ? `type=${et}` : ""}${et && q ? "&" : ""}${q ? `q=${q}` : ""}` : ""}`;
+        USERS = await fetchJSON(url);
+        renderUsers();
+        renderComposition();
+        document.getElementById("headcount").textContent = USERS.length;
+    }
+
+    function renderUsers() {
+        const tb = document.getElementById("rows");
+        const empty = document.getElementById("empty");
+        tb.innerHTML = "";
+        if (!USERS.length) { empty.classList.remove("hidden"); return; }
+        empty.classList.add("hidden");
+
+        USERS.forEach(u => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+      <td class="px-4 py-2 font-medium">${u.name || "-"}</td>
+      <td class="px-4 py-2">${u.employee_id || "-"}</td>
+      <td class="px-4 py-2">${u.employee_type || "-"}</td>
+      <td class="px-4 py-2">${u.subposition || "-"}</td>
+      <td class="px-4 py-2">${u.designation || "-"}</td>
+      <td class="px-4 py-2">${u.email || "-"}</td>
+      <td class="px-4 py-2">${u.created_at ? new Date(u.created_at).toLocaleDateString() : "-"}</td>`;
+            tb.appendChild(tr);
+        });
+    }
+
+    function renderComposition() {
+        const root = document.getElementById("composition");
+        root.innerHTML = "";
+        const bySub = {};
+        USERS.forEach(u => { const k = u.subposition || "—"; bySub[k] = (bySub[k] || 0) + 1; });
+        Object.entries(bySub).sort((a, b) => a[0].localeCompare(b[0]))
+            .forEach(([sub, cnt]) => root.appendChild(chip(sub, cnt)));
+    }
+
+    document.getElementById("reload").addEventListener("click", () => loadUsers().catch(console.error));
+    document.getElementById("q").addEventListener("input", () => loadUsers().catch(console.error));
+    document.getElementById("etype").addEventListener("change", () => loadUsers().catch(console.error));
+
+    Promise.all([loadCards(), loadUsers()]).catch(console.error);
+</script>
+{% endblock %}

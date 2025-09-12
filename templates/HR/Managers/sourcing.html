@@ -1,0 +1,183 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-semibold text-slate-800">
+            <i class="fa-solid fa-magnifying-glass mr-2"></i>Sourcing
+        </h1>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Back</a>
+    </div>
+
+    <!-- Add Candidate -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
+        <h2 class="text-lg font-semibold text-slate-800 mb-4">Add Candidate</h2>
+        <form id="addForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" enctype="multipart/form-data">
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Name *</label>
+                <input name="name" class="w-full rounded-lg border border-slate-300 px-3 py-2" required>
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Role of Employment *</label>
+                <input name="role_of_employment" class="w-full rounded-lg border border-slate-300 px-3 py-2" required>
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Qualification</label>
+                <input name="qualification" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Job *</label>
+                <select name="job_id" id="jobSelect" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    required></select>
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Email</label>
+                <input name="email" type="email" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Phone</label>
+                <input name="phone" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Location</label>
+                <input name="location" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Source</label>
+                <input name="source" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="LinkedIn / Referral / ...">
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Years Experience</label>
+                <input name="years_experience" type="number" min="0"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Current CTC (annual)</label>
+                <input name="current_ctc" type="number" min="0"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Expected CTC (annual)</label>
+                <input name="expected_ctc" type="number" min="0"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Notice Period (days)</label>
+                <input name="notice_period_days" type="number" min="0"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Resume (PDF/DOC/DOCX)</label>
+                <input name="resume" type="file" accept=".pdf,.doc,.docx" class="w-full">
+            </div>
+            <div class="md:col-span-2 flex items-center gap-3">
+                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                    <i class="fa-solid fa-user-plus mr-1"></i> Add Candidate
+                </button>
+                <span id="addMsg" class="text-sm text-slate-600"></span>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-4 flex items-center gap-2">
+        <input id="search" placeholder="Search name / role / recruiter"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <button id="reload" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-rotate mr-1"></i> Reload
+        </button>
+    </div>
+
+    <!-- Candidates table -->
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+        <table class="min-w-full text-sm text-left text-slate-700">
+            <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                    <th class="px-4 py-2">Name</th>
+                    <th class="px-4 py-2">Role</th>
+                    <th class="px-4 py-2">Qualification</th>
+                    <th class="px-4 py-2">Stage</th>
+                    <th class="px-4 py-2">Job</th>
+                    <th class="px-4 py-2">Recruiter</th>
+                    <th class="px-4 py-2">Added On</th>
+                </tr>
+            </thead>
+            <tbody id="candidatesTable" class="divide-y divide-slate-200"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function fetchJSON(url) {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+    }
+    function includes(hay, needle) {
+        return (hay || "").toLowerCase().includes((needle || "").toLowerCase());
+    }
+
+    async function loadJobs() {
+        const jobs = await fetchJSON("/api/jobs?status=Open"); // same API as recruiter
+        const sel = document.getElementById("jobSelect");
+        sel.innerHTML = jobs.map(j => `<option value="${j.id}">${j.title} — ${j.location || ''}</option>`).join("");
+    }
+
+    let allCandidates = [];
+    async function loadCandidates() {
+        // same API as recruiter; backend already returns all for HR Managers
+        allCandidates = await fetchJSON("/api/candidates");
+        renderTable();
+    }
+
+    function renderTable() {
+        const q = document.getElementById("search").value.trim().toLowerCase();
+        const tbody = document.getElementById("candidatesTable");
+        const rows = allCandidates.filter(c =>
+            !q ||
+            includes(c.name, q) ||
+            includes(c.role_of_employment, q) ||
+            includes(c.recruiter_name, q) ||
+            includes(c.recruiter_username, q)
+        );
+
+        tbody.innerHTML = rows.map(c => `
+    <tr>
+      <td class="px-4 py-2 font-medium">${c.name || "-"}</td>
+      <td class="px-4 py-2">${c.role_of_employment || "-"}</td>
+      <td class="px-4 py-2">${c.qualification || "-"}</td>
+      <td class="px-4 py-2">${c.stage || "-"}</td>
+      <td class="px-4 py-2">${c.job_title || "-"}</td>
+      <td class="px-4 py-2">${c.recruiter_name ? c.recruiter_name : (c.recruiter_username || "-")}</td>
+      <td class="px-4 py-2">${new Date(c.created_at).toLocaleDateString()}</td>
+    </tr>
+  `).join("");
+    }
+
+    document.getElementById("reload").addEventListener("click", loadCandidates);
+    document.getElementById("search").addEventListener("input", renderTable);
+
+    document.getElementById("addForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById("addMsg");
+        msg.textContent = "Saving…";
+        const fd = new FormData(e.target);
+        try {
+            const r = await fetch("/api/candidates", { method: "POST", body: fd }); // same POST as recruiter
+            if (!r.ok) throw new Error(await r.text());
+            msg.textContent = "Candidate added ✓";
+            e.target.reset();
+            await loadCandidates();
+        } catch (err) {
+            console.error(err);
+            msg.textContent = "Failed to add candidate";
+        }
+    });
+
+    Promise.all([loadJobs(), loadCandidates()]).catch(console.error);
+</script>
+{% endblock %}

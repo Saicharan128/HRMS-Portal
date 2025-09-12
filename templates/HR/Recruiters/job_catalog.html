@@ -1,0 +1,275 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-6xl">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">Job Catalog</h1>
+            <p class="text-slate-600 text-sm">Maintain standardized roles with levels, skills, and salary bands. Jobs
+                and Sourcing can reference these.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Back</a>
+    </div>
+
+    <!-- Create Catalog Entry -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <h2 class="text-lg font-semibold text-slate-800 mb-3">Add Role to Catalog</h2>
+        <form id="catalogForm" class="grid md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Title *</label>
+                <input name="title" required class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Family</label>
+                <input name="family" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
+                <input name="level" placeholder="e.g., L2 / Senior"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Department</label>
+                <input name="department" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                <input name="location" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Employment Type</label>
+                <select name="employment_type" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">Select…</option>
+                    <option>Full-time</option>
+                    <option>Part-time</option>
+                    <option>Contract</option>
+                    <option>Intern</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Min Experience (yrs)</label>
+                <input name="min_experience" type="number" min="0"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Max Experience (yrs)</label>
+                <input name="max_experience" type="number" min="0"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Salary Min</label>
+                <input name="salary_min" type="number" min="0"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Salary Max</label>
+                <input name="salary_max" type="number" min="0"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Currency</label>
+                <input name="currency" value="INR" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Skills (comma-separated)</label>
+                <input name="skills" placeholder="Python, SQL, APIs"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Role Description</label>
+                <textarea name="description" rows="3"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Responsibilities</label>
+                <textarea name="responsibilities" rows="3"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Requirements</label>
+                <textarea name="requirements" rows="3"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea>
+            </div>
+            <div class="md:col-span-2 flex items-center justify-between">
+                <p class="text-xs text-slate-500">Fields marked * are required.</p>
+                <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900" type="submit">Add to
+                    Catalog</button>
+            </div>
+        </form>
+        <div id="formMsg" class="mt-3 text-sm"></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
+            <select id="statusFilter" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <option value="">All</option>
+                <option>Active</option>
+                <option>Archived</option>
+            </select>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 lg:col-span-2">
+            <label class="block text-sm font-medium text-slate-700 mb-2">Search</label>
+            <input id="searchInput" placeholder="Search title/skills/department/location/description…"
+                class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800">My Catalog</h2>
+            <button id="refreshBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Refresh</button>
+        </div>
+
+        <div class="mt-4 overflow-auto">
+            <table class="min-w-full text-sm">
+                <thead class="text-left text-slate-600 border-b">
+                    <tr>
+                        <th class="py-2 pr-3">Title</th>
+                        <th class="py-2 pr-3">Level</th>
+                        <th class="py-2 pr-3">Dept</th>
+                        <th class="py-2 pr-3">Location</th>
+                        <th class="py-2 pr-3">Type</th>
+                        <th class="py-2 pr-3">Exp</th>
+                        <th class="py-2 pr-3">Status</th>
+                        <th class="py-2 pr-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="catalogTbody" class="align-top"></tbody>
+            </table>
+        </div>
+        <div id="listMsg" class="mt-3 text-sm"></div>
+    </div>
+</div>
+
+<script>
+    async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function postJSON(url, data) { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function putJSON(url, data) { const r = await fetch(url, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function del(url) { const r = await fetch(url, { method: "DELETE" }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+
+    const catalogForm = document.getElementById("catalogForm");
+    const formMsg = document.getElementById("formMsg");
+    const statusFilter = document.getElementById("statusFilter");
+    const searchInput = document.getElementById("searchInput");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const catalogTbody = document.getElementById("catalogTbody");
+    const listMsg = document.getElementById("listMsg");
+
+    function input(value, cls = "w-44") { const i = document.createElement("input"); i.value = value || ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
+    function select(options, current) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; options.forEach(o => { const opt = document.createElement("option"); opt.value = o; opt.textContent = o; if (o === current) opt.selected = true; s.appendChild(opt); }); return s; }
+
+    async function loadCatalog() {
+        try {
+            listMsg.textContent = "Loading...";
+            const params = new URLSearchParams();
+            if (statusFilter.value) params.set("status", statusFilter.value);
+            if (searchInput.value.trim()) params.set("q", searchInput.value.trim());
+            const data = await fetchJSON("/api/job_catalog?" + params.toString());
+            catalogTbody.innerHTML = "";
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+
+                const titleI = input(row.title, "w-56");
+                const levelI = input(row.level || "", "w-28");
+                const deptI = input(row.department || "", "w-40");
+                const locI = input(row.location || "", "w-36");
+                const typeS = select(["", "Full-time", "Part-time", "Contract", "Intern"], row.employment_type || "");
+                const expI = input(`${row.min_experience ?? ""}-${row.max_experience ?? ""}`, "w-24"); // quick edit
+
+                const statusS = select(["Active", "Archived"], row.status);
+
+                const tdTitle = document.createElement("td"); tdTitle.className = "py-2 pr-3"; tdTitle.appendChild(titleI);
+                const tdLevel = document.createElement("td"); tdLevel.className = "py-2 pr-3"; tdLevel.appendChild(levelI);
+                const tdDept = document.createElement("td"); tdDept.className = "py-2 pr-3"; tdDept.appendChild(deptI);
+                const tdLoc = document.createElement("td"); tdLoc.className = "py-2 pr-3"; tdLoc.appendChild(locI);
+                const tdType = document.createElement("td"); tdType.className = "py-2 pr-3"; tdType.appendChild(typeS);
+                const tdExp = document.createElement("td"); tdExp.className = "py-2 pr-3"; tdExp.appendChild(expI);
+                const tdStatus = document.createElement("td"); tdStatus.className = "py-2 pr-3"; tdStatus.appendChild(statusS);
+
+                const tdAct = document.createElement("td"); tdAct.className = "py-2 pr-3";
+                const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.textContent = "Save";
+                const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50"; delBtn.textContent = "Delete";
+                tdAct.append(saveBtn, delBtn);
+
+                tr.append(tdTitle, tdLevel, tdDept, tdLoc, tdType, tdExp, tdStatus, tdAct);
+                catalogTbody.appendChild(tr);
+
+                saveBtn.addEventListener("click", async () => {
+                    // Parse "min-max" experience input quickly
+                    let min = null, max = null;
+                    const txt = (expI.value || "").trim();
+                    if (txt) {
+                        const m = txt.split("-").map(s => s.trim());
+                        if (m[0] !== undefined && m[0] !== "" && !isNaN(parseInt(m[0]))) min = parseInt(m[0]);
+                        if (m[1] !== undefined && m[1] !== "" && !isNaN(parseInt(m[1]))) max = parseInt(m[1]);
+                    }
+                    try {
+                        await putJSON(`/api/job_catalog/${row.id}`, {
+                            title: titleI.value.trim(),
+                            level: levelI.value.trim(),
+                            department: deptI.value.trim(),
+                            location: locI.value.trim(),
+                            employment_type: typeS.value,
+                            min_experience: min,
+                            max_experience: max,
+                            status: statusS.value
+                        });
+                        listMsg.className = "mt-3 text-sm text-emerald-700";
+                        listMsg.textContent = "Saved.";
+                        setTimeout(() => listMsg.textContent = "", 1200);
+                    } catch (e) {
+                        listMsg.className = "mt-3 text-sm text-rose-700";
+                        listMsg.textContent = "Failed to save.";
+                        console.error(e);
+                    }
+                });
+
+                delBtn.addEventListener("click", async () => {
+                    if (!confirm("Delete this catalog entry?")) return;
+                    try {
+                        await del(`/api/job_catalog/${row.id}`);
+                        await loadCatalog();
+                    } catch (e) {
+                        listMsg.className = "mt-3 text-sm text-rose-700";
+                        listMsg.textContent = "Failed to delete.";
+                        console.error(e);
+                    }
+                });
+            });
+            listMsg.textContent = data.length ? "" : "No catalog entries yet.";
+        } catch (e) {
+            listMsg.className = "mt-3 text-sm text-rose-700";
+            listMsg.textContent = "Failed to load catalog.";
+            console.error(e);
+        }
+    }
+
+    catalogForm?.addEventListener("submit", async (ev) => {
+        ev.preventDefault();
+        formMsg.textContent = "";
+        const fd = new FormData(catalogForm);
+        const payload = Object.fromEntries(fd.entries());
+        try {
+            await postJSON("/api/job_catalog", payload);
+            formMsg.className = "mt-3 text-sm text-emerald-700";
+            formMsg.textContent = "Role added to catalog.";
+            catalogForm.reset();
+            await loadCatalog();
+        } catch (e) {
+            formMsg.className = "mt-3 text-sm text-rose-700";
+            formMsg.textContent = "Failed to add role.";
+            console.error(e);
+        }
+    });
+
+    statusFilter?.addEventListener("change", loadCatalog);
+    searchInput?.addEventListener("input", () => { clearTimeout(window.__t); window.__t = setTimeout(loadCatalog, 300); });
+    refreshBtn?.addEventListener("click", loadCatalog);
+
+    loadCatalog();
+</script>
+{% endblock %}

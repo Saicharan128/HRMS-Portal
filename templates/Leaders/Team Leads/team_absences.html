@@ -1,0 +1,239 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-regular fa-user-clock mr-2"></i> Team absences
+            </h1>
+            <p class="text-slate-600 text-sm">Monitor team availability and absences in real time.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-user-minus mr-1"></i> Out today</div>
+            <div id="outToday" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-calendar-week mr-1"></i> Next 7 days</div>
+            <div id="nextWeek" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-list-check mr-1"></i> Pending approvals</div>
+            <div id="pendingCount" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-person-walking-arrow-right mr-1"></i> Active
+                ranges</div>
+            <div id="activeRanges" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">From</label>
+                    <input id="from" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">To</label>
+                    <input id="to" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Type</label>
+                    <select id="fType" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                        <option value="">All</option>
+                        <option>Annual</option>
+                        <option>Sick</option>
+                        <option>Casual</option>
+                        <option>Unpaid</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <input id="q" placeholder="Search user…" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <button id="reload"
+                    class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-rotate mr-1"></i> Reload
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day-by-day view -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <h2 class="text-lg font-semibold text-slate-800 mb-3">
+            <i class="fa-regular fa-calendar mr-2"></i> Calendar view
+        </h2>
+        <div id="days" class="space-y-4"></div>
+        <div id="calEmpty" class="text-sm text-slate-600 hidden">No absences in this window.</div>
+    </div>
+
+    <!-- Raw table -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800">
+                <i class="fa-solid fa-table-list mr-2"></i> Approved ranges
+            </h2>
+            <span id="countLabel" class="text-sm text-slate-500"></span>
+        </div>
+        <div class="mt-3 overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="text-left text-slate-600 border-b">
+                    <tr>
+                        <th class="py-2 pr-3">User</th>
+                        <th class="py-2 pr-3">Type</th>
+                        <th class="py-2 pr-3">Dates</th>
+                        <th class="py-2 pr-3">Business days</th>
+                        <th class="py-2 pr-3">Reason</th>
+                    </tr>
+                </thead>
+                <tbody id="rows" class="align-top"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const IS_APPROVER = ["HR", "Leaders"].includes("{{ session.get('employee_type') }}");
+
+    function fmt(d) { return new Date(d + "T00:00:00").toLocaleDateString(); }
+    function eachDay(fromStr, toStr) {
+        const out = []; let d1 = new Date(fromStr + "T00:00:00"), d2 = new Date(toStr + "T00:00:00");
+        for (let d = new Date(d1); d <= d2; d.setDate(d.getDate() + 1)) { out.push(new Date(d)); }
+        return out;
+    }
+    function iso(d) { return d.toISOString().slice(0, 10); }
+
+    async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+
+    const fromEl = document.getElementById("from");
+    const toEl = document.getElementById("to");
+    const fType = document.getElementById("fType");
+    const qEl = document.getElementById("q");
+    const reload = document.getElementById("reload");
+
+    const outTodayEl = document.getElementById("outToday");
+    const nextWeekEl = document.getElementById("nextWeek");
+    const pendingEl = document.getElementById("pendingCount");
+    const activeRanges = document.getElementById("activeRanges");
+
+    const rowsEl = document.getElementById("rows");
+    const countLbl = document.getElementById("countLabel");
+
+    const daysEl = document.getElementById("days");
+    const calEmpty = document.getElementById("calEmpty");
+
+    function setDefaultWindow() {
+        const now = new Date();
+        const from = iso(now);
+        const to = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30));
+        fromEl.value = from; toEl.value = to;
+    }
+    setDefaultWindow();
+
+    let RAW = [];
+
+    async function loadSummary() {
+        // Out today / next 7 days
+        const today = iso(new Date());
+        const weekTo = iso(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 7));
+        const [todayRows, weekRows, pending] = await Promise.all([
+            fetchJSON(`/api/absences?scope=all&from=${today}&to=${today}`),
+            fetchJSON(`/api/absences?scope=all&from=${today}&to=${weekTo}`),
+            fetchJSON(`/api/leaves?scope=all&status=Pending`)
+        ]);
+        outTodayEl.textContent = todayRows.length;
+        nextWeekEl.textContent = weekRows.length;
+        pendingEl.textContent = pending.length;
+    }
+
+    function applyClientFilters(rows) {
+        const type = fType.value;
+        const q = qEl.value.trim().toLowerCase();
+        return rows.filter(r => {
+            if (type && r.leave_type !== type) return false;
+            if (q && !((r.username || "").toLowerCase().includes(q))) return false;
+            return true;
+        });
+    }
+
+    function renderTable(rows) {
+        rowsEl.innerHTML = "";
+        rows.forEach(r => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+      <td class="py-2 pr-3 font-medium">${r.username}</td>
+      <td class="py-2 pr-3"><span class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-xs">${r.leave_type}</span></td>
+      <td class="py-2 pr-3">${fmt(r.start_date)} → ${fmt(r.end_date)}</td>
+      <td class="py-2 pr-3">${r.days}</td>
+      <td class="py-2 pr-3">${r.reason || "—"}</td>`;
+            rowsEl.appendChild(tr);
+        });
+        countLbl.textContent = `${rows.length} range${rows.length === 1 ? "" : "s"}`;
+    }
+
+    function renderCalendar(rows) {
+        daysEl.innerHTML = "";
+        const f = new Date(fromEl.value + "T00:00:00");
+        const t = new Date(toEl.value + "T00:00:00");
+        const dayMap = new Map(); // yyyy-mm-dd -> [{username, type}]
+        rows.forEach(r => {
+            eachDay(r.start_date, r.end_date).forEach(d => {
+                if (d < f || d > t) return;
+                const key = iso(d);
+                if (!dayMap.has(key)) dayMap.set(key, []);
+                dayMap.get(key).push({ u: r.username, t: r.leave_type });
+            });
+        });
+
+        if (dayMap.size === 0) { calEmpty.classList.remove("hidden"); return; }
+        calEmpty.classList.add("hidden");
+
+        [...dayMap.entries()].sort((a, b) => a[0].localeCompare(b[0])).forEach(([d, items]) => {
+            const box = document.createElement("div");
+            box.className = "rounded-xl border border-slate-200 bg-white p-4";
+            box.innerHTML = `
+      <div class="text-sm text-slate-500">${fmt(d)}</div>
+      <div class="mt-2 flex flex-wrap gap-2"></div>`;
+            const wrap = box.querySelector("div.mt-2");
+            items.forEach(it => {
+                const tag = document.createElement("span");
+                tag.className = "inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs";
+                tag.innerHTML = `<i class="fa-solid fa-user-xmark"></i> ${it.u} · ${it.t}`;
+                wrap.appendChild(tag);
+            });
+            daysEl.appendChild(box);
+        });
+
+        // summary count of active ranges overlapping the window
+        activeRanges.textContent = rows.length;
+    }
+
+    async function loadWindow() {
+        const params = new URLSearchParams();
+        params.set("scope", "all"); // Team Leads can view all
+        if (fromEl.value) params.set("from", fromEl.value);
+        if (toEl.value) params.set("to", toEl.value);
+        RAW = await fetchJSON(`/api/absences?${params.toString()}`);
+        const filtered = applyClientFilters(RAW);
+        renderTable(filtered);
+        renderCalendar(filtered);
+    }
+
+    [fromEl, toEl, fType].forEach(el => el.addEventListener("change", () => loadWindow().catch(console.error)));
+    qEl.addEventListener("input", () => { const filtered = applyClientFilters(RAW); renderTable(filtered); renderCalendar(filtered); });
+    reload.addEventListener("click", () => loadWindow().catch(console.error));
+
+    Promise.all([loadSummary(), loadWindow()]).catch(console.error);
+</script>
+{% endblock %}

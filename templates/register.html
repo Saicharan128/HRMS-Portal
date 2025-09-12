@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-2xl">
+    <h1 class="text-2xl font-semibold text-slate-800 mb-6">Create your account</h1>
+
+    <form method="POST" class="bg-white rounded-2xl shadow p-6 space-y-5">
+        <div class="grid md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Username (unique)</label>
+                <input name="username" required
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-800" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                <input name="name" required
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-800" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input type="email" name="email" required
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-800" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Employee Type</label>
+                <select id="employee_type" name="employee_type" required
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-800">
+                    <option value="">Select type</option>
+                    <option>HR</option>
+                    <option>Leaders</option>
+                    <option>CXOs</option>
+                    <option>Contractors / Remote staff</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Subposition</label>
+                <select id="subposition" name="subposition" required
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-800">
+                    <option value="">Select subposition</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                <input type="password" name="password" required minlength="6"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-800" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
+                <input type="password" name="confirm_password" required minlength="6"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-800" />
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+            <a href="{{ url_for('login') }}" class="text-sm text-slate-600 hover:underline">Already have an account?
+                Login</a>
+            <button type="submit"
+                class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900">Register</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Map employee types to subpositions
+    const SUBPOSITIONS = {
+        "HR": ["Managers", "Recruiters", "Executives", "Payroll", "Expense/Accounts"],
+        "Leaders": ["Team Leads", "Department Managers", "Finance Managers"],
+        "CXOs": ["CEO", "CFO", "CHRO", "CTO/COO"],
+        "Contractors / Remote staff": ["Contractor", "Remote Staff"]
+    };
+
+    const typeEl = document.getElementById('employee_type');
+    const subEl = document.getElementById('subposition');
+    const desWrap = document.getElementById('designation_wrap');
+
+    function refreshSubpositions() {
+        const t = typeEl.value;
+        const opts = SUBPOSITIONS[t] || [];
+        subEl.innerHTML = '<option value="">Select subposition</option>';
+        for (const o of opts) {
+            const opt = document.createElement('option');
+            opt.value = o;
+            opt.textContent = o;
+            subEl.appendChild(opt);
+        }
+        // toggle designation only for Employees
+        desWrap.classList.toggle('hidden', t !== 'Employees');
+    }
+
+    typeEl.addEventListener('change', refreshSubpositions);
+
+    // Initialize on load (in case of validation errors returning to page)
+    refreshSubpositions();
+</script>
+{% endblock %}

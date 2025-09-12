@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-6xl">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">Talent Insights</h1>
+            <p class="text-slate-600 text-sm">Gain data-driven visibility into workforce trends and talent performance.
+            </p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Back</a>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <h2 class="text-sm text-slate-500">Total Jobs</h2>
+            <p id="jobsCount" class="text-2xl font-semibold text-slate-800">-</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <h2 class="text-sm text-slate-500">Open Jobs</h2>
+            <p id="openJobsCount" class="text-2xl font-semibold text-slate-800">-</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <h2 class="text-sm text-slate-500">Candidates</h2>
+            <p id="candidatesCount" class="text-2xl font-semibold text-slate-800">-</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <h2 class="text-sm text-slate-500">Offers Rolled Out</h2>
+            <p id="offersCount" class="text-2xl font-semibold text-slate-800">-</p>
+        </div>
+    </div>
+
+    <!-- Candidates by Stage -->
+    <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+        <h2 class="text-lg font-semibold text-slate-800 mb-3">Candidates by Stage</h2>
+        <table class="min-w-full text-sm">
+            <thead class="text-left text-slate-600 border-b">
+                <tr>
+                    <th class="py-2 pr-3">Stage</th>
+                    <th class="py-2 pr-3">Count</th>
+                </tr>
+            </thead>
+            <tbody id="stagesTbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function fetchJSON(url) {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+    }
+
+    async function loadInsights() {
+        try {
+            const jobs = await fetchJSON("/api/jobs");
+            const candidates = await fetchJSON("/api/candidates");
+
+            document.getElementById("jobsCount").textContent = jobs.length;
+            document.getElementById("openJobsCount").textContent = jobs.filter(j => j.status === "Open").length;
+            document.getElementById("candidatesCount").textContent = candidates.length;
+            document.getElementById("offersCount").textContent = candidates.filter(c => c.stage === "Offer").length;
+
+            // Count by stage
+            const stages = {};
+            candidates.forEach(c => { stages[c.stage] = (stages[c.stage] || 0) + 1; });
+            const tbody = document.getElementById("stagesTbody");
+            tbody.innerHTML = "";
+            Object.entries(stages).forEach(([stage, count]) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td class="py-2 pr-3 font-medium text-slate-800">${stage}</td>
+                      <td class="py-2 pr-3">${count}</td>`;
+                tbody.appendChild(tr);
+            });
+        } catch (e) {
+            console.error("Failed to load insights", e);
+        }
+    }
+
+    loadInsights();
+</script>
+{% endblock %}
