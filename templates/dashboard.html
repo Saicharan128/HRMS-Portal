@@ -127,6 +127,18 @@
                 {% set _title = rest.split('–')[0].strip() %}
                 {% set _desc = (rest.split('–', 1)[1].strip()) if ('–' in rest) else '' %}
                 <li class="rounded-2xl border border-slate-200 bg-white hover:border-slate-300">
+                    {% if subposition == "Expense/Accounts" %}
+                    {% set subposition = "Expense" %}
+                    {% elif employee_type == "Contractors / Remote staff" %}
+                    {% set employee_type = "Contractors" %}
+                    {% if subposition == "Remote Staff" %}
+                        {% set subposition = "Remote" %}
+                        {% else %}
+                        {% set subposition = subposition %}
+                        {% endif %}
+                    {% else %}
+                    {% set subposition = subposition %}
+                    {% endif %}
                     <a href="{{ url_for('render_feature',
                               role=employee_type,
                               sub=subposition,
