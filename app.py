@@ -14,6 +14,7 @@ from reportlab.lib.pagesizes import A4
 import string, secrets
 import logging
 import json, uuid, shutil
+import subprocess
 
 app = Flask(__name__)
 
@@ -250,10 +251,6 @@ def allowed_resume(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_RESUME_EXTS
 
 
-
-
-
-
 # === Projects ===
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -373,11 +370,6 @@ def get_user_or_abort(username):
 
 def is_manager_or_hr():
     return session.get("employee_type") in ("Leaders", "HR")
-
-
-
-
-
 
 
 # === Role → Subposition → Features (tasks) ===
@@ -641,7 +633,7 @@ from datetime import date, timedelta, datetime
 from calendar import monthrange, SATURDAY, SUNDAY
 
 @app.route("/offers/<path:filename>")
-@login_required
+#@login_required
 def get_offer(filename):
     return send_from_directory(UPLOAD_OFFERS, filename, as_attachment=False)
 
@@ -735,7 +727,7 @@ def login():
     return render_template('login.html')
 
 @app.route('/dashboard')
-@login_required
+#@login_required
 def dashboard():
     employee_type = session.get('employee_type')
     subposition = session.get('subposition')
@@ -752,7 +744,7 @@ def dashboard():
     )
 
 @app.route("/feature/<role>/<sub>/<feature>")
-@login_required
+#@login_required
 def render_feature(role, sub, feature):
     """
     Render specific feature pages dynamically.
@@ -768,7 +760,7 @@ def render_feature(role, sub, feature):
 
 # --- Candidates API ---
 @app.route("/api/candidates", methods=["GET"])
-@login_required
+#@login_required
 def api_candidates_list():
     username = session.get('username')
 
@@ -815,7 +807,7 @@ def api_candidates_list():
     } for c in rows])
 
 @app.route("/api/candidates", methods=["POST"])
-@login_required
+#@login_required
 def api_candidates_create():
     username = session.get('username')
     recruiter = User.query.filter_by(username=username).first()
@@ -885,7 +877,7 @@ def api_candidates_create():
     return jsonify({"id": candidate.id}), 201
 
 @app.route("/api/candidates/<int:candidate_id>/status", methods=["POST"])
-@login_required
+#@login_required
 def api_candidates_update_status(candidate_id):
     username = session.get('username')
     employee_type = session.get('employee_type')
@@ -913,14 +905,14 @@ def api_candidates_update_status(candidate_id):
 
 # Serve resumes
 @app.route("/resumes/<path:filename>")
-@login_required
+#@login_required
 def get_resume(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=False)
 
 
 # List jobs (current user or all for HR Managers/Executives)
 @app.route("/api/jobs", methods=["GET"])
-@login_required
+#@login_required
 def api_jobs_list():
     username = session.get('username')
     employee_type = session.get('employee_type')
@@ -971,7 +963,7 @@ def api_jobs_list():
 
 
 @app.route("/api/users/stats", methods=["GET"])
-@login_required
+#@login_required
 def api_users_stats():
     """
     Get user statistics for team overview dashboard
@@ -1018,7 +1010,7 @@ def api_users_stats():
     })
 
 @app.route("/api/projects/team", methods=["GET"])
-@login_required
+#@login_required
 def api_projects_team():
     """
     Get projects for team overview - shows all projects for capacity planning
@@ -1071,7 +1063,7 @@ def api_projects_team():
     return jsonify(result)
 
 @app.route("/api/leaves/current", methods=["GET"])
-@login_required 
+#@login_required 
 def api_leaves_current():
     """
     Get current team absences - extends your existing /api/leaves endpoint
@@ -1116,7 +1108,7 @@ def api_leaves_current():
     return jsonify(absences)
 
 @app.route("/api/team/activity", methods=["GET"])
-@login_required
+#@login_required
 def api_team_activity():
     """
     Get recent team activity for the overview dashboard
@@ -1179,7 +1171,7 @@ def api_team_activity():
     return jsonify(activities[:15])  # Return top 15 most recent
 
 @app.route("/api/dashboard/metrics", methods=["GET"])
-@login_required
+#@login_required
 def api_dashboard_metrics():
     """
     Get all metrics for team overview dashboard in one call
@@ -1240,7 +1232,7 @@ def api_dashboard_metrics():
 
 # Create job
 @app.route("/api/jobs", methods=["POST"])
-@login_required
+#@login_required
 def api_jobs_create():
     username = session.get('username')
 
@@ -1265,7 +1257,7 @@ def api_jobs_create():
 
 # Read single job (optional helper)
 @app.route("/api/jobs/<int:job_id>", methods=["GET"])
-@login_required
+#@login_required
 def api_jobs_read(job_id):
     username = session.get('username')
     j = Job.query.filter_by(id=job_id, created_by=username).first()
@@ -1285,7 +1277,7 @@ def api_jobs_read(job_id):
 
 # Update job (title/fields/status)
 @app.route("/api/jobs/<int:job_id>", methods=["POST", "PUT", "PATCH"])
-@login_required
+#@login_required
 def api_jobs_update(job_id):
     username = session.get('username')
     j = Job.query.filter_by(id=job_id, created_by=username).first()
@@ -1322,7 +1314,7 @@ def api_jobs_update(job_id):
 
 # Delete job
 @app.route("/api/jobs/<int:job_id>", methods=["DELETE"])
-@login_required
+#@login_required
 def api_jobs_delete(job_id):
     username = session.get('username')
     j = Job.query.filter_by(id=job_id, created_by=username).first()
@@ -1339,7 +1331,7 @@ def api_jobs_delete(job_id):
 # List catalog entries (owned by current user)
 # Filters: ?status=Active|Archived, ?q=term, plus department/location/level/employment_type/family
 @app.route("/api/job_catalog", methods=["GET"])
-@login_required
+#@login_required
 def api_job_catalog_list():
     username = session.get('username')
     q = JobCatalog.query.filter_by(created_by=username).order_by(JobCatalog.created_at.desc())
@@ -1397,7 +1389,7 @@ def api_job_catalog_list():
 
 # Create catalog entry
 @app.route("/api/job_catalog", methods=["POST"])
-@login_required
+#@login_required
 def api_job_catalog_create():
     username = session.get('username')
     data = (request.json or request.form)
@@ -1436,7 +1428,7 @@ def api_job_catalog_create():
 
 # Read one
 @app.route("/api/job_catalog/<int:catalog_id>", methods=["GET"])
-@login_required
+#@login_required
 def api_job_catalog_read(catalog_id):
     username = session.get('username')
     r = JobCatalog.query.filter_by(id=catalog_id, created_by=username).first()
@@ -1465,7 +1457,7 @@ def api_job_catalog_read(catalog_id):
 
 # Update (fields + status)
 @app.route("/api/job_catalog/<int:catalog_id>", methods=["POST", "PUT", "PATCH"])
-@login_required
+#@login_required
 def api_job_catalog_update(catalog_id):
     username = session.get('username')
     r = JobCatalog.query.filter_by(id=catalog_id, created_by=username).first()
@@ -1508,7 +1500,7 @@ def api_job_catalog_update(catalog_id):
 
 # Delete
 @app.route("/api/job_catalog/<int:catalog_id>", methods=["DELETE"])
-@login_required
+#@login_required
 def api_job_catalog_delete(catalog_id):
     username = session.get('username')
     r = JobCatalog.query.filter_by(id=catalog_id, created_by=username).first()
@@ -1519,7 +1511,7 @@ def api_job_catalog_delete(catalog_id):
     return jsonify({"ok": True})
 
 @app.route("/api/onboarding", methods=["GET"])
-@login_required
+#@login_required
 def api_onboarding_list():
     username = session.get('username')
     rows = Candidate.query.filter_by(created_by=username, stage="Onboarding") \
@@ -1538,7 +1530,7 @@ def api_onboarding_list():
     } for c in rows])
 
 @app.route("/api/onboarding/<int:candidate_id>/offer", methods=["POST"])
-@login_required
+#@login_required
 def api_onboarding_offer(candidate_id):
     username = session.get('username')
     c = Candidate.query.filter_by(id=candidate_id, created_by=username, stage="Onboarding").first()
@@ -1664,21 +1656,21 @@ def api_onboarding_offer(candidate_id):
     })
 
 @app.route("/onboarding_docs/<path:filename>")
-@login_required
+#@login_required
 def get_onboarding_doc(filename):
     return send_from_directory(ONBOARDING_DOCS_DIR, filename, as_attachment=False)
 
 # ===== Self-Onboarding APIs (for Employees → New) =====
 
 @app.route("/api/self_onboarding", methods=["GET"])
-@login_required
+#@login_required
 def api_self_onboarding_get():
     username = session.get("username")
     data = load_onboarding(username)
     return jsonify(data)
 
 @app.route("/api/self_onboarding", methods=["POST"])
-@login_required
+#@login_required
 def api_self_onboarding_update():
     username = session.get("username")
     payload = request.json or request.form
@@ -1729,7 +1721,7 @@ def api_self_onboarding_update():
     return jsonify({"ok": True, "completed": data["completed"]})
 
 @app.route("/api/self_onboarding/upload", methods=["POST"])
-@login_required
+#@login_required
 def api_self_onboarding_upload():
     username = session.get("username")
     data = load_onboarding(username)
@@ -1777,12 +1769,12 @@ def api_self_onboarding_upload():
     })
 
 @app.route("/handbooks/<path:filename>")
-@login_required
+#@login_required
 def get_handbook_file(filename):
     return send_from_directory(HANDBOOKS_DIR, filename, as_attachment=False)
 
 @app.route("/docs/<path:filename>")
-@login_required
+#@login_required
 def get_managed_doc(filename):
     return send_from_directory(DOCS_FILES_DIR, filename, as_attachment=False)
 
@@ -1793,7 +1785,7 @@ def get_managed_doc(filename):
 # Leaders Team Leads +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # === Team Overview: lightweight users list ===
 @app.route("/api/users", methods=["GET"])
-@login_required
+#@login_required
 def api_users_list():
     """
     Returns users for snapshot views.
@@ -1848,7 +1840,7 @@ def _list_to_csv(lst):
 
 # ---- Projects: List ----
 @app.route("/api/projects", methods=["GET"])
-@login_required
+#@login_required
 def api_projects_list():
     """
     List projects created by current user (Team Lead).
@@ -1886,7 +1878,7 @@ def api_projects_list():
 
 # ---- Projects: Create ----
 @app.route("/api/projects", methods=["POST"])
-@login_required
+#@login_required
 def api_projects_create():
     username = session.get("username")
     data = request.json or request.form
@@ -1945,7 +1937,7 @@ def api_projects_create():
 
 # ---- Projects: Update ----
 @app.route("/api/projects/<int:project_id>", methods=["PUT", "PATCH", "POST"])
-@login_required
+#@login_required
 def api_projects_update(project_id):
     username = session.get("username")
     p = Project.query.filter_by(id=project_id, created_by=username).first()
@@ -2003,7 +1995,7 @@ def api_projects_update(project_id):
 
 # ---- Projects: Delete ----
 @app.route("/api/projects/<int:project_id>", methods=["DELETE"])
-@login_required
+#@login_required
 def api_projects_delete(project_id):
     username = session.get("username")
     p = Project.query.filter_by(id=project_id, created_by=username).first()
@@ -2015,7 +2007,7 @@ def api_projects_delete(project_id):
 
 # Get balances (current user; HR/Leaders can query ?user=<username>)
 @app.route("/api/leave/balances", methods=["GET"])
-@login_required
+#@login_required
 def api_leave_balances_get():
     target = request.args.get("user") or session.get("username")
     if target != session.get("username") and not is_approver():
@@ -2030,7 +2022,7 @@ def api_leave_balances_get():
 
 # Set balances (HR/Leaders only)
 @app.route("/api/leave/balances/set", methods=["POST"])
-@login_required
+#@login_required
 def api_leave_balances_set():
     if not is_approver():
         return jsonify({"error": "Not allowed"}), 403
@@ -2060,7 +2052,7 @@ def api_leave_balances_set():
 #  - normal users: their own
 #  - HR/Leaders: ?scope=all to see everyone; else own
 @app.route("/api/leaves", methods=["GET"])
-@login_required
+#@login_required
 def api_leaves_list():
     scope = (request.args.get("scope") or "").strip()
     status = (request.args.get("status") or "").strip()
@@ -2088,7 +2080,7 @@ def api_leaves_list():
 
 # Create request
 @app.route("/api/leaves", methods=["POST"])
-@login_required
+#@login_required
 def api_leaves_create():
     data = request.json or request.form
     username = session.get("username")
@@ -2126,7 +2118,7 @@ def api_leaves_create():
 
 # Cancel (by requester, while Pending)
 @app.route("/api/leaves/<int:leave_id>/cancel", methods=["POST"])
-@login_required
+#@login_required
 def api_leaves_cancel(leave_id):
     r = LeaveRequest.query.filter_by(id=leave_id).first()
     if not r or r.username != session.get("username"):
@@ -2139,7 +2131,7 @@ def api_leaves_cancel(leave_id):
 
 # Decision (Approve/Reject) — HR/Leaders only
 @app.route("/api/leaves/<int:leave_id>/decision", methods=["POST"])
-@login_required
+#@login_required
 def api_leaves_decision(leave_id):
     if not is_approver():
         return jsonify({"error": "Not allowed"}), 403
@@ -2181,7 +2173,7 @@ def _date_or_default(s, fallback):
         return fallback
 
 @app.route("/api/absences", methods=["GET"])
-@login_required
+#@login_required
 def api_absences():
     """
     Returns Approved leave requests.
@@ -2222,7 +2214,7 @@ def api_absences():
 
 # List cycles (all)
 @app.route("/api/perf/cycles", methods=["GET"])
-@login_required
+#@login_required
 def api_perf_cycles_list():
     rows = PerfCycle.query.order_by(PerfCycle.start_date.desc()).all()
     return jsonify([{
@@ -2232,7 +2224,7 @@ def api_perf_cycles_list():
 
 # Create/Update cycle (Leaders/HR)
 @app.route("/api/perf/cycles", methods=["POST"])
-@login_required
+#@login_required
 def api_perf_cycles_save():
     if not is_manager_or_hr():
         return jsonify({"error": "Not allowed"}), 403
@@ -2261,7 +2253,7 @@ def api_perf_cycles_save():
 
 # List my goals for a cycle (or all cycles if none). Managers/HR can pass ?user=<username>
 @app.route("/api/perf/goals", methods=["GET"])
-@login_required
+#@login_required
 def api_perf_goals_list():
     target = request.args.get("user") or session.get("username")
     if target != session.get("username") and not is_manager_or_hr():
@@ -2278,7 +2270,7 @@ def api_perf_goals_list():
 
 # Create / Update goal (owner or manager)
 @app.route("/api/perf/goals", methods=["POST"])
-@login_required
+#@login_required
 def api_perf_goals_save():
     data = request.json or request.form
     gid = data.get("id")
@@ -2306,7 +2298,7 @@ def api_perf_goals_save():
 
 # Add progress update (owner or manager)
 @app.route("/api/perf/goals/<int:goal_id>/update", methods=["POST"])
-@login_required
+#@login_required
 def api_perf_goal_update(goal_id):
     g = Goal.query.get(goal_id)
     if not g: return jsonify({"error":"Not found"}), 404
@@ -2326,7 +2318,7 @@ def api_perf_goal_update(goal_id):
 
 # List reviews (for me OR all if manager/hr)
 @app.route("/api/perf/reviews", methods=["GET"])
-@login_required
+#@login_required
 def api_perf_reviews_list():
     q = Review.query
     if is_manager_or_hr() and request.args.get("scope") == "all":
@@ -2346,7 +2338,7 @@ def api_perf_reviews_list():
 
 # Create/assign a review (Manager/HR)
 @app.route("/api/perf/reviews", methods=["POST"])
-@login_required
+#@login_required
 def api_perf_reviews_create():
     if not is_manager_or_hr():
         return jsonify({"error":"Not allowed"}), 403
@@ -2362,7 +2354,7 @@ def api_perf_reviews_create():
 
 # Submit/Finalize a review (reviewer)
 @app.route("/api/perf/reviews/<int:rid>", methods=["POST"])
-@login_required
+#@login_required
 def api_perf_reviews_submit(rid):
     d = request.json or request.form
     r = Review.query.get(rid)
@@ -2384,7 +2376,7 @@ def api_perf_reviews_submit(rid):
 
 
 @app.route("/api/org/structure", methods=["GET"])
-@login_required
+#@login_required
 def api_org_structure():
     """
     Get organizational structure data for the org chart
@@ -2442,7 +2434,7 @@ def api_org_structure():
 
 
 @app.route("/api/org/update-reporting", methods=["POST"])
-@login_required
+#@login_required
 def api_org_update_reporting():
     """
     Update reporting relationship between employees
@@ -2520,7 +2512,7 @@ def would_create_circular_reference(employee_id, manager_id):
 
 
 @app.route("/api/org/hierarchy", methods=["GET"])
-@login_required
+#@login_required
 def api_org_hierarchy():
     """
     Get hierarchical organization structure (tree format)
@@ -2560,7 +2552,7 @@ def api_org_hierarchy():
 
 
 @app.route("/api/org/departments", methods=["GET"])
-@login_required
+#@login_required
 def api_org_departments():
     """
     Get organization structure grouped by departments
@@ -2610,7 +2602,7 @@ def api_org_departments():
 
 
 @app.route("/api/org/stats", methods=["GET"])
-@login_required
+#@login_required
 def api_org_stats():
     """
     Get organizational statistics
@@ -2653,7 +2645,7 @@ def api_org_stats():
 
 
 @app.route("/api/org/setup-db", methods=["POST"])
-@login_required
+#@login_required
 def api_org_setup_db():
     """
     Helper route to add the manager_id field to User table
@@ -2686,7 +2678,7 @@ def api_org_setup_db():
     
 
 @app.route("/api/org/structure-mock", methods=["GET"])
-@login_required
+#@login_required
 def api_org_structure_mock():
     """
     Temporary endpoint that creates a mock org structure without requiring database changes
@@ -2806,7 +2798,7 @@ def get_user_location(user):
 
 
 @app.route("/api/workforce/locations", methods=["GET"])
-@login_required
+#@login_required
 def api_workforce_locations():
     """
     Get workforce location data for the world map
@@ -2846,11 +2838,20 @@ def api_workforce_locations():
     
     return jsonify(result)
 
+@app.route("/run_duplicates")
+def run_duplicates():
+    try:
+        # Run duplicates.py from the same directory
+        subprocess.run(["python3", "duplicates.py"], check=True)
+        flash("Bulk upload completed successfully!", "success")
+    except subprocess.CalledProcessError:
+        flash("Error while running duplicates.py", "error")
 
+    return redirect(url_for("dashboard"))
 
 
 @app.route('/logout')
-@login_required
+#@login_required
 def logout():
     session.clear()
     flash("You have been logged out.", "info")
