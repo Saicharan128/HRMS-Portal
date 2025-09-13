@@ -1,0 +1,490 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-book mr-2"></i> Employee Handbooks
+            </h1>
+            <p class="text-slate-600 text-sm">Digitize and distribute employee policies and guidelines.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="uploadBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-upload mr-1"></i> Upload Handbook
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters / Actions -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">View:</label>
+                <select id="viewType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="catalog">Catalog</option>
+                    <option value="ack">Acknowledgements</option>
+                    <option value="versions">Version History</option>
+                    <option value="analytics">Analytics</option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Category:</label>
+                <select id="categoryFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                </select>
+            </div>
+
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                <input id="searchBox" class="rounded-lg border border-slate-300 pl-8 pr-3 py-2 text-sm w-64"
+                    placeholder="Search title, tag..." />
+            </div>
+
+            <div class="ml-auto flex items-center gap-2">
+                <button id="assignBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-user-check mr-1"></i> Assign to Teams
+                </button>
+                <button id="exportBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-book-open mr-1"></i> Handbooks</div>
+            <div id="handbookCount" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-tag mr-1"></i> Categories</div>
+            <div id="categoryCount" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-user-check mr-1"></i> Acknowledged</div>
+            <div id="ackRate" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Pending</div>
+            <div id="pendingCount" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div id="loadingState" class="text-center py-12">
+            <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
+            <p class="text-slate-600">Loading handbooks...</p>
+        </div>
+
+        <!-- Catalog View -->
+        <div id="catalogView" class="hidden">
+            <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- Acknowledgements View -->
+        <div id="ackView" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Employee</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Handbook</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Version</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ackTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Version History View -->
+        <div id="versionsView" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Handbook</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Version</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Published</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Changelog</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Download</th>
+                        </tr>
+                    </thead>
+                    <tbody id="versionTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Analytics View -->
+        <div id="analyticsView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-chart-line mr-2"></i> Reads Over
+                            Time</h3>
+                        <span id="readsRange" class="text-xs text-slate-500">—</span>
+                    </div>
+                    <canvas id="readsCanvas" height="140"></canvas>
+                    <p class="text-xs text-slate-500 mt-2">Daily unique readers.</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-star-half-stroke mr-2"></i> Quiz
+                        Pass Rate</h3>
+                    <div class="space-y-2 text-sm" id="quizStats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">Upload Handbook</h3>
+                    <button id="closeUploadModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <form id="uploadForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Title</label>
+                        <input id="hbTitle" class="w-full rounded-lg border border-slate-300 px-3 py-2" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                        <select id="hbCategory" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="HR Policies">HR Policies</option>
+                            <option value="Security">Security</option>
+                            <option value="Compliance">Compliance</option>
+                            <option value="Benefits">Benefits</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">File</label>
+                        <input id="hbFile" type="file" accept=".pdf,.doc,.docx"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white" required />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2 text-sm">
+                            <input id="hbRequireAck" type="checkbox" class="rounded border-slate-300"> Require
+                            Acknowledgement
+                        </label>
+                        <label class="flex items-center gap-2 text-sm">
+                            <input id="hbRequireQuiz" type="checkbox" class="rounded border-slate-300"> Require Quiz
+                        </label>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="cancelUpload"
+                            class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        transition: all .2s;
+    }
+
+    .card:hover {
+        border-color: #64748b;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
+    }
+
+    .pill {
+        font-size: .7rem;
+        padding: .2rem .5rem;
+        border-radius: 9999px;
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    canvas {
+        width: 100%;
+    }
+</style>
+
+<script>
+    // State
+    let handbooks = [];      // [{id,title,category,version,tags,status,updated_at,require_ack,require_quiz,assigned_to,reads}]
+    let acknowledgements = []; // [{employee, handbook_id, version, status, date}]
+    let versions = [];       // [{handbook_id, title, version, published_at, notes}]
+    let readsSeries = [];    // [{date, count}]
+    let categories = [];
+
+    // Helpers
+    async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    async function postJSON(u, d) { const r = await fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    const fmtPct = n => (isNaN(n) ? '-' : (Math.round(n * 100) / 100) + '%');
+
+    // Load
+    async function loadAll() {
+        try {
+            const q = encodeURIComponent(document.getElementById('searchBox').value || '');
+            const cat = encodeURIComponent(document.getElementById('categoryFilter').value || '');
+            const [meta, hb, ack, ver, reads] = await Promise.all([
+                fetchJSON(`/api/handbooks/meta`),
+                fetchJSON(`/api/handbooks?search=${q}&category=${cat}`),
+                fetchJSON(`/api/handbooks/acks`),
+                fetchJSON(`/api/handbooks/versions`),
+                fetchJSON(`/api/handbooks/reads`)
+            ]);
+
+            categories = meta.categories || [];
+            handbooks = hb || [];
+            acknowledgements = ack || [];
+            versions = ver || [];
+            readsSeries = reads || [];
+
+            // Filters
+            const sel = document.getElementById('categoryFilter');
+            sel.innerHTML = '<option value="">All</option>';
+            categories.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+
+            // Stats
+            document.getElementById('handbookCount').textContent = handbooks.length;
+            document.getElementById('categoryCount').textContent = categories.length;
+            const needAck = handbooks.filter(h => h.require_ack).map(h => h.id);
+            const ackDone = acknowledgements.filter(a => a.status === 'Acknowledged' && needAck.includes(a.handbook_id)).length;
+            const ackTotal = acknowledgements.filter(a => needAck.includes(a.handbook_id)).length || 0;
+            document.getElementById('ackRate').textContent = ackTotal ? fmtPct((ackDone / ackTotal) * 100) : '-';
+            const pending = acknowledgements.filter(a => a.status !== 'Acknowledged').length;
+            document.getElementById('pendingCount').textContent = pending;
+
+            renderCurrentView();
+            document.getElementById('loadingState').classList.add('hidden');
+        } catch (e) {
+            console.error(e);
+            document.getElementById('loadingState').innerHTML = `
+        <div class="text-center py-12">
+          <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
+          <p class="text-red-600 mb-4">Failed to load handbooks</p>
+          <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
+        </div>`;
+        }
+    }
+
+    // Views
+    function renderCurrentView() {
+        const v = document.getElementById('viewType').value;
+        ['catalog', 'ack', 'versions', 'analytics'].forEach(k => document.getElementById(k + 'View').classList.add('hidden'));
+        if (v === 'catalog') { document.getElementById('catalogView').classList.remove('hidden'); renderCatalog(); }
+        if (v === 'ack') { document.getElementById('ackView').classList.remove('hidden'); renderAck(); }
+        if (v === 'versions') { document.getElementById('versionsView').classList.remove('hidden'); renderVersions(); }
+        if (v === 'analytics') { document.getElementById('analyticsView').classList.remove('hidden'); renderAnalytics(); }
+    }
+
+    function renderCatalog() {
+        const grid = document.getElementById('catalogGrid'); grid.innerHTML = '';
+        if (handbooks.length === 0) {
+            grid.innerHTML = `<div class="text-slate-500 text-sm">No handbooks yet. Click <b>Upload Handbook</b> to add one.</div>`;
+            return;
+        }
+        handbooks.forEach(h => {
+            const card = document.createElement('div'); card.className = 'card';
+            const status = h.status || 'Published';
+            const v = h.version ? `v${h.version}` : '—';
+            card.innerHTML = `
+        <div class="flex items-center mb-3">
+          <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
+            <i class="fa-solid fa-book text-slate-600"></i>
+          </div>
+          <div>
+            <h4 class="font-semibold text-slate-800">${h.title}</h4>
+            <p class="text-xs text-slate-500">${h.category || '-'} • ${v} • ${h.updated_at?.slice(0, 10) || '-'}</p>
+          </div>
+          <span class="ml-auto pill">${status}</span>
+        </div>
+        <div class="text-sm space-y-1 mb-3">
+          <div class="flex justify-between"><span class="text-slate-600">Requires Ack:</span><span class="font-medium">${h.require_ack ? 'Yes' : 'No'}</span></div>
+          <div class="flex justify-between"><span class="text-slate-600">Requires Quiz:</span><span class="font-medium">${h.require_quiz ? 'Yes' : 'No'}</span></div>
+          <div class="flex justify-between"><span class="text-slate-600">Assigned To:</span><span class="font-medium">${(h.assigned_to || []).join(', ') || 'All'}</span></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-1 border rounded-lg text-sm" onclick="openHandbook('${h.id}')"><i class="fa-solid fa-eye mr-1"></i> View</button>
+          <button class="px-3 py-1 border rounded-lg text-sm" onclick="downloadHandbook('${h.id}')"><i class="fa-solid fa-download mr-1"></i> Download</button>
+          <button class="px-3 py-1 border rounded-lg text-sm" onclick="newVersion('${h.id}')"><i class="fa-solid fa-plus mr-1"></i> New Version</button>
+        </div>`;
+            grid.appendChild(card);
+        });
+    }
+
+    function renderAck() {
+        const tbody = document.getElementById('ackTableBody'); tbody.innerHTML = '';
+        if (acknowledgements.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500 text-sm">No acknowledgements yet.</td></tr>`;
+            return;
+        }
+        acknowledgements.forEach(a => {
+            const hb = handbooks.find(h => h.id === a.handbook_id);
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-600">${a.employee || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${hb?.title || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${a.version ? 'v' + a.version : '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${a.status || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${(a.date || '').slice(0, 10)}</td>
+        <td class="px-4 py-3">
+          <button class="text-slate-600 hover:text-slate-800 text-sm" onclick="remind('${a.employee}','${a.handbook_id}')"><i class="fa-solid fa-bell"></i> Remind</button>
+        </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderVersions() {
+        const tbody = document.getElementById('versionTableBody'); tbody.innerHTML = '';
+        const rows = versions.map(v => {
+            const dl = `<button class="px-3 py-1 border rounded-lg text-sm" onclick="downloadVersion('${v.handbook_id}','${v.version}')"><i class="fa-solid fa-download mr-1"></i> Download</button>`;
+            return `
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3 text-sm text-slate-600">${v.title || '-'}</td>
+          <td class="px-4 py-3 text-sm text-slate-600">v${v.version}</td>
+          <td class="px-4 py-3 text-sm text-slate-600">${(v.published_at || '').slice(0, 10)}</td>
+          <td class="px-4 py-3 text-sm text-slate-600">${v.notes || '-'}</td>
+          <td class="px-4 py-3">${dl}</td>
+        </tr>`;
+        }).join('');
+        tbody.innerHTML = rows || `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500 text-sm">No versions found.</td></tr>`;
+    }
+
+    function renderAnalytics() {
+        // Reads chart
+        drawReads(readsSeries);
+        document.getElementById('readsRange').textContent = readsSeries.length ? `${readsSeries[0].date} → ${readsSeries[readsSeries.length - 1].date}` : '—';
+
+        // Quiz stats (by handbook)
+        const byHb = {};
+        handbooks.filter(h => h.require_quiz).forEach(h => byHb[h.id] = { title: h.title, pass: 0, total: 0 });
+        (window.quiz_results || []).forEach(q => {
+            if (byHb[q.handbook_id]) { byHb[q.handbook_id].total++; if (q.passed) byHb[q.handbook_id].pass++; }
+        });
+        const box = document.getElementById('quizStats'); box.innerHTML = '';
+        const entries = Object.values(byHb);
+        if (entries.length === 0) { box.innerHTML = `<div class="text-slate-500">No quizzes required.</div>`; return; }
+        entries.forEach(e => {
+            const rate = e.total ? Math.round((e.pass / e.total) * 10000) / 100 : 0;
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between';
+            row.innerHTML = `<span>${e.title}</span><span class="font-medium">${rate}%</span>`;
+            box.appendChild(row);
+        });
+    }
+
+    // Simple line chart without deps
+    function drawReads(series) {
+        const canvas = document.getElementById('readsCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width = canvas.clientWidth;
+        const H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        if (!series || series.length < 2) { ctx.fillStyle = '#64748b'; ctx.fillText('Not enough data', 10, 20); return; }
+
+        const xs = series.map((_, i) => i);
+        const ys = series.map(d => d.count || 0);
+        const min = Math.min(...ys, 0), max = Math.max(...ys, 10);
+        const pad = 16, x0 = pad, x1 = W - pad, y0 = H - pad, y1 = pad;
+
+        // grid
+        ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) { const y = y0 - (i / 3) * (y0 - y1); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
+
+        // line
+        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath();
+        xs.forEach((xv, i) => {
+            const x = x0 + (xv / (xs.length - 1)) * (x1 - x0);
+            const y = y0 - ((ys[i] - min) / (max - min || 1)) * (y0 - y1);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
+
+    // Actions
+    function openHandbook(id) { window.location.href = `/handbooks/${id}`; }
+    async function downloadHandbook(id) { window.location.href = `/api/handbooks/${id}/download`; }
+    async function newVersion(id) {
+        if (!confirm('Create new version from current file?')) return;
+        try { await postJSON('/api/handbooks/new-version', { id }); alert('New version created'); loadAll(); } catch (e) { alert('Failed to create version'); }
+    }
+    async function downloadVersion(id, ver) { window.location.href = `/api/handbooks/${id}/versions/${ver}/download`; }
+    async function remind(employee, handbookId) {
+        try { await postJSON('/api/handbooks/remind', { employee, handbook_id: handbookId }); alert('Reminder sent'); } catch (e) { alert('Failed to send reminder'); }
+    }
+
+    // Upload modal
+    function openUpload() { document.getElementById('uploadModal').classList.remove('hidden'); }
+    function closeUpload() { document.getElementById('uploadModal').classList.add('hidden'); }
+
+    // Export
+    function exportCSV() {
+        const rows = [['employee', 'handbook', 'version', 'status', 'date']];
+        acknowledgements.forEach(a => {
+            const hb = handbooks.find(h => h.id === a.handbook_id);
+            rows.push([a.employee, hb?.title || '', a.version || '', a.status || '', (a.date || '').slice(0, 10)]);
+        });
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'acknowledgements.csv'; a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Init
+    function setupEvents() {
+        document.getElementById('viewType').addEventListener('change', renderCurrentView);
+        document.getElementById('categoryFilter').addEventListener('change', loadAll);
+        document.getElementById('searchBox').addEventListener('input', debounce(loadAll, 250));
+        document.getElementById('exportBtn').addEventListener('click', exportCSV);
+        document.getElementById('uploadBtn').addEventListener('click', openUpload);
+        document.getElementById('closeUploadModal').addEventListener('click', closeUpload);
+        document.getElementById('cancelUpload').addEventListener('click', closeUpload);
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                // Note: implement actual file upload with FormData server-side
+                await postJSON('/api/handbooks/upload', {
+                    title: document.getElementById('hbTitle').value,
+                    category: document.getElementById('hbCategory').value,
+                    require_ack: document.getElementById('hbRequireAck').checked,
+                    require_quiz: document.getElementById('hbRequireQuiz').checked,
+                    file_name: document.getElementById('hbFile').files[0]?.name || ''
+                });
+                closeUpload(); loadAll(); alert('Handbook uploaded');
+            } catch (err) { console.error(err); alert('Upload failed'); }
+        });
+    }
+
+    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
+
+    async function initializePage() {
+        document.getElementById('loadingState').classList.remove('hidden');
+        await loadAll();
+        setupEvents();
+    }
+
+    document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+{% endblock %}

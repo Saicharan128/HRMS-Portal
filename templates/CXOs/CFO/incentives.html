@@ -1,0 +1,579 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-ranking-star mr-2"></i> Incentives
+            </h1>
+            <p class="text-slate-600 text-sm">Design and manage performance-based incentive programs.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newProgramBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New program
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="programsTab" class="in-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-layer-group mr-1"></i> Programs</button>
+            <button id="rulesTab" class="in-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-list-check mr-1"></i> Rules</button>
+            <button id="payoutsTab" class="in-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-sack-dollar mr-1"></i> Payouts</button>
+            <button id="approvalsTab" class="in-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-stamp mr-1"></i> Approvals</button>
+            <button id="complianceTab" class="in-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
+            <button id="reportsTab" class="in-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-chart-pie mr-1"></i> Reports</button>
+        </div>
+    </div>
+
+    <!-- Programs -->
+    <section id="programsPanel" class="in-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white">
+                <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                    <div class="relative w-full md:w-[28rem]">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input id="pSearch" placeholder="Search program, owner, or tag"
+                            class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
+                        <button id="pClear"
+                            class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="pStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="all">All</option>
+                            <option value="draft">Draft</option>
+                            <option value="active">Active</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                        <button id="dupProgram"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                            <i class="fa-solid fa-copy mr-1"></i> Duplicate
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 px-4">Program</th>
+                                <th class="py-2 px-4">Owner</th>
+                                <th class="py-2 px-4">Period</th>
+                                <th class="py-2 px-4">Budget</th>
+                                <th class="py-2 px-4">Status</th>
+                                <th class="py-2 px-4 w-24"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="progRows" class="text-slate-800"><!-- injected --></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-circle-info mr-2"></i>
+                    Summary</h3>
+                <ul id="progSummary" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rules -->
+    <section id="rulesPanel" class="in-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list-check mr-2"></i>
+                        Eligibility & Targets</h3>
+                    <div class="flex items-center gap-2">
+                        <select id="rProgram"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"></select>
+                        <button id="newRule"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                                class="fa-solid fa-plus mr-1"></i> Add rule</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 px-4">Condition</th>
+                                <th class="py-2 px-4">Operator</th>
+                                <th class="py-2 px-4">Value</th>
+                                <th class="py-2 px-4">Weight</th>
+                                <th class="py-2 px-4 w-24"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="ruleRows" class="text-slate-800"><!-- injected --></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-3"><i
+                        class="fa-solid fa-wand-magic-sparkles mr-2"></i> Preview</h3>
+                <div class="space-y-2 text-sm">
+                    <input id="pvDept" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Department e.g., Sales">
+                    <input id="pvRole" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Role e.g., AE">
+                    <button id="runPreview"
+                        class="w-full px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm">Calculate
+                        potential bonus</button>
+                    <div id="pvBox" class="text-slate-700"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payouts -->
+    <section id="payoutsPanel" class="in-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-sack-dollar mr-2"></i> Payouts
+                </h3>
+                <div class="flex items-center gap-2">
+                    <select id="payPeriod"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"></select>
+                    <button id="exportPayouts"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                            class="fa-solid fa-file-export mr-1"></i> Export</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Employee</th>
+                            <th class="py-2 px-4">Program</th>
+                            <th class="py-2 px-4">Quota</th>
+                            <th class="py-2 px-4">Attainment</th>
+                            <th class="py-2 px-4">Payout</th>
+                            <th class="py-2 px-4">Status</th>
+                            <th class="py-2 px-4 w-24"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="payRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Approvals -->
+    <section id="approvalsPanel" class="in-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-stamp mr-2"></i> Approval queue
+                </h3>
+                <div class="flex items-center gap-2">
+                    <select id="apFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <button id="bulkApprove"
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
+                            class="fa-solid fa-check mr-1"></i> Approve all</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Request</th>
+                            <th class="py-2 px-4">Program</th>
+                            <th class="py-2 px-4">Requested by</th>
+                            <th class="py-2 px-4">Amount</th>
+                            <th class="py-2 px-4">Status</th>
+                            <th class="py-2 px-4 w-24"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="apRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compliance -->
+    <section id="compliancePanel" class="in-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-shield mr-2"></i>
+                    Checklist</h3>
+                <div id="cList" class="space-y-3"><!-- injected --></div>
+                <button id="cAll"
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
+                        class="fa-solid fa-check mr-1"></i> Mark all</button>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>
+                    Tax treatment</h3>
+                <ul id="taxNotes" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-folder-open mr-2"></i>
+                    Documents</h3>
+                <ul id="docs" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reports -->
+    <section id="reportsPanel" class="in-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-column mr-2"></i>
+                    Attainment by team</h3>
+                <canvas id="attChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-coins mr-2"></i> Payout
+                    trend</h3>
+                <canvas id="payChart" height="220"></canvas>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Program Modal -->
+<div id="programModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Create incentive program</h3>
+                    <button id="closeProgram" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <input id="prName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Program name">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="prOwner" class="rounded-lg border border-slate-300 px-3 py-2" placeholder="Owner">
+                        <input id="prBudget" type="number" class="rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Budget (USD)">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="prStart" type="month" class="rounded-lg border border-slate-300 px-3 py-2">
+                        <input id="prEnd" type="month" class="rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div class="flex items-center justify-end gap-2">
+                        <button id="saveProgram"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rule Modal -->
+<div id="ruleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Add rule</h3>
+                    <button id="closeRule" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-4 gap-3">
+                        <select id="rField" class="rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="department">Department</option>
+                            <option value="role">Role</option>
+                            <option value="quota">Quota</option>
+                            <option value="attainment">Attainment %</option>
+                        </select>
+                        <select id="rOp" class="rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="is">is</option>
+                            <option value="gt">≥</option>
+                            <option value="lt">≤</option>
+                        </select>
+                        <input id="rVal" class="rounded-lg border border-slate-300 px-3 py-2" placeholder="Value">
+                        <input id="rWeight" type="number" class="rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Weight %">
+                    </div>
+                    <div class="flex items-center justify-end gap-2">
+                        <button id="saveRule" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                                class="fa-solid fa-plus mr-1"></i> Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ---------- Mock Data ---------- */
+    let PROGRAMS = [
+        { id: 'INC-001', name: 'Sales FY25 H1', owner: 'Priya Singh', period: '2025-04 → 2025-09', budget: 250000, status: 'active' },
+        { id: 'INC-002', name: 'CS NPS Bonus', owner: 'Noah Kim', period: '2025-01 → 2025-12', budget: 60000, status: 'draft' },
+        { id: 'INC-003', name: 'Eng Referral', owner: 'Riya Patel', period: '2025-03 → 2025-12', budget: 30000, status: 'archived' }
+    ];
+    let RULES = [
+        { pid: 'INC-001', field: 'attainment', op: 'gt', value: '80', weight: 60 },
+        { pid: 'INC-001', field: 'quota', op: 'gt', value: '100000', weight: 40 },
+        { pid: 'INC-002', field: 'department', op: 'is', value: 'Support', weight: 100 }
+    ];
+    let PAY_PERIODS = ['2025-05', '2025-06', '2025-07', '2025-08', '2025-09'];
+    let PAYOUTS = [
+        { emp: 'Aarav Mehta', pid: 'INC-001', quota: 120000, attain: 95, payout: 4200, status: 'pending' },
+        { emp: 'Isha Verma', pid: 'INC-001', quota: 90000, attain: 88, payout: 3100, status: 'approved' },
+        { emp: 'Omar Ali', pid: 'INC-002', quota: 0, attain: 100, payout: 800, status: 'pending' }
+    ];
+    let APPROVALS = [
+        { id: 'APR-101', pid: 'INC-001', by: 'Priya Singh', amt: 15000, status: 'pending' },
+        { id: 'APR-102', pid: 'INC-002', by: 'Noah Kim', amt: 800, status: 'approved' }
+    ];
+    let COMPLIANCE = [
+        { id: 301, text: 'Policy published & acknowledged', done: true },
+        { id: 302, text: 'Formula transparency check', done: false },
+        { id: 303, text: 'Budget within allocation', done: true }
+    ];
+    let DOCS = [{ k: 'Incentive Policy v1.3', v: 'Open' }, { k: 'Attainment Evidence Template', v: 'Open' }];
+
+    /* ---------- Helpers ---------- */
+    const $ = (id) => document.getElementById(id);
+    const money = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n || 0));
+    function pill(s) { return s === 'active' ? 'bg-emerald-50 text-emerald-700' : s === 'draft' ? 'bg-amber-50 text-amber-700' : s === 'archived' ? 'bg-slate-100 text-slate-700' : 'bg-blue-50 text-blue-700'; }
+    function apPill(s) { return s === 'approved' ? 'bg-emerald-50 text-emerald-700' : s === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'; }
+
+    /* ---------- Init ---------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tabs
+        document.querySelectorAll('.in-tab').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.in-tab').forEach(x => x.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.in-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+                if (name === 'reports') ensureCharts(), drawCharts();
+            });
+        });
+
+        // Programs
+        $('pStatus').addEventListener('change', renderPrograms);
+        const s = $('pSearch'), c = $('pClear');
+        s.addEventListener('input', () => { c.classList.toggle('hidden', !s.value.trim()); renderPrograms(); });
+        c.addEventListener('click', () => { s.value = ''; c.classList.add('hidden'); renderPrograms(); });
+        $('newProgramBtn').addEventListener('click', () => $('programModal').classList.remove('hidden'));
+        $('closeProgram').addEventListener('click', () => $('programModal').classList.add('hidden'));
+        $('saveProgram').addEventListener('click', saveProgram);
+        $('dupProgram').addEventListener('click', () => alert('📄 Duplicated latest program (mock)'));
+
+        // Rules
+        $('newRule').addEventListener('click', () => $('ruleModal').classList.remove('hidden'));
+        $('closeRule').addEventListener('click', () => $('ruleModal').classList.add('hidden'));
+        $('saveRule').addEventListener('click', saveRule);
+        $('runPreview').addEventListener('click', runPreview);
+
+        // Payouts
+        $('exportPayouts').addEventListener('click', () => alert('📄 Exported (mock)'));
+        $('payPeriod').innerHTML = PAY_PERIODS.map(p => `<option>${p}</option>`).join('');
+
+        // Approvals
+        $('apFilter').addEventListener('change', renderApprovals);
+        $('bulkApprove').addEventListener('click', () => { APPROVALS = APPROVALS.map(a => ({ ...a, status: 'approved' })); renderApprovals(); alert('✅ Approved'); });
+
+        // Compliance
+        $('cAll').addEventListener('click', () => { COMPLIANCE = COMPLIANCE.map(x => ({ ...x, done: true })); renderCompliance(); });
+
+        // Seed selects
+        syncProgramSelects();
+
+        // First paint
+        renderPrograms(); renderProgSummary();
+        renderRules();
+        renderPayouts();
+        renderApprovals();
+        renderCompliance(); renderTaxNotes(); renderDocs();
+        ensureCharts(); drawCharts();
+    });
+
+    /* ---------- Programs ---------- */
+    function renderPrograms() {
+        const q = ($('pSearch').value || '').toLowerCase(), st = $('pStatus').value;
+        const data = PROGRAMS.filter(p => (st === 'all' || p.status === st) && (!q || [p.name, p.owner, p.id].some(x => String(x).toLowerCase().includes(q))));
+        $('progRows').innerHTML = data.map(p => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 px-4 font-medium">${p.name}</td>
+      <td class="py-2 px-4">${p.owner}</td>
+      <td class="py-2 px-4">${p.period}</td>
+      <td class="py-2 px-4">${money(p.budget)}</td>
+      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill(p.status)}">${p.status}</span></td>
+      <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Open ${p.id}')">Open</button></td>
+    </tr>`).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No programs</td></tr>`;
+    }
+    function renderProgSummary() {
+        const active = PROGRAMS.filter(p => p.status === 'active');
+        const budget = active.reduce((s, p) => s + p.budget, 0);
+        $('progSummary').innerHTML = `
+    <li class="flex items-center justify-between"><span>Active programs</span><span class="font-semibold">${active.length}</span></li>
+    <li class="flex items-center justify-between"><span>Active budget</span><span class="font-semibold">${money(budget)}</span></li>
+  `;
+    }
+    function saveProgram() {
+        const name = val('prName').trim(), owner = val('prOwner').trim(), budget = Number(val('prBudget') || 0);
+        if (!name) { alert('Name required'); return; }
+        const start = val('prStart') || '', end = val('prEnd') || '';
+        PROGRAMS.push({ id: 'INC-' + Date.now(), name, owner, period: `${start} → ${end}`, budget, status: 'draft' });
+        $('programModal').classList.add('hidden'); renderPrograms(); renderProgSummary(); syncProgramSelects();
+    }
+
+    /* ---------- Rules ---------- */
+    function syncProgramSelects() {
+        const opts = PROGRAMS.filter(p => p.status !== 'archived').map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        $('rProgram').innerHTML = opts || '';
+    }
+    function renderRules() {
+        const pid = val('rProgram') || PROGRAMS[0]?.id; if (!pid) { $('ruleRows').innerHTML = ''; return; }
+        const data = RULES.filter(r => r.pid === pid);
+        $('ruleRows').innerHTML = data.map((r, i) => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 px-4">${cap(r.field)}</td>
+      <td class="py-2 px-4">${opText(r.op)}</td>
+      <td class="py-2 px-4">${r.value}</td>
+      <td class="py-2 px-4">${r.weight}%</td>
+      <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="delRule('${pid}',${i})">Delete</button></td>
+    </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No rules</td></tr>`;
+    }
+    $('rProgram').addEventListener('change', renderRules);
+    function saveRule() {
+        const pid = val('rProgram') || PROGRAMS[0]?.id; if (!pid) return;
+        RULES.push({ pid, field: val('rField'), op: val('rOp'), value: val('rVal'), weight: Number(val('rWeight') || 0) });
+        $('ruleModal').classList.add('hidden'); $('rVal').value = ''; $('rWeight').value = ''; renderRules();
+    }
+    function delRule(pid, idx) {
+        const list = RULES.filter(r => r.pid === pid);
+        const del = list[idx]; const i = RULES.indexOf(del); if (i > -1) RULES.splice(i, 1);
+        renderRules();
+    }
+    function runPreview() {
+        const pid = val('rProgram') || PROGRAMS[0]?.id; if (!pid) return;
+        const rules = RULES.filter(r => r.pid === pid);
+        const base = 1000; // mock base bonus
+        const weightSum = rules.reduce((s, r) => s + r.weight, 0) || 100;
+        const potential = Math.round(base * (weightSum / 100));
+        $('pvBox').innerHTML = `<div class="p-2 rounded bg-emerald-50 text-emerald-700">Estimated bonus: ${money(potential)}</div>`;
+    }
+
+    /* ---------- Payouts ---------- */
+    function renderPayouts() {
+        $('payRows').innerHTML = PAYOUTS.map(x => {
+            const prog = PROGRAMS.find(p => p.id === x.pid);
+            const status = x.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${x.emp}</td>
+        <td class="py-2 px-4">${prog?.name || '—'}</td>
+        <td class="py-2 px-4">${money(x.quota)}</td>
+        <td class="py-2 px-4">${x.attain}%</td>
+        <td class="py-2 px-4">${money(x.payout)}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${status}">${x.status}</span></td>
+        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approvePayout('${x.emp}','${x.pid}')">Approve</button></td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No payouts</td></tr>`;
+    }
+    function approvePayout(emp, pid) { const x = PAYOUTS.find(p => p.emp === emp && p.pid === pid); if (x) { x.status = 'approved'; renderPayouts(); } }
+
+    /* ---------- Approvals ---------- */
+    function renderApprovals() {
+        const f = $('apFilter').value;
+        const data = f === 'all' ? APPROVALS : APPROVALS.filter(a => a.status === f);
+        $('apRows').innerHTML = data.map(a => {
+            const p = PROGRAMS.find(p => p.id === a.pid);
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${a.id}</td>
+        <td class="py-2 px-4">${p?.name || '—'}</td>
+        <td class="py-2 px-4">${a.by}</td>
+        <td class="py-2 px-4">${money(a.amt)}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${apPill(a.status)}">${a.status}</span></td>
+        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleApproval('${a.id}')">Toggle</button></td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No requests</td></tr>`;
+    }
+    function toggleApproval(id) { const x = APPROVALS.find(a => a.id === id); if (!x) return; x.status = x.status === 'approved' ? 'pending' : 'approved'; renderApprovals(); }
+
+    /* ---------- Compliance ---------- */
+    function renderCompliance() {
+        $('cList').innerHTML = COMPLIANCE.map(c => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleC(${c.id}, this.checked)"> ${c.text}</label>
+      ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
+    </div>`).join('');
+    }
+    function toggleC(id, on) { const x = COMPLIANCE.find(c => c.id === id); if (x) { x.done = on; renderCompliance(); } }
+    function renderTaxNotes() {
+        $('taxNotes').innerHTML = `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>Sales bonuses — supplemental withholding</span><span class="text-slate-700">Apply local rate</span></li>
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>Referral rewards — taxable benefit</span><span class="text-slate-700">Gross up optional</span></li>
+  `;
+    }
+    function renderDocs() {
+        $('docs').innerHTML = DOCS.map(d => `<li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>${d.k}</span><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50">Open</button></li>`).join('');
+    }
+
+    /* ---------- Reports (Charts) ---------- */
+    let chartsReady = false, attC, payC;
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartsReady = true; return; }
+        if (chartsReady) return;
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
+    }
+    function drawCharts() {
+        if (!chartsReady) return;
+        const aCtx = document.getElementById('attChart'); const pCtx = document.getElementById('payChart');
+        attC && attC.destroy(); payC && payC.destroy();
+
+        attC = new Chart(aCtx, {
+            type: 'bar',
+            data: { labels: ['Eng', 'Sales', 'CS', 'Mkt', 'Ops'], datasets: [{ data: [78, 92, 85, 74, 80], backgroundColor: '#06b6d4' }] },
+            options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+
+        payC = new Chart(pCtx, {
+            type: 'line',
+            data: { labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep'], datasets: [{ data: [18, 22, 21, 24, 26], fill: false }] },
+            options: { plugins: { legend: { display: false } } }
+        });
+    }
+
+    /* ---------- Utils ---------- */
+    function val(id) { const el = $(id); return el ? el.value : ''; }
+    function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function opText(o) { return o === 'gt' ? '≥' : (o === 'lt' ? '≤' : 'is'); }
+</script>
+
+<style>
+    .in-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .in-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .in-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,540 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-chart-line mr-2"></i> Equity
+            </h1>
+            <p class="text-slate-600 text-sm">Administer and track employee equity and stock options.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newGrantBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New grant
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="grantsTab" class="eq-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-gift mr-1"></i> Grants</button>
+            <button id="vestingTab" class="eq-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-hourglass-half mr-1"></i> Vesting</button>
+            <button id="exercisesTab" class="eq-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-right-from-bracket mr-1"></i> Exercises</button>
+            <button id="captableTab" class="eq-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-diagram-project mr-1"></i> Cap table</button>
+            <button id="complianceTab" class="eq-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
+            <button id="reportsTab" class="eq-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-chart-pie mr-1"></i> Reports</button>
+        </div>
+    </div>
+
+    <!-- Grants -->
+    <section id="grantsPanel" class="eq-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white">
+                <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                    <div class="relative w-full md:w-[28rem]">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input id="gSearch" placeholder="Search employee, grant #, or type"
+                            class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
+                        <button id="gClear"
+                            class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="gType" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="all">All</option>
+                            <option>ISO</option>
+                            <option>NSO</option>
+                            <option>RSU</option>
+                        </select>
+                        <button id="bulkUpload"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                            <i class="fa-solid fa-file-arrow-up mr-1"></i> Bulk upload
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 px-4">Grant #</th>
+                                <th class="py-2 px-4">Employee</th>
+                                <th class="py-2 px-4">Type</th>
+                                <th class="py-2 px-4">Shares</th>
+                                <th class="py-2 px-4">Strike</th>
+                                <th class="py-2 px-4">Granted</th>
+                                <th class="py-2 px-4">Vested</th>
+                                <th class="py-2 px-4 w-24"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="gRows" class="text-slate-800"><!-- injected --></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-circle-info mr-2"></i>
+                    Summary</h3>
+                <ul id="gSummary" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vesting -->
+    <section id="vestingPanel" class="eq-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-hourglass-half mr-2"></i> Vesting
+                    schedule</h3>
+                <div class="flex items-center gap-2">
+                    <select id="vFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="next90">Next 90 days</option>
+                        <option value="year">Next 12 months</option>
+                        <option value="all">All</option>
+                    </select>
+                    <button id="exportVesting"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-file-export mr-1"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Date</th>
+                            <th class="py-2 px-4">Employee</th>
+                            <th class="py-2 px-4">Grant #</th>
+                            <th class="py-2 px-4">Vesting</th>
+                            <th class="py-2 px-4">Cliff</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Exercises -->
+    <section id="exercisesPanel" class="eq-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-right-from-bracket mr-2"></i>
+                        Exercises</h3>
+                    <div class="flex items-center gap-2">
+                        <select id="eStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="all">All</option>
+                            <option value="requested">Requested</option>
+                            <option value="approved">Approved</option>
+                            <option value="settled">Settled</option>
+                        </select>
+                        <button id="settleBatch"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                            <i class="fa-solid fa-building-columns mr-1"></i> Settle batch
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 px-4">Req #</th>
+                                <th class="py-2 px-4">Employee</th>
+                                <th class="py-2 px-4">Grant #</th>
+                                <th class="py-2 px-4">Shares</th>
+                                <th class="py-2 px-4">Cost</th>
+                                <th class="py-2 px-4">Status</th>
+                                <th class="py-2 px-4 w-24"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="eRows" class="text-slate-800"><!-- injected --></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>
+                    Tax estimate</h3>
+                <ul id="taxBox" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cap table -->
+    <section id="captablePanel" class="eq-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-diagram-project mr-2"></i>
+                    Ownership</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 px-4">Holder</th>
+                                <th class="py-2 px-4">Class</th>
+                                <th class="py-2 px-4">Shares</th>
+                                <th class="py-2 px-4">Fully Diluted %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="capRows" class="text-slate-800"><!-- injected --></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Cap
+                    breakdown</h3>
+                <canvas id="capChart" height="220"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compliance -->
+    <section id="compliancePanel" class="eq-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-shield mr-2"></i>
+                    Checklist</h3>
+                <div id="cList" class="space-y-3"><!-- injected --></div>
+                <button id="cAll"
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
+                        class="fa-solid fa-check mr-1"></i> Mark all</button>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-stamp mr-2"></i> Approvals
+                </h3>
+                <ul id="approvals" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-folder-open mr-2"></i>
+                    Documents</h3>
+                <ul id="docs" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reports -->
+    <section id="reportsPanel" class="eq-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-line mr-2"></i>
+                    Vesting runway</h3>
+                <canvas id="vestChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-wallet mr-2"></i> Exercise
+                    cash need</h3>
+                <canvas id="cashChart" height="220"></canvas>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- New Grant Modal -->
+<div id="grantModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Create grant</h3>
+                    <button id="closeGrant" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="gEmp" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Employee name">
+                        <select id="gKind" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>ISO</option>
+                            <option>NSO</option>
+                            <option>RSU</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="gShares" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Shares">
+                        <input id="gStrike" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Strike price">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="gStart" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <select id="gVesting" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="4y_1y_cliff">4y monthly, 1y cliff</option>
+                            <option value="3y_quarterly">3y quarterly</option>
+                            <option value="2y_monthly">2y monthly</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-end gap-2">
+                        <button id="saveGrant" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* -------- Mock Data -------- */
+    let GRANTS = [
+        { id: 'G-1001', emp: 'Aarav Mehta', type: 'ISO', shares: 15000, strike: 1.2, date: '2024-09-01', vested: 4500, cliff: '1y' },
+        { id: 'G-1002', emp: 'Riya Patel', type: 'RSU', shares: 8000, strike: 0, date: '2025-01-15', vested: 1200, cliff: '6m' },
+        { id: 'G-1003', emp: 'Noah Kim', type: 'NSO', shares: 12000, strike: 2.0, date: '2024-06-10', vested: 6000, cliff: '1y' }
+    ];
+    let VEST_EVENTS = [
+        { date: '2025-10-01', emp: 'Aarav Mehta', gid: 'G-1001', amt: 312, cliff: false },
+        { date: '2025-10-15', emp: 'Riya Patel', gid: 'G-1002', amt: 166, cliff: false },
+        { date: '2025-11-10', emp: 'Noah Kim', gid: 'G-1003', amt: 250, cliff: false }
+    ];
+    let EXERCISES = [
+        { id: 'X-901', emp: 'Aarav Mehta', gid: 'G-1001', shares: 2000, cost: 2400, status: 'requested' },
+        { id: 'X-902', emp: 'Noah Kim', gid: 'G-1003', shares: 1500, cost: 3000, status: 'approved' },
+        { id: 'X-903', emp: 'Riya Patel', gid: 'G-1002', shares: 500, cost: 0, status: 'settled' }
+    ];
+    let CAP_TABLE = [
+        { holder: 'Founders', class: 'Common', shares: 3_000_000, fd: 55.0 },
+        { holder: 'Investors', class: 'Preferred', shares: 2_000_000, fd: 36.0 },
+        { holder: 'ESOP Pool', class: 'Options/RSUs', shares: 450_000, fd: 9.0 }
+    ];
+    let COMPLIANCE = [
+        { id: 301, text: 'Board approvals on file', done: true },
+        { id: 302, text: '409A / valuation current', done: false },
+        { id: 303, text: 'Securities filings complete', done: true },
+        { id: 304, text: 'Option agreements countersigned', done: false }
+    ];
+    let APPROVALS = [
+        { k: 'Next board meeting', v: '2025-10-05' },
+        { k: 'Pending grants to ratify', v: '3' }
+    ];
+    let DOCS = [
+        { k: 'Plan doc (v2.1)', v: 'Open' },
+        { k: 'Option agreement template', v: 'Open' }
+    ];
+
+    /* -------- Shortcuts -------- */
+    const $ = (id) => document.getElementById(id);
+    const money = (n, c = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency: c, maximumFractionDigits: 2 }).format(Number(n || 0));
+    function pill(s) { const m = { requested: 'bg-amber-50 text-amber-700', approved: 'bg-emerald-50 text-emerald-700', settled: 'bg-blue-50 text-blue-700' }; return `<span class="px-2 py-0.5 rounded-full text-xs ${m[s] || 'bg-slate-100 text-slate-700'}">${s}</span>`; }
+
+    /* -------- Init -------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tabs
+        document.querySelectorAll('.eq-tab').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.eq-tab').forEach(x => x.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.eq-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+                if (name === 'captable' || name === 'reports') { ensureCharts(); drawCharts(); }
+            });
+        });
+
+        // Grants: search/filter
+        $('gType').addEventListener('change', renderGrants);
+        const s = $('gSearch'), c = $('gClear');
+        s.addEventListener('input', () => { c.classList.toggle('hidden', !s.value.trim()); renderGrants(); });
+        c.addEventListener('click', () => { s.value = ''; c.classList.add('hidden'); renderGrants(); });
+
+        // Vesting
+        $('vFilter').addEventListener('change', renderVesting);
+
+        // Exercises
+        $('eStatus').addEventListener('change', renderExercises);
+        $('settleBatch').addEventListener('click', () => alert('✅ Batch settled (mock)'));
+
+        // Compliance
+        $('cAll').addEventListener('click', () => { COMPLIANCE = COMPLIANCE.map(x => ({ ...x, done: true })); renderCompliance(); });
+
+        // Modals
+        $('newGrantBtn').addEventListener('click', () => $('grantModal').classList.remove('hidden'));
+        $('closeGrant').addEventListener('click', () => $('grantModal').classList.add('hidden'));
+        $('saveGrant').addEventListener('click', saveGrant);
+        $('bulkUpload').addEventListener('click', () => alert('📤 CSV/XLSX uploader coming soon'));
+        $('exportVesting').addEventListener('click', () => alert('📄 Exported (mock)'));
+
+        // Paint
+        renderGrants(); renderSummary();
+        renderVesting(); renderExercises(); renderTaxes();
+        renderCapTable(); renderCompliance(); renderApprovals(); renderDocs();
+        ensureCharts(); drawCharts();
+    });
+
+    /* -------- Grants -------- */
+    function renderGrants() {
+        const q = ($('gSearch').value || '').toLowerCase();
+        const t = $('gType').value;
+        const data = GRANTS.filter(g => (t === 'all' || g.type === t) && (!q || [g.id, g.emp, g.type].some(x => String(x).toLowerCase().includes(q))));
+        $('gRows').innerHTML = data.map(g => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 px-4 font-medium">${g.id}</td>
+      <td class="py-2 px-4">${g.emp}</td>
+      <td class="py-2 px-4">${g.type}</td>
+      <td class="py-2 px-4">${g.shares.toLocaleString()}</td>
+      <td class="py-2 px-4">${g.strike ? money(g.strike) : '—'}</td>
+      <td class="py-2 px-4">${g.date}</td>
+      <td class="py-2 px-4">${g.vested.toLocaleString()}</td>
+      <td class="py-2 px-4 text-right">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Open ${g.id}')">Open</button>
+      </td>
+    </tr>`).join('') || `<tr><td colspan="8" class="py-6 text-center text-slate-500">No grants</td></tr>`;
+    }
+    function renderSummary() {
+        const total = GRANTS.reduce((s, g) => s + g.shares, 0);
+        const vested = GRANTS.reduce((s, g) => s + g.vested, 0);
+        const rsu = GRANTS.filter(g => g.type === 'RSU').reduce((s, g) => s + g.shares, 0);
+        const opt = total - rsu;
+        $('gSummary').innerHTML = `
+    <li class="flex items-center justify-between"><span>Total granted</span><span class="font-semibold">${total.toLocaleString()} sh</span></li>
+    <li class="flex items-center justify-between"><span>Vested to date</span><span class="font-semibold">${vested.toLocaleString()} sh</span></li>
+    <li class="flex items-center justify-between"><span>Options</span><span class="font-semibold">${opt.toLocaleString()} sh</span></li>
+    <li class="flex items-center justify-between"><span>RSUs</span><span class="font-semibold">${rsu.toLocaleString()} sh</span></li>
+  `;
+    }
+    function saveGrant() {
+        const emp = val('gEmp') || 'Unknown', type = val('gKind') || 'ISO', shares = Number(val('gShares') || 0), strike = Number(val('gStrike') || 0), date = val('gStart') || new Date().toISOString().slice(0, 10);
+        if (!shares) { alert('Shares required'); return; }
+        GRANTS.push({ id: 'G-' + Date.now(), emp, type, shares, strike, date, vested: 0, cliff: type === 'RSU' ? '6m' : '1y' });
+        $('grantModal').classList.add('hidden');
+        renderGrants(); renderSummary();
+    }
+
+    /* -------- Vesting -------- */
+    function renderVesting() {
+        const f = $('vFilter').value;
+        const now = new Date();
+        const data = VEST_EVENTS.filter(v => {
+            if (f === 'all') return true;
+            const days = (new Date(v.date) - now) / (1000 * 60 * 60 * 24);
+            return f === 'next90' ? days <= 90 && days >= 0 : days <= 365 && days >= 0;
+        }).sort((a, b) => new Date(a.date) - new Date(b.date));
+        $('vRows').innerHTML = data.map(v => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 px-4">${v.date}</td>
+      <td class="py-2 px-4">${v.emp}</td>
+      <td class="py-2 px-4">${v.gid}</td>
+      <td class="py-2 px-4">${v.amt.toLocaleString()} sh</td>
+      <td class="py-2 px-4">${v.cliff ? 'Cliff' : '—'}</td>
+    </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No upcoming vests</td></tr>`;
+    }
+
+    /* -------- Exercises -------- */
+    function renderExercises() {
+        const f = $('eStatus').value;
+        const data = f === 'all' ? EXERCISES : EXERCISES.filter(x => x.status === f);
+        $('eRows').innerHTML = data.map(x => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 px-4 font-medium">${x.id}</td>
+      <td class="py-2 px-4">${x.emp}</td>
+      <td class="py-2 px-4">${x.gid}</td>
+      <td class="py-2 px-4">${x.shares.toLocaleString()}</td>
+      <td class="py-2 px-4">${money(x.cost)}</td>
+      <td class="py-2 px-4">${pill(x.status)}</td>
+      <td class="py-2 px-4 text-right">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approveExercise('${x.id}')">Approve</button>
+      </td>
+    </tr>`).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No exercises</td></tr>`;
+    }
+    function approveExercise(id) { const x = EXERCISES.find(e => e.id === id); if (!x) return; x.status = 'approved'; renderExercises(); }
+    function renderTaxes() {
+        const totalCost = EXERCISES.reduce((s, x) => s + (x.status !== 'settled' ? x.cost : 0), 0);
+        $('taxBox').innerHTML = `
+    <li class="flex items-center justify-between"><span>Pending exercise cost</span><span class="font-semibold">${money(totalCost)}</span></li>
+    <li class="flex items-center justify-between"><span>Withholding est.</span><span class="font-semibold">${money(totalCost * 0.15)}</span></li>
+    <li class="flex items-center justify-between"><span>Net cash need</span><span class="font-semibold">${money(totalCost * 0.85)}</span></li>
+  `;
+    }
+
+    /* -------- Cap table -------- */
+    function renderCapTable() {
+        $('capRows').innerHTML = CAP_TABLE.map(r => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 px-4 font-medium">${r.holder}</td>
+      <td class="py-2 px-4">${r.class}</td>
+      <td class="py-2 px-4">${r.shares.toLocaleString()}</td>
+      <td class="py-2 px-4">${r.fd.toFixed(1)}%</td>
+    </tr>`).join('');
+    }
+
+    /* -------- Compliance -------- */
+    function renderCompliance() {
+        $('cList').innerHTML = COMPLIANCE.map(c => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleC(${c.id}, this.checked)"> ${c.text}</label>
+      ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
+    </div>`).join('');
+    }
+    function toggleC(id, on) { const x = COMPLIANCE.find(c => c.id === id); if (x) { x.done = on; renderCompliance(); } }
+    function renderApprovals() {
+        $('approvals').innerHTML = APPROVALS.map(a => `<li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>${a.k}</span><span class="font-medium">${a.v}</span></li>`).join('');
+    }
+    function renderDocs() {
+        $('docs').innerHTML = DOCS.map(d => `<li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>${d.k}</span><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50">Open</button></li>`).join('');
+    }
+
+    /* -------- Charts -------- */
+    let chartsReady = false, capC, vestC, cashC;
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartsReady = true; return; }
+        if (chartsReady) return;
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
+    }
+    function drawCharts() {
+        if (!chartsReady) return;
+        // Cap breakdown
+        const capCtx = document.getElementById('capChart'); if (capCtx) {
+            capC && capC.destroy();
+            capC = new Chart(capCtx, {
+                type: 'pie',
+                data: { labels: CAP_TABLE.map(c => c.holder), datasets: [{ data: CAP_TABLE.map(c => c.fd), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+        // Reports
+        const vCtx = document.getElementById('vestChart'); if (vCtx) {
+            vestC && vestC.destroy();
+            const months = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+            const vdata = [380, 420, 460, 520, 560, 600];
+            vestC = new Chart(vCtx, { type: 'bar', data: { labels: months, datasets: [{ data: vdata, backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+        }
+        const cCtx = document.getElementById('cashChart'); if (cCtx) {
+            cashC && cashC.destroy();
+            const months = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']; const cash = [12, 18, 16, 22, 15, 17];
+            cashC = new Chart(cCtx, { type: 'line', data: { labels: months, datasets: [{ data: cash, fill: false }] }, options: { plugins: { legend: { display: false } } } });
+        }
+    }
+
+    /* -------- Utils -------- */
+    function val(id) { const el = $(id); return el ? el.value : ''; }
+</script>
+
+<style>
+    .eq-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .eq-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .eq-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

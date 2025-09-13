@@ -1,0 +1,1314 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-chart-simple mr-2"></i> All Reports
+            </h1>
+            <p class="text-slate-600 text-sm">Generate detailed reports across all HR and payroll modules.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newReportBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> Generate Report
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-chart-bar mr-1"></i> Total Reports</div>
+            <div id="totalReports" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-clock mr-1"></i> Generated Today</div>
+            <div id="todayReports" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-download mr-1"></i> Downloads</div>
+            <div id="totalDownloads" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-calendar-check mr-1"></i> Scheduled</div>
+            <div id="scheduledReports" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+    </div>
+
+    <!-- Report Categories -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- HR Reports -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center mb-4">
+                <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                    <i class="fa-solid fa-users text-blue-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-800">HR Reports</h3>
+            </div>
+            <div class="space-y-2">
+                <button onclick="generateQuickReport('employee_roster')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-user-group mr-2 text-slate-500"></i> Employee Roster
+                </button>
+                <button onclick="generateQuickReport('headcount_analysis')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-chart-line mr-2 text-slate-500"></i> Headcount Analysis
+                </button>
+                <button onclick="generateQuickReport('turnover_report')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-door-open mr-2 text-slate-500"></i> Turnover Report
+                </button>
+                <button onclick="generateQuickReport('diversity_metrics')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-balance-scale mr-2 text-slate-500"></i> Diversity Metrics
+                </button>
+                <button onclick="generateQuickReport('recruitment_pipeline')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-funnel-dollar mr-2 text-slate-500"></i> Recruitment Pipeline
+                </button>
+            </div>
+        </div>
+
+        <!-- Performance Reports -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center mb-4">
+                <div class="p-2 bg-green-100 rounded-lg mr-3">
+                    <i class="fa-solid fa-chart-line text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-800">Performance Reports</h3>
+            </div>
+            <div class="space-y-2">
+                <button onclick="generateQuickReport('performance_summary')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-star mr-2 text-slate-500"></i> Performance Summary
+                </button>
+                <button onclick="generateQuickReport('goal_achievement')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-target mr-2 text-slate-500"></i> Goal Achievement
+                </button>
+                <button onclick="generateQuickReport('review_completion')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-clipboard-check mr-2 text-slate-500"></i> Review Completion
+                </button>
+                <button onclick="generateQuickReport('top_performers')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-trophy mr-2 text-slate-500"></i> Top Performers
+                </button>
+                <button onclick="generateQuickReport('training_completion')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-graduation-cap mr-2 text-slate-500"></i> Training Completion
+                </button>
+            </div>
+        </div>
+
+        <!-- Financial Reports -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center mb-4">
+                <div class="p-2 bg-yellow-100 rounded-lg mr-3">
+                    <i class="fa-solid fa-dollar-sign text-yellow-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-800">Financial Reports</h3>
+            </div>
+            <div class="space-y-2">
+                <button onclick="generateQuickReport('payroll_summary')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-money-bill mr-2 text-slate-500"></i> Payroll Summary
+                </button>
+                <button onclick="generateQuickReport('cost_analysis')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-calculator mr-2 text-slate-500"></i> Cost Analysis
+                </button>
+                <button onclick="generateQuickReport('expense_reports')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-receipt mr-2 text-slate-500"></i> Expense Reports
+                </button>
+                <button onclick="generateQuickReport('budget_variance')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Budget Variance
+                </button>
+                <button onclick="generateQuickReport('contractor_payments')"
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-handshake mr-2 text-slate-500"></i> Contractor Payments
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time & Attendance Reports -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center mb-4">
+                <div class="p-2 bg-purple-100 rounded-lg mr-3">
+                    <i class="fa-solid fa-clock text-purple-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-800">Time & Attendance</h3>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="generateQuickReport('attendance_summary')"
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-calendar-days mr-2 text-slate-500"></i> Attendance Summary
+                </button>
+                <button onclick="generateQuickReport('leave_analysis')"
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-plane-departure mr-2 text-slate-500"></i> Leave Analysis
+                </button>
+                <button onclick="generateQuickReport('overtime_report')"
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-clock mr-2 text-slate-500"></i> Overtime Report
+                </button>
+                <button onclick="generateQuickReport('tardiness_report')"
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-exclamation-triangle mr-2 text-slate-500"></i> Tardiness Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Compliance Reports -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center mb-4">
+                <div class="p-2 bg-red-100 rounded-lg mr-3">
+                    <i class="fa-solid fa-shield-halved text-red-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-800">Compliance & Legal</h3>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="generateQuickReport('eeo_report')"
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-balance-scale mr-2 text-slate-500"></i> EEO Report
+                </button>
+                <button onclick="generateQuickReport('safety_incidents')"
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-hard-hat mr-2 text-slate-500"></i> Safety Incidents
+                </button>
+                <button onclick="generateQuickReport('policy_compliance')"
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-file-contract mr-2 text-slate-500"></i> Policy Compliance
+                </button>
+                <button onclick="generateQuickReport('audit_trail')"
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-search mr-2 text-slate-500"></i> Audit Trail
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Dashboard -->
+    <div class="rounded-2xl border border-slate-200 bg-white">
+        <div class="p-6 border-b border-slate-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-list mr-2"></i> Generated Reports
+                </h2>
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-slate-600">Filter:</label>
+                        <select id="reportTypeFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                            <option value="">All Types</option>
+                            <option value="hr">HR Reports</option>
+                            <option value="performance">Performance</option>
+                            <option value="financial">Financial</option>
+                            <option value="attendance">Time & Attendance</option>
+                            <option value="compliance">Compliance</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-slate-600">Period:</label>
+                        <select id="periodFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="all">All time</option>
+                        </select>
+                    </div>
+                    <button id="refreshReports"
+                        class="px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="p-8 text-center">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
+            <p class="mt-2 text-sm text-slate-600">Loading reports...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden p-8 text-center">
+            <i class="fa-solid fa-chart-simple text-4xl text-slate-300 mb-4"></i>
+            <h3 class="text-lg font-medium text-slate-800 mb-2">No Reports Generated Yet</h3>
+            <p class="text-slate-600 mb-4">Start by generating your first report from the categories above.</p>
+        </div>
+
+        <!-- Reports Table -->
+        <div id="reportsTable" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Report Name</th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Type</th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Generated</th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Generated By</th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Size</th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Status</th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody" class="divide-y divide-slate-200">
+                        <!-- Rows will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div id="paginationContainer" class="p-6 border-t border-slate-200 flex items-center justify-between">
+                <div class="text-sm text-slate-600">
+                    Showing <span id="pageInfo">0-0 of 0</span> reports
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="prevPageBtn" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
+                        disabled>
+                        Previous
+                    </button>
+                    <div id="pageNumbers" class="flex items-center gap-1">
+                        <!-- Page numbers will be populated here -->
+                    </div>
+                    <button id="nextPageBtn" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
+                        disabled>
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Report Modal -->
+<div id="generateReportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl">
+                <div class="p-6 border-b border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-slate-800">
+                            <i class="fa-solid fa-chart-simple mr-2"></i> Generate Custom Report
+                        </h3>
+                        <button id="closeGenerateModal" class="text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <form id="generateReportForm" class="p-6 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Report Type *</label>
+                            <select name="report_type" required
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option value="">Select Report Type</option>
+                                <option value="hr">HR Report</option>
+                                <option value="performance">Performance Report</option>
+                                <option value="financial">Financial Report</option>
+                                <option value="attendance">Time & Attendance</option>
+                                <option value="compliance">Compliance Report</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Report Template *</label>
+                            <select name="template_id" required
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option value="">Select Template</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Date Range *</label>
+                            <select name="date_range" required
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option value="">Select Range</option>
+                                <option value="last_7_days">Last 7 Days</option>
+                                <option value="last_30_days">Last 30 Days</option>
+                                <option value="last_quarter">Last Quarter</option>
+                                <option value="current_quarter">Current Quarter</option>
+                                <option value="last_year">Last Year</option>
+                                <option value="current_year">Current Year</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Format *</label>
+                            <select name="format" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option value="pdf">PDF Document</option>
+                                <option value="excel">Excel Spreadsheet</option>
+                                <option value="csv">CSV File</option>
+                                <option value="html">HTML Report</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Custom Date Range -->
+                    <div id="customDateRange" class="hidden grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
+                            <input type="date" name="start_date"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">End Date</label>
+                            <input type="date" name="end_date"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Departments</label>
+                            <select name="departments[]" multiple
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2" size="4">
+                                <option value="all" selected>All Departments</option>
+                                <option value="engineering">Engineering</option>
+                                <option value="sales">Sales</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="hr">Human Resources</option>
+                                <option value="finance">Finance</option>
+                                <option value="operations">Operations</option>
+                            </select>
+                            <p class="text-xs text-slate-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Employee Types</label>
+                            <select name="employee_types[]" multiple
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2" size="4">
+                                <option value="all" selected>All Types</option>
+                                <option value="full_time">Full Time</option>
+                                <option value="part_time">Part Time</option>
+                                <option value="contractor">Contractor</option>
+                                <option value="intern">Intern</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Report Name</label>
+                        <input type="text" name="report_name" placeholder="Enter custom name (optional)"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <input type="checkbox" name="schedule_report" id="scheduleReport"
+                            class="mt-1 rounded border-slate-300">
+                        <div>
+                            <label for="scheduleReport" class="block text-sm font-medium text-slate-700">Schedule
+                                recurring report</label>
+                            <p class="text-xs text-slate-500">Generate this report automatically at regular intervals
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="scheduleOptions" class="hidden grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Frequency</label>
+                            <select name="frequency" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="quarterly">Quarterly</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Recipients</label>
+                            <input type="email" name="recipients" placeholder="email1@company.com, email2@company.com"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+                        <button type="button" id="cancelGenerate"
+                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                            <i class="fa-solid fa-cog mr-1"></i> Generate Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Preview Modal -->
+<div id="reportPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b border-slate-200 sticky top-0 bg-white">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-slate-800">
+                            <i class="fa-solid fa-eye mr-2"></i> Report Preview
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <button id="downloadReportBtn"
+                                class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                                <i class="fa-solid fa-download mr-1"></i> Download
+                            </button>
+                            <button id="closePreviewModal" class="text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-times text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="reportPreviewContent" class="p-6">
+                    <!-- Report preview will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize reports management
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeReports();
+    });
+
+    // Global state
+    let reports = [];
+    let filteredReports = [];
+    let currentPage = 1;
+    let totalPages = 1;
+
+    async function initializeReports() {
+        await loadReportsData();
+        setupEventListeners();
+        renderReports();
+    }
+
+    async function loadReportsData() {
+        try {
+            document.getElementById('loadingState').classList.remove('hidden');
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Mock reports data
+            const mockReports = [
+                {
+                    id: 1,
+                    name: "Employee Roster Q4 2024",
+                    type: "hr",
+                    generated_date: "2024-01-15T10:30:00",
+                    generated_by: "Sarah Johnson",
+                    file_size: "2.4 MB",
+                    format: "pdf",
+                    status: "completed",
+                    download_count: 15
+                },
+                {
+                    id: 2,
+                    name: "Performance Summary December",
+                    type: "performance",
+                    generated_date: "2024-01-14T14:22:00",
+                    generated_by: "Mike Davis",
+                    file_size: "1.8 MB",
+                    format: "excel",
+                    status: "completed",
+                    download_count: 8
+                },
+                {
+                    id: 3,
+                    name: "Payroll Summary December 2024",
+                    type: "financial",
+                    generated_date: "2024-01-13T09:15:00",
+                    generated_by: "Lisa Brown",
+                    file_size: "3.2 MB",
+                    format: "pdf",
+                    status: "completed",
+                    download_count: 22
+                },
+                {
+                    id: 4,
+                    name: "Attendance Analysis Q4",
+                    type: "attendance",
+                    generated_date: "2024-01-12T16:45:00",
+                    generated_by: "Tom Wilson",
+                    file_size: "1.5 MB",
+                    format: "csv",
+                    status: "processing",
+                    download_count: 0
+                },
+                {
+                    id: 5,
+                    name: "EEO Compliance Report 2024",
+                    type: "compliance",
+                    generated_date: "2024-01-11T11:20:00",
+                    generated_by: "Sarah Johnson",
+                    file_size: "987 KB",
+                    format: "pdf",
+                    status: "completed",
+                    download_count: 5
+                }
+            ];
+
+            reports = mockReports;
+            filteredReports = [...reports];
+
+            // Update summary stats
+            updateSummaryStats();
+
+            document.getElementById('loadingState').classList.add('hidden');
+
+        } catch (error) {
+            console.error('Error loading reports data:', error);
+            document.getElementById('loadingState').classList.add('hidden');
+            showError('Failed to load reports data');
+        }
+    }
+
+    function updateSummaryStats() {
+        const today = new Date().toDateString();
+        const todayReports = reports.filter(r =>
+            new Date(r.generated_date).toDateString() === today
+        ).length;
+
+        const totalDownloads = reports.reduce((sum, r) => sum + r.download_count, 0);
+        const scheduledReports = 3; // Mock scheduled reports count
+
+        document.getElementById('totalReports').textContent = reports.length;
+        document.getElementById('todayReports').textContent = todayReports;
+        document.getElementById('totalDownloads').textContent = totalDownloads;
+        document.getElementById('scheduledReports').textContent = scheduledReports;
+    }
+
+    function setupEventListeners() {
+        // Modal controls
+        document.getElementById('newReportBtn').addEventListener('click', openGenerateReportModal);
+        document.getElementById('closeGenerateModal').addEventListener('click', () => closeModal('generateReportModal'));
+        document.getElementById('cancelGenerate').addEventListener('click', () => closeModal('generateReportModal'));
+        document.getElementById('closePreviewModal').addEventListener('click', () => closeModal('reportPreviewModal'));
+
+        // Form submission
+        document.getElementById('generateReportForm').addEventListener('submit', handleGenerateReport);
+
+        // Filters
+        document.getElementById('reportTypeFilter').addEventListener('change', applyFilters);
+        document.getElementById('periodFilter').addEventListener('change', applyFilters);
+        document.getElementById('refreshReports').addEventListener('click', loadReportsData);
+
+        // Report type change handler
+        document.querySelector('select[name="report_type"]').addEventListener('change', updateTemplateOptions);
+
+        // Date range change handler
+        document.querySelector('select[name="date_range"]').addEventListener('change', toggleCustomDateRange);
+
+        // Schedule checkbox
+        document.getElementById('scheduleReport').addEventListener('change', toggleScheduleOptions);
+    }
+
+    function openGenerateReportModal() {
+        document.getElementById('generateReportModal').classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        if (modalId === 'generateReportModal') {
+            document.getElementById('generateReportForm').reset();
+            document.getElementById('customDateRange').classList.add('hidden');
+            document.getElementById('scheduleOptions').classList.add('hidden');
+        }
+    }
+
+    function updateTemplateOptions() {
+        const reportType = document.querySelector('select[name="report_type"]').value;
+        const templateSelect = document.querySelector('select[name="template_id"]');
+
+        // Clear existing options
+        templateSelect.innerHTML = '<option value="">Select Template</option>';
+
+        const templates = {
+            'hr': [
+                { value: 'employee_roster', text: 'Employee Roster' },
+                { value: 'headcount_analysis', text: 'Headcount Analysis' },
+                { value: 'turnover_report', text: 'Turnover Report' },
+                { value: 'diversity_metrics', text: 'Diversity Metrics' }
+            ],
+            'performance': [
+                { value: 'performance_summary', text: 'Performance Summary' },
+                { value: 'goal_achievement', text: 'Goal Achievement' },
+                { value: 'review_completion', text: 'Review Completion' },
+                { value: 'top_performers', text: 'Top Performers' }
+            ],
+            'financial': [
+                { value: 'payroll_summary', text: 'Payroll Summary' },
+                { value: 'cost_analysis', text: 'Cost Analysis' },
+                { value: 'expense_reports', text: 'Expense Reports' },
+                { value: 'budget_variance', text: 'Budget Variance' }
+            ],
+            'attendance': [
+                { value: 'attendance_summary', text: 'Attendance Summary' },
+                { value: 'leave_analysis', text: 'Leave Analysis' },
+                { value: 'overtime_report', text: 'Overtime Report' },
+                { value: 'tardiness_report', text: 'Tardiness Report' }
+            ],
+            'compliance': [
+                { value: 'eeo_report', text: 'EEO Report' },
+                { value: 'safety_incidents', text: 'Safety Incidents' },
+                { value: 'policy_compliance', text: 'Policy Compliance' },
+                { value: 'audit_trail', text: 'Audit Trail' }
+            ]
+        };
+
+        if (templates[reportType]) {
+            templates[reportType].forEach(template => {
+                const option = document.createElement('option');
+                option.value = template.value;
+                option.textContent = template.text;
+                templateSelect.appendChild(option);
+            });
+        }
+    }
+
+    function toggleCustomDateRange() {
+        const dateRange = document.querySelector('select[name="date_range"]').value;
+        const customRange = document.getElementById('customDateRange');
+
+        if (dateRange === 'custom') {
+            customRange.classList.remove('hidden');
+        } else {
+            customRange.classList.add('hidden');
+        }
+    }
+
+    function toggleScheduleOptions() {
+        const scheduleCheckbox = document.getElementById('scheduleReport');
+        const scheduleOptions = document.getElementById('scheduleOptions');
+
+        if (scheduleCheckbox.checked) {
+            scheduleOptions.classList.remove('hidden');
+        } else {
+            scheduleOptions.classList.add('hidden');
+        }
+    }
+
+    async function handleGenerateReport(e) {
+        e.preventDefault();
+
+        try {
+            const formData = new FormData(e.target);
+            const reportData = Object.fromEntries(formData.entries());
+
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Generating...';
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            console.log('Generating report:', reportData);
+
+            showSuccess('Report generation started! You will be notified when it\'s ready.');
+
+            // Close modal and reload data
+            closeModal('generateReportModal');
+            await loadReportsData();
+
+            // Reset button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+
+        } catch (error) {
+            console.error('Error generating report:', error);
+            showError('Failed to generate report');
+
+            // Reset button
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fa-solid fa-cog mr-1"></i> Generate Report';
+            submitBtn.disabled = false;
+        }
+    }
+
+    async function generateQuickReport(reportType) {
+        try {
+            showInfo(`Generating ${formatReportName(reportType)} report...`);
+
+            // Simulate quick report generation
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            showSuccess(`${formatReportName(reportType)} report generated successfully!`);
+            await loadReportsData();
+
+        } catch (error) {
+            console.error('Error generating quick report:', error);
+            showError('Failed to generate report');
+        }
+    }
+
+    function formatReportName(reportType) {
+        return reportType.split('_').map(word =>
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    }
+
+    function applyFilters() {
+        const typeFilter = document.getElementById('reportTypeFilter').value;
+        const periodFilter = document.getElementById('periodFilter').value;
+
+        filteredReports = reports.filter(report => {
+            const matchesType = !typeFilter || report.type === typeFilter;
+
+            let matchesPeriod = true;
+            if (periodFilter && periodFilter !== 'all') {
+                const reportDate = new Date(report.generated_date);
+                const now = new Date();
+                const daysAgo = parseInt(periodFilter);
+                const cutoffDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+                matchesPeriod = reportDate >= cutoffDate;
+            }
+
+            return matchesType && matchesPeriod;
+        });
+
+        currentPage = 1;
+        renderReports();
+    }
+
+    function renderReports() {
+        if (filteredReports.length === 0) {
+            document.getElementById('emptyState').classList.remove('hidden');
+            document.getElementById('reportsTable').classList.add('hidden');
+            return;
+        }
+
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('reportsTable').classList.remove('hidden');
+
+        renderReportsTable();
+        updatePagination();
+    }
+
+    function renderReportsTable() {
+        const tbody = document.getElementById('reportsTableBody');
+        tbody.innerHTML = '';
+
+        const itemsPerPage = 10;
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageReports = filteredReports.slice(startIndex, endIndex);
+
+        pageReports.forEach(report => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-50';
+
+            row.innerHTML = `
+            <td class="px-6 py-4">
+                <div>
+                    <div class="font-medium text-slate-800">${report.name}</div>
+                    <div class="text-sm text-slate-600">ID: #${report.id}</div>
+                </div>
+            </td>
+            <td class="px-6 py-4">
+                <span class="px-2 py-1 rounded text-xs font-medium ${getTypeBadgeClass(report.type)}">
+                    ${formatType(report.type)}
+                </span>
+            </td>
+            <td class="px-6 py-4 text-slate-800">${formatDate(report.generated_date)}</td>
+            <td class="px-6 py-4 text-slate-800">${report.generated_by}</td>
+            <td class="px-6 py-4 text-slate-800">${report.file_size}</td>
+            <td class="px-6 py-4">
+                <span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(report.status)}">
+                    ${formatStatus(report.status)}
+                </span>
+            </td>
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                    ${report.status === 'completed' ? `
+                        <button onclick="previewReport(${report.id})" 
+                            class="text-blue-600 hover:text-blue-800" title="Preview">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button onclick="downloadReport(${report.id})" 
+                            class="text-green-600 hover:text-green-800" title="Download">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+                        <button onclick="shareReport(${report.id})" 
+                            class="text-purple-600 hover:text-purple-800" title="Share">
+                            <i class="fa-solid fa-share"></i>
+                        </button>
+                    ` : `
+                        <span class="text-slate-400">
+                            <i class="fa-solid fa-clock" title="Processing"></i>
+                        </span>
+                    `}
+                    <button onclick="deleteReport(${report.id})" 
+                        class="text-red-600 hover:text-red-800" title="Delete">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    function updatePagination() {
+        const itemsPerPage = 10;
+        totalPages = Math.ceil(filteredReports.length / itemsPerPage);
+
+        const start = (currentPage - 1) * itemsPerPage + 1;
+        const end = Math.min(currentPage * itemsPerPage, filteredReports.length);
+        document.getElementById('pageInfo').textContent = `${start}-${end} of ${filteredReports.length}`;
+
+        document.getElementById('prevPageBtn').disabled = currentPage === 1;
+        document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+
+        // Update page numbers
+        const pageNumbers = document.getElementById('pageNumbers');
+        pageNumbers.innerHTML = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.className = i === currentPage
+                    ? 'px-3 py-1 rounded bg-slate-800 text-white text-sm'
+                    : 'px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50';
+                pageBtn.onclick = () => goToPage(i);
+                pageNumbers.appendChild(pageBtn);
+            } else if (Math.abs(i - currentPage) === 3) {
+                const ellipsis = document.createElement('span');
+                ellipsis.textContent = '...';
+                ellipsis.className = 'px-2 text-slate-400';
+                pageNumbers.appendChild(ellipsis);
+            }
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        renderReports();
+    }
+
+    function getTypeBadgeClass(type) {
+        const classes = {
+            'hr': 'bg-blue-100 text-blue-700',
+            'performance': 'bg-green-100 text-green-700',
+            'financial': 'bg-yellow-100 text-yellow-700',
+            'attendance': 'bg-purple-100 text-purple-700',
+            'compliance': 'bg-red-100 text-red-700'
+        };
+        return classes[type] || 'bg-slate-100 text-slate-700';
+    }
+
+    function formatType(type) {
+        const types = {
+            'hr': 'HR Report',
+            'performance': 'Performance',
+            'financial': 'Financial',
+            'attendance': 'Time & Attendance',
+            'compliance': 'Compliance'
+        };
+        return types[type] || type;
+    }
+
+    function getStatusBadgeClass(status) {
+        const classes = {
+            'completed': 'bg-green-100 text-green-700',
+            'processing': 'bg-blue-100 text-blue-700',
+            'failed': 'bg-red-100 text-red-700',
+            'scheduled': 'bg-yellow-100 text-yellow-700'
+        };
+        return classes[status] || 'bg-slate-100 text-slate-700';
+    }
+
+    function formatStatus(status) {
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function previewReport(reportId) {
+        const report = reports.find(r => r.id === reportId);
+        if (!report) return;
+
+        const modal = document.getElementById('reportPreviewModal');
+        const content = document.getElementById('reportPreviewContent');
+
+        // Generate mock report preview
+        content.innerHTML = generateReportPreview(report);
+
+        modal.classList.remove('hidden');
+    }
+
+    function generateReportPreview(report) {
+        // Generate different previews based on report type
+        switch (report.type) {
+            case 'hr':
+                return generateHRReportPreview(report);
+            case 'performance':
+                return generatePerformanceReportPreview(report);
+            case 'financial':
+                return generateFinancialReportPreview(report);
+            case 'attendance':
+                return generateAttendanceReportPreview(report);
+            case 'compliance':
+                return generateComplianceReportPreview(report);
+            default:
+                return '<p class="text-slate-600">Report preview not available.</p>';
+        }
+    }
+
+    function generateHRReportPreview(report) {
+        return `
+        <div class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
+                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Total Employees</h5>
+                    <p class="text-2xl font-bold text-blue-600">247</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">New Hires</h5>
+                    <p class="text-2xl font-bold text-green-600">15</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Departures</h5>
+                    <p class="text-2xl font-bold text-red-600">8</p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-50 p-4 rounded-lg">
+                <h5 class="font-medium text-slate-800 mb-3">Department Breakdown</h5>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Engineering</span>
+                        <span class="font-medium">95 employees</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Sales</span>
+                        <span class="font-medium">42 employees</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Marketing</span>
+                        <span class="font-medium">28 employees</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    }
+
+    function generatePerformanceReportPreview(report) {
+        return `
+        <div class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
+                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Avg Rating</h5>
+                    <p class="text-2xl font-bold text-green-600">4.2/5</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Reviews Completed</h5>
+                    <p class="text-2xl font-bold text-blue-600">89%</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Goals Achieved</h5>
+                    <p class="text-2xl font-bold text-yellow-600">76%</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Top Performers</h5>
+                    <p class="text-2xl font-bold text-purple-600">23</p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-50 p-4 rounded-lg">
+                <h5 class="font-medium text-slate-800 mb-3">Performance Distribution</h5>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Exceeds Expectations (4.5-5.0)</span>
+                        <span class="font-medium">18%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Meets Expectations (3.5-4.4)</span>
+                        <span class="font-medium">67%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Below Expectations (2.0-3.4)</span>
+                        <span class="font-medium">15%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    }
+
+    function generateFinancialReportPreview(report) {
+        return `
+        <div class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
+                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Total Payroll</h5>
+                    <p class="text-2xl font-bold text-green-600">$1.2M</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Benefits Cost</h5>
+                    <p class="text-2xl font-bold text-blue-600">$245K</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Expenses</h5>
+                    <p class="text-2xl font-bold text-yellow-600">$89K</p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-50 p-4 rounded-lg">
+                <h5 class="font-medium text-slate-800 mb-3">Department Costs</h5>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Engineering</span>
+                        <span class="font-medium">$687,500</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Sales</span>
+                        <span class="font-medium">$312,000</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Marketing</span>
+                        <span class="font-medium">$156,000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    }
+
+    function generateAttendanceReportPreview(report) {
+        return `
+        <div class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
+                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Avg Attendance</h5>
+                    <p class="text-2xl font-bold text-green-600">94.2%</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">On Time %</h5>
+                    <p class="text-2xl font-bold text-blue-600">87.5%</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Leave Days</h5>
+                    <p class="text-2xl font-bold text-yellow-600">156</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Sick Days</h5>
+                    <p class="text-2xl font-bold text-red-600">89</p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-50 p-4 rounded-lg">
+                <h5 class="font-medium text-slate-800 mb-3">Attendance Trends</h5>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Perfect Attendance</span>
+                        <span class="font-medium">42 employees</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>1-2 Absences</span>
+                        <span class="font-medium">128 employees</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>3+ Absences</span>
+                        <span class="font-medium">77 employees</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    }
+
+    function generateComplianceReportPreview(report) {
+        return `
+        <div class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
+                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Compliance Score</h5>
+                    <p class="text-2xl font-bold text-green-600">96%</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Open Issues</h5>
+                    <p class="text-2xl font-bold text-yellow-600">3</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h5 class="font-medium text-slate-800">Training Complete</h5>
+                    <p class="text-2xl font-bold text-blue-600">89%</p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-50 p-4 rounded-lg">
+                <h5 class="font-medium text-slate-800 mb-3">Compliance Areas</h5>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Equal Opportunity</span>
+                        <span class="font-medium text-green-600">✓ Compliant</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Safety Training</span>
+                        <span class="font-medium text-green-600">✓ Compliant</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Data Privacy</span>
+                        <span class="font-medium text-yellow-600">⚠ Review Required</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    }
+
+    function downloadReport(reportId) {
+        const report = reports.find(r => r.id === reportId);
+        if (!report) return;
+
+        showInfo(`Downloading ${report.name}...`);
+
+        // Simulate download
+        setTimeout(() => {
+            // Update download count
+            report.download_count++;
+            updateSummaryStats();
+            renderReports();
+            showSuccess('Report downloaded successfully!');
+        }, 1000);
+    }
+
+
+    // Simple share functionality - in a real app, this would generate shareable links
+    const shareData = {
+        title: report.name,
+        text: `Check out this report: ${report.name}`,
+        url: window.location.href + `?report=${report.id}`
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData);
+    } else {
+        // Fallback - copy link to clipboard
+        navigator.clipboard.writeText(shareData.url).then(() => {
+            showSuccess('Report link copied to clipboard!');
+        }).catch(() => {
+            showInfo('Share functionality not available');
+        });
+    }
+}
+
+    function deleteReport(reportId) {
+        const report = reports.find(r => r.id === reportId);
+        if (!report) return;
+
+        if (confirm(`Are you sure you want to delete "${report.name}"? This action cannot be undone.`)) {
+            // Simulate deletion
+            reports = reports.filter(r => r.id !== reportId);
+            filteredReports = filteredReports.filter(r => r.id !== reportId);
+
+            updateSummaryStats();
+            renderReports();
+            showSuccess('Report deleted successfully');
+        }
+    }
+
+    // Utility functions
+    function showSuccess(message) {
+        // Implementation for success toast/notification
+        console.log('Success:', message);
+        // You can implement a toast notification here
+        alert('✅ ' + message);
+    }
+
+    function showError(message) {
+        // Implementation for error toast/notification
+        console.log('Error:', message);
+        alert('❌ ' + message);
+    }
+
+    function showInfo(message) {
+        // Implementation for info toast/notification
+        console.log('Info:', message);
+        alert('ℹ️ ' + message);
+    }
+
+    // Close modals when clicking outside
+    window.addEventListener('click', function (event) {
+        const modals = ['generateReportModal', 'reportPreviewModal'];
+        modals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (event.target === modal) {
+                closeModal(modalId);
+            }
+        });
+    });
+
+    // Pagination controls
+    document.getElementById('prevPageBtn').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderReports();
+        }
+    });
+
+    document.getElementById('nextPageBtn').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderReports();
+        }
+    });
+
+    // Download report from preview modal
+    document.getElementById('downloadReportBtn').addEventListener('click', () => {
+        // Get the current report ID from modal context
+        showInfo('Download functionality would be implemented here');
+    });
+
+    // Auto-refresh reports every 30 seconds
+    setInterval(() => {
+        loadReportsData();
+    }, 30000);
+</script>
+{% endblock %}

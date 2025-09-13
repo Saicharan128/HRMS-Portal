@@ -1,0 +1,521 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-comments mr-2"></i> Company Feedback
+            </h1>
+            <p class="text-slate-600 text-sm">Capture employee sentiment with surveys and feedback tools.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newSurveyBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New Survey
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- View / Filters -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">View:</label>
+                <select id="viewType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="dashboard">Dashboard</option>
+                    <option value="surveys">Surveys</option>
+                    <option value="responses">Responses</option>
+                    <option value="insights">Insights</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Department:</label>
+                <select id="departmentFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Time:</label>
+                <select id="timeRange" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="180">Last 6 months</option>
+                    <option value="365">Last year</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2 ml-auto">
+                <button id="exportBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+                </button>
+                <button id="refreshBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-poll mr-1"></i> Active Surveys</div>
+            <div id="activeSurveys" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-inbox mr-1"></i> Total Responses</div>
+            <div id="totalResponses" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-face-smile mr-1"></i> eNPS</div>
+            <div id="enpsScore" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-bolt mr-1"></i> Response Rate</div>
+            <div id="responseRate" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div id="loadingState" class="text-center py-12">
+            <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
+            <p class="text-slate-600">Loading feedback data...</p>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Trend (simple canvas) -->
+                <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-chart-line mr-2"></i> Sentiment
+                            Trend</h3>
+                        <span id="trendSubtitle" class="text-xs text-slate-500">—</span>
+                    </div>
+                    <canvas id="trendCanvas" height="140"></canvas>
+                    <p class="text-xs text-slate-500 mt-2">Average sentiment (1–5) over time.</p>
+                </div>
+                <!-- Top Themes -->
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-tags mr-2"></i> Top Themes</h3>
+                    <ul id="themeList" class="space-y-2 text-sm text-slate-700">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Surveys View -->
+        <div id="surveysView" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-poll-h mr-2"></i> Surveys</h3>
+                <div class="text-sm text-slate-500" id="surveyCount">—</div>
+            </div>
+            <div id="surveyGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- Responses View -->
+        <div id="responsesView" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Survey</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Department</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Rating</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Comment</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Sentiment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="responseTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Insights View -->
+        <div id="insightsView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-ranking-star mr-2"></i> Drivers
+                    </h3>
+                    <ul id="driversList" class="space-y-2 text-sm text-slate-700"></ul>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                        Watchlist</h3>
+                    <ul id="watchList" class="space-y-2 text-sm text-slate-700"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Survey Modal -->
+    <div id="surveyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">Create Survey</h3>
+                    <button id="closeSurveyModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <form id="surveyForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Title</label>
+                        <input id="surveyTitle" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="e.g., Q4 Pulse Check" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Audience</label>
+                        <select id="surveyAudience" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="">All Employees</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Questions</label>
+                        <div id="questionList" class="space-y-2">
+                            <!-- Simple seed questions -->
+                            <div class="flex gap-2">
+                                <input class="flex-1 rounded-lg border border-slate-300 px-3 py-2"
+                                    value="How satisfied are you with your work-life balance? (1-5)" />
+                                <button type="button"
+                                    class="px-3 py-2 border rounded-lg text-sm remove-q">Remove</button>
+                            </div>
+                            <div class="flex gap-2">
+                                <input class="flex-1 rounded-lg border border-slate-300 px-3 py-2"
+                                    value="Do you feel recognized for good work? (Yes/No)" />
+                                <button type="button"
+                                    class="px-3 py-2 border rounded-lg text-sm remove-q">Remove</button>
+                            </div>
+                        </div>
+                        <button type="button" id="addQuestion"
+                            class="mt-2 px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">
+                            <i class="fa-solid fa-plus mr-1"></i> Add Question
+                        </button>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="cancelSurvey"
+                            class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .spark-bar {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 9999px;
+        overflow: hidden;
+    }
+
+    .spark-fill {
+        height: 8px;
+        background: #10b981;
+    }
+
+    canvas {
+        width: 100%;
+    }
+</style>
+
+<script>
+    // Data holders
+    let surveys = [];
+    let responses = [];
+    let departments = [];
+
+    // Helpers
+    async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }
+    async function postJSON(url, data) { const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }
+    const fmtPct = n => (isNaN(n) ? '-' : (Math.round(n * 100) / 100) + '%');
+
+    // Load
+    async function loadAll() {
+        try {
+            const range = document.getElementById('timeRange').value;
+            const dept = document.getElementById('departmentFilter').value;
+            const [meta, svy, resp] = await Promise.all([
+                fetchJSON(`/api/feedback/meta?range=${range}&dept=${encodeURIComponent(dept)}`),
+                fetchJSON(`/api/feedback/surveys?range=${range}&dept=${encodeURIComponent(dept)}`),
+                fetchJSON(`/api/feedback/responses?range=${range}&dept=${encodeURIComponent(dept)}`)
+            ]);
+
+            departments = meta.departments || [];
+            surveys = svy || [];
+            responses = resp || [];
+
+            // Filters
+            const deptSel = document.getElementById('departmentFilter');
+            deptSel.innerHTML = '<option value="">All</option>';
+            departments.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; deptSel.appendChild(o); });
+
+            // Stats
+            document.getElementById('activeSurveys').textContent = (surveys.filter(s => s.status === 'Active') || []).length;
+            document.getElementById('totalResponses').textContent = responses.length;
+            document.getElementById('enpsScore').textContent = meta.enps ?? '-';
+            document.getElementById('responseRate').textContent = meta.response_rate ? fmtPct(meta.response_rate) : '-';
+
+            // Views
+            renderCurrentView();
+            document.getElementById('loadingState').classList.add('hidden');
+        } catch (e) {
+            console.error(e);
+            document.getElementById('loadingState').innerHTML = `
+        <div class="text-center py-12">
+          <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
+          <p class="text-red-600 mb-4">Failed to load feedback data</p>
+          <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
+        </div>`;
+        }
+    }
+
+    // Views
+    function renderCurrentView() {
+        const v = document.getElementById('viewType').value;
+        ['dashboard', 'surveys', 'responses', 'insights'].forEach(k => {
+            document.getElementById(k + 'View').classList.add('hidden');
+        });
+        if (v === 'dashboard') { document.getElementById('dashboardView').classList.remove('hidden'); renderDashboard(); }
+        if (v === 'surveys') { document.getElementById('surveysView').classList.remove('hidden'); renderSurveys(); }
+        if (v === 'responses') { document.getElementById('responsesView').classList.remove('hidden'); renderResponses(); }
+        if (v === 'insights') { document.getElementById('insightsView').classList.remove('hidden'); renderInsights(); }
+    }
+
+    function renderDashboard() {
+        // Trend
+        const byDay = {}; // {date: avgRating}
+        responses.forEach(r => {
+            const d = (r.date || '').slice(0, 10);
+            if (!d) return;
+            if (!byDay[d]) byDay[d] = [];
+            if (typeof r.rating === 'number') byDay[d].push(r.rating);
+        });
+        const labels = Object.keys(byDay).sort();
+        const values = labels.map(d => {
+            const arr = byDay[d]; return Math.round((arr.reduce((a, b) => a + b, 0) / arr.length || 0) * 100) / 100;
+        });
+        drawTrend(labels, values);
+        document.getElementById('trendSubtitle').textContent = labels.length ? `${labels[0]} → ${labels[labels.length - 1]}` : '—';
+
+        // Themes
+        const themes = {};
+        responses.forEach(r => {
+            (r.themes || []).forEach(t => themes[t] = (themes[t] || 0) + 1);
+        });
+        const top = Object.entries(themes).sort((a, b) => b[1] - a[1]).slice(0, 6);
+        const list = document.getElementById('themeList'); list.innerHTML = '';
+        if (top.length === 0) { list.innerHTML = '<li class="text-slate-500">No themes yet</li>'; }
+        top.forEach(([t, c]) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between">
+        <span>${t}</span>
+        <div class="w-32 spark-bar"><div class="spark-fill" style="width:${Math.min(100, (c / (top[0]?.[1] || 1)) * 100)}%"></div></div>
+      </div>`;
+            list.appendChild(li);
+        });
+    }
+
+    function drawTrend(labels, values) {
+        const canvas = document.getElementById('trendCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width = canvas.clientWidth;
+        const H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        if (values.length < 2) { ctx.fillStyle = '#64748b'; ctx.fillText('Not enough data', 10, 20); return; }
+
+        const min = Math.min(...values, 1), max = Math.max(...values, 5);
+        const pad = 16, x0 = pad, x1 = W - pad, y0 = H - pad, y1 = pad;
+
+        ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+        for (let i = 1; i <= 5; i++) {
+            const y = y0 - (i - 1) * ((y0 - y1) / 4);
+            ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath();
+        values.forEach((v, i) => {
+            const x = x0 + (i / (values.length - 1)) * (x1 - x0);
+            const y = y0 - ((v - min) / (max - min || 1)) * (y0 - y1);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
+
+    function renderSurveys() {
+        const grid = document.getElementById('surveyGrid'); grid.innerHTML = '';
+        document.getElementById('surveyCount').textContent = `${surveys.length} total`;
+        if (surveys.length === 0) {
+            grid.innerHTML = `<div class="text-slate-500 text-sm">No surveys yet. Click <b>New Survey</b> to create one.</div>`;
+            return;
+        }
+        surveys.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'department-card';
+            const rate = s.response_rate ? fmtPct(s.response_rate) : '-';
+            card.innerHTML = `
+        <div class="flex items-center mb-3">
+          <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
+            <i class="fa-solid fa-poll text-slate-600"></i>
+          </div>
+          <div>
+            <h4 class="font-semibold text-slate-800">${s.title}</h4>
+            <p class="text-xs text-slate-500">${s.status || 'Draft'} • ${s.created_at?.slice(0, 10) || '-'}</p>
+          </div>
+        </div>
+        <div class="text-sm space-y-1 mb-3">
+          <div class="flex justify-between"><span class="text-slate-600">Audience:</span><span class="font-medium">${s.audience || 'All'}</span></div>
+          <div class="flex justify-between"><span class="text-slate-600">Questions:</span><span class="font-medium">${s.questions?.length || 0}</span></div>
+          <div class="flex justify-between"><span class="text-slate-600">Response Rate:</span><span class="font-medium">${rate}</span></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-1 border rounded-lg text-sm" onclick="openSurvey('${s.id}')"><i class="fa-solid fa-eye mr-1"></i> View</button>
+          <button class="px-3 py-1 border rounded-lg text-sm" onclick="sendSurvey('${s.id}')"><i class="fa-solid fa-paper-plane mr-1"></i> Send</button>
+          <button class="px-3 py-1 border rounded-lg text-sm" onclick="closeSurvey('${s.id}')"><i class="fa-solid fa-lock mr-1"></i> Close</button>
+        </div>`;
+            grid.appendChild(card);
+        });
+    }
+
+    function renderResponses() {
+        const tbody = document.getElementById('responseTableBody'); tbody.innerHTML = '';
+        if (responses.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500 text-sm">No responses yet.</td></tr>`;
+            return;
+        }
+        responses.forEach(r => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-600">${(r.date || '').slice(0, 10)}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${r.survey_title || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${r.department || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${typeof r.rating === 'number' ? r.rating : '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${r.comment || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${r.sentiment || '-'}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderInsights() {
+        const drivers = {}; // theme -> avg rating
+        const counts = {};
+        responses.forEach(r => {
+            (r.themes || []).forEach(t => {
+                counts[t] = (counts[t] || 0) + 1;
+                if (typeof r.rating === 'number') {
+                    if (!drivers[t]) drivers[t] = { s: 0, c: 0 };
+                    drivers[t].s += r.rating; drivers[t].c++;
+                }
+            });
+        });
+        const scores = Object.entries(drivers).map(([t, { s, c }]) => [t, Math.round((s / c) * 100) / 100, counts[t] || 0])
+            .sort((a, b) => b[1] - a[1]);
+
+        const driversList = document.getElementById('driversList'); driversList.innerHTML = '';
+        const watchList = document.getElementById('watchList'); watchList.innerHTML = '';
+
+        if (scores.length === 0) {
+            driversList.innerHTML = '<li class="text-slate-500">No insight yet</li>';
+            watchList.innerHTML = '<li class="text-slate-500">No issues detected</li>';
+            return;
+        }
+
+        scores.slice(0, 5).forEach(([t, score, c]) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between"><span>${t}</span><span class="text-slate-700 font-medium">${score}/5</span></div><div class="text-xs text-slate-500">${c} mentions</div>`;
+            driversList.appendChild(li);
+        });
+
+        scores.slice(-5).forEach(([t, score, c]) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between"><span>${t}</span><span class="text-slate-700 font-medium">${score}/5</span></div><div class="text-xs text-amber-600">${c} mentions • investigate</div>`;
+            watchList.appendChild(li);
+        });
+    }
+
+    // Actions
+    async function sendSurvey(id) { try { await postJSON('/api/feedback/surveys/send', { id }); alert('Survey sent'); loadAll(); } catch (e) { alert('Error sending survey'); } }
+    async function closeSurvey(id) { try { await postJSON('/api/feedback/surveys/close', { id }); alert('Survey closed'); loadAll(); } catch (e) { alert('Error closing survey'); } }
+    function openSurvey(id) { window.location.href = `/feedback/surveys/${id}`; }
+
+    // Modal
+    function openModal() { document.getElementById('surveyModal').classList.remove('hidden'); }
+    function closeModal() { document.getElementById('surveyModal').classList.add('hidden'); }
+
+    // Export
+    function exportCSV() {
+        const rows = [['date', 'survey', 'department', 'rating', 'comment', 'sentiment']];
+        responses.forEach(r => rows.push([
+            (r.date || '').slice(0, 10), r.survey_title || '', r.department || '', (r.rating ?? ''), (r.comment || '').replace(/\n/g, ' '), r.sentiment || ''
+        ]));
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'responses.csv'; a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Init
+    function setupEvents() {
+        document.getElementById('viewType').addEventListener('change', renderCurrentView);
+        document.getElementById('timeRange').addEventListener('change', loadAll);
+        document.getElementById('departmentFilter').addEventListener('change', loadAll);
+        document.getElementById('refreshBtn').addEventListener('click', loadAll);
+        document.getElementById('exportBtn').addEventListener('click', exportCSV);
+        document.getElementById('newSurveyBtn').addEventListener('click', openModal);
+        document.getElementById('closeSurveyModal').addEventListener('click', closeModal);
+        document.getElementById('cancelSurvey').addEventListener('click', closeModal);
+
+        document.getElementById('addQuestion').addEventListener('click', () => {
+            const wrap = document.createElement('div');
+            wrap.className = 'flex gap-2 mt-2';
+            wrap.innerHTML = `<input class="flex-1 rounded-lg border border-slate-300 px-3 py-2" placeholder="Write a question..." />
+                        <button type="button" class="px-3 py-2 border rounded-lg text-sm remove-q">Remove</button>`;
+            document.getElementById('questionList').appendChild(wrap);
+        });
+
+        document.getElementById('surveyForm').addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-q')) e.target.parentElement.remove();
+        });
+
+        document.getElementById('surveyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const qs = Array.from(document.querySelectorAll('#questionList input')).map(i => i.value).filter(Boolean);
+            try {
+                await postJSON('/api/feedback/surveys/create', {
+                    title: document.getElementById('surveyTitle').value,
+                    audience: document.getElementById('surveyAudience').value || 'All',
+                    questions: qs
+                });
+                closeModal(); loadAll(); alert('Survey created');
+            } catch (err) { console.error(err); alert('Failed to create survey'); }
+        });
+    }
+
+    async function initializePage() {
+        document.getElementById('loadingState').classList.remove('hidden');
+        try {
+            // preload audiences
+            const aud = await fetchJSON('/api/feedback/audiences');
+            const sel = document.getElementById('surveyAudience');
+            (aud || []).forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; sel.appendChild(o); });
+        } catch (e) { /* non-blocking */ }
+        await loadAll();
+        setupEvents();
+    }
+
+    document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+{% endblock %}
