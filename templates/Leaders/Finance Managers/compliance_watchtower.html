@@ -1,0 +1,604 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-tower-observation mr-2"></i> Compliance Watchtower
+            </h1>
+            <p class="text-slate-600 text-sm">Stay compliant with labor laws and regulations.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newAlertBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-bell mr-1"></i> New Alert
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="dashTab" class="cw-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-gauge-high mr-1"></i> Dashboard</button>
+            <button id="alertsTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-bell mr-1"></i> Alerts</button>
+            <button id="filingsTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-file-invoice mr-1"></i> Filings</button>
+            <button id="auditsTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-shield-halved mr-1"></i> Audits</button>
+            <button id="policiesTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-scroll mr-1"></i> Policies</button>
+            <button id="registersTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-clipboard-list mr-1"></i> Registers</button>
+            <button id="trainingTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-graduation-cap mr-1"></i> Training</button>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <section id="dashPanel" class="cw-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Scorecards -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-traffic-light mr-2"></i>
+                    Risk Snapshot</h3>
+                <ul id="riskSnapshot" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-calendar-check mr-2"></i>
+                    Upcoming Deadlines (30d)</h3>
+                <ul id="deadlinesList" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-earth-asia mr-2"></i> Country
+                        Coverage</h3>
+                    <select id="entityFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All Entities</option>
+                        <option value="india_co">India Pvt Ltd</option>
+                        <option value="us_inc">US Inc</option>
+                    </select>
+                </div>
+                <ul id="countryMatrix" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+
+            <!-- Heatmap & Checks -->
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-fire-flame-curved mr-2"></i>
+                        Risk Heatmap</h3>
+                    <button id="recalcRisk"
+                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                            class="fa-solid fa-rotate mr-1"></i> Recalculate</button>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="heatGrid"><!-- injected --></div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-list-check mr-2"></i> Quick
+                    Checks</h3>
+                <div id="checksList" class="space-y-2 text-sm"><!-- injected --></div>
+                <button id="markAllChecks"
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
+                        class="fa-solid fa-check mr-1"></i> Mark All Done</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Alerts -->
+    <section id="alertsPanel" class="cw-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                <div class="relative w-full md:w-[28rem]">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input id="alertSearch" placeholder="Search alert, jurisdiction, or keyword"
+                        class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
+                    <button id="alertClear"
+                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select id="alertFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <button id="ackAll"
+                        class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm hover:bg-slate-900"><i
+                            class="fa-solid fa-check-double mr-1"></i> Acknowledge All</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Alert</th>
+                            <th class="py-2 px-4">Jurisdiction</th>
+                            <th class="py-2 px-4">Severity</th>
+                            <th class="py-2 px-4">Effective</th>
+                            <th class="py-2 px-4 w-28"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="alertRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filings -->
+    <section id="filingsPanel" class="cw-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-invoice mr-2"></i>
+                        Statutory Filings</h3>
+                    <div class="flex items-center gap-2">
+                        <select id="filingFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="all">All</option>
+                            <option value="due_30">Due ≤30d</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                        <button id="uploadEvidence"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                                class="fa-solid fa-upload mr-1"></i> Evidence</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 px-4">Return</th>
+                                <th class="py-2 px-4">Jurisdiction</th>
+                                <th class="py-2 px-4">Due</th>
+                                <th class="py-2 px-4">Status</th>
+                                <th class="py-2 px-4 w-28"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="filingRows" class="text-slate-800"><!-- injected --></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-route mr-2"></i> Filing
+                    Timeline</h3>
+                <ul id="filingTimeline" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Audits -->
+    <section id="auditsPanel" class="cw-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-clipboard-check mr-2"></i>
+                        Audit Cases</h3>
+                    <button id="newAudit"
+                        class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
+                            class="fa-solid fa-plus mr-1"></i> New</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 px-4">Case</th>
+                                <th class="py-2 px-4">Scope</th>
+                                <th class="py-2 px-4">Owner</th>
+                                <th class="py-2 px-4">Status</th>
+                                <th class="py-2 px-4 w-28"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditRows" class="text-slate-800"><!-- injected --></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-lock mr-2"></i> Evidence
+                    Locker</h3>
+                <ul id="evidenceList" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Policies -->
+    <section id="policiesPanel" class="cw-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-scroll mr-2"></i> Policy Library
+                </h3>
+                <button id="newPolicy" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                        class="fa-solid fa-plus mr-1"></i> New</button>
+            </div>
+            <ul id="policyList" class="space-y-3 text-sm"><!-- injected --></ul>
+        </div>
+    </section>
+
+    <!-- Registers -->
+    <section id="registersPanel" class="cw-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-id-card mr-2"></i> Licenses
+                    & Permits</h3>
+                <ul id="licenseList" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-book mr-2"></i> Registers
+                </h3>
+                <ul id="regList" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Training -->
+    <section id="trainingPanel" class="cw-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-graduation-cap mr-2"></i>
+                        Mandatory Trainings</h3>
+                    <select id="trainFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="due">Due</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 px-4">Course</th>
+                                <th class="py-2 px-4">Audience</th>
+                                <th class="py-2 px-4">Due</th>
+                                <th class="py-2 px-4">Status</th>
+                                <th class="py-2 px-4 w-24"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="trainRows" class="text-slate-800"><!-- injected --></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-bullseye mr-2"></i>
+                    Completion KPI</h3>
+                <canvas id="kpiChart" height="220"></canvas>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Evidence Modal -->
+<div id="evidenceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Upload Evidence</h3>
+                    <button id="closeEvidence" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <input class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Title e.g., PF Challan Aug 2025">
+                    <textarea class="w-full rounded-lg border border-slate-300 px-3 py-2" rows="3"
+                        placeholder="Notes (optional)"></textarea>
+                    <div class="flex items-center justify-end gap-2">
+                        <button id="cancelEvidence"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="saveEvidence"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ------- Mock Data ------- */
+    let RISK = [
+        { k: 'Wage & Hour', lvl: 'medium' }, { k: 'Contractor Classif.', lvl: 'high' },
+        { k: 'Leave & Benefits', lvl: 'low' }, { k: 'Safety/OSH', lvl: 'medium' }
+    ];
+    let DEADLINES = [
+        { k: 'PF/401k monthly remittance', due: '2025-09-15', j: 'IN' },
+        { k: 'ESIC/Health contribution', due: '2025-09-15', j: 'IN' },
+        { k: '941/Withholding deposit', due: '2025-09-30', j: 'US' }
+    ];
+    let MATRIX = [
+        { cc: 'IN', name: 'India', coverage: '90%', gaps: 2 },
+        { cc: 'US', name: 'United States', coverage: '85%', gaps: 3 },
+        { cc: 'UK', name: 'United Kingdom', coverage: '100%', gaps: 0 }
+    ];
+    let CHECKS = [
+        { id: 1, text: 'Minimum wage tables updated', done: false },
+        { id: 2, text: 'Overtime rules synced to HRIS', done: true },
+        { id: 3, text: 'Leave carryover verified', done: false }
+    ];
+    let ALERTS = [
+        { id: 'A-901', t: 'Gratuity threshold change', j: 'IN', sev: 'high', eff: '2025-10-01' },
+        { id: 'A-902', t: 'FLSA salary basis increase', j: 'US', sev: 'medium', eff: '2025-12-01' },
+        { id: 'A-903', t: 'Sick-leave expansion', j: 'UK', sev: 'low', eff: '2025-09-20' }
+    ];
+    let FILINGS = [
+        { id: 'F-101', r: 'PF ECR', j: 'IN', due: '2025-09-15', st: 'due' },
+        { id: 'F-102', r: 'ESIC', j: 'IN', due: '2025-09-15', st: 'due' },
+        { id: 'F-201', r: '941 Deposit', j: 'US', due: '2025-09-30', st: 'scheduled' },
+        { id: 'F-301', r: 'Gender Pay Gap', j: 'UK', due: '2026-04-04', st: 'scheduled' }
+    ];
+    let TIMELINE = [
+        { d: '2025-09-10', txt: 'Auto-fill returns generated' },
+        { d: '2025-09-12', txt: 'HR signed-off payroll basis' },
+        { d: '2025-09-15', txt: 'PF/ESIC submissions due' },
+        { d: '2025-09-30', txt: 'US 941 deposit due' }
+    ];
+    let AUDITS = [
+        { id: 'AU-41', scope: 'FLSA Overtime', owner: 'Priya S', st: 'open' },
+        { id: 'AU-42', scope: 'IN Contractor Review', owner: 'Arjun R', st: 'in progress' }
+    ];
+    let EVIDENCE = [
+        { name: 'PF Challan Aug 2025.pdf', at: '2025-09-12' },
+        { name: 'ESIC Receipt Aug 2025.pdf', at: '2025-09-12' }
+    ];
+    let POLICIES = [
+        { name: 'Code of Conduct', ver: 'v3.1', eff: '2025-08-01' },
+        { name: 'Leave Policy (IN)', ver: 'v2.4', eff: '2025-07-15' }
+    ];
+    let LICENSES = [
+        { name: 'Shops & Establishments (BLR)', exp: '2026-03-31', ok: true },
+        { name: 'Professional Tax (KA)', exp: '2026-01-01', ok: true }
+    ];
+    let REGISTERS = [
+        { name: 'Register of Wages', loc: 'IN', status: 'maintained' },
+        { name: 'Accident Register', loc: 'IN', status: 'maintained' }
+    ];
+    let TRAIN = [
+        { course: 'POSH/Anti-harassment', audience: 'All (IN)', due: '2025-09-25', st: 'due' },
+        { course: 'Workplace Safety', audience: 'Ops', due: '2025-09-10', st: 'overdue' },
+        { course: 'Code of Conduct', audience: 'All', due: '2025-08-20', st: 'completed' }
+    ];
+
+    /* ------- Helpers ------- */
+    const $ = (id) => document.getElementById(id);
+    const pill = (t) => t === 'high' ? 'bg-red-50 text-red-700' : t === 'medium' ? 'bg-amber-50 text-amber-700' : t === 'low' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700';
+    function fmtDate(d) { return d; }
+
+    /* ------- Init ------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tabs
+        document.querySelectorAll('.cw-tab').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.cw-tab').forEach(x => x.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.cw-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+                if (name === 'training') { ensureCharts(); drawCharts(); }
+            });
+        });
+
+        // Dashboard
+        $('entityFilter').addEventListener('change', renderMatrix);
+        $('recalcRisk').addEventListener('click', renderHeatmap);
+        $('markAllChecks').addEventListener('click', () => { CHECKS = CHECKS.map(c => ({ ...c, done: true })); renderChecks(); });
+
+        // Alerts
+        $('alertFilter').addEventListener('change', renderAlerts);
+        const as = $('alertSearch'), ac = $('alertClear');
+        as.addEventListener('input', () => { ac.classList.toggle('hidden', !as.value.trim()); renderAlerts(); });
+        ac.addEventListener('click', () => { as.value = ''; ac.classList.add('hidden'); renderAlerts(); });
+        $('ackAll').addEventListener('click', () => alert('✅ All alerts acknowledged'));
+
+        // Filings
+        $('filingFilter').addEventListener('change', renderFilings);
+        $('uploadEvidence').addEventListener('click', openEvidence);
+        $('closeEvidence').addEventListener('click', closeEvidence);
+        $('cancelEvidence').addEventListener('click', closeEvidence);
+        $('saveEvidence').addEventListener('click', () => { EVIDENCE.push({ name: 'Evidence_' + Date.now() + '.pdf', at: new Date().toISOString().slice(0, 10) }); closeEvidence(); renderEvidence(); });
+
+        // Audits
+        $('newAudit').addEventListener('click', () => { AUDITS.push({ id: 'AU-' + Date.now(), scope: 'Custom', owner: 'You', st: 'open' }); renderAudits(); });
+
+        // Training
+        $('trainFilter').addEventListener('change', renderTraining);
+
+        // Initial renders
+        renderRisk(); renderDeadlines(); renderMatrix(); renderHeatmap(); renderChecks();
+        renderAlerts(); renderFilings(); renderTimeline(); renderAudits(); renderEvidence(); renderPolicies();
+        renderLicenses(); renderRegisters(); renderTraining();
+    });
+
+    /* ------- Dashboard Renders ------- */
+    function renderRisk() {
+        $('riskSnapshot').innerHTML = RISK.map(r => `
+    <li class="flex items-center justify-between p-2 rounded ${pill(r.lvl)}">
+      <span>${r.k}</span><span class="text-xs capitalize">${r.lvl}</span>
+    </li>`).join('');
+    }
+    function renderDeadlines() {
+        $('deadlinesList').innerHTML = DEADLINES.map(d => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
+      <span>${d.k} • <span class="text-slate-500">${d.j}</span></span>
+      <span class="text-xs">${fmtDate(d.due)}</span>
+    </li>`).join('') || `<li class="text-slate-500">No deadlines</li>`;
+    }
+    function renderMatrix() {
+        const data = MATRIX; // could filter by entity
+        $('countryMatrix').innerHTML = data.map(m => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
+      <span>${m.name}</span>
+      <span class="text-xs text-slate-600">${m.coverage} • Gaps: ${m.gaps}</span>
+    </li>`).join('');
+    }
+    function renderHeatmap() {
+        const cells = [
+            { k: 'Wage & Hour', lvl: 'medium' }, { k: 'OT/Rest', lvl: 'high' }, { k: 'Leave', lvl: 'low' }, { k: 'Contractor', lvl: 'high' },
+            { k: 'Safety', lvl: 'medium' }, { k: 'Privacy', lvl: 'low' }, { k: 'Taxes', lvl: 'medium' }, { k: 'Benefits', lvl: 'low' }
+        ];
+        $('heatGrid').innerHTML = cells.map(c => `
+    <div class="p-3 rounded border border-slate-200 ${pill(c.lvl)}">
+      <div class="text-sm font-medium">${c.k}</div>
+      <div class="text-xs capitalize">${c.lvl}</div>
+    </div>`).join('');
+    }
+    function renderChecks() {
+        $('checksList').innerHTML = CHECKS.map(c => `
+    <div class="flex items-center justify-between p-2 rounded bg-slate-50">
+      <label class="flex items-center gap-2"><input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleCheck(${c.id}, this.checked)"> <span>${c.text}</span></label>
+      ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
+    </div>`).join('');
+    }
+    function toggleCheck(id, on) { const x = CHECKS.find(c => c.id === id); if (x) { x.done = on; renderChecks(); } }
+
+    /* ------- Alerts ------- */
+    function renderAlerts() {
+        const f = $('alertFilter').value;
+        const q = ($('alertSearch').value || '').toLowerCase();
+        const data = ALERTS.filter(a => (f === 'all' || a.sev === f) && (!q || [a.t, a.j, a.id].some(x => String(x).toLowerCase().includes(q))));
+        $('alertRows').innerHTML = data.map(a => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 px-4 font-medium">${a.t}</td>
+      <td class="py-2 px-4">${a.j}</td>
+      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill(a.sev)} capitalize">${a.sev}</span></td>
+      <td class="py-2 px-4">${fmtDate(a.eff)}</td>
+      <td class="py-2 px-4 text-right">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Acknowledged')">Ack</button>
+      </td>
+    </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No alerts</td></tr>`;
+    }
+
+    /* ------- Filings ------- */
+    function renderFilings() {
+        const f = $('filingFilter').value;
+        const now = new Date();
+        const data = FILINGS.filter(x => {
+            if (f === 'due_30') return (new Date(x.due) - now) / (1000 * 60 * 60 * 24) <= 30 && (new Date(x.due) - now) >= 0;
+            if (f === 'overdue') return new Date(x.due) < now;
+            return true;
+        });
+        $('filingRows').innerHTML = data.map(x => {
+            const tone = new Date(x.due) < now ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700';
+            const tag = x.st === 'scheduled' ? 'bg-slate-100 text-slate-700' : tone;
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${x.r}</td>
+        <td class="py-2 px-4">${x.j}</td>
+        <td class="py-2 px-4">${fmtDate(x.due)}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${tag}">${x.st}</span></td>
+        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Mark filed')">Mark Filed</button></td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No filings</td></tr>`;
+    }
+    function renderTimeline() {
+        $('filingTimeline').innerHTML = TIMELINE.map(t => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
+      <span>${t.txt}</span><span class="text-xs">${t.d}</span>
+    </li>`).join('');
+    }
+
+    /* ------- Audits ------- */
+    function renderAudits() {
+        $('auditRows').innerHTML = AUDITS.map(a => {
+            const tone = a.st === 'open' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${a.id}</td>
+        <td class="py-2 px-4">${a.scope}</td>
+        <td class="py-2 px-4">${a.owner}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${tone} capitalize">${a.st}</span></td>
+        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Audit details')">Details</button></td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No audits</td></tr>`;
+    }
+    function renderEvidence() {
+        $('evidenceList').innerHTML = EVIDENCE.map(e => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
+      <span>${e.name}</span><span class="text-xs">${e.at}</span>
+    </li>`).join('') || `<li class="text-slate-500">No evidence</li>`;
+    }
+    function openEvidence() { $('evidenceModal').classList.remove('hidden'); }
+    function closeEvidence() { $('evidenceModal').classList.add('hidden'); }
+
+    /* ------- Policies ------- */
+    function renderPolicies() {
+        $('policyList').innerHTML = POLICIES.map(p => `
+    <li class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div><div class="font-medium text-slate-800">${p.name}</div><div class="text-xs text-slate-600">${p.ver} • Effective ${p.eff}</div></div>
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Open policy')">Open</button>
+    </li>`).join('');
+    }
+
+    /* ------- Registers ------- */
+    function renderLicenses() {
+        $('licenseList').innerHTML = LICENSES.map(l => `
+    <li class="flex items-center justify-between p-2 rounded ${l.ok ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
+      <span>${l.name}</span><span class="text-xs">Expires ${l.exp}</span>
+    </li>`).join('');
+    }
+    function renderRegisters() {
+        $('regList').innerHTML = REGISTERS.map(r => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
+      <span>${r.name} (${r.loc})</span><span class="text-xs capitalize">${r.status}</span>
+    </li>`).join('');
+    }
+
+    /* ------- Training ------- */
+    function renderTraining() {
+        const f = $('trainFilter').value;
+        const data = f === 'all' ? TRAIN : TRAIN.filter(t => t.st === f);
+        $('trainRows').innerHTML = data.map(t => {
+            const tone = t.st === 'completed' ? 'bg-emerald-50 text-emerald-700' : t.st === 'overdue' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${t.course}</td>
+        <td class="py-2 px-4">${t.audience}</td>
+        <td class="py-2 px-4">${t.due}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${tone} capitalize">${t.st}</span></td>
+        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Send reminder')">Remind</button></td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No trainings</td></tr>`;
+    }
+
+    /* ------- Charts (Training KPI) ------- */
+    let chartLoaded = false, kpiC;
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartLoaded = true; return; }
+        if (chartLoaded) return;
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartLoaded = true; drawCharts(); };
+        document.head.appendChild(s);
+    }
+    function drawCharts() {
+        const ctx = document.getElementById('kpiChart').getContext('2d'); if (!ctx) return;
+        kpiC && kpiC.destroy();
+        const counts = { completed: TRAIN.filter(t => t.st === 'completed').length, due: TRAIN.filter(t => t.st === 'due').length, overdue: TRAIN.filter(t => t.st === 'overdue').length };
+        kpiC = new Chart(ctx, { type: 'pie', data: { labels: ['Completed', 'Due', 'Overdue'], datasets: [{ data: [counts.completed, counts.due, counts.overdue], borderWidth: 2, borderColor: '#fff', backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+    }
+</script>
+
+<style>
+    .cw-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .cw-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .cw-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

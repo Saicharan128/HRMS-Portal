@@ -1,0 +1,452 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-chart-pie mr-2"></i> All Reports
+            </h1>
+            <p class="text-slate-600 text-sm">Generate detailed reports across all HR and payroll modules.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="scheduleBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-clock mr-1"></i> Schedule
+            </button>
+            <button id="exportBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-download mr-1"></i> Export
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab" class="ar-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-gauge-high mr-1"></i> Overview</button>
+            <button id="hrTab" class="ar-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-users mr-1"></i> HR</button>
+            <button id="payrollTab" class="ar-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-money-check-dollar mr-1"></i> Payroll</button>
+            <button id="complianceTab" class="ar-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
+            <button id="financeTab" class="ar-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-coins mr-1"></i> Finance</button>
+            <button id="customTab" class="ar-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-wand-magic-sparkles mr-1"></i> Custom</button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">Period</label>
+                <input id="fPeriod" type="month" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">Department</label>
+                <select id="fDept" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <option value="all">All</option>
+                    <option>Engineering</option>
+                    <option>Sales</option>
+                    <option>Marketing</option>
+                    <option>HR</option>
+                    <option>Finance</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">Location</label>
+                <select id="fLoc" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <option value="all">All</option>
+                    <option>IN</option>
+                    <option>US</option>
+                    <option>EU</option>
+                    <option>UK</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-500 mb-1">Entity</label>
+                <select id="fEnt" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <option value="all">All</option>
+                    <option>India Pvt Ltd</option>
+                    <option>US Inc</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button id="applyFilters"
+                    class="w-full px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                    <i class="fa-solid fa-filter mr-1"></i> Apply
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overviewPanel" class="ar-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Cost
+                    Mix</h3>
+                <canvas id="mixChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-users-gear mr-2"></i>
+                    Headcount</h3>
+                <canvas id="hcChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-sack-dollar mr-2"></i>
+                    Payroll vs. Budget</h3>
+                <canvas id="budgetChart" height="220"></canvas>
+            </div>
+        </div>
+
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-table mr-2"></i> KPI Table</h3>
+                <div class="text-sm text-slate-600"><span id="kpiPeriod">—</span> • <span id="kpiScope">All</span></div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Metric</th>
+                            <th class="py-2 px-4">Value</th>
+                            <th class="py-2 px-4">Δ MoM</th>
+                            <th class="py-2 px-4">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kpiRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- HR -->
+    <section id="hrPanel" class="ar-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-user-plus mr-2"></i> Hiring
+                        Funnel</h3>
+                    <button id="exportHR"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                            class="fa-solid fa-file-export mr-1"></i> Export</button>
+                </div>
+                <canvas id="hiringChart" height="240"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-person-walking-arrow-loop-left mr-2"></i> Attrition</h3>
+                <canvas id="attrChart" height="240"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payroll -->
+    <section id="payrollPanel" class="ar-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-money-bills mr-2"></i>
+                        Gross/Net Breakdown</h3>
+                    <button id="exportPayroll"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                            class="fa-solid fa-file-export mr-1"></i> Export</button>
+                </div>
+                <canvas id="payChart" height="240"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-building-columns mr-2"></i>
+                    Disbursement SLA</h3>
+                <canvas id="slaChart" height="240"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compliance -->
+    <section id="compliancePanel" class="ar-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-traffic-light mr-2"></i>
+                    Risk</h3>
+                <canvas id="riskChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-invoice mr-2"></i>
+                    Filings (30d)</h3>
+                <canvas id="fileChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-user-shield mr-2"></i>
+                    Training</h3>
+                <canvas id="trainChart" height="220"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Finance -->
+    <section id="financePanel" class="ar-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-wallet mr-2"></i> Cost by
+                    Dept</h3>
+                <canvas id="deptChart" height="240"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>
+                    Taxes</h3>
+                <canvas id="taxChart" height="240"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom -->
+    <section id="customPanel" class="ar-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i
+                            class="fa-solid fa-wand-magic-sparkles mr-2"></i> Builder</h3>
+                    <button id="runCustom"
+                        class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
+                            class="fa-solid fa-play mr-1"></i> Run</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <select id="cModule" class="rounded-lg border border-slate-300 px-3 py-2">
+                        <option>HR</option>
+                        <option>Payroll</option>
+                        <option>Compliance</option>
+                        <option>Finance</option>
+                    </select>
+                    <select id="cMetric" class="rounded-lg border border-slate-300 px-3 py-2">
+                        <option>Headcount</option>
+                        <option>Attrition</option>
+                        <option>Net Pay</option>
+                        <option>Tax</option>
+                        <option>Training Completion</option>
+                    </select>
+                    <select id="cGroup" class="rounded-lg border border-slate-300 px-3 py-2">
+                        <option>Department</option>
+                        <option>Location</option>
+                        <option>Entity</option>
+                    </select>
+                    <select id="cChart" class="rounded-lg border border-slate-300 px-3 py-2">
+                        <option>Bar</option>
+                        <option>Line</option>
+                        <option>Pie</option>
+                    </select>
+                </div>
+                <div class="mt-4">
+                    <canvas id="customChart" height="260"></canvas>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-bell mr-2"></i> Alerts</h3>
+                <ul id="customNotes" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Schedule Modal -->
+<div id="schedModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Schedule Report</h3>
+                    <button id="closeSched" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="sFreq" class="rounded-lg border border-slate-300 px-3 py-2">
+                            <option>Monthly</option>
+                            <option>Weekly</option>
+                            <option>Daily</option>
+                        </select>
+                        <select id="sFormat" class="rounded-lg border border-slate-300 px-3 py-2">
+                            <option>PDF</option>
+                            <option>CSV</option>
+                            <option>XLSX</option>
+                        </select>
+                    </div>
+                    <input id="sEmails" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Emails (comma separated)">
+                    <div class="flex items-center justify-end gap-2">
+                        <button id="cancelSched"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="saveSched" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ---- Mock Data ---- */
+    const MODEL = {
+        payroll: { net: 175000, tax: 32000, er: 14500 },
+        headcount: { total: 62, byDept: { Engineering: 28, Sales: 12, Marketing: 8, HR: 6, Finance: 8 } },
+        hiring: { stages: ['Applied', 'Screen', 'Interview', 'Offer', 'Hired'], data: [220, 80, 36, 10, 6] },
+        attr: { months: ['May', 'Jun', 'Jul', 'Aug', 'Sep'], rates: [8, 7, 6, 6, 5] },
+        compliance: { risk: { high: 2, medium: 3, low: 5 }, filings: { due: 3, scheduled: 4 }, training: { completed: 120, due: 28, overdue: 6 } },
+        finance: { byDept: [48, 22, 15, 8, 7], taxes: [18, 14, 12, 10, 8] }
+    };
+    const $ = (id) => document.getElementById(id);
+
+    /* ---- Init ---- */
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.ar-tab').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.ar-tab').forEach(x => x.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.ar-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+                ensureCharts(); drawAll();
+            });
+        });
+
+        $('fPeriod').value = new Date().toISOString().slice(0, 7);
+        $('applyFilters').addEventListener('click', () => { paintKPIs(); drawAll(); });
+
+        $('exportBtn').addEventListener('click', () => alert('📄 Exported (mock)'));
+        $('scheduleBtn').addEventListener('click', openSched);
+        $('closeSched').addEventListener('click', closeSched);
+        $('cancelSched').addEventListener('click', closeSched);
+        $('saveSched').addEventListener('click', () => { closeSched(); alert('⏰ Schedule saved'); });
+
+        paintKPIs(); ensureCharts(); drawAll();
+    });
+
+    /* ---- KPI Table ---- */
+    function paintKPIs() {
+        const p = $('fPeriod').value || '—';
+        $('kpiPeriod').textContent = p;
+        const scope = [val('fDept'), val('fLoc'), val('fEnt')].filter(x => x && x !== 'all').join(' • ') || 'All';
+        $('kpiScope').textContent = scope;
+
+        const rows = [
+            { m: 'Net Payroll', v: money(MODEL.payroll.net), d: '+3% MoM', n: 'Steady' },
+            { m: 'Taxes (withholding)', v: money(MODEL.payroll.tax), d: '+1%', n: 'On track' },
+            { m: 'Employer Costs', v: money(MODEL.payroll.er), d: '0%', n: 'Flat' },
+            { m: 'Headcount', v: MODEL.headcount.total, d: '+2', n: 'Hiring ENG' },
+            { m: 'Compliance Risk (H/M/L)', v: `${MODEL.compliance.risk.high}/${MODEL.compliance.risk.medium}/${MODEL.compliance.risk.low}`, d: '-1 high', n: 'Mitigations' }
+        ];
+        $('kpiRows').innerHTML = rows.map(r => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 px-4 font-medium">${r.m}</td>
+      <td class="py-2 px-4">${r.v}</td>
+      <td class="py-2 px-4">${r.d}</td>
+      <td class="py-2 px-4">${r.n}</td>
+    </tr>`).join('');
+    }
+
+    /* ---- Charts ---- */
+    let ready = false, charts = {};
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { ready = true; return; }
+        if (ready) return;
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { ready = true; drawAll(); };
+        document.head.appendChild(s);
+    }
+    function drawAll() {
+        if (!ready) return;
+        drawPie('mixChart', ['Net', 'Tax', 'Employer'], [MODEL.payroll.net, MODEL.payroll.tax, MODEL.payroll.er]);
+        drawBar('hcChart', Object.keys(MODEL.headcount.byDept), Object.values(MODEL.headcount.byDept));
+        drawLine('budgetChart', ['Plan', 'Actual'], [[210, 210, 210, 210, 210], [200, 198, 205, 208, 212]], ['May', 'Jun', 'Jul', 'Aug', 'Sep']);
+        drawBar('hiringChart', MODEL.hiring.stages, MODEL.hiring.data);
+        drawLineSimple('attrChart', MODEL.attr.months, MODEL.attr.rates);
+        drawPie('riskChart', ['High', 'Medium', 'Low'], Object.values(MODEL.compliance.risk));
+        drawBar('fileChart', ['Due', 'Scheduled'], [MODEL.compliance.filings.due, MODEL.compliance.filings.scheduled]);
+        drawPie('trainChart', ['Completed', 'Due', 'Overdue'], Object.values(MODEL.compliance.training));
+        drawBar('deptChart', ['Eng', 'Sales', 'Mkt', 'HR', 'Fin'], MODEL.finance.byDept);
+        drawBar('taxChart', ['IN', 'US', 'EU', 'UK', 'SG'], MODEL.finance.taxes);
+        drawBar('payChart', ['Gross', 'Tax', 'Net', 'Employer'], [MODEL.payroll.net + MODEL.payroll.tax, MODEL.payroll.tax, MODEL.payroll.net, MODEL.payroll.er]);
+        drawBar('slaChart', ['Compute', 'Approve', 'Pay'], [2, 8, 4]);
+
+        runCustom();
+    }
+    function drawPie(id, labels, data) {
+        const ctx = document.getElementById(id); if (!ctx) return;
+        charts[id] && charts[id].destroy();
+        charts[id] = new Chart(ctx, { type: 'pie', data: { labels, datasets: [{ data, borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+    }
+    function drawBar(id, labels, data) {
+        const ctx = document.getElementById(id); if (!ctx) return;
+        charts[id] && charts[id].destroy();
+        charts[id] = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ data, backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+    }
+    function drawLine(id, seriesLabels, seriesData, xlabels) {
+        const ctx = document.getElementById(id); if (!ctx) return;
+        charts[id] && charts[id].destroy();
+        charts[id] = new Chart(ctx, { type: 'line', data: { labels: xlabels, datasets: seriesData.map((d, i) => ({ label: seriesLabels[i], data: d, fill: false })) } });
+    }
+    function drawLineSimple(id, labels, data) {
+        const ctx = document.getElementById(id); if (!ctx) return;
+        charts[id] && charts[id].destroy();
+        charts[id] = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ data, fill: false }] }, options: { plugins: { legend: { display: false } } } });
+    }
+
+    /* ---- Custom Builder ---- */
+    function runCustom() {
+        const mod = val('cModule') || 'HR';
+        const met = val('cMetric') || 'Headcount';
+        const grp = val('cGroup') || 'Department';
+        const kind = (val('cChart') || 'Bar').toLowerCase();
+        const ctx = document.getElementById('customChart'); if (!ctx) return;
+
+        const dims = ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance'];
+        let data = [28, 12, 8, 6, 8];
+        if (met === 'Net Pay') data = [72, 38, 22, 12, 18];
+        if (met === 'Tax') data = [14, 8, 4, 3, 3];
+        if (met === 'Training Completion') data = [92, 81, 85, 97, 88];
+
+        charts.customChart && charts.customChart.destroy();
+        charts.customChart = new Chart(ctx, {
+            type: kind === 'pie' ? 'pie' : (kind === 'line' ? 'line' : 'bar'),
+            data: { labels: dims, datasets: [{ label: `${mod} • ${met} by ${grp}`, data, backgroundColor: kind === 'pie' ? undefined : '#06b6d4', borderWidth: kind === 'pie' ? 2 : undefined, borderColor: kind === 'pie' ? '#fff' : undefined, fill: false }] },
+            options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { position: kind === 'pie' ? 'bottom' : 'top' } } }
+        });
+
+        $('customNotes').innerHTML = [
+            `Generated for ${val('fPeriod') || 'current period'}`,
+            `Filters → Dept:${val('fDept')} • Loc:${val('fLoc')} • Ent:${val('fEnt')}`
+        ].map(t => `<li class="p-2 rounded bg-slate-50">${t}</li>`).join('');
+    }
+
+    /* ---- Utils & Modal ---- */
+    function val(id) { const el = $(id); return el ? el.value : ''; }
+    function money(n) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n); }
+    function openSched() { $('schedModal').classList.remove('hidden'); }
+    function closeSched() { $('schedModal').classList.add('hidden'); }
+</script>
+
+<style>
+    .ar-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .ar-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .ar-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

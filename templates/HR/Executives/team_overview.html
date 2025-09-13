@@ -1,0 +1,384 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-users-gear mr-2"></i> Team Overview
+            </h1>
+            <p class="text-slate-600 text-sm">Get a snapshot of team composition, capacity, and status.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="exportBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-download mr-1"></i> Export
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+        <div class="flex items-center gap-2">
+            <select id="periodSelect" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                <option value="this_q">This Quarter</option>
+                <option value="next_q">Next Quarter</option>
+                <option value="this_m">This Month</option>
+            </select>
+            <select id="deptSelect" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                <option value="all">All Depts</option>
+                <option value="engineering">Engineering</option>
+                <option value="sales">Sales</option>
+                <option value="marketing">Marketing</option>
+                <option value="hr">HR</option>
+                <option value="finance">Finance</option>
+                <option value="operations">Operations</option>
+            </select>
+        </div>
+        <div class="relative w-full md:w-96">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input id="searchInput" type="text" placeholder="Find squad, manager, or keyword"
+                class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
+            <button id="clearSearch"
+                class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI tiles -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Headcount</div>
+            <div class="mt-1 flex items-end justify-between">
+                <div class="text-2xl font-semibold text-slate-800" id="kpiHeadcount">0</div>
+                <span id="kpiHCTrend" class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">+0%</span>
+            </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Utilization (avg)</div>
+            <div class="mt-1 flex items-end justify-between">
+                <div class="text-2xl font-semibold text-slate-800" id="kpiUtil">0%</div>
+                <span class="text-xs text-slate-500">Target: 75–85%</span>
+            </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Capacity Buffer</div>
+            <div class="mt-1 flex items-end justify-between">
+                <div class="text-2xl font-semibold text-slate-800" id="kpiBuffer">0%</div>
+                <span id="kpiBufferBadge"
+                    class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">Balanced</span>
+            </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Open Roles</div>
+            <div class="mt-1 flex items-end justify-between">
+                <div class="text-2xl font-semibold text-slate-800" id="kpiOpen">0</div>
+                <span class="text-xs text-slate-500">Time-to-fill: <span id="kpiTTF">—</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Composition -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-circle-nodes mr-2"></i>
+                    Composition by Department</h3>
+                <span class="text-sm text-slate-600" id="compTotal">0 total</span>
+            </div>
+            <canvas id="compChart" height="210"></canvas>
+            <div id="compLegend" class="mt-4 flex flex-wrap gap-2 text-xs"></div>
+        </div>
+
+        <!-- Seniority -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-stairs mr-2"></i> Seniority Mix
+                </h3>
+                <span class="text-sm text-slate-600">Entry • Mid • Senior • Lead</span>
+            </div>
+            <canvas id="seniorityChart" height="210"></canvas>
+        </div>
+
+        <!-- Utilization -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-gauge-high mr-2"></i> Capacity &
+                    Utilization</h3>
+                <span class="text-sm text-slate-600" id="utilLabel">—</span>
+            </div>
+            <canvas id="utilChart" height="210"></canvas>
+            <div class="mt-3 text-xs text-slate-600">Shows planned vs. available hours for the selected period.</div>
+        </div>
+    </div>
+
+    <!-- Squads table -->
+    <div class="rounded-2xl border border-slate-200 bg-white mt-6">
+        <div class="flex items-center justify-between p-4 border-b border-slate-200">
+            <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-people-group mr-2"></i> Squads</h3>
+            <div class="flex items-center gap-2 text-sm">
+                <span class="text-slate-600">Color key:</span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Under</span>
+                <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Balanced</span>
+                <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700">Over</span>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="text-left text-slate-500 border-b">
+                    <tr>
+                        <th class="py-2 px-4">Squad</th>
+                        <th class="py-2 px-4">Manager</th>
+                        <th class="py-2 px-4">Dept</th>
+                        <th class="py-2 px-4">Headcount</th>
+                        <th class="py-2 px-4">Capacity (hrs)</th>
+                        <th class="py-2 px-4">Planned (hrs)</th>
+                        <th class="py-2 px-4">Utilization</th>
+                        <th class="py-2 px-4 w-24"></th>
+                    </tr>
+                </thead>
+                <tbody id="squadRows" class="text-slate-800">
+                    <!-- injected -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PTO / Status -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-plane-departure mr-2"></i>
+                Upcoming PTO</h3>
+            <div id="ptoList" class="space-y-3"></div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-user-check mr-2"></i> Status
+                Breakdown</h3>
+            <div id="statusBreakdown" class="space-y-2 text-sm"></div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-bullhorn mr-2"></i> Notes</h3>
+            <ul id="notesFeed" class="list-disc list-inside text-sm text-slate-700 space-y-2"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ----- Mock data ----- */
+    const PEOPLE = [
+        { id: 1, name: 'Aarav Mehta', dept: 'engineering', level: 'mid', status: 'active' },
+        { id: 2, name: 'Sara Lopez', dept: 'hr', level: 'senior', status: 'active' },
+        { id: 3, name: 'Kai Ng', dept: 'sales', level: 'lead', status: 'on_leave' },
+        { id: 4, name: 'Riya Patel', dept: 'marketing', level: 'entry', status: 'active' },
+        { id: 5, name: 'Noah Kim', dept: 'finance', level: 'mid', status: 'inactive' },
+        { id: 6, name: 'Isha Verma', dept: 'engineering', level: 'senior', status: 'active' },
+        { id: 7, name: 'Jon Park', dept: 'operations', level: 'mid', status: 'active' },
+        { id: 8, name: 'Maya Singh', dept: 'engineering', level: 'entry', status: 'active' },
+        { id: 9, name: 'Omar Ali', dept: 'sales', level: 'mid', status: 'active' },
+        { id: 10, name: 'Ana Souza', dept: 'marketing', level: 'senior', status: 'active' },
+    ];
+    const SQUADS = [
+        { id: 201, name: 'Platform Core', manager: 'Priya S', dept: 'engineering', hc: 5, capacity: 800, planned: 660 },
+        { id: 202, name: 'Growth GTM', manager: 'Alex R', dept: 'marketing', hc: 3, capacity: 480, planned: 420 },
+        { id: 203, name: 'RevOps', manager: 'Meera J', dept: 'sales', hc: 3, capacity: 480, planned: 520 },
+        { id: 204, name: 'People Ops', manager: 'David K', dept: 'hr', hc: 2, capacity: 320, planned: 210 },
+        { id: 205, name: 'FinOps', manager: 'Sana M', dept: 'finance', hc: 2, capacity: 320, planned: 300 },
+    ];
+    const PTO = [
+        { who: 'Kai Ng', from: '2025-09-18', to: '2025-09-22' },
+        { who: 'Maya Singh', from: '2025-09-25', to: '2025-09-27' },
+        { who: 'Noah Kim', from: '2025-10-02', to: '2025-10-05' },
+    ];
+    const OPEN_ROLES = 4;
+    const TTF_DAYS = 26;
+    const NOTES = [
+        'Hiring freeze lifted for Engineering (2 roles unlocked).',
+        'Quarterly rotations starting Oct 1: check manager assignments.',
+        'PTO spike during last week of September—re-balance sprint capacity.',
+    ];
+
+    /* ----- State/Elements ----- */
+    let filters = { period: 'this_q', dept: 'all', q: '' };
+    const $ = (id) => document.getElementById(id);
+
+    /* ----- Init ----- */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Controls
+        $('periodSelect').addEventListener('change', e => { filters.period = e.target.value; renderAll(); });
+        $('deptSelect').addEventListener('change', e => { filters.dept = e.target.value; renderAll(); });
+
+        const search = $('searchInput'), clearBtn = $('clearSearch');
+        search.addEventListener('input', debounce(() => { filters.q = search.value.trim().toLowerCase(); clearBtn.classList.toggle('hidden', !filters.q); renderSquads(); }, 250));
+        clearBtn.addEventListener('click', () => { search.value = ''; filters.q = ''; clearBtn.classList.add('hidden'); renderSquads(); });
+
+        $('exportBtn').addEventListener('click', () => alert('✅ Export queued'));
+
+        // Render
+        renderKPIs();
+        renderCharts();
+        renderSquads();
+        renderSidePanels();
+
+        // Load Chart.js if needed
+        if (typeof Chart === 'undefined') {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+            s.onload = () => { drawComp(); drawSeniority(); drawUtil(); };
+            document.head.appendChild(s);
+        } else { drawComp(); drawSeniority(); drawUtil(); }
+    });
+
+    function renderAll() { renderKPIs(); drawComp(); drawSeniority(); drawUtil(); renderSquads(); renderSidePanels(); }
+
+    /* ----- KPIs ----- */
+    function renderKPIs() {
+        const pool = applyDept(PEOPLE);
+        const hc = pool.length;
+        const utilAvg = avgUtil();
+        const buffer = Math.max(0, 100 - utilAvg);
+        $('kpiHeadcount').textContent = hc;
+        $('kpiHCTrend').textContent = '+0%';
+        $('kpiUtil').textContent = utilAvg.toFixed(0) + '%';
+        $('kpiBuffer').textContent = buffer.toFixed(0) + '%';
+        $('kpiBufferBadge').textContent = utilAvg > 90 ? 'Tight' : utilAvg < 70 ? 'Under' : 'Balanced';
+        $('kpiBufferBadge').className = 'text-xs px-2 py-0.5 rounded-full ' + (utilAvg > 90 ? 'bg-red-50 text-red-700' : utilAvg < 70 ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700');
+        $('kpiOpen').textContent = OPEN_ROLES;
+        $('kpiTTF').textContent = TTF_DAYS + 'd';
+    }
+
+    /* ----- Charts ----- */
+    let compChart, seniorityChart, utilChart;
+    function renderCharts() {
+        $('compTotal').textContent = applyDept(PEOPLE).length + ' total';
+        $('utilLabel').textContent = labelPeriod(filters.period);
+    }
+    function drawComp() {
+        const ctx = $('compChart').getContext('2d');
+        const data = countBy(applyDept(PEOPLE), 'dept');
+        const labels = Object.keys(data).map(capitalize);
+        const values = Object.values(data);
+        compChart && compChart.destroy();
+        compChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels, datasets: [{
+                    data: values, borderWidth: 2, borderColor: '#fff',
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+        $('compLegend').innerHTML = labels.map((l, i) => `<span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">${l} • ${values[i]}</span>`).join(' ');
+    }
+
+    function drawSeniority() {
+        const ctx = $('seniorityChart').getContext('2d');
+        const levels = ['entry', 'mid', 'senior', 'lead'];
+        const byDept = groupBy(applyDept(PEOPLE), 'dept');
+        const depts = Object.keys(byDept).map(capitalize);
+        const datasets = levels.map((lvl, idx) => ({
+            label: lvl,
+            data: Object.values(byDept).map(list => list.filter(p => p.level === lvl).length),
+            backgroundColor: ['#c7d2fe', '#93c5fd', '#86efac', '#fbcfe8'][idx],
+            borderWidth: 0
+        }));
+        seniorityChart && seniorityChart.destroy();
+        seniorityChart = new Chart(ctx, {
+            type: 'bar', data: { labels: depts, datasets },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+        });
+    }
+
+    function drawUtil() {
+        const ctx = $('utilChart').getContext('2d');
+        const items = applyDeptSquads(SQUADS).slice().sort((a, b) => a.name.localeCompare(b.name));
+        const labels = items.map(s => s.name);
+        const planned = items.map(s => s.planned);
+        const capacity = items.map(s => s.capacity);
+        utilChart && utilChart.destroy();
+        utilChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels, datasets: [
+                    { label: 'Planned', data: planned, backgroundColor: '#f59e0b' },
+                    { label: 'Capacity', data: capacity, backgroundColor: '#10b981' }
+                ]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    /* ----- Squads table ----- */
+    function renderSquads() {
+        const q = (filters.q || '').toLowerCase();
+        const rows = applyDeptSquads(SQUADS)
+            .filter(s => !q || s.name.toLowerCase().includes(q) || s.manager.toLowerCase().includes(q))
+            .map(s => {
+                const util = Math.round((s.planned / Math.max(1, s.capacity)) * 100);
+                const pill = util > 90 ? 'bg-red-50 text-red-700' : util < 70 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
+                return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${s.name}</td>
+        <td class="py-2 px-4">${s.manager}</td>
+        <td class="py-2 px-4">${capitalize(s.dept)}</td>
+        <td class="py-2 px-4">${s.hc}</td>
+        <td class="py-2 px-4">${s.capacity}</td>
+        <td class="py-2 px-4">${s.planned}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${util}%</span></td>
+        <td class="py-2 px-4 text-right">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Squad details coming soon')"><i class="fa-solid fa-circle-info mr-1"></i> Details</button>
+        </td>
+      </tr>`;
+            }).join('');
+        $('squadRows').innerHTML = rows || `<tr><td colspan="8" class="py-6 text-center text-slate-500">No squads match your filters</td></tr>`;
+    }
+
+    /* ----- Side panels ----- */
+    function renderSidePanels() {
+        // PTO
+        $('ptoList').innerHTML = PTO.map(p => `
+    <div class="flex items-center justify-between p-3 rounded-lg ${daysFromNow(p.from) <= 7 ? 'bg-amber-50' : 'bg-slate-50'}">
+      <div>
+        <div class="font-medium text-slate-800">${p.who}</div>
+        <div class="text-xs text-slate-600">${p.from} → ${p.to} • starts in ${daysFromNow(p.from)}d</div>
+      </div>
+      <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs">PTO</span>
+    </div>`).join('');
+
+        // Status Breakdown
+        const pool = applyDept(PEOPLE);
+        const byStatus = countBy(pool, 'status');
+        $('statusBreakdown').innerHTML = Object.entries(byStatus)
+            .map(([k, v]) => `<div class="flex items-center justify-between">
+      <span class="text-slate-600">${labelStatus(k)}</span>
+      <span class="font-medium text-slate-800">${v}</span>
+    </div>`).join('') || '<div class="text-slate-500">No data</div>';
+
+        // Notes
+        $('notesFeed').innerHTML = NOTES.map(n => `<li>${n}</li>`).join('');
+    }
+
+    /* ----- Helpers ----- */
+    function applyDept(list) { return filters.dept === 'all' ? list.slice() : list.filter(x => x.dept === filters.dept); }
+    function applyDeptSquads(list) { return filters.dept === 'all' ? list.slice() : list.filter(x => x.dept === filters.dept); }
+    function countBy(list, key) { return list.reduce((m, x) => (m[x[key]] = (m[x[key]] || 0) + 1, m), {}); }
+    function groupBy(list, key) { return list.reduce((m, x) => ((m[x[key]] = m[x[key]] || []).push(x), m), {}); }
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function labelPeriod(p) { return ({ this_q: 'This Quarter', next_q: 'Next Quarter', this_m: 'This Month' })[p] || 'This Quarter'; }
+    function labelStatus(s) { return ({ active: 'Active', on_leave: 'On Leave', inactive: 'Inactive' })[s] || s; }
+    function daysFromNow(dateStr) { const d = new Date(dateStr), now = new Date(); return Math.max(0, Math.ceil((d - now) / (1000 * 60 * 60 * 24))); }
+    function avgUtil() {
+        const items = applyDeptSquads(SQUADS);
+        if (!items.length) return 0;
+        const arr = items.map(s => (s.planned / Math.max(1, s.capacity)) * 100);
+        return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+</script>
+
+{% endblock %}

@@ -1,0 +1,475 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-diagram-project mr-2"></i> Workflows
+            </h1>
+            <p class="text-slate-600 text-sm">Automate HR processes with customizable workflows.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newWorkflowBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> New Workflow
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="builderTab" class="wf-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-sitemap mr-1"></i> Builder</button>
+            <button id="libraryTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-box-archive mr-1"></i> Library</button>
+            <button id="runsTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-play mr-1"></i> Runs</button>
+            <button id="analyticsTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-chart-line mr-1"></i> Analytics</button>
+            <button id="settingsTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-gear mr-1"></i> Settings</button>
+        </div>
+    </div>
+
+    <!-- Builder -->
+    <section id="builderPanel" class="wf-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Triggers + Steps -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-bolt mr-2"></i> Triggers
+                </h3>
+                <div id="triggerList" class="grid grid-cols-2 gap-2 text-sm">
+                    <button class="wf-chip" data-type="trigger" data-key="new_hire"><i
+                            class="fa-solid fa-user-plus mr-1"></i> New Hire</button>
+                    <button class="wf-chip" data-type="trigger" data-key="termination"><i
+                            class="fa-solid fa-user-xmark mr-1"></i> Termination</button>
+                    <button class="wf-chip" data-type="trigger" data-key="role_change"><i
+                            class="fa-solid fa-briefcase mr-1"></i> Role Change</button>
+                    <button class="wf-chip" data-type="trigger" data-key="pto_request"><i
+                            class="fa-solid fa-plane mr-1"></i> PTO Request</button>
+                </div>
+
+                <h3 class="text-lg font-semibold text-slate-800 my-4"><i class="fa-solid fa-list-check mr-2"></i> Steps
+                </h3>
+                <div id="stepList" class="grid grid-cols-2 gap-2 text-sm">
+                    <button class="wf-chip" data-type="step" data-key="create_ticket"><i
+                            class="fa-solid fa-ticket mr-1"></i> Create Ticket</button>
+                    <button class="wf-chip" data-type="step" data-key="send_email"><i
+                            class="fa-solid fa-envelope mr-1"></i> Send Email</button>
+                    <button class="wf-chip" data-type="step" data-key="assign_task"><i
+                            class="fa-solid fa-user-check mr-1"></i> Assign Task</button>
+                    <button class="wf-chip" data-type="step" data-key="update_hris"><i
+                            class="fa-solid fa-database mr-1"></i> Update HRIS</button>
+                    <button class="wf-chip" data-type="step" data-key="webhook"><i class="fa-solid fa-plug mr-1"></i>
+                        Webhook</button>
+                    <button class="wf-chip" data-type="step" data-key="approval"><i
+                            class="fa-solid fa-thumbs-up mr-1"></i> Approval</button>
+                </div>
+            </div>
+
+            <!-- Middle: Canvas -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-layer-group mr-2"></i> Canvas
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <button id="clearCanvas"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
+                        <button id="saveWorkflow"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        <button id="publishWorkflow"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"><i
+                                class="fa-solid fa-rocket mr-1"></i> Publish</button>
+                    </div>
+                </div>
+                <ul id="canvas" class="space-y-2 text-sm min-h-[120px]">
+                    <!-- items injected -->
+                </ul>
+            </div>
+
+            <!-- Right: Inspector -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-magnifying-glass-chart mr-2"></i> Inspector</h3>
+                <div id="inspector" class="space-y-3 text-sm">
+                    <div class="text-slate-500">Select a node to edit settings.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Library -->
+    <section id="libraryPanel" class="wf-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-box-archive mr-2"></i> Templates
+                </h3>
+                <button id="newTemplate"
+                    class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
+                        class="fa-solid fa-plus mr-1"></i> New</button>
+            </div>
+            <div id="templateList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- injected -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Runs -->
+    <section id="runsPanel" class="wf-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-play mr-2"></i> Recent Runs</h3>
+                <select id="runFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                    <option value="all">All</option>
+                    <option value="success">Success</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Time</th>
+                            <th class="py-2 px-4">Workflow</th>
+                            <th class="py-2 px-4">Triggered By</th>
+                            <th class="py-2 px-4">Status</th>
+                            <th class="py-2 px-4 w-24"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="runRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics -->
+    <section id="analyticsPanel" class="wf-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-stopwatch mr-2"></i> Time to
+                    Complete</h3>
+                <canvas id="ttcChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-screwdriver-wrench mr-2"></i> Step Success Rate</h3>
+                <canvas id="successChart" height="220"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settingsPanel" class="wf-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-plug mr-2"></i> Integrations
+                </h3>
+                <div class="space-y-3 text-sm" id="intList"><!-- injected --></div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-lock mr-2"></i> Permissions
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Allow Managers to run</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Allow HR to edit</label>
+                    <label class="flex items-center gap-2"><input type="checkbox"> Require approval to publish</label>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-shield-halved mr-2"></i>
+                    Safety Checks</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Validate PII usage</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Require 2nd approver for
+                        terminations</label>
+                    <label class="flex items-center gap-2"><input type="checkbox"> Block external webhooks</label>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    /* ------------ Mock Data ------------ */
+    let CANVAS = []; // [{type:'trigger'|'step', key:'send_email', cfg:{...}}]
+    let SELECTED = null;
+
+    let TEMPLATES = [
+        { id: 1, name: 'Onboarding • Remote', nodes: [{ type: 'trigger', key: 'new_hire' }, { type: 'step', key: 'create_ticket' }, { type: 'step', key: 'send_email' }, { type: 'step', key: 'assign_task' }] },
+        { id: 2, name: 'Offboarding • Standard', nodes: [{ type: 'trigger', key: 'termination' }, { type: 'step', key: 'revoke_access' }, { type: 'step', key: 'update_hris' }, { type: 'step', key: 'webhook' }] }
+    ];
+
+    let RUNS = [
+        { id: 11, at: '2025-09-12 10:05', wf: 'Onboarding • Remote', who: 'System', status: 'success' },
+        { id: 12, at: '2025-09-12 11:17', wf: 'Offboarding • Standard', who: 'Priya S', status: 'failed' },
+        { id: 13, at: '2025-09-13 09:40', wf: 'PTO Auto-Approve', who: 'System', status: 'success' }
+    ];
+
+    let INTEGRATIONS = [
+        { name: 'Google Workspace', state: 'Connected' },
+        { name: 'Slack', state: 'Connected' },
+        { name: 'BambooHR', state: 'Pending' },
+        { name: 'Okta', state: 'Connected' }
+    ];
+
+    /* ------------ Elements & Init ------------ */
+    const $ = (id) => document.getElementById(id);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tabs
+        document.querySelectorAll('.wf-tab').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.wf-tab').forEach(x => x.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.wf-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+                if (name === 'analytics') { ensureCharts(); drawCharts(); }
+            });
+        });
+
+        // Builder interactions
+        document.querySelectorAll('.wf-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                addNode({ type: chip.dataset.type, key: chip.dataset.key, cfg: defaultCfg(chip.dataset.key) });
+            });
+        });
+        $('clearCanvas').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); });
+        $('saveWorkflow').addEventListener('click', () => alert('✅ Workflow saved'));
+        $('publishWorkflow').addEventListener('click', () => alert('🚀 Workflow published'));
+        $('newWorkflowBtn').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); alert('✨ New workflow started'); });
+
+        // Library
+        $('newTemplate').addEventListener('click', () => { TEMPLATES.push({ id: Date.now(), name: 'Untitled Template', nodes: [...CANVAS] }); renderTemplates(); alert('✅ Template created'); });
+
+        // Runs
+        $('runFilter').addEventListener('change', renderRuns);
+
+        // Settings
+        renderIntegrations();
+
+        // Initial renders
+        renderCanvas(); renderInspector(); renderTemplates(); renderRuns();
+    });
+
+    /* ------------ Builder ------------ */
+    function addNode(n) { CANVAS.push(n); renderCanvas(); }
+    function moveNode(i, d) { const j = i + d; if (j < 0 || j >= CANVAS.length) return;[CANVAS[i], CANVAS[j]] = [CANVAS[j], CANVAS[i]]; renderCanvas(); }
+    function removeNode(i) { CANVAS.splice(i, 1); if (SELECTED === i) SELECTED = null; renderCanvas(); renderInspector(); }
+    function selectNode(i) { SELECTED = i; renderInspector(); }
+
+    function renderCanvas() {
+        $('canvas').innerHTML = CANVAS.map((n, i) => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200 ${SELECTED === i ? 'ring-2 ring-blue-200' : ''}">
+      <div class="flex items-center gap-2">${icon(n.key)} <span class="font-medium">${label(n)}</span> ${n.type === 'trigger' ? badge('Trigger', 'amber') : ''}</div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},-1)">↑</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},1)">↓</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="selectNode(${i})">Edit</button>
+        <button class="px-2 py-1 text-xs rounded text-white bg-red-600 hover:bg-red-700" onclick="removeNode(${i})">Remove</button>
+      </div>
+    </li>
+  `).join('') || `<li class="text-slate-500 text-sm">No nodes yet. Click a Trigger or Step to add.</li>`;
+    }
+
+    function renderInspector() {
+        const box = $('inspector');
+        if (SELECTED === null) { box.innerHTML = '<div class="text-slate-500">Select a node to edit settings.</div>'; return; }
+        const n = CANVAS[SELECTED];
+        const cfg = n.cfg || {};
+        box.innerHTML = `
+    <div class="space-y-3">
+      <div class="flex items-center gap-2"><div>${icon(n.key)}</div><div class="font-medium">${label(n)}</div></div>
+      ${n.type === 'trigger' ? triggerEditor(cfg) : stepEditor(n.key, cfg)}
+      <div class="flex items-center justify-end gap-2">
+        <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="cancelEdit()">Cancel</button>
+        <button class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700" onclick="saveEdit()">Save</button>
+      </div>
+    </div>
+  `;
+    }
+    function cancelEdit() { SELECTED = null; renderInspector(); }
+    function saveEdit() {
+        const form = document.querySelector('#inspector form');
+        if (!form) { SELECTED = null; renderInspector(); return; }
+        const data = Object.fromEntries(new FormData(form).entries());
+        const n = CANVAS[SELECTED]; n.cfg = { ...n.cfg, ...data };
+        alert('✅ Node updated'); SELECTED = null; renderInspector();
+    }
+
+    function triggerEditor(cfg) {
+        return `
+    <form class="space-y-3">
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">When</label>
+        <select name="when" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option value="immediate" ${sel(cfg.when, 'immediate')}>Immediate</option>
+          <option value="scheduled" ${sel(cfg.when, 'scheduled')}>Scheduled</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Filter (JEXL)</label>
+        <input name="filter" value="${esc(cfg.filter || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., location=='IN' && dept=='engineering'">
+      </div>
+    </form>`;
+    }
+    function stepEditor(key, cfg) {
+        if (key === 'send_email') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">To</label><input name="to" value="${esc(cfg.to || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="user@company.com"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">Subject</label><input name="subject" value="${esc(cfg.subject || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="Subject"></div>
+      </form>`;
+        }
+        if (key === 'webhook') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">URL</label><input name="url" value="${esc(cfg.url || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="https://api.example.com/hook"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">Method</label>
+          <select name="method" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            <option ${sel(cfg.method, 'POST')}>POST</option><option ${sel(cfg.method, 'PUT')}>PUT</option>
+          </select>
+        </div>
+      </form>`;
+        }
+        if (key === 'approval') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">Approver</label><input name="approver" value="${esc(cfg.approver || 'Manager')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">SLA (hours)</label><input type="number" name="sla" value="${esc(cfg.sla || 24)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      </form>`;
+        }
+        // generic
+        return `<form class="space-y-3"><div class="text-slate-500">No configurable fields.</div></form>`;
+    }
+
+    /* ------------ Library ------------ */
+    function renderTemplates() {
+        $('templateList').innerHTML = TEMPLATES.map(t => `
+    <div class="rounded-xl border border-slate-200 p-4 flex items-center justify-between">
+      <div>
+        <div class="font-medium text-slate-800">${t.name}</div>
+        <div class="text-xs text-slate-600">${t.nodes.map(label).join(' • ')}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="loadTemplate(${t.id})"><i class="fa-solid fa-arrow-down mr-1"></i> Load</button>
+        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteTemplate(${t.id})"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
+      </div>
+    </div>
+  `).join('') || `<div class="text-slate-500 text-sm">No templates</div>`;
+    }
+    function loadTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; CANVAS = t.nodes.map(n => ({ ...n, cfg: defaultCfg(n.key) })); SELECTED = null; renderCanvas(); renderInspector(); }
+    function deleteTemplate(id) { TEMPLATES = TEMPLATES.filter(t => t.id !== id); renderTemplates(); }
+
+    /* ------------ Runs ------------ */
+    function renderRuns() {
+        const f = $('runFilter').value;
+        const data = f === 'all' ? RUNS : RUNS.filter(r => r.status === f);
+        $('runRows').innerHTML = data.map(r => {
+            const pill = r.status === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 text-slate-600">${r.at}</td>
+        <td class="py-2 px-4">${r.wf}</td>
+        <td class="py-2 px-4">${r.who}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${r.status}</span></td>
+        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Run details coming soon')">Details</button></td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No runs</td></tr>`;
+    }
+
+    /* ------------ Analytics ------------ */
+    let chartsReady = false, ttcC, successC;
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartsReady = true; return; }
+        if (chartsReady) return;
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
+    }
+    function drawCharts() {
+        const tctx = document.getElementById('ttcChart').getContext('2d');
+        const sctx = document.getElementById('successChart').getContext('2d');
+        ttcC && ttcC.destroy(); successC && successC.destroy();
+        ttcC = new Chart(tctx, { type: 'bar', data: { labels: ['Onboarding', 'Offboarding', 'PTO', 'Change Role'], datasets: [{ label: 'Median Hours', data: [6, 4, 1, 3], backgroundColor: '#3b82f6' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+        successC = new Chart(sctx, { type: 'pie', data: { labels: ['Create Ticket', 'Send Email', 'Assign Task', 'Webhook', 'Approval'], datasets: [{ data: [98, 96, 93, 88, 84], borderWidth: 2, borderColor: '#fff', backgroundColor: ['#10b981', '#06b6d4', '#f59e0b', '#ef4444', '#8b5cf6'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+    }
+
+    /* ------------ Settings ------------ */
+    function renderIntegrations() {
+        $('intList').innerHTML = INTEGRATIONS.map(i => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="font-medium text-slate-800">${i.name}</div>
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded-full text-xs ${i.state === 'Connected' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${i.state}</span>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleInt('${i.name}')">${i.state === 'Connected' ? 'Disconnect' : 'Connect'}</button>
+      </div>
+    </div>`).join('');
+    }
+    function toggleInt(name) { INTEGRATIONS = INTEGRATIONS.map(x => x.name === name ? { ...x, state: x.state === 'Connected' ? 'Pending' : 'Connected' } : x); renderIntegrations(); }
+
+    /* ------------ Helpers ------------ */
+    function icon(k) {
+        const m = {
+            new_hire: '<i class="fa-solid fa-user-plus"></i>', termination: '<i class="fa-solid fa-user-xmark"></i>',
+            role_change: '<i class="fa-solid fa-briefcase"></i>', pto_request: '<i class="fa-solid fa-plane"></i>',
+            create_ticket: '<i class="fa-solid fa-ticket"></i>', send_email: '<i class="fa-solid fa-envelope"></i>',
+            assign_task: '<i class="fa-solid fa-user-check"></i>', update_hris: '<i class="fa-solid fa-database"></i>',
+            webhook: '<i class="fa-solid fa-plug"></i>', approval: '<i class="fa-solid fa-thumbs-up"></i>',
+            revoke_access: '<i class="fa-solid fa-user-lock"></i>'
+        }; return m[k] || '<i class="fa-solid fa-circle-dot"></i>';
+    }
+    function label(n) {
+        const names = {
+            new_hire: 'New Hire', termination: 'Termination', role_change: 'Role Change', pto_request: 'PTO Request',
+            create_ticket: 'Create Ticket', send_email: 'Send Email', assign_task: 'Assign Task', update_hris: 'Update HRIS',
+            webhook: 'Webhook', approval: 'Approval', revoke_access: 'Revoke Access'
+        };
+        return names[n.key] || n.key;
+    }
+    function defaultCfg(key) {
+        if (key === 'send_email') return { to: '', subject: '' };
+        if (key === 'webhook') return { url: '', method: 'POST' };
+        if (key === 'approval') return { approver: 'Manager', sla: 24 };
+        return {};
+    }
+    function badge(txt, tone) { const m = { emerald: 'bg-emerald-50 text-emerald-700', amber: 'bg-amber-50 text-amber-700', slate: 'bg-slate-100 text-slate-700' }; return `<span class="px-2 py-0.5 rounded-full ${m[tone] || m.slate} text-xs">${txt}</span>`; }
+    function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c])); }
+    function sel(v, exp) { return (String(v || '') === String(exp)) ? 'selected' : ''; }
+</script>
+
+<style>
+    .wf-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .wf-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .wf-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+
+    .wf-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .375rem;
+        border: 1px solid rgb(203, 213, 225);
+        background: white;
+        border-radius: .5rem;
+        padding: .375rem .5rem;
+        font-size: .875rem;
+    }
+
+    .wf-chip:hover {
+        background: #f8fafc;
+    }
+</style>
+{% endblock %}

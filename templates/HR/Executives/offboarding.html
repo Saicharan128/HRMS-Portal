@@ -1,0 +1,622 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-person-walking-arrow-right mr-2"></i> Offboarding
+            </h1>
+            <p class="text-slate-600 text-sm">Manage exits smoothly while ensuring compliance and knowledge transfer.
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newCaseBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New Case
+            </button>
+            <button id="exportBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="casesTab" class="obf-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-briefcase mr-1"></i> Cases</button>
+            <button id="checklistsTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-list-check mr-1"></i> Checklists</button>
+            <button id="assetsTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-computer mr-1"></i> Assets</button>
+            <button id="complianceTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
+            <button id="reportsTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-chart-line mr-1"></i> Reports</button>
+        </div>
+    </div>
+
+    <!-- Cases -->
+    <section id="casesPanel" class="obf-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Summary -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-gauge-high mr-2"></i>
+                    Overview</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Open</div>
+                        <div id="kOpen" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Due ≤7d</div>
+                        <div id="kSoon" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Completed</div>
+                        <div id="kDone" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="mt-5">
+                    <div class="text-sm font-medium text-slate-700 mb-2">Filters</div>
+                    <div class="flex items-center gap-2">
+                        <select id="caseStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="done">Done</option>
+                        </select>
+                        <select id="caseDept" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="all">All Depts</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="sales">Sales</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="hr">HR</option>
+                            <option value="finance">Finance</option>
+                            <option value="operations">Operations</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Cases Table -->
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white">
+                <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                    <div class="relative w-full md:w-96">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input id="searchCases" placeholder="Search by name, manager, or reason"
+                            class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
+                        <button id="clearSearch"
+                            class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="text-sm text-slate-600"><span id="caseCount">0</span> cases</div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 px-4">Employee</th>
+                                <th class="py-2 px-4">Department</th>
+                                <th class="py-2 px-4">Manager</th>
+                                <th class="py-2 px-4">Last Day</th>
+                                <th class="py-2 px-4">Status</th>
+                                <th class="py-2 px-4 w-28">Progress</th>
+                                <th class="py-2 px-4 w-28"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="caseRows" class="text-slate-800">
+                            <!-- injected -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checklists -->
+    <section id="checklistsPanel" class="obf-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Builder -->
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list-check mr-2"></i>
+                        Checklist Builder</h3>
+                    <div class="flex items-center gap-2">
+                        <button id="saveChecklist"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        <button id="publishChecklist"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"><i
+                                class="fa-solid fa-rocket mr-1"></i> Publish</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Triggers -->
+                    <div class="rounded-lg border border-slate-200 p-4">
+                        <div class="font-medium text-slate-800 mb-2"><i class="fa-solid fa-bolt mr-1"></i> Triggers
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="ck-trigger"
+                                    value="notice_received"> Notice Received</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="ck-trigger"
+                                    value="last_week"> Last Working Week</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="ck-trigger"
+                                    value="last_day"> Last Day</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="ck-trigger"
+                                    value="post_exit_7"> Post-Exit +7d</label>
+                        </div>
+                    </div>
+                    <!-- Tasks Library -->
+                    <div class="rounded-lg border border-slate-200 p-4">
+                        <div class="font-medium text-slate-800 mb-2"><i class="fa-solid fa-toolbox mr-1"></i> Tasks
+                            Library</div>
+                        <div id="taskLibrary" class="space-y-2 text-sm">
+                            <button class="ck-chip" data-task="revoke_access"><i class="fa-solid fa-user-lock mr-1"></i>
+                                Revoke Access</button>
+                            <button class="ck-chip" data-task="collect_assets"><i class="fa-solid fa-computer mr-1"></i>
+                                Collect Assets</button>
+                            <button class="ck-chip" data-task="handover_docs"><i
+                                    class="fa-solid fa-file-export mr-1"></i> Handover Docs</button>
+                            <button class="ck-chip" data-task="exit_interview"><i class="fa-solid fa-comments mr-1"></i>
+                                Exit Interview</button>
+                            <button class="ck-chip" data-task="final_payroll"><i
+                                    class="fa-solid fa-money-check-dollar mr-1"></i> Final Payroll</button>
+                            <button class="ck-chip" data-task="notify_team"><i class="fa-solid fa-bullhorn mr-1"></i>
+                                Notify Team/Clients</button>
+                        </div>
+                    </div>
+                    <!-- Canvas -->
+                    <div class="rounded-lg border border-slate-200 p-4">
+                        <div class="font-medium text-slate-800 mb-2"><i class="fa-solid fa-layer-group mr-1"></i>
+                            Checklist Canvas</div>
+                        <ul id="checklistCanvas" class="space-y-2 text-sm"></ul>
+                        <div class="mt-3">
+                            <button id="clearCanvas"
+                                class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Templates -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-clone mr-2"></i> Templates
+                    </h3>
+                    <button id="newTemplate"
+                        class="px-3 py-2 rounded-lg text-white bg-purple-600 hover:bg-purple-700 text-sm"><i
+                            class="fa-solid fa-plus mr-1"></i> New</button>
+                </div>
+                <div id="templatesList" class="space-y-3"><!-- injected --></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Assets -->
+    <section id="assetsPanel" class="obf-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-computer mr-2"></i> Asset
+                    Recovery</h3>
+                <div class="flex items-center gap-2">
+                    <select id="assetFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="returned">Returned</option>
+                    </select>
+                    <button id="newAsset"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                            class="fa-solid fa-plus mr-1"></i> Add</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Employee</th>
+                            <th class="py-2 px-4">Item</th>
+                            <th class="py-2 px-4">Serial</th>
+                            <th class="py-2 px-4">Status</th>
+                            <th class="py-2 px-4">Due</th>
+                            <th class="py-2 px-4 w-24"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="assetRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compliance -->
+    <section id="compliancePanel" class="obf-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-shield mr-2"></i>
+                    Compliance Checklist</h3>
+                <div id="compList" class="space-y-3"><!-- injected --></div>
+                <button id="completeAllComp"
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                    <i class="fa-solid fa-check mr-1"></i> Mark All Complete
+                </button>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-user-lock mr-2"></i> Access
+                    Revocation Audit</h3>
+                <div id="revocationList" class="space-y-3"><!-- injected --></div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-money-bill-wave mr-2"></i>
+                    Final Pay</h3>
+                <div id="finalPayPanel" class="space-y-3"><!-- injected --></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reports -->
+    <section id="reportsPanel" class="obf-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Exit
+                    Reasons</h3>
+                <canvas id="reasonsChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-gauge-high mr-2"></i> SLA &
+                    Timeliness</h3>
+                <canvas id="slaChart" height="220"></canvas>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- New Case Modal -->
+<div id="caseModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">New Offboarding Case</h3>
+                    <button id="closeCaseModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <input id="cName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Employee name">
+                    <div class="grid grid-cols-2 gap-4">
+                        <select id="cDept" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="engineering">Engineering</option>
+                            <option value="sales">Sales</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="hr">HR</option>
+                            <option value="finance">Finance</option>
+                            <option value="operations">Operations</option>
+                        </select>
+                        <input id="cManager" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Manager">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="cLastDay" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <select id="cReason" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>Resignation</option>
+                            <option>Termination</option>
+                            <option>Contract End</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="cancelCase"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="saveCase" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ---------- Mock Data ---------- */
+    let CASES = [
+        { id: 1, name: 'Kai Ng', dept: 'sales', manager: 'Meera J', last: '2025-09-22', status: 'in_progress', reason: 'Resignation', progress: 60 },
+        { id: 2, name: 'Noah Kim', dept: 'finance', manager: 'Sana M', last: '2025-10-05', status: 'pending', reason: 'Contract End', progress: 10 },
+        { id: 3, name: 'Aarav Mehta', dept: 'engineering', manager: 'Priya S', last: '2025-09-18', status: 'done', reason: 'Other', progress: 100 }
+    ];
+    let CHECKLIST = []; // built steps
+    let TEMPLATES = [
+        { id: 11, name: 'Standard • Office', steps: ['revoke_access', 'collect_assets', 'handover_docs', 'exit_interview', 'final_payroll', 'notify_team'] },
+        { id: 12, name: 'Standard • Remote', steps: ['revoke_access', 'handover_docs', 'final_payroll', 'notify_team'] }
+    ];
+    let ASSETS = [
+        { id: 101, emp: 'Kai Ng', item: 'Laptop', serial: 'MBP-21344', status: 'pending', due: '2025-09-23' },
+        { id: 102, emp: 'Noah Kim', item: 'Badge', serial: 'B-8841', status: 'pending', due: '2025-10-06' },
+        { id: 103, emp: 'Aarav Mehta', item: 'Monitor', serial: 'MN-7721', status: 'returned', due: '2025-09-17' }
+    ];
+    let COMP_ITEMS = [
+        { id: 201, text: 'Signed resignation/termination letter', done: true },
+        { id: 202, text: 'Final payroll scheduled per local law', done: false },
+        { id: 203, text: 'Benefits & COBRA/ESIC notice sent', done: false },
+        { id: 204, text: 'Data retention policy applied', done: true }
+    ];
+    let REVOKE = [
+        { sys: 'Google Workspace', by: 'System', ts: '2025-09-12 10:05', state: 'Revoked' },
+        { sys: 'Github', by: 'IT', ts: '2025-09-12 11:12', state: 'Revoked' },
+        { sys: 'Okta', by: 'System', ts: '2025-09-12 10:06', state: 'Revoked' }
+    ];
+    let FINAL_PAY = [
+        { emp: 'Kai Ng', calc: 'Salary + PTO payout', amount: '$4,320', due: '2025-09-23', state: 'Queued' },
+        { emp: 'Aarav Mehta', calc: 'Salary only', amount: '$1,980', due: '2025-09-19', state: 'Paid' }
+    ];
+
+    /* ---------- Elements & Init ---------- */
+    const $ = (id) => document.getElementById(id);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tabs
+        document.querySelectorAll('.obf-tab').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.obf-tab').forEach(x => x.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.obf-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+                if (name === 'reports') { ensureCharts(); drawCharts(); }
+            });
+        });
+
+        // Cases controls
+        $('caseStatus').addEventListener('change', renderCases);
+        $('caseDept').addEventListener('change', renderCases);
+        const s = $('searchCases'), clr = $('clearSearch');
+        s.addEventListener('input', debounce(() => { clr.classList.toggle('hidden', !s.value.trim()); renderCases(); }, 250));
+        clr.addEventListener('click', () => { s.value = ''; clr.classList.add('hidden'); renderCases(); });
+        $('newCaseBtn').addEventListener('click', openCaseModal);
+        $('closeCaseModal').addEventListener('click', closeCaseModal);
+        $('cancelCase').addEventListener('click', closeCaseModal);
+        $('saveCase').addEventListener('click', saveCase);
+        $('exportBtn').addEventListener('click', () => alert('✅ Export queued'));
+
+        // Checklist builder
+        document.querySelectorAll('.ck-chip').forEach(chip => chip.addEventListener('click', () => addStep(chip.dataset.task)));
+        $('clearCanvas').addEventListener('click', () => { CHECKLIST = []; renderChecklist(); });
+        $('saveChecklist').addEventListener('click', () => alert('✅ Checklist saved'));
+        $('publishChecklist').addEventListener('click', () => alert('🚀 Checklist published'));
+        $('newTemplate').addEventListener('click', () => { TEMPLATES.push({ id: Date.now(), name: 'Untitled', steps: [...CHECKLIST] }); renderTemplates(); });
+
+        // Assets
+        $('assetFilter').addEventListener('change', renderAssets);
+        $('newAsset').addEventListener('click', addAsset);
+
+        // Compliance
+        $('completeAllComp').addEventListener('click', () => { COMP_ITEMS = COMP_ITEMS.map(c => ({ ...c, done: true })); renderCompliance(); });
+
+        // Initial renders
+        renderCases(); renderChecklist(); renderTemplates(); renderAssets(); renderCompliance(); renderRevocation(); renderFinalPay();
+    });
+
+    /* ---------- Cases ---------- */
+    function renderCases() {
+        const status = $('caseStatus').value, dept = $('caseDept').value, q = ($('searchCases').value || '').toLowerCase();
+        let data = CASES.slice();
+        if (status !== 'all') data = data.filter(c => c.status === status);
+        if (dept !== 'all') data = data.filter(c => c.dept === dept);
+        if (q) data = data.filter(c => c.name.toLowerCase().includes(q) || c.manager.toLowerCase().includes(q) || c.reason.toLowerCase().includes(q));
+        $('caseCount').textContent = data.length;
+
+        // KPIs
+        $('kOpen').textContent = CASES.filter(c => c.status !== 'done').length;
+        $('kDone').textContent = CASES.filter(c => c.status === 'done').length;
+        const soon = CASES.filter(c => daysFromNow(c.last) <= 7 && c.status !== 'done').length;
+        $('kSoon').textContent = soon;
+
+        $('caseRows').innerHTML = data.map(c => {
+            const pill = c.status === 'done' ? 'bg-emerald-50 text-emerald-700' : c.status === 'in_progress' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${c.name}</td>
+        <td class="py-2 px-4">${capitalize(c.dept)}</td>
+        <td class="py-2 px-4">${c.manager}</td>
+        <td class="py-2 px-4">${c.last} <span class="text-xs text-slate-500">(${daysFromNow(c.last)}d)</span></td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${labelStatus(c.status)}</span></td>
+        <td class="py-2 px-4">
+          <div class="w-28 h-2 bg-slate-200 rounded"><div class="h-2 rounded ${c.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}" style="width:${c.progress}%"></div></div>
+        </td>
+        <td class="py-2 px-4 text-right">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="advanceCase(${c.id})"><i class="fa-solid fa-forward mr-1"></i> Advance</button>
+        </td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No cases</td></tr>`;
+    }
+    function openCaseModal() { $('caseModal').classList.remove('hidden'); }
+    function closeCaseModal() { $('caseModal').classList.add('hidden'); }
+    function saveCase() {
+        const name = val('cName'); if (!name) { alert('❌ Name required'); return; }
+        CASES.push({ id: Date.now(), name, dept: val('cDept'), manager: val('cManager'), last: val('cLastDay') || today(), status: 'pending', reason: val('cReason'), progress: 0 });
+        closeCaseModal(); renderCases(); alert('✅ Case created');
+    }
+    function advanceCase(id) {
+        const c = CASES.find(x => x.id === id); if (!c) return;
+        c.progress = Math.min(100, c.progress + 20);
+        c.status = c.progress === 100 ? 'done' : c.progress > 0 ? 'in_progress' : 'pending';
+        renderCases();
+    }
+
+    /* ---------- Checklist Builder ---------- */
+    function renderChecklist() {
+        $('checklistCanvas').innerHTML = CHECKLIST.map((s, idx) => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
+      <div class="flex items-center gap-2">${stepIcon(s)} <span class="font-medium">${labelStep(s)}</span></div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveStep(${idx},-1)">↑</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveStep(${idx},1)">↓</button>
+        <button class="px-2 py-1 text-xs rounded text-white bg-red-600 hover:bg-red-700" onclick="removeStep(${idx})">Remove</button>
+      </div>
+    </li>
+  `).join('') || `<li class="text-slate-500 text-sm">No steps yet. Select from the library.</li>`;
+    }
+    function addStep(s) { CHECKLIST.push(s); renderChecklist(); }
+    function moveStep(i, d) { const j = i + d; if (j < 0 || j >= CHECKLIST.length) return;[CHECKLIST[i], CHECKLIST[j]] = [CHECKLIST[j], CHECKLIST[i]]; renderChecklist(); }
+    function removeStep(i) { CHECKLIST.splice(i, 1); renderChecklist(); }
+    $('taskLibrary')?.addEventListener('click', (e) => { const b = e.target.closest('.ck-chip'); if (b) addStep(b.dataset.task); });
+
+    function renderTemplates() {
+        $('templatesList').innerHTML = TEMPLATES.map(t => `
+    <div class="rounded-lg border border-slate-200 p-3 flex items-center justify-between">
+      <div>
+        <div class="font-medium text-slate-800">${t.name}</div>
+        <div class="text-xs text-slate-600">${t.steps.map(labelStep).join(' • ')}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="loadTemplate(${t.id})"><i class="fa-solid fa-arrow-down mr-1"></i> Load</button>
+        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteTemplate(${t.id})"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
+      </div>
+    </div>`).join('') || `<div class="text-slate-500 text-sm">No templates</div>`;
+    }
+    function loadTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; CHECKLIST = t.steps.slice(); renderChecklist(); }
+    function deleteTemplate(id) { TEMPLATES = TEMPLATES.filter(t => t.id !== id); renderTemplates(); }
+
+    /* ---------- Assets ---------- */
+    function renderAssets() {
+        const f = $('assetFilter').value;
+        const data = f === 'all' ? ASSETS : ASSETS.filter(a => a.status === f);
+        $('assetRows').innerHTML = data.map(a => {
+            const pill = a.status === 'returned' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4">${a.emp}</td>
+        <td class="py-2 px-4">${a.item}</td>
+        <td class="py-2 px-4">${a.serial}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(a.status)}</span></td>
+        <td class="py-2 px-4">${a.due}</td>
+        <td class="py-2 px-4 text-right">
+          ${a.status === 'returned'
+                    ? '<span class="text-xs text-slate-500">Done</span>'
+                    : `<button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="markReturned(${a.id})"><i class='fa-solid fa-check mr-1'></i> Returned</button>`}
+        </td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No assets</td></tr>`;
+    }
+    function markReturned(id) { const a = ASSETS.find(x => x.id === id); if (a) { a.status = 'returned'; renderAssets(); } }
+    function addAsset() { const emp = prompt('Employee'); if (!emp) return; ASSETS.push({ id: Date.now(), emp, item: 'TBD', serial: '—', status: 'pending', due: today() }); renderAssets(); }
+
+    /* ---------- Compliance ---------- */
+    function renderCompliance() {
+        $('compList').innerHTML = COMP_ITEMS.map(c => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="flex items-center gap-2">
+        <input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleComp(${c.id}, this.checked)">
+        <span class="text-sm ${c.done ? 'line-through text-slate-500' : ''}">${c.text}</span>
+      </div>
+      ${c.done ? '<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Done</span>' : ''}
+    </div>`).join('');
+    }
+    function toggleComp(id, on) { const it = COMP_ITEMS.find(x => x.id === id); if (it) { it.done = on; renderCompliance(); } }
+    function renderRevocation() {
+        $('revocationList').innerHTML = REVOKE.map(r => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="text-sm text-slate-800">${r.sys}</div>
+      <div class="text-xs text-slate-600">${r.ts} • ${r.by}</div>
+      <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">${r.state}</span>
+    </div>`).join('');
+    }
+    function renderFinalPay() {
+        $('finalPayPanel').innerHTML = FINAL_PAY.map(p => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div>
+        <div class="font-medium text-slate-800">${p.emp}</div>
+        <div class="text-xs text-slate-600">${p.calc}</div>
+      </div>
+      <div class="text-right">
+        <div class="text-sm font-semibold text-slate-800">${p.amount}</div>
+        <div class="text-xs text-slate-600">${p.state} • ${p.due}</div>
+      </div>
+    </div>`).join('');
+    }
+
+    /* ---------- Reports (Charts) ---------- */
+    let chartsLoaded = false, reasonsC, slaC;
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartsLoaded = true; return; }
+        if (chartsLoaded) return;
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsLoaded = true; drawCharts(); };
+        document.head.appendChild(s);
+    }
+    function drawCharts() {
+        const rctx = document.getElementById('reasonsChart').getContext('2d');
+        const sctx = document.getElementById('slaChart').getContext('2d');
+        reasonsC && reasonsC.destroy(); slaC && slaC.destroy();
+        const reasons = { Resignation: 6, Termination: 2, 'Contract End': 3, Other: 1 };
+        reasonsC = new Chart(rctx, { type: 'pie', data: { labels: Object.keys(reasons), datasets: [{ data: Object.values(reasons), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+        // SLA% within 3 days for Access Revoke, Asset Return, Final Pay
+        slaC = new Chart(sctx, { type: 'bar', data: { labels: ['Access', 'Assets', 'Final Pay'], datasets: [{ label: 'Within 3 days', data: [96, 82, 88], backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } } });
+    }
+
+    /* ---------- Utils ---------- */
+    function stepIcon(s) {
+        const m = {
+            revoke_access: '<i class="fa-solid fa-user-lock"></i>',
+            collect_assets: '<i class="fa-solid fa-computer"></i>',
+            handover_docs: '<i class="fa-solid fa-file-export"></i>',
+            exit_interview: '<i class="fa-solid fa-comments"></i>',
+            final_payroll: '<i class="fa-solid fa-money-check-dollar"></i>',
+            notify_team: '<i class="fa-solid fa-bullhorn"></i>',
+            notice_received: '<i class="fa-solid fa-envelope-open-text"></i>',
+            last_week: '<i class="fa-solid fa-calendar-week"></i>',
+            last_day: '<i class="fa-solid fa-calendar-day"></i>',
+            post_exit_7: '<i class="fa-solid fa-clock-rotate-left"></i>'
+        }; return m[s] || '<i class="fa-solid fa-circle-dot"></i>';
+    }
+    function labelStep(s) {
+        return ({
+            revoke_access: 'Revoke Access', collect_assets: 'Collect Assets', handover_docs: 'Handover Documents',
+            exit_interview: 'Exit Interview', final_payroll: 'Final Payroll', notify_team: 'Notify Team/Clients',
+            notice_received: 'Notice Received', last_week: 'Last Working Week', last_day: 'Last Day', post_exit_7: 'Post-Exit +7d'
+        })[s] || s;
+    }
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function labelStatus(s) { return ({ pending: 'Pending', in_progress: 'In Progress', done: 'Done' })[s] || s; }
+    function daysFromNow(d) { const x = new Date(d), n = new Date(); return Math.max(0, Math.ceil((x - n) / (1000 * 60 * 60 * 24))); }
+    function val(id) { return $(id).value; }
+    function today() { const d = new Date(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${d.getFullYear()}-${m}-${day}`; }
+    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+</script>
+
+<style>
+    .obf-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .obf-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .obf-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+
+    .ck-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .375rem;
+        border: 1px solid rgb(203, 213, 225);
+        background: white;
+        border-radius: .5rem;
+        padding: .375rem .5rem;
+        font-size: .875rem;
+    }
+
+    .ck-chip:hover {
+        background: #f8fafc;
+    }
+</style>
+{% endblock %}

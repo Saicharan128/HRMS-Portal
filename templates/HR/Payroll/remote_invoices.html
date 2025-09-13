@@ -1,0 +1,644 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-globe mr-2"></i> Remote Invoices
+            </h1>
+            <p class="text-slate-600 text-sm">Process invoices for remote employees and contractors globally.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newInvBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-file-circle-plus mr-1"></i> New Invoice
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="queueTab" class="ri-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-inbox mr-1"></i> Queue</button>
+            <button id="createTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-pen-to-square mr-1"></i> Create</button>
+            <button id="taxfxTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-scale-balanced mr-1"></i> Tax & FX</button>
+            <button id="payTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-building-columns mr-1"></i> Disburse</button>
+            <button id="compTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
+            <button id="reportsTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-chart-line mr-1"></i> Reports</button>
+        </div>
+    </div>
+
+    <!-- Queue -->
+    <section id="queuePanel" class="ri-panel">
+        <div class="rounded-2xl border border-slate-200 bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                <div class="relative w-full md:w-[28rem]">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input id="qSearch" placeholder="Search invoice #, name, country or currency"
+                        class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
+                    <button id="qClear"
+                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select id="qStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="paid">Paid</option>
+                    </select>
+                    <select id="qType" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All Types</option>
+                        <option value="employee">Employee</option>
+                        <option value="contractor">Contractor</option>
+                    </select>
+                    <select id="homeCcy" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="USD">USD</option>
+                        <option value="INR">INR</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Invoice #</th>
+                            <th class="py-2 px-4">Name</th>
+                            <th class="py-2 px-4">Country</th>
+                            <th class="py-2 px-4">Type</th>
+                            <th class="py-2 px-4">Amount</th>
+                            <th class="py-2 px-4">In Home CCY</th>
+                            <th class="py-2 px-4">Status</th>
+                            <th class="py-2 px-4 w-28"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="qRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Create -->
+    <section id="createPanel" class="ri-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-pen-to-square mr-2"></i> New
+                        Invoice</h3>
+                    <div class="flex items-center gap-2">
+                        <button id="saveDraft"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save Draft</button>
+                        <button id="submitInv"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                                class="fa-solid fa-paper-plane mr-1"></i> Submit</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Person Type</label>
+                        <select id="cType" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="employee">Employee</option>
+                            <option value="contractor">Contractor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Name</label>
+                        <input id="cName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Full name">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Country</label>
+                        <input id="cCountry" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="e.g., IN, US, DE">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Currency</label>
+                        <select id="cCcy" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>USD</option>
+                            <option>INR</option>
+                            <option>EUR</option>
+                            <option>GBP</option>
+                            <option>JPY</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Amount</label>
+                        <input id="cAmt" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Period</label>
+                        <input id="cPeriod" type="month" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label class="block text-xs text-slate-500 mb-1">Description</label>
+                        <input id="cDesc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Work summary or expense details">
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">FX Rate (to Home)</div>
+                        <div id="fxPreview" class="text-lg font-semibold text-slate-800">—</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Converted</div>
+                        <div id="fxConverted" class="text-lg font-semibold text-slate-800">—</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Withholding (est.)</div>
+                        <div id="fxWithhold" class="text-lg font-semibold text-slate-800">—</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Net Pay</div>
+                        <div id="fxNet" class="text-lg font-semibold text-slate-800">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-gear mr-2"></i> Options</h3>
+                <div class="space-y-3 text-sm">
+                    <label class="flex items-center gap-2"><input id="opAutoApprove" type="checkbox"> Auto-approve if ≤
+                        set cap</label>
+                    <label class="flex items-center gap-2"><input id="opHoldTax" type="checkbox" checked> Apply
+                        withholding if required</label>
+                    <label class="flex items-center gap-2"><input id="opFxFee" type="checkbox" checked> Add FX/transfer
+                        fee estimate</label>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tax & FX -->
+    <section id="taxfxPanel" class="ri-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-scale-balanced mr-2"></i> FX
+                        & Tax Simulator</h3>
+                    <button id="recalcFx"
+                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                            class="fa-solid fa-rotate mr-1"></i> Recalculate</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">From</label>
+                        <select id="fxFrom" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>USD</option>
+                            <option>INR</option>
+                            <option>EUR</option>
+                            <option>GBP</option>
+                            <option>JPY</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">To (Home)</label>
+                        <select id="fxTo" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>USD</option>
+                            <option>INR</option>
+                            <option>EUR</option>
+                            <option>GBP</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Amount</label>
+                        <input id="fxAmt" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Withholding %</label>
+                        <input id="fxWh" type="number" step="0.1" value="5"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">FX Fee</label>
+                        <input id="fxFee" type="number" value="8"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Rate</div>
+                        <div id="simRate" class="text-lg font-semibold text-slate-800">—</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Converted</div>
+                        <div id="simConv" class="text-lg font-semibold text-slate-800">—</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Withholding</div>
+                        <div id="simWh" class="text-lg font-semibold text-slate-800">—</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Net</div>
+                        <div id="simNet" class="text-lg font-semibold text-slate-800">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-language mr-2"></i> Country
+                    Presets</h3>
+                <ul id="countryPresets" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Disburse -->
+    <section id="payPanel" class="ri-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-building-columns mr-2"></i>
+                    Batches</h3>
+                <div class="flex items-center gap-2">
+                    <select id="payFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="queued">Queued</option>
+                        <option value="sent">Sent</option>
+                    </select>
+                    <button id="genFile"
+                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                            class="fa-solid fa-file-arrow-down mr-1"></i> Generate File</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Batch</th>
+                            <th class="py-2 px-4">Currency</th>
+                            <th class="py-2 px-4">Count</th>
+                            <th class="py-2 px-4">Amount</th>
+                            <th class="py-2 px-4">Status</th>
+                            <th class="py-2 px-4 w-24"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="payRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compliance -->
+    <section id="compPanel" class="ri-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-shield mr-2"></i>
+                    Checklist</h3>
+                <div id="compList" class="space-y-3"><!-- injected --></div>
+                <button id="compAll"
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
+                        class="fa-solid fa-check mr-1"></i> Mark All Complete</button>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>
+                    Withholding Summary</h3>
+                <ul id="withholdList" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-user-shield mr-2"></i>
+                    Residency & Docs</h3>
+                <ul id="residency" class="space-y-2 text-sm"><!-- injected --></ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reports -->
+    <section id="reportsPanel" class="ri-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Spend
+                    by Currency</h3>
+                <canvas id="spendChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-stopwatch mr-2"></i>
+                    Approval SLA</h3>
+                <canvas id="slaChart" height="220"></canvas>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- New Invoice Modal -->
+<div id="invModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Quick Invoice</h3>
+                    <button id="closeInvModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="mName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Name">
+                        <input id="mCountry" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Country">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <select id="mCcy" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>USD</option>
+                            <option>INR</option>
+                            <option>EUR</option>
+                            <option>GBP</option>
+                        </select>
+                        <input id="mAmt" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Amount">
+                    </div>
+                    <input id="mDesc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Description">
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="cancelInv"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="saveInv" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ---------- Mock Data ---------- */
+    let FX = { // illustrative static rates to home=USD (can be changed via homeCcy by inversion)
+        USD: 1.00, EUR: 1.09, GBP: 1.27, INR: 0.012, JPY: 0.0068
+    };
+    let INVS = [
+        { id: 'RI-2401', name: 'Isha Verma', country: 'IN', type: 'employee', ccy: 'INR', amt: 120000, status: 'pending' },
+        { id: 'RI-2402', name: 'PixelCraft Studio', country: 'IN', type: 'contractor', ccy: 'USD', amt: 4200, status: 'approved' },
+        { id: 'RI-2403', name: 'Omar Ali', country: 'AE', type: 'contractor', ccy: 'USD', amt: 1800, status: 'paid' },
+        { id: 'RI-2404', name: 'Noah Kim', country: 'KR', type: 'employee', ccy: 'USD', amt: 2300, status: 'rejected' },
+        { id: 'RI-2405', name: 'Riya Patel', country: 'IN', type: 'employee', ccy: 'INR', amt: 95000, status: 'pending' }
+    ];
+    let PRESETS = [
+        { cc: 'IN', label: 'India • TDS 5% (services)', wh: 5, ccy: 'INR' },
+        { cc: 'US', label: 'USA • 0% (treaty/no withholding)', wh: 0, ccy: 'USD' },
+        { cc: 'EU', label: 'EU • 0–5% (depends)', wh: 3, ccy: 'EUR' },
+        { cc: 'UK', label: 'UK • 0% (contractor services)', wh: 0, ccy: 'GBP' }
+    ];
+    let BATCHES = [
+        { id: 'RB-0003', ccy: 'USD', count: 3, amount: 7900, status: 'sent' },
+        { id: 'RB-0004', ccy: 'INR', count: 2, amount: 215000, status: 'queued' }
+    ];
+    let COMP = [
+        { id: 301, text: 'Residence/tax form on file (W-8/W-9/15CA/15CB etc.)', done: true },
+        { id: 302, text: 'Contract/SOW signed & stored', done: true },
+        { id: 303, text: 'Withholding calculated where applicable', done: false },
+        { id: 304, text: 'Bank/KYC verified', done: true }
+    ];
+
+    /* ---------- Helpers ---------- */
+    const $ = (id) => document.getElementById(id);
+    function fmt(n, c = 'USD') { const v = Number(n || 0); return new Intl.NumberFormat('en-US', { style: 'currency', currency: c, maximumFractionDigits: 0 }).format(v); }
+    function badge(txt, tone) { const m = { emerald: 'bg-emerald-50 text-emerald-700', amber: 'bg-amber-50 text-amber-700', red: 'bg-red-50 text-red-700', slate: 'bg-slate-100 text-slate-700', blue: 'bg-blue-50 text-blue-700' }; return `<span class="px-2 py-0.5 rounded-full ${m[tone] || m.slate} text-xs">${txt}</span>`; }
+    function daysFromNow(d) { const x = new Date(d), n = new Date(); return Math.max(0, Math.ceil((x - n) / (1000 * 60 * 60 * 24))); }
+
+    /* ---------- Init ---------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tabs
+        document.querySelectorAll('.ri-tab').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.ri-tab').forEach(x => x.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.ri-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+                if (name === 'reports') { ensureCharts(); drawCharts(); }
+            });
+        });
+
+        // Queue filters
+        $('qStatus').addEventListener('change', renderQueue);
+        $('qType').addEventListener('change', renderQueue);
+        $('homeCcy').addEventListener('change', renderQueue);
+        const s = $('qSearch'), c = $('qClear');
+        s.addEventListener('input', () => { c.classList.toggle('hidden', !s.value.trim()); renderQueue(); });
+        c.addEventListener('click', () => { s.value = ''; c.classList.add('hidden'); renderQueue(); });
+
+        // Create
+        $('cCcy').addEventListener('change', previewCreate);
+        ['cAmt', 'cType', 'cName', 'cCountry', 'cPeriod'].forEach(id => $(id).addEventListener('input', previewCreate));
+        $('homeCcy').addEventListener('change', previewCreate);
+        $('recalcFx').addEventListener('click', simulateFx);
+        $('fxFrom').addEventListener('change', simulateFx);
+        $('fxTo').addEventListener('change', simulateFx);
+        ;['fxAmt', 'fxWh', 'fxFee'].forEach(id => $(id).addEventListener('input', simulateFx));
+
+        // Disburse & Compliance
+        $('payFilter').addEventListener('change', renderBatches);
+        $('genFile').addEventListener('click', () => alert('✅ Payment file generated'));
+        $('compAll').addEventListener('click', () => { COMP = COMP.map(c => ({ ...c, done: true })); renderCompliance(); });
+
+        // Modal
+        $('newInvBtn').addEventListener('click', openInvModal);
+        $('closeInvModal').addEventListener('click', closeInvModal);
+        $('cancelInv').addEventListener('click', closeInvModal);
+        $('saveInv').addEventListener('click', saveInv);
+        $('saveDraft').addEventListener('click', () => alert('✅ Draft saved'));
+        $('submitInv').addEventListener('click', () => { addInvoiceFromCreate(); alert('📨 Submitted'); });
+
+        // Presets
+        renderPresets();
+
+        // First paint
+        renderQueue(); previewCreate(); simulateFx(); renderBatches(); renderCompliance(); renderWithhold(); renderResidency();
+    });
+
+    /* ---------- Queue ---------- */
+    function renderQueue() {
+        const q = ($('qSearch').value || '').toLowerCase();
+        const st = $('qStatus').value, tp = $('qType').value, home = $('homeCcy').value;
+        const toUSD = (val, from) => val * (FX[from] || 1); // convert to USD baseline
+        // derive map for home currency relative to USD
+        const homePerUSD = FX[home] || 1;
+        const data = INVS.filter(i =>
+            (st === 'all' || i.status === st) && (tp === 'all' || i.type === tp) &&
+            (!q || [i.id, i.name, i.country, i.ccy].some(x => String(x).toLowerCase().includes(q)))
+        );
+        $('qRows').innerHTML = data.map(i => {
+            const usd = toUSD(i.amt, i.ccy);
+            const inHome = usd / (1 / homePerUSD);
+            const pill = i.status === 'approved' ? 'emerald' : i.status === 'pending' ? 'amber' : i.status === 'paid' ? 'blue' : 'red';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${i.id}</td>
+        <td class="py-2 px-4">${i.name}</td>
+        <td class="py-2 px-4">${i.country}</td>
+        <td class="py-2 px-4 capitalize">${i.type}</td>
+        <td class="py-2 px-4">${fmt(i.amt, i.ccy)}</td>
+        <td class="py-2 px-4">${fmt(Math.round(inHome), home)}</td>
+        <td class="py-2 px-4">${badge(i.status.charAt(0).toUpperCase() + i.status.slice(1), pill)}</td>
+        <td class="py-2 px-4 text-right">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${i.id}')">Approve</button>
+        </td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="8" class="py-6 text-center text-slate-500">No invoices</td></tr>`;
+    }
+    function approve(id) { const x = INVS.find(i => i.id === id); if (!x) return; x.status = 'approved'; renderQueue(); }
+
+    /* ---------- Create Preview ---------- */
+    function previewCreate() {
+        const home = $('homeCcy').value; const ccy = $('cCcy').value; const amt = Number($('cAmt').value || 0);
+        if (!amt) { $('fxPreview').textContent = '—'; $('fxConverted').textContent = '—'; $('fxWithhold').textContent = '—'; $('fxNet').textContent = '—'; return; }
+        const usd = amt * (FX[ccy] || 1);
+        const homePerUSD = FX[home] || 1;
+        const converted = usd / (1 / homePerUSD);
+        const whPct = $('opHoldTax').checked ? (guessWH($('cCountry').value) || 0) : 0;
+        const fee = $('opFxFee').checked ? 8 : 0;
+        const whAmt = converted * (whPct / 100);
+        const net = converted - whAmt - fee;
+        $('fxPreview').textContent = `1 ${ccy} ≈ ${(FX[ccy] / (FX[home] || 1)).toFixed(4)} ${home}`;
+        $('fxConverted').textContent = fmt(Math.round(converted), home);
+        $('fxWithhold').textContent = `${fmt(Math.round(whAmt), home)} (${whPct}%)`;
+        $('fxNet').textContent = fmt(Math.round(net), home);
+    }
+    function guessWH(cc) { const p = PRESETS.find(x => x.cc.toLowerCase() === String(cc || '').toLowerCase()); return p ? p.wh : 3; }
+    function addInvoiceFromCreate() {
+        const name = $('cName').value || 'Unknown', country = $('cCountry').value || '—', type = $('cType').value || 'contractor', ccy = $('cCcy').value || 'USD', amt = Number($('cAmt').value || 0);
+        if (!amt) { alert('Amount required'); return; }
+        INVS.push({ id: 'RI-' + Date.now(), name, country, type, ccy, amt, status: $('opAutoApprove').checked ? 'approved' : 'pending' });
+        renderQueue();
+    }
+
+    /* ---------- FX Simulator ---------- */
+    function simulateFx() {
+        const from = $('fxFrom').value, to = $('fxTo').value, amt = Number($('fxAmt').value || 0), wh = Number($('fxWh').value || 0), fee = Number($('fxFee').value || 0);
+        if (!amt) { $('simRate').textContent = '—'; $('simConv').textContent = '—'; $('simWh').textContent = '—'; $('simNet').textContent = '—'; return; }
+        const usd = amt * (FX[from] || 1);
+        const homePerUSD = FX[to] || 1;
+        const conv = usd / (1 / homePerUSD);
+        const whAmt = conv * (wh / 100);
+        $('simRate').textContent = `1 ${from} ≈ ${(FX[from] / (FX[to] || 1)).toFixed(4)} ${to}`;
+        $('simConv').textContent = fmt(Math.round(conv), to);
+        $('simWh').textContent = fmt(Math.round(whAmt), to);
+        $('simNet').textContent = fmt(Math.round(conv - whAmt - fee), to);
+    }
+
+    /* ---------- Presets ---------- */
+    function renderPresets() {
+        $('countryPresets').innerHTML = PRESETS.map(p => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
+      <span>${p.label}</span>
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50"
+        onclick="applyPreset('${p.cc}','${p.ccy}',${p.wh})">Apply</button>
+    </li>`).join('');
+    }
+    function applyPreset(cc, ccy, wh) {
+        $('cCountry').value = cc; $('cCcy').value = ccy; $('fxWh').value = wh; previewCreate(); simulateFx();
+    }
+
+    /* ---------- Disburse ---------- */
+    function renderBatches() {
+        const f = $('payFilter').value;
+        const data = f === 'all' ? BATCHES : BATCHES.filter(b => b.status === f);
+        $('payRows').innerHTML = data.map(b => {
+            const pill = b.status === 'sent' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${b.id}</td>
+        <td class="py-2 px-4">${b.ccy}</td>
+        <td class="py-2 px-4">${b.count}</td>
+        <td class="py-2 px-4">${fmt(b.amount, b.ccy)}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${b.status}</span></td>
+        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button></td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No batches</td></tr>`;
+    }
+
+    /* ---------- Compliance ---------- */
+    function renderCompliance() {
+        $('compList').innerHTML = COMP.map(c => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleComp(${c.id}, this.checked)"> ${c.text}</label>
+      ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
+    </div>`).join('');
+    }
+    function toggleComp(id, on) { const x = COMP.find(c => c.id === id); if (x) { x.done = on; renderCompliance(); } }
+    function renderWithhold() {
+        const sum = Math.round(INVS.reduce((s, i) => s + (i.status !== 'rejected' ? (i.amt * (i.ccy === 'INR' ? FX.INR : FX[i.ccy] || 1)) * 0.03 : 0), 0));
+        $('withholdList').innerHTML = `
+    <li class="flex items-center justify-between"><span>Estimated Withholding</span><span class="font-medium">${fmt(sum)}</span></li>
+    <li class="flex items-center justify-between"><span>FX / Transfer Fees</span><span class="font-medium">${fmt(32)}</span></li>
+  `;
+    }
+    function renderResidency() {
+        const items = [
+            { name: 'Isha Verma', doc: '15CA/15CB', expiry: '2026-03-31', ok: true },
+            { name: 'PixelCraft Studio', doc: 'GSTIN', expiry: '2026-01-01', ok: true },
+            { name: 'Omar Ali', doc: 'Residency Cert', expiry: '2025-11-15', ok: false }
+        ];
+        $('residency').innerHTML = items.map(i => `
+    <li class="flex items-center justify-between p-2 rounded ${i.ok ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
+      <span>${i.name} • ${i.doc}</span><span class="text-xs">Valid till ${i.expiry}</span>
+    </li>`).join('');
+    }
+
+    /* ---------- Modal ---------- */
+    function openInvModal() { $('invModal').classList.remove('hidden'); }
+    function closeInvModal() { $('invModal').classList.add('hidden'); }
+    function saveInv() {
+        const name = $('mName').value || 'Unknown', country = $('mCountry').value || '—', ccy = $('mCcy').value || 'USD', amt = Number($('mAmt').value || 0);
+        if (!amt) { alert('Amount required'); return; }
+        INVS.push({ id: 'RI-' + Date.now(), name, country, type: 'contractor', ccy, amt, status: 'pending' });
+        closeInvModal(); renderQueue();
+    }
+
+    /* ---------- Reports (Charts) ---------- */
+    let chartsReady = false, spendC, slaC;
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartsReady = true; return; }
+        if (chartsReady) return;
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
+    }
+    function drawCharts() {
+        const c1 = document.getElementById('spendChart').getContext('2d');
+        const c2 = document.getElementById('slaChart').getContext('2d');
+        spendC && spendC.destroy(); slaC && slaC.destroy();
+        const byCcy = { USD: 6000, INR: 215000, EUR: 0, GBP: 0 };
+        spendC = new Chart(c1, { type: 'pie', data: { labels: Object.keys(byCcy), datasets: [{ data: Object.values(byCcy), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+        slaC = new Chart(c2, { type: 'bar', data: { labels: ['Submit', 'Approve', 'Pay'], datasets: [{ label: 'Median Hours', data: [8, 20, 12], backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+    }
+</script>
+
+<style>
+    .ri-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .ri-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .ri-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

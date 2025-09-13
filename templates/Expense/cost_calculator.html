@@ -1,0 +1,559 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-calculator mr-2"></i> Cost Calculator
+            </h1>
+            <p class="text-slate-600 text-sm">Estimate workforce costs with advanced budgeting tools.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="saveScenarioBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-save mr-1"></i> Save Scenario
+            </button>
+            <button id="exportBudgetBtn"
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-download mr-1"></i> Export
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="positionTab" class="cc-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-user mr-1"></i> Position</button>
+            <button id="teamTab" class="cc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-users mr-1"></i> Team</button>
+            <button id="budgetTab" class="cc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-chart-pie mr-1"></i> Budget</button>
+            <button id="scenarioTab" class="cc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-flask mr-1"></i> Scenarios</button>
+        </div>
+    </div>
+
+    <!-- Position Calculator -->
+    <section id="positionPanel" class="cc-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Form -->
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-user-plus mr-2"></i>
+                    Position Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Job Title *</label>
+                        <input id="pTitle" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="e.g., Senior Engineer">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Department</label>
+                        <select id="pDept" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>Engineering</option>
+                            <option>Sales</option>
+                            <option>Marketing</option>
+                            <option>HR</option>
+                            <option>Finance</option>
+                            <option>Operations</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Base Salary *</label>
+                        <input id="pBase" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Bonus %</label>
+                        <input id="pBonus" type="number" step="1" value="10"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Equity (annual $)</label>
+                        <input id="pEquity" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Employment</label>
+                        <select id="pType" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>Full-Time</option>
+                            <option>Part-Time</option>
+                            <option>Contractor</option>
+                            <option>Intern</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Health Insurance (monthly)</label>
+                        <input id="pHI" type="number" value="800"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">401k Match %</label>
+                        <input id="p401k" type="number" step="0.5" value="4"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Equipment (one-time)</label>
+                        <input id="pEquip" type="number" value="2000"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Training (annual)</label>
+                        <input id="pTrain" type="number" value="1500"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Office (monthly)</label>
+                        <input id="pOffice" type="number" value="500"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Other Benefits (monthly)</label>
+                        <input id="pOther" type="number" value="0"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Payroll Tax %</label>
+                        <input id="pTax" type="number" step="0.1" value="7.65"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Workers' Comp %</label>
+                        <input id="pWC" type="number" step="0.1" value="0.5"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Unemployment %</label>
+                        <input id="pUE" type="number" step="0.1" value="2.5"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                </div>
+
+                <button id="calcPos"
+                    class="mt-5 w-full px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">
+                    <i class="fa-solid fa-calculator mr-2"></i> Calculate
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-line mr-2"></i> Cost
+                    Breakdown</h3>
+
+                <div id="posEmpty" class="text-center py-8 text-slate-500">
+                    <i class="fa-solid fa-calculator text-4xl mb-4"></i>
+                    <p>Enter details and click “Calculate”.</p>
+                </div>
+
+                <div id="posResults" class="hidden space-y-4">
+                    <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                        <div class="text-sm text-blue-600 mb-1">Total Annual Cost</div>
+                        <div id="rTotal" class="text-2xl font-bold text-blue-800">$0</div>
+                        <div class="text-xs text-blue-600 mt-1">Includes benefits, taxes & overhead</div>
+                    </div>
+
+                    <div class="p-3 rounded-lg bg-slate-50 flex justify-between">
+                        <span class="text-sm text-slate-600">Monthly</span>
+                        <span id="rMonthly" class="font-medium text-slate-800">$0</span>
+                    </div>
+
+                    <div class="p-3 rounded-lg bg-green-50 flex justify-between">
+                        <span class="text-sm text-green-600">Effective Hourly</span>
+                        <span id="rHourly" class="font-medium text-green-800">$0</span>
+                    </div>
+
+                    <div class="p-3 rounded-lg bg-purple-50 flex justify-between">
+                        <span class="text-sm text-purple-600">Benefits Ratio</span>
+                        <span id="rBRatio" class="font-medium text-purple-800">0%</span>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-medium text-slate-800 mb-2">Line Items</h4>
+                        <div id="rBreak" class="space-y-1 text-sm"><!-- injected --></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Calculator -->
+    <section id="teamPanel" class="cc-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-users mr-2"></i> Team Builder
+                    </h3>
+                    <button id="addMember"
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                        <i class="fa-solid fa-plus mr-1"></i> Add
+                    </button>
+                </div>
+                <div id="teamList" class="space-y-3"><!-- injected --></div>
+                <div class="mt-4 pt-4 border-t border-slate-200">
+                    <button id="calcTeam"
+                        class="w-full px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">
+                        <i class="fa-solid fa-calculator mr-2"></i> Calculate Team
+                    </button>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Team
+                    Analysis</h3>
+                <div id="teamEmpty" class="text-center py-8 text-slate-500"><i
+                        class="fa-solid fa-users text-4xl mb-4"></i>
+                    <p>No members added</p>
+                </div>
+                <div id="teamResults" class="hidden space-y-4"><!-- injected --></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Budget Planner -->
+    <section id="budgetPanel" class="cc-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-cog mr-2"></i> Parameters
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Period</label>
+                        <select id="bPeriod" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="annual">Annual</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Total Budget</label>
+                        <input id="bTotal" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Growth %</label>
+                        <input id="bGrowth" type="number" value="5"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Department</label>
+                        <select id="bDept" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="all">All</option>
+                            <option>Engineering</option>
+                            <option>Sales</option>
+                            <option>Marketing</option>
+                            <option>HR</option>
+                            <option>Finance</option>
+                        </select>
+                    </div>
+                    <button id="genBudget"
+                        class="w-full px-4 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium">
+                        <i class="fa-solid fa-chart-pie mr-2"></i> Generate
+                    </button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-pie-chart mr-2"></i>
+                        Allocation</h3>
+                    <div class="text-sm text-slate-600"><span id="bUtil">0%</span> allocated</div>
+                </div>
+                <div id="bChartWrap" class="mb-6"><canvas id="bChart" height="300"></canvas></div>
+                <div id="bBreak" class="space-y-3"><!-- injected --></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scenario Analysis -->
+    <section id="scenarioPanel" class="cc-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-flask mr-2"></i> Scenario
+                    Comparison</h3>
+                <button id="addScenario"
+                    class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm">
+                    <i class="fa-solid fa-plus mr-1"></i> Add
+                </button>
+            </div>
+            <div id="scGrid" class="grid grid-cols-1 lg:grid-cols-3 gap-6"><!-- injected --></div>
+            <div class="mt-6 rounded-lg border border-slate-200 p-4">
+                <h4 class="font-medium text-slate-800 mb-3">Scenario Chart</h4>
+                <canvas id="scChart" height="200"></canvas>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Add Member Modal -->
+<div id="memberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Add Team Member</h3>
+                    <button id="closeMember" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <input id="mRole" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Role title">
+                    <div class="grid grid-cols-2 gap-4">
+                        <select id="mLevel" class="rounded-lg border border-slate-300 px-3 py-2">
+                            <option>Entry</option>
+                            <option>Mid</option>
+                            <option>Senior</option>
+                            <option>Lead</option>
+                        </select>
+                        <input id="mCount" type="number" value="1" class="rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <input id="mSalary" type="number" placeholder="Annual salary"
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="cancelMember"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="saveMember" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ===== State ===== */
+    let TEAM = [];
+    let SCEN = [];
+
+    /* ===== Utils ===== */
+    const $ = (id) => document.getElementById(id);
+    const money = (n, cents = true) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0 }).format(Number(n || 0));
+    function show(id, on) { $(id).classList.toggle('hidden', !on); }
+
+    /* ===== Tabs ===== */
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.cc-tab').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.cc-tab').forEach(x => x.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.cc-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+                if (name === 'budget' || name === 'scenario') ensureCharts();
+                if (name === 'scenario') drawScenarioChart();
+            });
+        });
+
+        // Position Calc
+        $('calcPos').addEventListener('click', calcPosition);
+        // Team
+        $('addMember').addEventListener('click', () => $('memberModal').classList.remove('hidden'));
+        $('closeMember').addEventListener('click', closeMember);
+        $('cancelMember').addEventListener('click', closeMember);
+        $('saveMember').addEventListener('click', saveMember);
+        $('calcTeam').addEventListener('click', calcTeam);
+        // Budget
+        $('genBudget').addEventListener('click', genBudget);
+        // Scenario
+        $('addScenario').addEventListener('click', addScenario);
+        // Header actions
+        $('exportBudgetBtn').addEventListener('click', () => alert('📄 Exported (mock)'));
+        $('saveScenarioBtn').addEventListener('click', () => alert('💾 Scenario saved (mock)'));
+    });
+
+    /* ===== Position Calculator ===== */
+    function calcPosition() {
+        const base = +$('pBase').value || 0; if (!base) { alert('Base salary required'); return; }
+        const bonus = base * ((+$('pBonus').value || 0) / 100);
+        const equity = +$('pEquity').value || 0;
+
+        const hi = (+$('pHI').value || 0) * 12;
+        const match = base * ((+$('p401k').value || 0) / 100);
+        const equip = +$('pEquip').value || 0;
+        const train = +$('pTrain').value || 0;
+        const office = (+$('pOffice').value || 0) * 12;
+        const other = (+$('pOther').value || 0) * 12;
+
+        const comp = base + bonus + equity;
+        const taxes = comp * ((+$('pTax').value || 0) / 100) + comp * ((+$('pWC').value || 0) / 100) + comp * ((+$('pUE').value || 0) / 100);
+        const benefits = hi + match + train + other;
+        const total = comp + taxes + benefits + equip + office;
+
+        $('rTotal').textContent = money(total);
+        $('rMonthly').textContent = money(total / 12);
+        $('rHourly').textContent = money(total / (40 * 52), false);
+        $('rBRatio').textContent = ((benefits / base) * 100).toFixed(1) + '%';
+
+        const items = [
+            ['Base Salary', base], ['Bonus', bonus], ['Equity', equity],
+            ['Health Insurance', hi], ['401k Match', match], ['Training', train],
+            ['Office Space', office], ['Other Benefits', other], ['Equipment', equip], ['Payroll/Other Taxes', taxes]
+        ].filter(x => x[1] > 0).map(x => `
+    <div class="flex justify-between"><span class="text-slate-600">${x[0]}</span><span class="text-slate-800">${money(x[1])}</span></div>
+  `).join('');
+        $('rBreak').innerHTML = items;
+
+        show('posEmpty', false); show('posResults', true);
+    }
+
+    /* ===== Team Calculator ===== */
+    function closeMember() { $('memberModal').classList.add('hidden'); }
+    function saveMember() {
+        const role = $('mRole').value.trim(); const sal = +$('mSalary').value || 0; const cnt = +$('mCount').value || 1; const lvl = $('mLevel').value;
+        if (!role || !sal) { alert('Role & salary required'); return; }
+        TEAM.push({ id: Date.now(), role, level: lvl, count: cnt, salary: sal, total: sal * 1.4 * cnt });
+        $('mRole').value = ''; $('mSalary').value = ''; $('mCount').value = '1'; closeMember(); renderTeam();
+    }
+    function renderTeam() {
+        $('teamList').innerHTML = TEAM.length ? TEAM.map(m => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div>
+        <div class="font-medium text-slate-800">${m.role}</div>
+        <div class="text-sm text-slate-600">${m.level} • ${m.count}x</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <div class="font-medium text-slate-800">${money(m.salary)}</div>
+          <div class="text-xs text-slate-600">per person</div>
+        </div>
+        <button class="text-red-600 hover:text-red-800 p-1" onclick="delMember(${m.id})"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('') : '<p class="text-slate-500 text-center py-4">No team members added</p>';
+    }
+    function delMember(id) { TEAM = TEAM.filter(m => m.id !== id); renderTeam(); }
+    function calcTeam() {
+        if (!TEAM.length) { $('teamResults').classList.add('hidden'); $('teamEmpty').classList.remove('hidden'); return; }
+        const size = TEAM.reduce((s, m) => s + m.count, 0);
+        const total = TEAM.reduce((s, m) => s + m.total, 0);
+        const avg = TEAM.reduce((s, m) => s + m.salary * m.count, 0) / size;
+        const byRole = TEAM.map(m => `<div class="flex justify-between text-sm"><span class="text-slate-600">${m.role} (${m.count}x)</span><span class="font-medium text-slate-800">${money(m.total)}</span></div>`).join('');
+
+        $('teamResults').innerHTML = `
+    <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
+      <div class="text-sm text-blue-600 mb-1">Total Team Cost</div>
+      <div class="text-2xl font-bold text-blue-800">${money(total)}</div>
+      <div class="text-xs text-blue-600 mt-1">Annual incl. benefits & taxes (est.)</div>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="p-3 rounded-lg bg-slate-50"><div class="text-sm text-slate-600">Team Size</div><div class="text-lg font-bold text-slate-800">${size}</div></div>
+      <div class="p-3 rounded-lg bg-slate-50"><div class="text-sm text-slate-600">Avg Salary</div><div class="text-lg font-bold text-slate-800">${money(avg)}</div></div>
+    </div>
+    <div class="space-y-2"><h4 class="text-sm font-medium text-slate-800">Cost by Role</h4>${byRole}</div>
+  `;
+        $('teamEmpty').classList.add('hidden'); $('teamResults').classList.remove('hidden');
+    }
+
+    /* ===== Budget Planner ===== */
+    function genBudget() {
+        const total = +$('bTotal').value || 0; if (!total) { alert('Enter total budget'); return; }
+        const alloc = { Salaries: .65, Benefits: .20, Equipment: .05, Training: .03, Office: .04, Other: .03 };
+        const data = Object.entries(alloc).map(([k, v]) => ({ k, amt: total * v, pct: v * 100 }));
+        $('bBreak').innerHTML = data.map((x, i) => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="flex items-center gap-3">
+        <div class="w-4 h-4 rounded" style="background-color:${['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16'][i % 7]}"></div>
+        <span class="font-medium text-slate-800">${x.k}</span>
+      </div>
+      <div class="text-right">
+        <div class="font-bold text-slate-800">${money(x.amt)}</div>
+        <div class="text-sm text-slate-600">${x.pct.toFixed(1)}%</div>
+      </div>
+    </div>
+  `).join('');
+        $('bUtil').textContent = (data.reduce((s, i) => s + i.pct, 0)).toFixed(1) + '%';
+        ensureCharts(); drawBudgetChart(data);
+    }
+
+    /* ===== Scenarios ===== */
+    function addScenario() {
+        const s = { id: Date.now(), name: `Scenario ${SCEN.length + 1}`, head: 50, avg: 75000, ben: .25, growth: .10 };
+        SCEN.push(s); renderScenarios(); drawScenarioChart();
+    }
+    function renderScenarios() {
+        $('scGrid').innerHTML = SCEN.length ? SCEN.map(s => `
+    <div class="rounded-lg border border-slate-200 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <input value="${s.name}" class="font-medium text-slate-800 bg-transparent border-none p-0 focus:ring-0"
+               onchange="renameScenario(${s.id}, this.value)">
+        <button class="text-red-600 hover:text-red-800" onclick="delScenario(${s.id})"><i class="fa-solid fa-trash"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">Headcount</label>
+          <input type="number" value="${s.head}" class="w-full text-sm rounded border border-slate-300 px-2 py-1" onchange="updScenario(${s.id},'head',this.value)"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">Avg Salary</label>
+          <input type="number" value="${s.avg}" class="w-full text-sm rounded border border-slate-300 px-2 py-1" onchange="updScenario(${s.id},'avg',this.value)"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">Benefits Rate</label>
+          <input type="number" step="0.05" value="${s.ben}" class="w-full text-sm rounded border border-slate-300 px-2 py-1" onchange="updScenario(${s.id},'ben',this.value)"></div>
+        <div class="pt-2 border-t border-slate-200">
+          <div class="text-sm text-slate-600">Total Cost</div>
+          <div class="text-lg font-bold text-slate-800">${money(scenCost(s))}</div>
+        </div>
+      </div>
+    </div>
+  `).join('') : '<p class="col-span-3 text-slate-500 text-center py-8">No scenarios yet</p>';
+    }
+    function scenCost(s) { const base = s.head * s.avg; return base + base * s.ben + base * 0.10; }
+    function renameScenario(id, n) { const x = SCEN.find(s => s.id === id); if (x) x.name = n; }
+    function updScenario(id, f, v) { const x = SCEN.find(s => s.id === id); if (x) { x[f] = parseFloat(v) || 0; renderScenarios(); drawScenarioChart(); } }
+    function delScenario(id) { SCEN = SCEN.filter(s => s.id !== id); renderScenarios(); drawScenarioChart(); }
+
+    /* ===== Charts ===== */
+    let chartReady = false, charts = {};
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartReady = true; return; }
+        if (chartReady) return;
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartReady = true; drawScenarioChart(); };
+        document.head.appendChild(s);
+    }
+    function drawBudgetChart(data) {
+        if (!chartReady) return;
+        const el = document.getElementById('bChart'); if (!el) return;
+        charts.b && charts.b.destroy();
+        charts.b = new Chart(el, {
+            type: 'pie',
+            data: { labels: data.map(d => d.k), datasets: [{ data: data.map(d => d.amt), borderWidth: 2, borderColor: '#fff' }] },
+            options: { plugins: { legend: { position: 'right' } } }
+        });
+    }
+    function drawScenarioChart() {
+        if (!chartReady) return;
+        const el = document.getElementById('scChart'); if (!el || !SCEN.length) return;
+        charts.sc && charts.sc.destroy();
+        charts.sc = new Chart(el, {
+            type: 'bar',
+            data: { labels: SCEN.map(s => s.name), datasets: [{ label: 'Total Cost', data: SCEN.map(s => scenCost(s)) }] },
+            options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+    }
+</script>
+
+<style>
+    .cc-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .cc-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .cc-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}
