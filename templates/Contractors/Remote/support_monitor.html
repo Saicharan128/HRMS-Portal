@@ -1,0 +1,634 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-headset mr-2"></i> Support Monitor
+            </h1>
+            <p class="text-slate-600 text-sm">Track employee support tickets and resolve HR queries.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newTicketBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New Ticket
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">View:</label>
+                <select id="viewType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="dashboard">Dashboard</option>
+                    <option value="tickets">Tickets</option>
+                    <option value="sla">SLA</option>
+                    <option value="agents">Agents</option>
+                    <option value="kb">Knowledge Base</option>
+                    <option value="analytics">Analytics</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Status:</label>
+                <select id="statusFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                    <option>New</option>
+                    <option>Open</option>
+                    <option>Pending</option>
+                    <option>Waiting on Employee</option>
+                    <option>Resolved</option>
+                    <option>Closed</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Priority:</label>
+                <select id="priorityFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                    <option>Low</option>
+                    <option>Medium</option>
+                    <option>High</option>
+                    <option>Urgent</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Channel:</label>
+                <select id="channelFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                    <option>Email</option>
+                    <option>Portal</option>
+                    <option>Slack</option>
+                    <option>Mobile</option>
+                </select>
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                <input id="searchBox" class="rounded-lg border border-slate-300 pl-8 pr-3 py-2 text-sm w-64"
+                    placeholder="Search subject, requester…" />
+            </div>
+            <div class="ml-auto flex items-center gap-2">
+                <button id="exportBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+                </button>
+                <button id="refreshBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-inbox mr-1"></i> Open Tickets</div>
+            <div id="openCount" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-hourglass-half mr-1"></i> Avg 1st Response</div>
+            <div id="avgFRT" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-gauge-high mr-1"></i> SLA Breaches</div>
+            <div id="slaBreaches" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-face-smile mr-1"></i> CSAT</div>
+            <div id="csatScore" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-rotate mr-1"></i> Backlog (≥7d)</div>
+            <div id="backlog7" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div id="loadingState" class="text-center py-12">
+            <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
+            <p class="text-slate-600">Loading support data…</p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-chart-line mr-2"></i> Tickets by
+                            Day</h3>
+                        <span id="rangeLabel" class="text-xs text-slate-500">—</span>
+                    </div>
+                    <canvas id="ticketsCanvas" height="140"></canvas>
+                    <p class="text-xs text-slate-500 mt-2">Created vs resolved volume.</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                        High Priority</h3>
+                    <ul id="highPriorityList" class="space-y-2 text-sm text-slate-700"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets -->
+        <div id="ticketsView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-ticket mr-2"></i> Tickets</h3>
+                <div class="flex items-center gap-2">
+                    <button id="bulkAssignBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-user-gear mr-1"></i> Assign</button>
+                    <button id="bulkResolveBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-check mr-1"></i> Resolve</button>
+                    <button id="bulkCloseBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-xmark mr-1"></i> Close</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3"><input type="checkbox" id="selectAllRows"></th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">#</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Subject</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Requester</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Priority</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Assignee</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Age</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLA -->
+        <div id="slaView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-clock mr-2"></i> First Response
+                        SLA</h3>
+                    <ul id="frSlaList" class="space-y-2 text-sm"></ul>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-bullseye mr-2"></i> Resolution
+                        SLA</h3>
+                    <ul id="resSlaList" class="space-y-2 text-sm"></ul>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-list-check mr-2"></i> Breach
+                        Watchlist</h3>
+                    <ul id="breachList" class="space-y-2 text-sm"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agents -->
+        <div id="agentsView" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Agent</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Open</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Resolved (7d)
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Avg FRT</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">CSAT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agentTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Knowledge Base -->
+        <div id="kbView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-book mr-2"></i> Knowledge Base</h3>
+                <button id="newArticleBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                        class="fa-solid fa-plus mr-1"></i> New Article</button>
+            </div>
+            <div id="kbGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- Analytics -->
+        <div id="analyticsView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-chart-area mr-2"></i> Resolution
+                        Time Trend</h3>
+                    <canvas id="resTimeCanvas" height="140"></canvas>
+                    <p class="text-xs text-slate-500 mt-2">Median resolution time (hours).</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-face-smile mr-2"></i> CSAT
+                        Distribution</h3>
+                    <ul id="csatDist" class="space-y-2 text-sm"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Ticket Modal -->
+    <div id="ticketModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">Create Ticket</h3>
+                    <button id="closeTicketModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="ticketForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Requester</label>
+                            <select id="tRequester"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Priority</label>
+                            <select id="tPriority" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option>Low</option>
+                                <option>Medium</option>
+                                <option>High</option>
+                                <option>Urgent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Subject</label>
+                        <input id="tSubject" class="w-full rounded-lg border border-slate-300 px-3 py-2" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                        <textarea id="tDesc" class="w-full rounded-lg border border-slate-300 px-3 py-2" rows="3"
+                            required></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="cancelTicket"
+                            class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pill {
+        font-size: .7rem;
+        padding: .2rem .5rem;
+        border-radius: 9999px;
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    canvas {
+        width: 100%;
+    }
+
+    .card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        transition: all .2s;
+    }
+
+    .card:hover {
+        border-color: #64748b;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
+    }
+</style>
+
+<script>
+    // State
+    let tickets = [];     // [{id, number, subject, requester, priority, assignee, status, created_at, updated_at, channel, dept, csat}]
+    let agents = [];      // [{name, open, resolved7, avg_frt, csat}]
+    let kb = [];         // [{id, title, category, views, updated_at}]
+    let meta = { range: { start: '', end: '' } };
+
+    // Helpers
+    async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    async function postJSON(u, d) { const r = await fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    const qs = s => document.querySelector(s);
+    const qsa = s => Array.from(document.querySelectorAll(s));
+    const age = iso => { if (!iso) return '-'; const d = (Date.now() - new Date(iso)); const h = Math.floor(d / 36e5); return h >= 24 ? Math.floor(h / 24) + 'd' : h + 'h'; };
+
+    // Load
+    async function loadAll() {
+        try {
+            const q = encodeURIComponent(qs('#searchBox').value || '');
+            const status = encodeURIComponent(qs('#statusFilter').value || '');
+            const priority = encodeURIComponent(qs('#priorityFilter').value || '');
+            const channel = encodeURIComponent(qs('#channelFilter').value || '');
+            const [m, t, a, k] = await Promise.all([
+                fetchJSON(`/api/support/meta`),
+                fetchJSON(`/api/support/tickets?status=${status}&priority=${priority}&channel=${channel}&q=${q}`),
+                fetchJSON(`/api/support/agents`),
+                fetchJSON(`/api/support/kb`)
+            ]);
+            meta = m || meta; tickets = t || []; agents = a || []; kb = k || [];
+
+            // Stats
+            const open = tickets.filter(x => ['New', 'Open', 'Pending', 'Waiting on Employee'].includes(x.status)).length;
+            const frts = tickets.map(x => x.first_response_minutes).filter(Boolean);
+            const avgFRT = frts.length ? Math.round(frts.reduce((s, v) => s + v, 0) / frts.length) : 0;
+            const breaches = tickets.filter(x => x.sla_breached).length;
+            const csats = tickets.map(x => x.csat).filter(v => typeof v === 'number');
+            const csat = csats.length ? Math.round((csats.reduce((s, v) => s + v, 0) / csats.length) * 10) / 10 : '-';
+            const backlog = tickets.filter(x => ['New', 'Open', 'Pending', 'Waiting on Employee'].includes(x.status) && daysSince(x.created_at) >= 7).length;
+
+            qs('#openCount').textContent = open;
+            qs('#avgFRT').textContent = avgFRT ? (avgFRT + 'm') : '-';
+            qs('#slaBreaches').textContent = breaches;
+            qs('#csatScore').textContent = csat === '-' ? '-' : `${csat}/5`;
+            qs('#backlog7').textContent = backlog;
+
+            renderCurrentView();
+            qs('#loadingState').classList.add('hidden');
+        } catch (e) {
+            console.error(e);
+            qs('#loadingState').innerHTML = `
+        <div class="text-center py-12">
+          <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
+          <p class="text-red-600 mb-4">Failed to load support data</p>
+          <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
+        </div>`;
+        }
+    }
+
+    // Views
+    function renderCurrentView() {
+        const v = qs('#viewType').value;
+        ['dashboard', 'tickets', 'sla', 'agents', 'kb', 'analytics'].forEach(k => qs('#' + k + 'View').classList.add('hidden'));
+        if (v === 'dashboard') { qs('#dashboardView').classList.remove('hidden'); renderDashboard(); }
+        if (v === 'tickets') { qs('#ticketsView').classList.remove('hidden'); renderTickets(); }
+        if (v === 'sla') { qs('#slaView').classList.remove('hidden'); renderSLA(); }
+        if (v === 'agents') { qs('#agentsView').classList.remove('hidden'); renderAgents(); }
+        if (v === 'kb') { qs('#kbView').classList.remove('hidden'); renderKB(); }
+        if (v === 'analytics') { qs('#analyticsView').classList.remove('hidden'); renderAnalytics(); }
+    }
+
+    function renderDashboard() {
+        drawTicketsTrend();
+        qs('#rangeLabel').textContent = meta.range?.start && meta.range?.end ? `${meta.range.start} → ${meta.range.end}` : '—';
+
+        const list = tickets.filter(x => x.priority === 'Urgent' || x.priority === 'High')
+            .filter(x => ['New', 'Open', 'Pending', 'Waiting on Employee'].includes(x.status))
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).slice(0, 8);
+        const ul = qs('#highPriorityList'); ul.innerHTML = '';
+        if (list.length === 0) { ul.innerHTML = '<li class="text-slate-500">No high-priority tickets.</li>'; return; }
+        list.forEach(t => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between">
+        <span>#${t.number} • ${t.subject}</span>
+        <span class="pill">${age(t.created_at)}</span>
+      </div>`;
+            ul.appendChild(li);
+        });
+    }
+
+    function drawTicketsTrend() {
+        const canvas = qs('#ticketsCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width = canvas.clientWidth;
+        const H = canvas.height; ctx.clearRect(0, 0, W, H);
+
+        const created = {}, resolved = {};
+        tickets.forEach(t => {
+            const c = (t.created_at || '').slice(0, 10); if (c) created[c] = (created[c] || 0) + 1;
+            const r = (t.resolved_at || '').slice(0, 10); if (r) resolved[r] = (resolved[r] || 0) + 1;
+        });
+        const days = Array.from(new Set([...Object.keys(created), ...Object.keys(resolved)])).sort();
+        const cVals = days.map(d => created[d] || 0), rVals = days.map(d => resolved[d] || 0);
+        if (days.length < 2) { ctx.fillStyle = '#64748b'; ctx.fillText('Not enough data', 10, 20); return; }
+
+        const max = Math.max(...cVals, ...rVals, 5), pad = 16, x0 = pad, x1 = W - pad, y0 = H - pad, y1 = pad;
+        ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) { const y = y0 - (i / 3) * (y0 - y1); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
+
+        // created line
+        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath();
+        cVals.forEach((v, i) => { const x = x0 + (i / (days.length - 1)) * (x1 - x0); const y = y0 - (v / max) * (y0 - y1); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }); ctx.stroke();
+
+        // resolved line
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2; ctx.beginPath();
+        rVals.forEach((v, i) => { const x = x0 + (i / (days.length - 1)) * (x1 - x0); const y = y0 - (v / max) * (y0 - y1); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }); ctx.stroke();
+    }
+
+    function renderTickets() {
+        const tbody = qs('#ticketTableBody'); tbody.innerHTML = '';
+        if (tickets.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-6 text-center text-slate-500 text-sm">No tickets.</td></tr>`;
+            return;
+        }
+        tickets.forEach(t => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="${t.id}"></td>
+        <td class="px-4 py-3 text-sm text-slate-700">#${t.number}</td>
+        <td class="px-4 py-3 text-sm text-slate-700">${t.subject}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${t.requester}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${t.priority}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${t.assignee || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${t.status}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${age(t.created_at)}</td>
+        <td class="px-4 py-3">
+          <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="openTicket('${t.id}')"><i class="fa-solid fa-eye"></i></button>
+          <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="assign('${t.id}')"><i class="fa-solid fa-user-gear"></i></button>
+          <button class="text-slate-600 hover:text-slate-800" onclick="resolve('${t.id}')"><i class="fa-solid fa-check"></i></button>
+        </td>`;
+            tbody.appendChild(tr);
+        });
+        qs('#selectAllRows').checked = false;
+    }
+
+    function renderSLA() {
+        const fr = qs('#frSlaList'); fr.innerHTML = '';
+        (meta.sla?.first_response || []).forEach(rule => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between"><span>${rule.priority}</span><span class="pill">${rule.minutes}m</span></div>`;
+            fr.appendChild(li);
+        });
+        const res = qs('#resSlaList'); res.innerHTML = '';
+        (meta.sla?.resolution || []).forEach(rule => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between"><span>${rule.priority}</span><span class="pill">${rule.hours}h</span></div>`;
+            res.appendChild(li);
+        });
+        const br = qs('#breachList'); br.innerHTML = '';
+        const watch = tickets.filter(t => ['New', 'Open', 'Pending', 'Waiting on Employee'].includes(t.status) && t.sla_risk)
+            .sort((a, b) => (a.sla_due || '').localeCompare(b.sla_due || '')).slice(0, 8);
+        if (watch.length === 0) { br.innerHTML = '<li class="text-slate-500">No risks.</li>'; return; }
+        watch.forEach(t => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between"><span>#${t.number} • ${t.subject}</span><span class="pill">${(t.sla_due || '').slice(11, 16)} due</span></div>`;
+            br.appendChild(li);
+        });
+    }
+
+    function renderAgents() {
+        const tbody = qs('#agentTableBody'); tbody.innerHTML = '';
+        if (agents.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500 text-sm">No agent data.</td></tr>`;
+            return;
+        }
+        agents.forEach(a => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-700">${a.name}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${a.open}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${a.resolved7}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${a.avg_frt ? a.avg_frt + 'm' : '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${a.csat ? a.csat + '/5' : '-'}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderKB() {
+        const grid = qs('#kbGrid'); grid.innerHTML = '';
+        if (kb.length === 0) { grid.innerHTML = '<div class="text-slate-500 text-sm">No articles yet.</div>'; return; }
+        kb.forEach(a => {
+            const card = document.createElement('div'); card.className = 'card';
+            card.innerHTML = `
+        <div class="flex items-center mb-3">
+          <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
+            <i class="fa-solid fa-book text-slate-600"></i>
+          </div>
+          <div>
+            <h4 class="font-semibold text-slate-800">${a.title}</h4>
+            <p class="text-xs text-slate-500">${a.category || '-'} • ${a.updated_at?.slice(0, 10) || '-'}</p>
+          </div>
+          <span class="ml-auto pill">${a.views || 0} views</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-1 border rounded-lg text-sm" onclick="openArticle('${a.id}')"><i class="fa-solid fa-eye mr-1"></i> View</button>
+          <button class="px-3 py-1 border rounded-lg text-sm" onclick="suggestArticle('${a.id}')"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Suggest</button>
+        </div>`;
+            grid.appendChild(card);
+        });
+    }
+
+    function renderAnalytics() {
+        drawResolutionTrend();
+        const dist = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        tickets.forEach(t => { if (typeof t.csat === 'number') dist[Math.round(t.csat)]++; });
+        const ul = qs('#csatDist'); ul.innerHTML = '';
+        Object.entries(dist).forEach(([k, v]) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between"><span>${k}★</span><span class="pill">${v}</span></div>`;
+            ul.appendChild(li);
+        });
+    }
+
+    function drawResolutionTrend() {
+        const canvas = qs('#resTimeCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width = canvas.clientWidth;
+        const H = canvas.height; ctx.clearRect(0, 0, W, H);
+
+        const byDay = {};
+        tickets.forEach(t => {
+            const d = (t.resolved_at || '').slice(0, 10); if (!d || !t.resolution_hours) return;
+            (byDay[d] ||= []).push(t.resolution_hours);
+        });
+        const labels = Object.keys(byDay).sort();
+        const values = labels.map(d => {
+            const arr = byDay[d], mid = arr.sort((a, b) => a - b)[Math.floor(arr.length / 2)];
+            return mid || 0;
+        });
+        if (values.length < 2) { ctx.fillStyle = '#64748b'; ctx.fillText('Not enough data', 10, 20); return; }
+
+        const max = Math.max(...values, 1), pad = 16, x0 = pad, x1 = W - pad, y0 = H - pad, y1 = pad;
+        ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) { const y = y0 - (i / 3) * (y0 - y1); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
+
+        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath();
+        values.forEach((v, i) => { const x = x0 + (i / (values.length - 1)) * (x1 - x0); const y = y0 - (v / max) * (y0 - y1); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+        ctx.stroke();
+    }
+
+    // Utils
+    function daysSince(iso) { return Math.floor((Date.now() - new Date(iso)) / (1000 * 60 * 60 * 24)); }
+
+    // Actions
+    function openTicket(id) { window.location.href = `/support/tickets/${id}`; }
+    async function assign(id) { await postJSON('/api/support/assign', { id }); await loadAll(); }
+    async function resolve(id) { await postJSON('/api/support/resolve', { id }); await loadAll(); }
+    function bulk(action) {
+        const ids = qsa('.rowSel:checked').map(c => c.dataset.id);
+        if (ids.length === 0) return alert('No rows selected');
+        postJSON(`/api/support/${action}`, { ids }).then(loadAll).catch(() => alert('Action failed'));
+    }
+
+    function openArticle(id) { window.location.href = `/support/kb/${id}`; }
+    async function suggestArticle(id) { await postJSON('/api/support/kb/suggest', { id }); alert('Suggestion recorded'); }
+    function exportCSV() {
+        const rows = [['number', 'subject', 'requester', 'priority', 'assignee', 'status', 'created_at', 'channel']];
+        tickets.forEach(t => rows.push([t.number, t.subject, t.requester, t.priority, t.assignee || '', t.status, t.created_at || '', t.channel || '']));
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'tickets.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    // Modal
+    function openTicketModal() { qs('#ticketModal').classList.remove('hidden'); }
+    function closeTicketModal() { qs('#ticketModal').classList.add('hidden'); qs('#ticketForm').reset(); }
+
+    // Events
+    function setupEvents() {
+        qs('#viewType').addEventListener('change', renderCurrentView);
+        ['statusFilter', 'priorityFilter', 'channelFilter'].forEach(id => qs('#' + id).addEventListener('change', loadAll));
+        qs('#searchBox').addEventListener('input', debounce(loadAll, 250));
+        qs('#refreshBtn').addEventListener('click', loadAll);
+        qs('#exportBtn').addEventListener('click', exportCSV);
+
+        qs('#newTicketBtn').addEventListener('click', openTicketModal);
+        qs('#closeTicketModal').addEventListener('click', closeTicketModal);
+        qs('#cancelTicket').addEventListener('click', closeTicketModal);
+        qs('#ticketForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                requester: qs('#tRequester').value,
+                priority: qs('#tPriority').value,
+                subject: qs('#tSubject').value,
+                description: qs('#tDesc').value
+            };
+            try { await postJSON('/api/support/tickets/create', payload); closeTicketModal(); await loadAll(); alert('Ticket created'); } catch { alert('Create failed'); }
+        });
+
+        qs('#bulkAssignBtn').addEventListener('click', () => bulk('assign-batch'));
+        qs('#bulkResolveBtn').addEventListener('click', () => bulk('resolve-batch'));
+        qs('#bulkCloseBtn').addEventListener('click', () => bulk('close-batch'));
+        qs('#selectAllRows').addEventListener('change', (e) => qsa('.rowSel').forEach(cb => cb.checked = e.target.checked));
+
+        qs('#newArticleBtn').addEventListener('click', () => window.location.href = '/support/kb/new');
+    }
+
+    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
+
+    async function initializePage() {
+        qs('#loadingState').classList.remove('hidden');
+        try {
+            // preload requester list
+            const people = await fetchJSON('/api/support/requesters');
+            const sel = qs('#tRequester'); sel.innerHTML = ''; (people || []).forEach(p => { const o = document.createElement('option'); o.value = p.email || p.name; o.textContent = p.name || p.email; sel.appendChild(o); });
+        } catch (e) { /* non-blocking */ }
+        await loadAll();
+        setupEvents();
+    }
+
+    document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+{% endblock %}

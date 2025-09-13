@@ -1,0 +1,578 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-clock mr-2"></i> Timesheets
+            </h1>
+            <p class="text-slate-600 text-sm">Capture, approve, and process employee work logs.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newEntryBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New Entry
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">View:</label>
+                <select id="viewType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="dashboard">Dashboard</option>
+                    <option value="entries">Entries</option>
+                    <option value="approvals">Approvals</option>
+                    <option value="payroll">Payroll</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Period:</label>
+                <select id="periodSelect" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="current">Current Week</option>
+                    <option value="prev">Previous Week</option>
+                    <option value="month">This Month</option>
+                    <option value="custom">Custom…</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Department:</label>
+                <select id="deptFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                <input id="searchBox" class="rounded-lg border border-slate-300 pl-8 pr-3 py-2 text-sm w-64"
+                    placeholder="Search employee, project…" />
+            </div>
+            <div class="ml-auto flex items-center gap-2">
+                <button id="importBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-file-import mr-1"></i> Import CSV
+                </button>
+                <button id="exportBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+                </button>
+                <button id="refreshBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-hourglass-half mr-1"></i> Logged Hours</div>
+            <div id="loggedHours" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-circle-exclamation mr-1"></i> Missing Entries
+            </div>
+            <div id="missingEntries" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-check-circle mr-1"></i> Approved</div>
+            <div id="approvedHours" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-coins mr-1"></i> Payroll Ready</div>
+            <div id="payrollReady" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div id="loadingState" class="text-center py-12">
+            <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
+            <p class="text-slate-600">Loading timesheets…</p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-chart-line mr-2"></i> Hours by
+                            Day</h3>
+                        <span id="hoursRange" class="text-xs text-slate-500">—</span>
+                    </div>
+                    <canvas id="hoursCanvas" height="140"></canvas>
+                    <p class="text-xs text-slate-500 mt-2">Total submitted hours per day.</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-list-check mr-2"></i> Approvals
+                        Queue</h3>
+                    <ul id="approvalsSummary" class="space-y-2 text-sm text-slate-700"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entries -->
+        <div id="entriesView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-regular fa-clock mr-2"></i> Entries</h3>
+                <div class="flex items-center gap-2">
+                    <button id="bulkSubmitBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-paper-plane mr-1"></i> Submit Selected</button>
+                    <button id="bulkDeleteBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-trash mr-1"></i> Delete</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3"><input type="checkbox" id="selectAllRows"></th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Employee</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Project</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Task</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Hours</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entriesTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Approvals -->
+        <div id="approvalsView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-stamp mr-2"></i> Manager Approvals</h3>
+                <div class="flex items-center gap-2">
+                    <button id="approveAllBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-check mr-1"></i> Approve All</button>
+                    <button id="rejectAllBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-xmark mr-1"></i> Reject All</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Employee</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Period</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Submitted</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Total Hours
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvalsTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payroll -->
+        <div id="payrollView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-file-invoice-dollar mr-2"></i> Payroll
+                    Export</h3>
+                <div class="flex items-center gap-2">
+                    <button id="lockPeriodBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-lock mr-1"></i> Lock Period</button>
+                    <button id="exportPayrollBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-download mr-1"></i> Download CSV</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Employee</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Regular</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Overtime</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Leave</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payrollTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Entry Modal -->
+    <div id="entryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">New Time Entry</h3>
+                    <button id="closeEntryModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="entryForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                            <input id="eDate" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Hours</label>
+                            <input id="eHours" type="number" min="0" step="0.25"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2" required />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Project</label>
+                            <select id="eProject" class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Task</label>
+                            <input id="eTask" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                placeholder="e.g., Feature dev" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                        <textarea id="eNotes" class="w-full rounded-lg border border-slate-300 px-3 py-2" rows="2"
+                            placeholder="Optional"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="cancelEntry"
+                            class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">Import Timesheets (CSV)</h3>
+                    <button id="closeImportModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times"></i></button>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <input id="csvFile" type="file" accept=".csv"
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white" />
+                    <p class="text-slate-500">Columns: date, employee_email, project, task, hours, notes</p>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button id="cancelImport"
+                        class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                    <button id="confirmImport"
+                        class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pill {
+        font-size: .7rem;
+        padding: .2rem .5rem;
+        border-radius: 9999px;
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    canvas {
+        width: 100%;
+    }
+</style>
+
+<script>
+    // State
+    let entries = [];     // [{id,date,employee,employee_email,project,task,hours,status,notes}]
+    let approvals = [];   // [{employee, period, submitted_at, total_hours, ids:[]}]
+    let payroll = [];     // [{employee, regular, overtime, leave, total}]
+    let departments = [];
+    let projects = [];
+    let periodRange = { start: '', end: '' };
+
+    // Helpers
+    async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    async function postJSON(u, d) { const r = await fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    const qs = sel => document.querySelector(sel);
+    const qsa = sel => Array.from(document.querySelectorAll(sel));
+    const fmt = n => isNaN(n) ? '-' : Math.round(n * 100) / 100;
+
+    // Load
+    async function loadAll() {
+        try {
+            const q = encodeURIComponent(qs('#searchBox').value || '');
+            const dept = encodeURIComponent(qs('#deptFilter').value || '');
+            const per = qs('#periodSelect').value;
+            const [meta, e, a, p] = await Promise.all([
+                fetchJSON(`/api/timesheets/meta?period=${per}`),
+                fetchJSON(`/api/timesheets/entries?period=${per}&dept=${dept}&q=${q}`),
+                fetchJSON(`/api/timesheets/approvals?period=${per}&dept=${dept}`),
+                fetchJSON(`/api/timesheets/payroll?period=${per}&dept=${dept}`)
+            ]);
+
+            departments = meta.departments || [];
+            projects = meta.projects || [];
+            periodRange = meta.range || { start: '', end: '' };
+            entries = e || [];
+            approvals = a || [];
+            payroll = p || [];
+
+            // filters
+            const deptSel = qs('#deptFilter'); deptSel.innerHTML = '<option value="">All</option>';
+            departments.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; deptSel.appendChild(o); });
+            const projSel = qs('#eProject'); projSel.innerHTML = ''; projects.forEach(pr => { const o = document.createElement('option'); o.value = pr; o.textContent = pr; projSel.appendChild(o); });
+
+            // stats
+            const totalLogged = entries.reduce((s, x) => s + (x.hours || 0), 0);
+            const missing = (meta.missing || 0);
+            const approved = entries.filter(x => x.status === 'Approved').reduce((s, x) => s + (x.hours || 0), 0);
+            const payrollReady = payroll.reduce((s, x) => s + (x.total || 0), 0);
+            qs('#loggedHours').textContent = fmt(totalLogged);
+            qs('#missingEntries').textContent = missing;
+            qs('#approvedHours').textContent = fmt(approved);
+            qs('#payrollReady').textContent = fmt(payrollReady);
+
+            renderCurrentView();
+            qs('#loadingState').classList.add('hidden');
+        } catch (err) {
+            console.error(err);
+            qs('#loadingState').innerHTML = `
+        <div class="text-center py-12">
+          <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
+          <p class="text-red-600 mb-4">Failed to load timesheets</p>
+          <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
+        </div>`;
+        }
+    }
+
+    // Views
+    function renderCurrentView() {
+        const v = qs('#viewType').value;
+        ['dashboard', 'entries', 'approvals', 'payroll'].forEach(k => qs('#' + k + 'View').classList.add('hidden'));
+        if (v === 'dashboard') { qs('#dashboardView').classList.remove('hidden'); renderDashboard(); }
+        if (v === 'entries') { qs('#entriesView').classList.remove('hidden'); renderEntries(); }
+        if (v === 'approvals') { qs('#approvalsView').classList.remove('hidden'); renderApprovals(); }
+        if (v === 'payroll') { qs('#payrollView').classList.remove('hidden'); renderPayroll(); }
+    }
+
+    function renderDashboard() {
+        drawHoursChart(entries, periodRange);
+        qs('#hoursRange').textContent = periodRange.start && periodRange.end ? `${periodRange.start} → ${periodRange.end}` : '—';
+
+        const box = qs('#approvalsSummary'); box.innerHTML = '';
+        if (approvals.length === 0) { box.innerHTML = '<li class="text-slate-500">No pending approvals.</li>'; return; }
+        approvals.slice(0, 8).forEach(a => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between">
+        <span>${a.employee}</span>
+        <span class="pill">${fmt(a.total_hours)}h</span>
+      </div>
+      <div class="text-xs text-slate-500">${a.period} • ${a.submitted_at?.slice(0, 10) || '-'}</div>`;
+            box.appendChild(li);
+        });
+    }
+
+    function drawHoursChart(list, range) {
+        const canvas = qs('#hoursCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width = canvas.clientWidth;
+        const H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        if (!list.length) { ctx.fillStyle = '#64748b'; ctx.fillText('No data', 10, 20); return; }
+
+        // aggregate by date
+        const dayMap = {};
+        list.forEach(e => { const d = (e.date || '').slice(0, 10); if (!d) return; dayMap[d] = (dayMap[d] || 0) + (+e.hours || 0); });
+        const labels = Object.keys(dayMap).sort();
+        const values = labels.map(d => dayMap[d]);
+        if (values.length < 2) { ctx.fillStyle = '#64748b'; ctx.fillText('Not enough data', 10, 20); return; }
+
+        const min = Math.min(...values, 0), max = Math.max(...values, 8);
+        const pad = 16, x0 = pad, x1 = W - pad, y0 = H - pad, y1 = pad;
+
+        ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) { const y = y0 - (i / 3) * (y0 - y1); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
+
+        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath();
+        values.forEach((v, i) => {
+            const x = x0 + (i / (values.length - 1)) * (x1 - x0);
+            const y = y0 - ((v - min) / (max - min || 1)) * (y0 - y1);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
+
+    function renderEntries() {
+        const tbody = qs('#entriesTableBody'); tbody.innerHTML = '';
+        if (entries.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-slate-500 text-sm">No entries yet.</td></tr>`;
+            return;
+        }
+        entries.forEach(e => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="${e.id}"></td>
+        <td class="px-4 py-3 text-sm text-slate-600">${(e.date || '').slice(0, 10)}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${e.employee || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${e.project || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${e.task || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${fmt(e.hours)}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${e.status || '-'}</td>
+        <td class="px-4 py-3">
+          <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('${e.id}')"><i class="fa-solid fa-edit"></i></button>
+          <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('${e.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>`;
+            tbody.appendChild(tr);
+        });
+        qs('#selectAllRows').checked = false;
+    }
+
+    function renderApprovals() {
+        const tbody = qs('#approvalsTableBody'); tbody.innerHTML = '';
+        if (approvals.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500 text-sm">No submissions pending.</td></tr>`;
+            return;
+        }
+        approvals.forEach(a => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-600">${a.employee}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${a.period}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${(a.submitted_at || '').slice(0, 10)}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${fmt(a.total_hours)}</td>
+        <td class="px-4 py-3">
+          <button class="px-2 py-1 border rounded-lg text-sm mr-2" onclick="approve('${a.employee}','${a.period}')"><i class="fa-solid fa-check mr-1"></i> Approve</button>
+          <button class="px-2 py-1 border rounded-lg text-sm" onclick="reject('${a.employee}','${a.period}')"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
+        </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPayroll() {
+        const tbody = qs('#payrollTableBody'); tbody.innerHTML = '';
+        if (payroll.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500 text-sm">No payroll data.</td></tr>`;
+            return;
+        }
+        payroll.forEach(r => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-600">${r.employee}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${fmt(r.regular)}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${fmt(r.overtime)}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${fmt(r.leave)}</td>
+        <td class="px-4 py-3 text-sm text-slate-700 font-medium">${fmt(r.total)}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Actions
+    function openEntryModal() { qs('#entryModal').classList.remove('hidden'); }
+    function closeEntryModal() { qs('#entryModal').classList.add('hidden'); qs('#entryForm').reset(); }
+    function openImportModal() { qs('#importModal').classList.remove('hidden'); }
+    function closeImportModal() { qs('#importModal').classList.add('hidden'); qs('#csvFile').value = ''; }
+
+    async function saveEntry(payload) {
+        await postJSON('/api/timesheets/entries/create', payload);
+        closeEntryModal(); await loadAll(); alert('Entry saved');
+    }
+    async function deleteEntry(id) {
+        if (!confirm('Delete this entry?')) return;
+        await postJSON('/api/timesheets/entries/delete', { id });
+        await loadAll();
+    }
+    function editEntry(id) { window.location.href = `/timesheets/entries/${id}`; }
+
+    async function approve(employee, period) { await postJSON('/api/timesheets/approve', { employee, period }); await loadAll(); }
+    async function reject(employee, period) { await postJSON('/api/timesheets/reject', { employee, period }); await loadAll(); }
+
+    async function approveAll() { await postJSON('/api/timesheets/approve-all', { period: qs('#periodSelect').value }); await loadAll(); }
+    async function rejectAll() { await postJSON('/api/timesheets/reject-all', { period: qs('#periodSelect').value }); await loadAll(); }
+
+    function exportCSV() {
+        const rows = [['date', 'employee', 'project', 'task', 'hours', 'status', 'notes']];
+        entries.forEach(e => rows.push([(e.date || '').slice(0, 10), e.employee || '', e.project || '', e.task || '', e.hours ?? '', e.status || '', (e.notes || '').replace(/\n/g, ' ')]));
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'timesheets.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    async function importCSV(file) {
+        // NOTE: Implement real CSV parsing server-side. Here we just send filename.
+        await postJSON('/api/timesheets/import', { file_name: file?.name || '' });
+        closeImportModal(); await loadAll(); alert('Import started');
+    }
+
+    function bulkSubmit() {
+        const ids = qsa('.rowSel:checked').map(c => c.dataset.id);
+        if (ids.length === 0) return alert('No rows selected');
+        postJSON('/api/timesheets/entries/submit', { ids }).then(() => { loadAll(); alert('Submitted'); }).catch(() => alert('Submit failed'));
+    }
+    function bulkDelete() {
+        const ids = qsa('.rowSel:checked').map(c => c.dataset.id);
+        if (ids.length === 0) return alert('No rows selected');
+        if (!confirm(`Delete ${ids.length} entries?`)) return;
+        postJSON('/api/timesheets/entries/delete-batch', { ids }).then(loadAll);
+    }
+
+    function setupEvents() {
+        qs('#viewType').addEventListener('change', renderCurrentView);
+        qs('#periodSelect').addEventListener('change', loadAll);
+        qs('#deptFilter').addEventListener('change', loadAll);
+        qs('#searchBox').addEventListener('input', debounce(loadAll, 250));
+        qs('#refreshBtn').addEventListener('click', loadAll);
+        qs('#exportBtn').addEventListener('click', exportCSV);
+        qs('#importBtn').addEventListener('click', openImportModal);
+        qs('#closeImportModal').addEventListener('click', closeImportModal);
+        qs('#cancelImport').addEventListener('click', closeImportModal);
+        qs('#confirmImport').addEventListener('click', () => importCSV(qs('#csvFile').files[0]));
+
+        qs('#newEntryBtn').addEventListener('click', openEntryModal);
+        qs('#closeEntryModal').addEventListener('click', closeEntryModal);
+        qs('#cancelEntry').addEventListener('click', closeEntryModal);
+        qs('#entryForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const payload = {
+                date: qs('#eDate').value,
+                hours: +qs('#eHours').value,
+                project: qs('#eProject').value,
+                task: qs('#eTask').value,
+                notes: qs('#eNotes').value
+            };
+            saveEntry(payload).catch(() => alert('Failed to save'));
+        });
+
+        qs('#bulkSubmitBtn').addEventListener('click', bulkSubmit);
+        qs('#bulkDeleteBtn').addEventListener('click', bulkDelete);
+        qs('#approveAllBtn')?.addEventListener('click', approveAll);
+        qs('#rejectAllBtn')?.addEventListener('click', rejectAll);
+        qs('#selectAllRows').addEventListener('change', (e) => qsa('.rowSel').forEach(cb => cb.checked = e.target.checked));
+        qs('#exportPayrollBtn').addEventListener('click', exportCSV); // reuse simple export
+        qs('#lockPeriodBtn').addEventListener('click', async () => {
+            try { await postJSON('/api/timesheets/lock', { period: qs('#periodSelect').value }); alert('Period locked'); } catch { alert('Failed to lock'); }
+        });
+    }
+
+    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
+
+    async function initializePage() {
+        qs('#loadingState').classList.remove('hidden');
+        await loadAll();
+        setupEvents();
+    }
+
+    document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+{% endblock %}

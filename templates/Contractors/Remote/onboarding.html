@@ -1,0 +1,504 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-person-circle-plus mr-2"></i> Onboarding
+            </h1>
+            <p class="text-slate-600 text-sm">Automate new hire setup with seamless onboarding workflows.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newFlowBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> New Flow
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="flowsTab" class="ob-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-diagram-project mr-1"></i> Flows</button>
+            <button id="hiresTab" class="ob-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-user-plus mr-1"></i> New Hires</button>
+            <button id="tasksTab" class="ob-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-list-check mr-1"></i> Tasks</button>
+            <button id="settingsTab" class="ob-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-gear mr-1"></i> Settings</button>
+        </div>
+    </div>
+
+    <!-- Flows -->
+    <section id="flowsPanel" class="ob-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Flow Builder -->
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-diagram-project mr-2"></i>
+                        Flow Builder</h3>
+                    <div class="flex items-center gap-2">
+                        <button id="saveFlow"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        <button id="publishFlow"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"><i
+                                class="fa-solid fa-rocket mr-1"></i> Publish</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Triggers -->
+                    <div class="rounded-lg border border-slate-200 p-4">
+                        <div class="font-medium text-slate-800 mb-2"><i class="fa-solid fa-bolt mr-1"></i> Triggers
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="flow-trigger"
+                                    value="signed_offer"> Signed Offer</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="flow-trigger"
+                                    value="background_clear"> Background Clear</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="flow-trigger"
+                                    value="day_1"> Day 1</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="flow-trigger"
+                                    value="week_1"> End of Week 1</label>
+                        </div>
+                    </div>
+
+                    <!-- Tasks Library -->
+                    <div class="rounded-lg border border-slate-200 p-4">
+                        <div class="font-medium text-slate-800 mb-2"><i class="fa-solid fa-list-check mr-1"></i> Tasks
+                            Library</div>
+                        <div id="taskLibrary" class="space-y-2 text-sm">
+                            <button class="ob-chip" data-task="account_setup"><i class="fa-solid fa-laptop mr-1"></i> IT
+                                Account Setup</button>
+                            <button class="ob-chip" data-task="equipment"><i class="fa-solid fa-computer mr-1"></i> Ship
+                                Equipment</button>
+                            <button class="ob-chip" data-task="docs"><i class="fa-solid fa-file-signature mr-1"></i>
+                                Sign Documents</button>
+                            <button class="ob-chip" data-task="orientation"><i class="fa-solid fa-compass mr-1"></i>
+                                Orientation</button>
+                            <button class="ob-chip" data-task="buddy"><i class="fa-solid fa-user-group mr-1"></i> Assign
+                                Buddy</button>
+                            <button class="ob-chip" data-task="benefits"><i class="fa-solid fa-notes-medical mr-1"></i>
+                                Benefits Enrollment</button>
+                        </div>
+                    </div>
+
+                    <!-- Flow Canvas -->
+                    <div class="rounded-lg border border-slate-200 p-4">
+                        <div class="font-medium text-slate-800 mb-2"><i class="fa-solid fa-layer-group mr-1"></i> Flow
+                            Canvas</div>
+                        <ul id="flowCanvas" class="space-y-2 text-sm">
+                            <!-- steps injected -->
+                        </ul>
+                        <div class="mt-3">
+                            <button id="clearCanvas"
+                                class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-clone mr-2"></i> Templates
+                    </h3>
+                    <button id="newTemplate"
+                        class="px-3 py-2 rounded-lg text-white bg-purple-600 hover:bg-purple-700 text-sm"><i
+                            class="fa-solid fa-plus mr-1"></i> New</button>
+                </div>
+                <div id="templatesList" class="space-y-3">
+                    <!-- injected -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Hires -->
+    <section id="hiresPanel" class="ob-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-user-plus mr-2"></i> New Hires
+                </h3>
+                <div class="flex items-center gap-2">
+                    <button id="addHireBtn"
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
+                            class="fa-solid fa-plus mr-1"></i> Add</button>
+                    <select id="hireFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Employee</th>
+                            <th class="py-2 px-4">Role</th>
+                            <th class="py-2 px-4">Start</th>
+                            <th class="py-2 px-4">Manager</th>
+                            <th class="py-2 px-4">Status</th>
+                            <th class="py-2 px-4 w-28">Progress</th>
+                            <th class="py-2 px-4 w-24"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="hiresRows" class="text-slate-800">
+                        <!-- injected -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tasks -->
+    <section id="tasksPanel" class="ob-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list-check mr-2"></i> Task
+                        Board</h3>
+                    <div class="flex items-center gap-2">
+                        <select id="taskView" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="all">All</option>
+                            <option value="due_7">Due in 7d</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                        <button id="assignMe"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                            <i class="fa-solid fa-user-check mr-1"></i> Assign to me
+                        </button>
+                    </div>
+                </div>
+                <div id="taskList" class="space-y-3">
+                    <!-- injected -->
+                </div>
+            </div>
+
+            <!-- Right: Documents & Equipment -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-signature mr-2"></i>
+                    Documents</h3>
+                <div id="docList" class="space-y-3 mb-6"></div>
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-computer mr-2"></i>
+                    Equipment</h3>
+                <div id="equipList" class="space-y-3"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settingsPanel" class="ob-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-shield-keyhole mr-2"></i>
+                    Automation Rules</h3>
+                <div class="space-y-3" id="rulesList"><!-- injected --></div>
+                <button id="addRule"
+                    class="mt-2 px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm">
+                    <i class="fa-solid fa-plus mr-1"></i> Add Rule
+                </button>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-envelope-open-text mr-2"></i> Emails & Notifications</h3>
+                <div class="space-y-3 text-sm">
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Send welcome email</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Manager reminders</label>
+                    <label class="flex items-center gap-2"><input type="checkbox"> Daily digest</label>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-people-arrows mr-2"></i>
+                    Buddy Program</h3>
+                <div class="space-y-3 text-sm">
+                    <label class="flex items-center gap-2"><input type="checkbox" id="buddyAuto" checked> Auto-assign
+                        buddy by department</label>
+                    <input id="buddyGuide" type="text" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Buddy guide link (optional)">
+                    <button id="saveBuddy"
+                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                            class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    /* ---------- Mock Data ---------- */
+    let FLOW = []; // sequence of steps
+    let TEMPLATES = [
+        { id: 1, name: 'Engineering • Remote', steps: ['signed_offer', 'account_setup', 'equipment', 'docs', 'orientation', 'buddy'] },
+        { id: 2, name: 'Sales • In-office', steps: ['signed_offer', 'docs', 'orientation', 'benefits'] }
+    ];
+    let HIRES = [
+        { id: 11, name: 'Aarav Mehta', role: 'SWE I', start: '2025-10-01', manager: 'Priya S', status: 'in_progress', progress: 60 },
+        { id: 12, name: 'Riya Patel', role: 'Marketing Analyst', start: '2025-09-23', manager: 'Alex R', status: 'pending', progress: 15 },
+        { id: 13, name: 'Omar Ali', role: 'AE', start: '2025-10-07', manager: 'Meera J', status: 'pending', progress: 0 },
+        { id: 14, name: 'Isha Verma', role: 'SWE II', start: '2025-09-16', manager: 'Priya S', status: 'done', progress: 100 }
+    ];
+    let TASKS = [
+        { id: 101, title: 'Provision email & SSO', assignee: 'IT', due: '2025-09-15', status: 'open' },
+        { id: 102, title: 'Ship MacBook Pro', assignee: 'Ops', due: '2025-09-17', status: 'open' },
+        { id: 103, title: 'Collect I-9 & PAN', assignee: 'HR', due: '2025-09-18', status: 'open' },
+        { id: 104, title: 'Schedule orientation', assignee: 'HR', due: '2025-09-20', status: 'open' }
+    ];
+    let DOCS = [
+        { id: 201, name: 'Offer Letter', state: 'Signed' },
+        { id: 202, name: 'NDA', state: 'Pending' },
+        { id: 203, name: 'Tax Forms', state: 'Pending' }
+    ];
+    let EQUIP = [
+        { id: 301, name: 'Laptop', state: 'Ready to ship' },
+        { id: 302, name: 'Monitor', state: 'Pending approval' },
+        { id: 303, name: 'Access Badge', state: 'Queued' }
+    ];
+    let RULES = [
+        { id: 401, name: 'Auto tasks for India', condition: "location=='IN'", action: 'Add PF/ESIC docs', enabled: true },
+        { id: 402, name: 'Buddy for remote', condition: "remote==true", action: 'Assign buddy', enabled: true }
+    ];
+
+    /* ---------- Elements & Init ---------- */
+    const $ = (id) => document.getElementById(id);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tabs
+        document.querySelectorAll('.ob-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.ob-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.ob-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+            });
+        });
+
+        // Flow builder interactions
+        document.querySelectorAll('.ob-chip').forEach(chip => {
+            chip.addEventListener('click', () => { addStep(chip.dataset.task); });
+        });
+        $('clearCanvas').addEventListener('click', () => { FLOW = []; renderFlow(); });
+        $('saveFlow').addEventListener('click', () => alert('✅ Flow saved'));
+        $('publishFlow').addEventListener('click', () => alert('🚀 Flow published'));
+        $('newFlowBtn').addEventListener('click', () => { FLOW = []; renderFlow(); alert('✨ New flow started'); });
+
+        // Templates
+        $('newTemplate').addEventListener('click', () => { TEMPLATES.push({ id: Date.now(), name: 'Untitled Template', steps: [...FLOW] }); renderTemplates(); alert('✅ Template created'); });
+
+        // Hires
+        $('addHireBtn').addEventListener('click', addHire);
+        $('hireFilter').addEventListener('change', renderHires);
+
+        // Tasks
+        $('taskView').addEventListener('change', renderTasks);
+        $('assignMe').addEventListener('click', () => alert('🧑‍💻 Assigned to you'));
+
+        // Settings
+        $('addRule').addEventListener('click', () => { RULES.push({ id: Date.now(), name: 'New Rule', condition: 'any', action: 'Notify HR', enabled: true }); renderRules(); });
+        $('saveBuddy').addEventListener('click', () => alert('✅ Buddy settings saved'));
+
+        // Initial renders
+        renderFlow(); renderTemplates(); renderHires(); renderTasks(); renderDocs(); renderEquip(); renderRules();
+    });
+
+    /* ---------- Renderers ---------- */
+    function renderFlow() {
+        $('flowCanvas').innerHTML = FLOW.map((s, idx) => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
+      <div class="flex items-center gap-2">${stepIcon(s)} <span class="font-medium">${labelStep(s)}</span></div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveStep(${idx},-1)">↑</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveStep(${idx},1)">↓</button>
+        <button class="px-2 py-1 text-xs rounded text-white bg-red-600 hover:bg-red-700" onclick="removeStep(${idx})">Remove</button>
+      </div>
+    </li>
+  `).join('') || `<li class="text-slate-500 text-sm">No steps yet. Select from the library.</li>`;
+    }
+    function renderTemplates() {
+        $('templatesList').innerHTML = TEMPLATES.map(t => `
+    <div class="rounded-lg border border-slate-200 p-3 flex items-center justify-between">
+      <div>
+        <div class="font-medium text-slate-800">${t.name}</div>
+        <div class="text-xs text-slate-600">${t.steps.map(labelStep).join(' • ')}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="loadTemplate(${t.id})"><i class="fa-solid fa-arrow-down mr-1"></i> Load</button>
+        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteTemplate(${t.id})"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
+      </div>
+    </div>`).join('') || `<div class="text-slate-500 text-sm">No templates yet.</div>`;
+    }
+    function renderHires() {
+        const f = $('hireFilter').value;
+        const data = f === 'all' ? HIRES : HIRES.filter(h => h.status === f);
+        $('hiresRows').innerHTML = data.map(h => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 px-4 font-medium">${h.name}</td>
+      <td class="py-2 px-4">${h.role}</td>
+      <td class="py-2 px-4">${h.start}</td>
+      <td class="py-2 px-4">${h.manager}</td>
+      <td class="py-2 px-4">${statusPill(h.status)}</td>
+      <td class="py-2 px-4">
+        <div class="w-28 h-2 bg-slate-200 rounded"><div class="h-2 rounded ${h.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}" style="width:${h.progress}%"></div></div>
+      </td>
+      <td class="py-2 px-4 text-right">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="advance(${h.id})"><i class="fa-solid fa-forward mr-1"></i> Advance</button>
+      </td>
+    </tr>`).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No hires</td></tr>`;
+    }
+    function renderTasks() {
+        const view = $('taskView').value;
+        const now = new Date();
+        const filtered = TASKS.filter(t => {
+            const dd = new Date(t.due);
+            const diff = Math.ceil((dd - now) / (1000 * 60 * 60 * 24));
+            if (view === 'due_7') return diff >= 0 && diff <= 7;
+            if (view === 'overdue') return dd < now;
+            return true;
+        });
+        $('taskList').innerHTML = filtered.map(t => `
+    <div class="flex items-start justify-between p-3 rounded-lg ${isOverdue(t.due) ? 'bg-amber-50' : 'bg-slate-50'}">
+      <div>
+        <div class="font-medium text-slate-800">${t.title}</div>
+        <div class="text-xs text-slate-600">Owner: ${t.assignee} • Due ${t.due}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="reassign(${t.id})"><i class="fa-solid fa-user-gear mr-1"></i> Reassign</button>
+        <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="completeTask(${t.id})"><i class="fa-solid fa-check mr-1"></i> Done</button>
+      </div>
+    </div>
+  `).join('') || `<div class="text-slate-500 text-sm">No tasks.</div>`;
+    }
+    function renderDocs() {
+        $('docList').innerHTML = DOCS.map(d => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="font-medium text-slate-800">${d.name}</div>
+      <span class="px-2 py-0.5 rounded-full ${d.state === 'Signed' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'} text-xs">${d.state}</span>
+    </div>`).join('');
+    }
+    function renderEquip() {
+        $('equipList').innerHTML = EQUIP.map(e => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="font-medium text-slate-800">${e.name}</div>
+      <span class="text-xs text-slate-600">${e.state}</span>
+    </div>`).join('');
+    }
+    function renderRules() {
+        $('rulesList').innerHTML = RULES.map(r => `
+    <div class="flex items-start justify-between p-3 rounded-lg bg-slate-50">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-medium text-slate-800">${r.name}</span>
+          ${badge(r.enabled ? 'Enabled' : 'Disabled', r.enabled ? 'emerald' : 'slate')}
+        </div>
+        <div class="text-xs text-slate-600"><b>If</b> ${r.condition} <b>then</b> ${r.action}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleRule(${r.id})">${r.enabled ? 'Disable' : 'Enable'}</button>
+        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteRule(${r.id})">Delete</button>
+      </div>
+    </div>`).join('') || `<div class="text-slate-500 text-sm">No rules.</div>`;
+    }
+
+    /* ---------- Flow ops ---------- */
+    function addStep(s) { FLOW.push(s); renderFlow(); }
+    function moveStep(idx, dir) { const j = idx + dir; if (j < 0 || j >= FLOW.length) return;[FLOW[idx], FLOW[j]] = [FLOW[j], FLOW[idx]]; renderFlow(); }
+    function removeStep(idx) { FLOW.splice(idx, 1); renderFlow(); }
+    function loadTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; FLOW = t.steps.slice(); renderFlow(); }
+    function deleteTemplate(id) { TEMPLATES = TEMPLATES.filter(t => t.id !== id); renderTemplates(); }
+
+    /* ---------- Hires ops ---------- */
+    function addHire() {
+        const name = prompt('Employee name?'); if (!name) return;
+        HIRES.push({ id: Date.now(), name, role: 'TBD', start: today(), manager: 'TBD', status: 'pending', progress: 0 });
+        renderHires();
+    }
+    function advance(id) {
+        const h = HIRES.find(x => x.id === id); if (!h) return;
+        h.progress = Math.min(100, h.progress + 20);
+        if (h.progress === 100) h.status = 'done'; else if (h.progress > 0) h.status = 'in_progress';
+        renderHires();
+    }
+
+    /* ---------- Tasks ops ---------- */
+    function reassign(id) { alert('🔁 Reassigned'); }
+    function completeTask(id) { TASKS = TASKS.filter(t => t.id !== id); renderTasks(); }
+
+    /* ---------- Rules ops ---------- */
+    function toggleRule(id) { const r = RULES.find(x => x.id === id); if (r) { r.enabled = !r.enabled; renderRules(); } }
+    function deleteRule(id) { RULES = RULES.filter(r => r.id !== id); renderRules(); }
+
+    /* ---------- Utils ---------- */
+    function stepIcon(s) {
+        const map = {
+            account_setup: '<i class="fa-solid fa-laptop"></i>',
+            equipment: '<i class="fa-solid fa-computer"></i>',
+            docs: '<i class="fa-solid fa-file-signature"></i>',
+            orientation: '<i class="fa-solid fa-compass"></i>',
+            buddy: '<i class="fa-solid fa-user-group"></i>',
+            benefits: '<i class="fa-solid fa-notes-medical"></i>',
+            signed_offer: '<i class="fa-solid fa-pen-to-square"></i>',
+            background_clear: '<i class="fa-solid fa-shield-halved"></i>',
+            day_1: '<i class="fa-solid fa-calendar-day"></i>',
+            week_1: '<i class="fa-solid fa-calendar-week"></i>'
+        };
+        return map[s] || '<i class="fa-solid fa-circle-dot"></i>';
+    }
+    function labelStep(s) {
+        return ({
+            account_setup: 'IT Account Setup', equipment: 'Ship Equipment', docs: 'Sign Documents',
+            orientation: 'Orientation', buddy: 'Assign Buddy', benefits: 'Benefits Enrollment',
+            signed_offer: 'Signed Offer', background_clear: 'Background Clear', day_1: 'Day 1', week_1: 'End of Week 1'
+        })[s] || s;
+    }
+    function badge(txt, tone) {
+        const m = { emerald: 'bg-emerald-50 text-emerald-700', slate: 'bg-slate-100 text-slate-700', amber: 'bg-amber-50 text-amber-700', red: 'bg-red-50 text-red-700' };
+        return `<span class="px-2 py-0.5 rounded-full ${m[tone] || m.slate} text-xs">${txt}</span>`;
+    }
+    function statusPill(s) {
+        const m = { pending: 'bg-slate-100 text-slate-700', in_progress: 'bg-amber-50 text-amber-700', done: 'bg-emerald-50 text-emerald-700' };
+        return `<span class="px-2 py-0.5 rounded-full ${m[s] || m.pending} text-xs">${(s === 'in_progress' ? 'In Progress' : s.charAt(0).toUpperCase() + s.slice(1))}</span>`;
+    }
+    function today() { const d = new Date(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${d.getFullYear()}-${m}-${day}`; }
+    function isOverdue(dateStr) { return new Date(dateStr) < new Date(); }
+</script>
+
+<style>
+    .ob-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .ob-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .ob-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+
+    .ob-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .375rem;
+        border: 1px solid rgb(203, 213, 225);
+        background: white;
+        border-radius: .5rem;
+        padding: .375rem .5rem;
+        font-size: .875rem;
+    }
+
+    .ob-chip:hover {
+        background: #f8fafc;
+    }
+</style>
+{% endblock %}

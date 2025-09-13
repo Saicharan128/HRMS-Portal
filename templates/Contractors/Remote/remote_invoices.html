@@ -1,0 +1,758 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Remote Invoices
+            </h1>
+            <p class="text-slate-600 text-sm">Process invoices for remote employees and contractors globally.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newInvoiceBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New Invoice
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">View:</label>
+                <select id="viewType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="dashboard">Dashboard</option>
+                    <option value="invoices">Invoices</option>
+                    <option value="approvals">Approvals</option>
+                    <option value="payouts">Payouts</option>
+                    <option value="vendors">Vendors</option>
+                    <option value="compliance">Compliance</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Status:</label>
+                <select id="statusFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                    <option>Draft</option>
+                    <option>Submitted</option>
+                    <option>Approved</option>
+                    <option>Scheduled</option>
+                    <option>Paid</option>
+                    <option>Rejected</option>
+                    <option>On Hold</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Country:</label>
+                <select id="countryFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                <input id="searchBox" class="rounded-lg border border-slate-300 pl-8 pr-3 py-2 text-sm w-64"
+                    placeholder="Search vendor, invoice #…" />
+            </div>
+            <div class="ml-auto flex items-center gap-2">
+                <button id="exportBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+                </button>
+                <button id="refreshBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-layer-group mr-1"></i> Open Invoices</div>
+            <div id="openCount" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-globe mr-1"></i> FX Exposure</div>
+            <div id="fxExposure" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-circle-check mr-1"></i> Ready to Pay</div>
+            <div id="readyToPay" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-hourglass-half mr-1"></i> Avg Cycle (d)</div>
+            <div id="avgCycle" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-shield-halved mr-1"></i> Compliance Flags</div>
+            <div id="flagsCount" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div id="loadingState" class="text-center py-12">
+            <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
+            <p class="text-slate-600">Loading invoices…</p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-chart-line mr-2"></i> Payables
+                            Trend</h3>
+                        <span id="trendRange" class="text-xs text-slate-500">—</span>
+                    </div>
+                    <canvas id="trendCanvas" height="140"></canvas>
+                    <p class="text-xs text-slate-500 mt-2">Daily payables in base currency.</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-flag mr-2"></i> At Risk (Due ≤
+                        7d)</h3>
+                    <ul id="atRiskList" class="space-y-2 text-sm text-slate-700"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoices -->
+        <div id="invoicesView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-regular fa-file-lines mr-2"></i> Invoices</h3>
+                <div class="flex items-center gap-2">
+                    <button id="bulkApproveBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-check mr-1"></i> Approve</button>
+                    <button id="bulkScheduleBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-calendar-check mr-1"></i> Schedule</button>
+                    <button id="bulkRejectBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3"><input type="checkbox" id="selectAllRows"></th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Invoice #</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Vendor</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Country</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Amount</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Currency</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Due</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Approvals -->
+        <div id="approvalsView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-stamp mr-2"></i> Pending Approvals</h3>
+                <div class="flex items-center gap-2">
+                    <button id="approveAllBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-check mr-1"></i> Approve All</button>
+                    <button id="rejectAllBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-xmark mr-1"></i> Reject All</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Invoice #</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Owner</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Submitted</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Amount</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvalsTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payouts -->
+        <div id="payoutsView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-money-check-dollar mr-2"></i> Payouts
+                </h3>
+                <div class="flex items-center gap-2">
+                    <button id="payNowBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-bolt mr-1"></i> Pay Now</button>
+                    <button id="scheduleBatchBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                            class="fa-solid fa-calendar-plus mr-1"></i> Schedule Batch</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Invoice #</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Vendor</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Method</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">FX Rate</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Base Amount
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payoutTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Vendors -->
+        <div id="vendorsView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-user-tie mr-2"></i> Vendors</h3>
+                <button id="addVendorBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                        class="fa-solid fa-user-plus mr-1"></i> Add Vendor</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Name</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Country</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Currency</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Method</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tax Forms</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vendorTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Compliance -->
+        <div id="complianceView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-file-circle-check mr-2"></i>
+                        Required Docs</h3>
+                    <ul id="docsList" class="space-y-2 text-sm"></ul>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                        Holds</h3>
+                    <ul id="holdsList" class="space-y-2 text-sm"></ul>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-scale-balanced mr-2"></i>
+                        Withholding</h3>
+                    <ul id="withholdingList" class="space-y-2 text-sm"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Invoice Modal -->
+    <div id="invoiceModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">Create Invoice</h3>
+                    <button id="closeInvoiceModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="invoiceForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Vendor</label>
+                        <select id="invVendor" class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Invoice #</label>
+                            <input id="invNumber" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Currency</label>
+                            <select id="invCurrency"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Amount</label>
+                            <input id="invAmount" type="number" step="0.01"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Due Date</label>
+                            <input id="invDue" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                required />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                        <textarea id="invDesc" class="w-full rounded-lg border border-slate-300 px-3 py-2" rows="2"
+                            placeholder="Optional"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="cancelInvoice"
+                            class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Vendor Modal -->
+    <div id="vendorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">Add Vendor</h3>
+                    <button id="closeVendorModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="vendorForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                            <input id="vName" class="w-full rounded-lg border border-slate-300 px-3 py-2" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Country</label>
+                            <select id="vCountry" class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Currency</label>
+                            <select id="vCurrency" class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Payment Method</label>
+                            <select id="vMethod" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option>Bank Transfer</option>
+                                <option>Wise</option>
+                                <option>PayPal</option>
+                                <option>UPI</option>
+                                <option>Crypto (compliance gated)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Tax Forms</label>
+                        <input id="vTaxForms" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="e.g., W-8BEN, GSTIN" />
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="cancelVendor"
+                            class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pill {
+        font-size: .7rem;
+        padding: .2rem .5rem;
+        border-radius: 9999px;
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    canvas {
+        width: 100%;
+    }
+</style>
+
+<script>
+    // State
+    let invoices = [];   // [{id, number, vendor, country, currency, amount, base_amount, fx_rate, due, status}]
+    let approvals = [];  // [{number, owner, submitted_at, amount}]
+    let payouts = [];    // [{number, vendor, method, fx_rate, base_amount, status}]
+    let vendors = [];    // [{id,name,country,currency,method,tax_forms}]
+    let compliance = { docs: [], holds: [], withholding: [] };
+    let countries = [];  // ['IN','US',...]
+    let currencies = []; // ['INR','USD',...]
+    let meta = { base_currency: 'USD', range: { start: '', end: '' } };
+
+    // Helpers
+    async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    async function postJSON(u, d) { const r = await fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    const qs = s => document.querySelector(s);
+    const qsa = s => Array.from(document.querySelectorAll(s));
+    const fmt = n => isNaN(n) ? '-' : (Math.round(n * 100) / 100).toLocaleString();
+
+    // Load
+    async function loadAll() {
+        try {
+            const q = encodeURIComponent(qs('#searchBox').value || '');
+            const status = encodeURIComponent(qs('#statusFilter').value || '');
+            const country = encodeURIComponent(qs('#countryFilter').value || '');
+            const [m, inv, appr, pay, ven, comp] = await Promise.all([
+                fetchJSON(`/api/invoices/meta`),
+                fetchJSON(`/api/invoices?status=${status}&country=${country}&q=${q}`),
+                fetchJSON(`/api/invoices/approvals`),
+                fetchJSON(`/api/invoices/payouts`),
+                fetchJSON(`/api/invoices/vendors`),
+                fetchJSON(`/api/invoices/compliance`)
+            ]);
+            meta = m || meta;
+            invoices = inv || [];
+            approvals = appr || [];
+            payouts = pay || [];
+            vendors = ven || [];
+            compliance = comp || compliance;
+            countries = meta.countries || [];
+            currencies = meta.currencies || [];
+
+            // filters
+            const cSel = qs('#countryFilter'); cSel.innerHTML = '<option value="">All</option>'; countries.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; cSel.appendChild(o); });
+
+            // stats
+            const open = invoices.filter(i => !['Paid', 'Rejected'].includes(i.status)).length;
+            const ready = invoices.filter(i => i.status === 'Approved').length;
+            const fx = invoices.reduce((s, i) => s + (i.base_amount ? 0 : (i.amount || 0)), 0); // naive: non-base amounts as exposure
+            const cycle = meta.avg_cycle_days ?? '-';
+            const flags = (compliance.holds || []).length + (compliance.docs || []).filter(d => d.required && !d.completed).length;
+
+            qs('#openCount').textContent = open;
+            qs('#readyToPay').textContent = ready;
+            qs('#fxExposure').textContent = fx ? `${fmt(fx)} (non-${meta.base_currency})` : '-';
+            qs('#avgCycle').textContent = cycle;
+            qs('#flagsCount').textContent = flags;
+
+            renderCurrentView();
+            qs('#loadingState').classList.add('hidden');
+        } catch (e) {
+            console.error(e);
+            qs('#loadingState').innerHTML = `
+        <div class="text-center py-12">
+          <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
+          <p class="text-red-600 mb-4">Failed to load invoices</p>
+          <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
+        </div>`;
+        }
+    }
+
+    // Views
+    function renderCurrentView() {
+        const v = qs('#viewType').value;
+        ['dashboard', 'invoices', 'approvals', 'payouts', 'vendors', 'compliance'].forEach(k => qs('#' + k + 'View').classList.add('hidden'));
+        if (v === 'dashboard') { qs('#dashboardView').classList.remove('hidden'); renderDashboard(); }
+        if (v === 'invoices') { qs('#invoicesView').classList.remove('hidden'); renderInvoices(); }
+        if (v === 'approvals') { qs('#approvalsView').classList.remove('hidden'); renderApprovals(); }
+        if (v === 'payouts') { qs('#payoutsView').classList.remove('hidden'); renderPayouts(); }
+        if (v === 'vendors') { qs('#vendorsView').classList.remove('hidden'); renderVendors(); }
+        if (v === 'compliance') { qs('#complianceView').classList.remove('hidden'); renderCompliance(); }
+    }
+
+    function renderDashboard() {
+        drawTrend();
+        qs('#trendRange').textContent = meta.range?.start && meta.range?.end ? `${meta.range.start} → ${meta.range.end}` : '—';
+
+        const atRisk = invoices
+            .filter(i => ['Submitted', 'Approved', 'Scheduled', 'On Hold'].includes(i.status))
+            .filter(i => {
+                const d = (i.due || '').slice(0, 10);
+                return d && daysUntil(d) <= 7;
+            })
+            .sort((a, b) => new Date(a.due) - new Date(b.due))
+            .slice(0, 8);
+
+        const ul = qs('#atRiskList'); ul.innerHTML = '';
+        if (atRisk.length === 0) { ul.innerHTML = '<li class="text-slate-500">Nothing due in 7 days.</li>'; return; }
+        atRisk.forEach(i => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between">
+        <span>#${i.number} • ${i.vendor}</span>
+        <span class="pill">${(i.due || '').slice(0, 10)}</span>
+      </div>`;
+            ul.appendChild(li);
+        });
+    }
+
+    function drawTrend() {
+        const canvas = qs('#trendCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width = canvas.clientWidth;
+        const H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const byDay = {};
+        invoices.forEach(i => {
+            const d = (i.created_at || i.submitted_at || '').slice(0, 10);
+            if (!d) return;
+            const amt = i.base_amount ?? i.amount || 0;
+            byDay[d] = (byDay[d] || 0) + amt;
+        });
+        const labels = Object.keys(byDay).sort();
+        const values = labels.map(d => byDay[d]);
+
+        if (values.length < 2) { ctx.fillStyle = '#64748b'; ctx.fillText('Not enough data', 10, 20); return; }
+
+        const min = Math.min(...values, 0), max = Math.max(...values, 1000);
+        const pad = 16, x0 = pad, x1 = W - pad, y0 = H - pad, y1 = pad;
+
+        ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) { const y = y0 - (i / 3) * (y0 - y1); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
+
+        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath();
+        values.forEach((v, i) => {
+            const x = x0 + (i / (values.length - 1)) * (x1 - x0);
+            const y = y0 - ((v - min) / (max - min || 1)) * (y0 - y1);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
+
+    function renderInvoices() {
+        const tbody = qs('#invoiceTableBody'); tbody.innerHTML = '';
+        if (invoices.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-6 text-center text-slate-500 text-sm">No invoices.</td></tr>`;
+            return;
+        }
+        invoices.forEach(i => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="${i.id}"></td>
+        <td class="px-4 py-3 text-sm text-slate-700">#${i.number}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${i.vendor}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${i.country || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-700">${fmt(i.amount)}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${i.currency}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${(i.due || '').slice(0, 10)}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${i.status || '-'}</td>
+        <td class="px-4 py-3">
+          <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="openInvoice('${i.id}')"><i class="fa-solid fa-eye"></i></button>
+          <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="approve('${i.id}')"><i class="fa-solid fa-check"></i></button>
+          <button class="text-slate-600 hover:text-slate-800" onclick="schedule('${i.id}')"><i class="fa-solid fa-calendar-check"></i></button>
+        </td>`;
+            tbody.appendChild(tr);
+        });
+        qs('#selectAllRows').checked = false;
+    }
+
+    function renderApprovals() {
+        const tbody = qs('#approvalsTableBody'); tbody.innerHTML = '';
+        if (approvals.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500 text-sm">No pending approvals.</td></tr>`;
+            return;
+        }
+        approvals.forEach(a => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-700">#${a.number}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${a.owner}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${(a.submitted_at || '').slice(0, 10)}</td>
+        <td class="px-4 py-3 text-sm text-slate-700">${fmt(a.amount)}</td>
+        <td class="px-4 py-3">
+          <button class="px-2 py-1 border rounded-lg text-sm mr-2" onclick="approveByNumber('${a.number}')"><i class="fa-solid fa-check mr-1"></i> Approve</button>
+          <button class="px-2 py-1 border rounded-lg text-sm" onclick="rejectByNumber('${a.number}')"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
+        </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPayouts() {
+        const tbody = qs('#payoutTableBody'); tbody.innerHTML = '';
+        if (payouts.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500 text-sm">No payouts scheduled.</td></tr>`;
+            return;
+        }
+        payouts.forEach(p => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-700">#${p.number}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${p.vendor}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${p.method}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${p.fx_rate || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-700">${fmt(p.base_amount)}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${p.status || '-'}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderVendors() {
+        const tbody = qs('#vendorTableBody'); tbody.innerHTML = '';
+        if (vendors.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500 text-sm">No vendors yet.</td></tr>`;
+            return;
+        }
+        vendors.forEach(v => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-700">${v.name}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${v.country}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${v.currency}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${v.method}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${v.tax_forms || '-'}</td>
+        <td class="px-4 py-3">
+          <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="openVendor('${v.id}')"><i class="fa-solid fa-eye"></i></button>
+          <button class="text-red-500 hover:text-red-600" onclick="deleteVendor('${v.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderCompliance() {
+        // Docs
+        const docs = qs('#docsList'); docs.innerHTML = '';
+        (compliance.docs || []).forEach(d => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between">
+        <span>${d.vendor} • ${d.name}</span>
+        <span class="pill">${d.completed ? 'Complete' : 'Required'}</span>
+      </div>`;
+            docs.appendChild(li);
+        });
+        // Holds
+        const holds = qs('#holdsList'); holds.innerHTML = '';
+        const arr = compliance.holds || [];
+        if (arr.length === 0) { holds.innerHTML = '<li class="text-slate-500">No holds.</li>'; } else {
+            arr.forEach(h => {
+                const li = document.createElement('li');
+                li.innerHTML = `<div class="flex items-center justify-between">
+          <span>#${h.number} • ${h.reason}</span>
+          <button class="px-2 py-1 border rounded-lg text-sm" onclick="clearHold('${h.number}')">Clear</button>
+        </div>`;
+                holds.appendChild(li);
+            });
+        }
+        // Withholding
+        const wh = qs('#withholdingList'); wh.innerHTML = '';
+        (compliance.withholding || []).forEach(w => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between">
+        <span>${w.country} • ${w.rule}</span>
+        <span class="pill">${w.rate}%</span>
+      </div>`;
+            wh.appendChild(li);
+        });
+    }
+
+    // Utils
+    function daysUntil(dateStr) { const d = new Date(dateStr); const now = new Date(); return Math.ceil((d - now) / (1000 * 60 * 60 * 24)); }
+
+    // Actions
+    function openInvoice(id) { window.location.href = `/invoices/${id}`; }
+    async function approve(id) { await postJSON('/api/invoices/approve', { id }); await loadAll(); }
+    async function schedule(id) { await postJSON('/api/invoices/schedule', { id }); await loadAll(); }
+    async function approveByNumber(num) { await postJSON('/api/invoices/approve-number', { number: num }); await loadAll(); }
+    async function rejectByNumber(num) { await postJSON('/api/invoices/reject-number', { number: num }); await loadAll(); }
+
+    function bulk(action) {
+        const ids = qsa('.rowSel:checked').map(c => c.dataset.id);
+        if (ids.length === 0) return alert('No rows selected');
+        postJSON(`/api/invoices/${action}`, { ids }).then(loadAll).catch(() => alert('Action failed'));
+    }
+
+    async function payNow() { await postJSON('/api/invoices/pay-now', {}); await loadAll(); }
+    async function scheduleBatch() { await postJSON('/api/invoices/schedule-batch', {}); await loadAll(); }
+
+    function openVendor(id) { window.location.href = `/vendors/${id}`; }
+    async function deleteVendor(id) { if (!confirm('Delete vendor?')) return; await postJSON('/api/invoices/vendors/delete', { id }); await loadAll(); }
+
+    function openInvoiceModal() { qs('#invoiceModal').classList.remove('hidden'); }
+    function closeInvoiceModal() { qs('#invoiceModal').classList.add('hidden'); qs('#invoiceForm').reset(); }
+    function openVendorModal() { qs('#vendorModal').classList.remove('hidden'); }
+    function closeVendorModal() { qs('#vendorModal').classList.add('hidden'); qs('#vendorForm').reset(); }
+
+    // Export
+    function exportCSV() {
+        const rows = [['number', 'vendor', 'country', 'currency', 'amount', 'due', 'status']];
+        invoices.forEach(i => rows.push([i.number, i.vendor, i.country || '', i.currency, i.amount ?? '', (i.due || '').slice(0, 10), i.status || '']));
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'invoices.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    // Events
+    function setupEvents() {
+        qs('#viewType').addEventListener('change', renderCurrentView);
+        qs('#statusFilter').addEventListener('change', loadAll);
+        qs('#countryFilter').addEventListener('change', loadAll);
+        qs('#searchBox').addEventListener('input', debounce(loadAll, 250));
+        qs('#refreshBtn').addEventListener('click', loadAll);
+        qs('#exportBtn').addEventListener('click', exportCSV);
+
+        qs('#newInvoiceBtn').addEventListener('click', openInvoiceModal);
+        qs('#closeInvoiceModal').addEventListener('click', closeInvoiceModal);
+        qs('#cancelInvoice').addEventListener('click', closeInvoiceModal);
+        qs('#invoiceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                vendor_id: qs('#invVendor').value,
+                number: qs('#invNumber').value,
+                currency: qs('#invCurrency').value,
+                amount: +qs('#invAmount').value,
+                due: qs('#invDue').value,
+                description: qs('#invDesc').value
+            };
+            try { await postJSON('/api/invoices/create', payload); closeInvoiceModal(); await loadAll(); alert('Invoice created'); } catch { alert('Failed to create'); }
+        });
+
+        qs('#addVendorBtn').addEventListener('click', openVendorModal);
+        qs('#closeVendorModal').addEventListener('click', closeVendorModal);
+        qs('#cancelVendor').addEventListener('click', closeVendorModal);
+        qs('#vendorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                name: qs('#vName').value,
+                country: qs('#vCountry').value,
+                currency: qs('#vCurrency').value,
+                method: qs('#vMethod').value,
+                tax_forms: qs('#vTaxForms').value
+            };
+            try { await postJSON('/api/invoices/vendors/create', payload); closeVendorModal(); await loadAll(); alert('Vendor added'); } catch { alert('Failed to add'); }
+        });
+
+        qs('#bulkApproveBtn').addEventListener('click', () => bulk('approve-batch'));
+        qs('#bulkRejectBtn').addEventListener('click', () => bulk('reject-batch'));
+        qs('#bulkScheduleBtn').addEventListener('click', () => bulk('schedule-batch'));
+        qs('#payNowBtn').addEventListener('click', payNow);
+        qs('#scheduleBatchBtn').addEventListener('click', scheduleBatch);
+
+        qs('#selectAllRows').addEventListener('change', (e) => qsa('.rowSel').forEach(cb => cb.checked = e.target.checked));
+    }
+
+    // Populate select options (vendors/currencies/countries)
+    async function preloadMeta() {
+        try {
+            const m = await fetchJSON('/api/invoices/meta');
+            countries = m.countries || []; currencies = m.currencies || []; vendors = m.vendors || vendors; meta.base_currency = m.base_currency || meta.base_currency;
+
+            const vSel = qs('#invVendor'); vSel.innerHTML = ''; (vendors || []).forEach(v => { const o = document.createElement('option'); o.value = v.id || v.name; o.textContent = v.name; vSel.appendChild(o); });
+            const cSel = qs('#invCurrency'); cSel.innerHTML = ''; (currencies || []).forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; cSel.appendChild(o); });
+            const vcSel = qs('#vCurrency'); vcSel.innerHTML = ''; (currencies || []).forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; vcSel.appendChild(o); });
+            const vcoSel = qs('#vCountry'); vcoSel.innerHTML = ''; (countries || []).forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; vcoSel.appendChild(o); });
+        } catch (e) { /* non-blocking */ }
+    }
+
+    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
+
+    async function initializePage() {
+        qs('#loadingState').classList.remove('hidden');
+        await preloadMeta();
+        await loadAll();
+        setupEvents();
+    }
+
+    document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+{% endblock %}

@@ -1,0 +1,621 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-stopwatch mr-2"></i> Time Tracking
+            </h1>
+            <p class="text-slate-600 text-sm">Track working hours, shifts, and productivity efficiently.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="startTimerBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-play mr-1"></i> Start Timer
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">View:</label>
+                <select id="viewType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="dashboard">Dashboard</option>
+                    <option value="tracker">Live Tracker</option>
+                    <option value="calendar">Shifts</option>
+                    <option value="productivity">Productivity</option>
+                    <option value="reports">Reports</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Period:</label>
+                <select id="periodSelect" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="custom">Custom…</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Team:</label>
+                <select id="teamFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                <input id="searchBox" class="rounded-lg border border-slate-300 pl-8 pr-3 py-2 text-sm w-64"
+                    placeholder="Search employee, project…" />
+            </div>
+            <div class="ml-auto flex items-center gap-2">
+                <button id="exportBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+                </button>
+                <button id="refreshBtn"
+                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-play mr-1"></i> Active Timers</div>
+            <div id="activeTimers" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-clock mr-1"></i> Total Hours (Today)</div>
+            <div id="totalHoursToday" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-user-group mr-1"></i> Avg / Employee</div>
+            <div id="avgPerEmployee" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500"><i class="fa-solid fa-bolt mr-1"></i> Overtime</div>
+            <div id="overtimeHours" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div id="loadingState" class="text-center py-12">
+            <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
+            <p class="text-slate-600">Loading time data…</p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-chart-line mr-2"></i> Hours by
+                            Day</h3>
+                        <span id="hoursRange" class="text-xs text-slate-500">—</span>
+                    </div>
+                    <canvas id="hoursCanvas" height="140"></canvas>
+                    <p class="text-xs text-slate-500 mt-2">Submitted hours per day.</p>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-ranking-star mr-2"></i> Top
+                        Contributors</h3>
+                    <ul id="topContrib" class="space-y-2 text-sm text-slate-700"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Tracker -->
+        <div id="trackerView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-regular fa-clock mr-2"></i> My Timer</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Project</label>
+                            <select id="tProject" class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Task</label>
+                            <input id="tTask" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                placeholder="e.g., Bugfix" />
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center gap-3">
+                        <div id="timerDisplay" class="text-3xl font-semibold tabular-nums text-slate-800">00:00:00</div>
+                        <button id="btnStart" class="px-3 py-2 border rounded-lg text-sm"><i
+                                class="fa-solid fa-play mr-1"></i> Start</button>
+                        <button id="btnPause" class="px-3 py-2 border rounded-lg text-sm"><i
+                                class="fa-solid fa-pause mr-1"></i> Pause</button>
+                        <button id="btnStop" class="px-3 py-2 border rounded-lg text-sm"><i
+                                class="fa-solid fa-stop mr-1"></i> Stop & Save</button>
+                    </div>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-list-check mr-2"></i> My Recent
+                        Logs</h3>
+                    <ul id="myLogs" class="space-y-2 text-sm text-slate-700"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shifts (Calendar/List) -->
+        <div id="calendarView" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-calendar-days mr-2"></i> Shifts</h3>
+                <button id="assignShiftBtn" class="px-3 py-1 border rounded-lg text-sm">
+                    <i class="fa-solid fa-user-plus mr-1"></i> Assign Shift
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Employee</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Start</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">End</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Location</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shiftTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Productivity -->
+        <div id="productivityView" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-bullseye mr-2"></i> Utilization
+                    </h3>
+                    <div id="utilizationBox" class="space-y-2 text-sm"></div>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-tags mr-2"></i> Top Projects
+                    </h3>
+                    <ul id="topProjects" class="space-y-2 text-sm"></ul>
+                </div>
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                        Anomalies</h3>
+                    <ul id="anomalies" class="space-y-2 text-sm"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports -->
+        <div id="reportsView" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Employee</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Project</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Task</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Duration</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Shift Modal -->
+    <div id="shiftModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">Assign Shift</h3>
+                    <button id="closeShiftModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="shiftForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Employee</label>
+                        <select id="sEmployee" class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                            <input id="sDate" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                            <input id="sLocation" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                placeholder="HQ / Remote" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Start</label>
+                            <input id="sStart" type="time" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">End</label>
+                            <input id="sEnd" type="time" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                required />
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="cancelShift"
+                            class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Assign</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pill {
+        font-size: .7rem;
+        padding: .2rem .5rem;
+        border-radius: 9999px;
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .spark {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 9999px;
+        overflow: hidden;
+    }
+
+    .spark>div {
+        height: 8px;
+        background: #10b981;
+    }
+
+    canvas {
+        width: 100%;
+    }
+</style>
+
+<script>
+    // State
+    let employees = [];     // ['Alice', ...]
+    let projects = [];      // ['Website', ...]
+    let teams = [];
+    let timers = [];        // [{id, employee, project, task, started_at, paused_ms, running}]
+    let logs = [];          // [{id, date, employee, project, task, duration_ms, status}]
+    let shifts = [];        // [{id, employee, date, start, end, location}]
+    let meta = { range: { start: '', end: '' }, overtime_threshold: 8 };
+
+    // Helpers
+    async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    async function postJSON(u, d) { const r = await fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    const qs = s => document.querySelector(s);
+    const qsa = s => Array.from(document.querySelectorAll(s));
+    const fmtH = ms => (ms <= 0 ? '0.00' : (Math.round(ms / 36) / 100).toFixed(2)); // ms -> hours, 2dp
+    const hhmmss = ms => {
+        const t = Math.max(0, Math.floor(ms / 1000));
+        const h = String(Math.floor(t / 3600)).padStart(2, '0');
+        const m = String(Math.floor((t % 3600) / 60)).padStart(2, '0');
+        const s = String(t % 60).padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    };
+
+    // Load
+    async function loadAll() {
+        try {
+            const q = encodeURIComponent(qs('#searchBox').value || '');
+            const team = encodeURIComponent(qs('#teamFilter').value || '');
+            const period = qs('#periodSelect').value;
+            const [m, p, e, t, l, sh] = await Promise.all([
+                fetchJSON(`/api/time/meta?period=${period}&team=${team}&q=${q}`),
+                fetchJSON(`/api/time/projects`),
+                fetchJSON(`/api/time/employees?team=${team}`),
+                fetchJSON(`/api/time/timers?team=${team}`),
+                fetchJSON(`/api/time/logs?period=${period}&team=${team}&q=${q}`),
+                fetchJSON(`/api/time/shifts?period=${period}&team=${team}`)
+            ]);
+
+            meta = m || meta;
+            projects = p || [];
+            employees = e || [];
+            timers = t || [];
+            logs = l || [];
+            shifts = sh || [];
+
+            // filters
+            const teamSel = qs('#teamFilter'); teamSel.innerHTML = '<option value="">All</option>';
+            (meta.teams || []).forEach(x => { const o = document.createElement('option'); o.value = x; o.textContent = x; teamSel.appendChild(o); });
+            const projSel = qs('#tProject'); projSel.innerHTML = ''; projects.forEach(pr => { const o = document.createElement('option'); o.value = pr; o.textContent = pr; projSel.appendChild(o); });
+            const empSel = qs('#sEmployee'); empSel.innerHTML = ''; employees.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; empSel.appendChild(o); });
+
+            // stats
+            const active = timers.filter(x => x.running).length;
+            const todayMs = logs.filter(x => x.date === meta.today).reduce((s, x) => s + (x.duration_ms || 0), 0);
+            const uniq = new Set(logs.filter(x => x.date === meta.today).map(x => x.employee)).size || 1;
+            const avg = todayMs / uniq;
+            const overtime = logs.filter(x => x.date === meta.today).reduce((s, x) => {
+                const h = x.duration_ms / 3600000;
+                return s + Math.max(0, h - meta.overtime_threshold);
+            }, 0);
+
+            qs('#activeTimers').textContent = active;
+            qs('#totalHoursToday').textContent = fmtH(todayMs);
+            qs('#avgPerEmployee').textContent = fmtH(avg * 1); // avg per person
+            qs('#overtimeHours').textContent = (Math.round(overtime * 100) / 100).toFixed(2);
+
+            renderCurrentView();
+            qs('#loadingState').classList.add('hidden');
+        } catch (err) {
+            console.error(err);
+            qs('#loadingState').innerHTML = `
+        <div class="text-center py-12">
+          <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
+          <p class="text-red-600 mb-4">Failed to load time tracking</p>
+          <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
+        </div>`;
+        }
+    }
+
+    // Views
+    function renderCurrentView() {
+        const v = qs('#viewType').value;
+        ['dashboard', 'tracker', 'calendar', 'productivity', 'reports'].forEach(k => qs('#' + k + 'View').classList.add('hidden'));
+        if (v === 'dashboard') { qs('#dashboardView').classList.remove('hidden'); renderDashboard(); }
+        if (v === 'tracker') { qs('#trackerView').classList.remove('hidden'); renderTracker(); }
+        if (v === 'calendar') { qs('#calendarView').classList.remove('hidden'); renderCalendar(); }
+        if (v === 'productivity') { qs('#productivityView').classList.remove('hidden'); renderProductivity(); }
+        if (v === 'reports') { qs('#reportsView').classList.remove('hidden'); renderReports(); }
+    }
+
+    function renderDashboard() {
+        drawHoursChart();
+        qs('#hoursRange').textContent = meta.range?.start && meta.range?.end ? `${meta.range.start} → ${meta.range.end}` : '—';
+
+        const sums = {};
+        logs.forEach(l => { sums[l.employee] = (sums[l.employee] || 0) + (l.duration_ms || 0); });
+        const top = Object.entries(sums).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        const box = qs('#topContrib'); box.innerHTML = '';
+        if (top.length === 0) { box.innerHTML = '<li class="text-slate-500">No data</li>'; return; }
+        top.forEach(([name, ms]) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between"><span>${name}</span><span class="pill">${fmtH(ms)}h</span></div>`;
+            box.appendChild(li);
+        });
+    }
+
+    function drawHoursChart() {
+        const canvas = qs('#hoursCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width = canvas.clientWidth;
+        const H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        // aggregate by date
+        const byDay = {};
+        logs.forEach(r => { const d = r.date; if (!d) return; byDay[d] = (byDay[d] || 0) + (r.duration_ms || 0); });
+        const labels = Object.keys(byDay).sort();
+        const values = labels.map(d => (byDay[d] / 3600000)); // hours
+
+        if (values.length < 2) { ctx.fillStyle = '#64748b'; ctx.fillText('Not enough data', 10, 20); return; }
+
+        const min = Math.min(...values, 0), max = Math.max(...values, 8);
+        const pad = 16, x0 = pad, x1 = W - pad, y0 = H - pad, y1 = pad;
+
+        ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) { const y = y0 - (i / 3) * (y0 - y1); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
+
+        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath();
+        values.forEach((v, i) => {
+            const x = x0 + (i / (values.length - 1)) * (x1 - x0);
+            const y = y0 - ((v - min) / (max - min || 1)) * (y0 - y1);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
+
+    function renderTracker() {
+        // recent logs for current user (assume meta.me)
+        const list = logs.filter(l => l.employee === meta.me).slice(-8).reverse();
+        const ul = qs('#myLogs'); ul.innerHTML = '';
+        if (list.length === 0) { ul.innerHTML = '<li class="text-slate-500">No recent logs.</li>'; return; }
+        list.forEach(l => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between">
+        <span>${l.date} • ${l.project} — ${l.task || '-'}</span>
+        <span class="pill">${fmtH(l.duration_ms)}h</span>
+      </div>`;
+            ul.appendChild(li);
+        });
+    }
+
+    function renderCalendar() {
+        const tbody = qs('#shiftTableBody'); tbody.innerHTML = '';
+        if (shifts.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500 text-sm">No shifts scheduled.</td></tr>`;
+            return;
+        }
+        shifts.forEach(s => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-600">${s.employee}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${s.date}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${s.start}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${s.end}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${s.location || '-'}</td>
+        <td class="px-4 py-3">
+          <button class="px-2 py-1 border rounded-lg text-sm mr-2" onclick="editShift('${s.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="px-2 py-1 border rounded-lg text-sm" onclick="deleteShift('${s.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderProductivity() {
+        // Utilization by team/employee
+        const totalH = logs.reduce((s, l) => s + (l.duration_ms || 0), 0);
+        const byTeam = {};
+        logs.forEach(l => {
+            const team = (l.team || 'Unassigned');
+            byTeam[team] = (byTeam[team] || 0) + (l.duration_ms || 0);
+        });
+        const box = qs('#utilizationBox'); box.innerHTML = '';
+        const entries = Object.entries(byTeam).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        if (entries.length === 0) { box.innerHTML = '<div class="text-slate-500 text-sm">No data</div>'; return; }
+        entries.forEach(([team, ms]) => {
+            const pct = totalH ? Math.round((ms / totalH) * 100) : 0;
+            const row = document.createElement('div');
+            row.innerHTML = `<div class="flex items-center justify-between">
+        <span>${team}</span><span class="font-medium text-slate-700">${pct}%</span>
+      </div>
+      <div class="spark"><div style="width:${pct}%"></div></div>`;
+            box.appendChild(row);
+        });
+
+        // Top projects
+        const byProj = {};
+        logs.forEach(l => { byProj[l.project] = (byProj[l.project] || 0) + (l.duration_ms || 0); });
+        const proj = Object.entries(byProj).sort((a, b) => b[1] - a[1]).slice(0, 6);
+        const ul = qs('#topProjects'); ul.innerHTML = '';
+        proj.forEach(([p, ms]) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between"><span>${p}</span><span class="pill">${fmtH(ms)}h</span></div>`;
+            ul.appendChild(li);
+        });
+
+        // Anomalies (long days, missing lunch, etc. — simple rule)
+        const anomalies = [];
+        const byEmpDay = {};
+        logs.forEach(l => {
+            const k = `${l.employee}|${l.date}`;
+            byEmpDay[k] = (byEmpDay[k] || 0) + (l.duration_ms || 0);
+        });
+        Object.entries(byEmpDay).forEach(([k, ms]) => {
+            if (ms / 3600000 > 12) anomalies.push({ k, ms, reason: '>12h in a day' });
+        });
+        const an = qs('#anomalies'); an.innerHTML = '';
+        if (anomalies.length === 0) { an.innerHTML = '<li class="text-slate-500">No anomalies detected.</li>'; return; }
+        anomalies.slice(0, 8).forEach(a => {
+            const [emp, date] = a.k.split('|');
+            const li = document.createElement('li');
+            li.innerHTML = `<div class="flex items-center justify-between"><span>${emp} • ${date}</span><span class="pill">${fmtH(a.ms)}h</span></div><div class="text-xs text-amber-600">${a.reason}</div>`;
+            an.appendChild(li);
+        });
+    }
+
+    function renderReports() {
+        const tbody = qs('#reportTableBody'); tbody.innerHTML = '';
+        if (logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500 text-sm">No logs.</td></tr>`;
+            return;
+        }
+        logs.forEach(r => {
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3 text-sm text-slate-600">${r.date}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${r.employee}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${r.project || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${r.task || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${fmtH(r.duration_ms)}h</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${r.status || '-'}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Timer controls (client-side ticker; server should persist)
+    let tickHandle = null, startMs = 0, pausedAcc = 0, running = false;
+    function updateTimer() {
+        const now = Date.now();
+        const elapsed = running ? (now - startMs + pausedAcc) : pausedAcc;
+        qs('#timerDisplay').textContent = hhmmss(elapsed);
+    }
+    function startTimer() {
+        if (running) return;
+        running = true;
+        startMs = Date.now();
+        tickHandle = setInterval(updateTimer, 500);
+    }
+    function pauseTimer() {
+        if (!running) return;
+        pausedAcc += Date.now() - startMs;
+        running = false;
+        clearInterval(tickHandle); updateTimer();
+    }
+    async function stopTimer() {
+        const total = running ? (Date.now() - startMs + pausedAcc) : pausedAcc;
+        running = false; clearInterval(tickHandle); updateTimer();
+        const payload = { project: qs('#tProject').value, task: qs('#tTask').value, duration_ms: total };
+        pausedAcc = 0; startMs = 0;
+        try { await postJSON('/api/time/logs/create', payload); await loadAll(); alert('Time saved'); } catch { alert('Failed to save'); }
+    }
+
+    // Shift actions
+    function openShiftModal() { qs('#shiftModal').classList.remove('hidden'); }
+    function closeShiftModal() { qs('#shiftModal').classList.add('hidden'); qs('#shiftForm').reset(); }
+    async function saveShift(payload) { await postJSON('/api/time/shifts/assign', payload); closeShiftModal(); await loadAll(); }
+    function editShift(id) { window.location.href = `/time/shifts/${id}`; }
+    async function deleteShift(id) { if (!confirm('Delete shift?')) return; await postJSON('/api/time/shifts/delete', { id }); await loadAll(); }
+
+    // Export
+    function exportCSV() {
+        const rows = [['date', 'employee', 'project', 'task', 'duration_hours', 'status']];
+        logs.forEach(r => rows.push([r.date, r.employee, r.project || '', r.task || '', (r.duration_ms / 3600000).toFixed(2), r.status || '']));
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'time_logs.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    // Events
+    function setupEvents() {
+        qs('#viewType').addEventListener('change', renderCurrentView);
+        qs('#periodSelect').addEventListener('change', loadAll);
+        qs('#teamFilter').addEventListener('change', loadAll);
+        qs('#searchBox').addEventListener('input', debounce(loadAll, 250));
+        qs('#refreshBtn').addEventListener('click', loadAll);
+        qs('#exportBtn').addEventListener('click', exportCSV);
+
+        qs('#assignShiftBtn').addEventListener('click', openShiftModal);
+        qs('#closeShiftModal').addEventListener('click', closeShiftModal);
+        qs('#cancelShift').addEventListener('click', closeShiftModal);
+        qs('#shiftForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                employee: qs('#sEmployee').value,
+                date: qs('#sDate').value,
+                start: qs('#sStart').value,
+                end: qs('#sEnd').value,
+                location: qs('#sLocation').value
+            };
+            try { await saveShift(payload); } catch { alert('Failed to assign'); }
+        });
+
+        qs('#startTimerBtn').addEventListener('click', () => { qs('#viewType').value = 'tracker'; renderCurrentView(); });
+        qs('#btnStart').addEventListener('click', startTimer);
+        qs('#btnPause').addEventListener('click', pauseTimer);
+        qs('#btnStop').addEventListener('click', stopTimer);
+    }
+
+    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
+
+    async function initializePage() {
+        qs('#loadingState').classList.remove('hidden');
+        await loadAll();
+        setupEvents();
+    }
+
+    document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+{% endblock %}
