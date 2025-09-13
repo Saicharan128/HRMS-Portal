@@ -46,6 +46,11 @@
                 <label class="text-sm font-medium text-slate-700">Department:</label>
                 <select id="deptFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option value="">All</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Sales">Sales</option>
+                    <option value="HR">HR</option>
+                    <option value="Finance">Finance</option>
                 </select>
             </div>
             <div class="relative">
@@ -74,38 +79,38 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-hourglass-half mr-1"></i> Logged Hours</div>
-            <div id="loggedHours" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+            <div id="loggedHours" class="mt-1 text-2xl font-semibold text-slate-800">324.5</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-circle-exclamation mr-1"></i> Missing Entries
             </div>
-            <div id="missingEntries" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+            <div id="missingEntries" class="mt-1 text-2xl font-semibold text-slate-800">7</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-check-circle mr-1"></i> Approved</div>
-            <div id="approvedHours" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+            <div id="approvedHours" class="mt-1 text-2xl font-semibold text-slate-800">256.0</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-coins mr-1"></i> Payroll Ready</div>
-            <div id="payrollReady" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+            <div id="payrollReady" class="mt-1 text-2xl font-semibold text-slate-800">280.25</div>
         </div>
     </div>
 
     <!-- Main -->
     <div class="rounded-2xl border border-slate-200 bg-white p-6">
-        <div id="loadingState" class="text-center py-12">
+        <div id="loadingState" class="text-center py-12 hidden">
             <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
             <p class="text-slate-600">Loading timesheets…</p>
         </div>
 
         <!-- Dashboard -->
-        <div id="dashboardView" class="hidden">
+        <div id="dashboardView">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-chart-line mr-2"></i> Hours by
                             Day</h3>
-                        <span id="hoursRange" class="text-xs text-slate-500">—</span>
+                        <span id="hoursRange" class="text-xs text-slate-500">Jan 8 → Jan 14, 2025</span>
                     </div>
                     <canvas id="hoursCanvas" height="140"></canvas>
                     <p class="text-xs text-slate-500 mt-2">Total submitted hours per day.</p>
@@ -113,7 +118,36 @@
                 <div class="rounded-xl border border-slate-200 p-4">
                     <h3 class="font-semibold text-slate-800 mb-3"><i class="fa-solid fa-list-check mr-2"></i> Approvals
                         Queue</h3>
-                    <ul id="approvalsSummary" class="space-y-2 text-sm text-slate-700"></ul>
+                    <ul id="approvalsSummary" class="space-y-2 text-sm text-slate-700">
+                        <li>
+                            <div class="flex items-center justify-between">
+                                <span>John Smith</span>
+                                <span class="pill">40.0h</span>
+                            </div>
+                            <div class="text-xs text-slate-500">Jan 8-14 • 2025-01-14</div>
+                        </li>
+                        <li>
+                            <div class="flex items-center justify-between">
+                                <span>Sarah Wilson</span>
+                                <span class="pill">38.5h</span>
+                            </div>
+                            <div class="text-xs text-slate-500">Jan 8-14 • 2025-01-14</div>
+                        </li>
+                        <li>
+                            <div class="flex items-center justify-between">
+                                <span>Mike Johnson</span>
+                                <span class="pill">42.0h</span>
+                            </div>
+                            <div class="text-xs text-slate-500">Jan 8-14 • 2025-01-13</div>
+                        </li>
+                        <li>
+                            <div class="flex items-center justify-between">
+                                <span>Emily Davis</span>
+                                <span class="pill">35.5h</span>
+                            </div>
+                            <div class="text-xs text-slate-500">Jan 8-14 • 2025-01-13</div>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -143,7 +177,88 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="entriesTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                    <tbody id="entriesTableBody" class="bg-white divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="1"></td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-14</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">John Smith</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Website Redesign</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Frontend Development</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">8.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600"><span
+                                    class="pill bg-green-100 text-green-800">Approved</span></td>
+                            <td class="px-4 py-3">
+                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('1')"><i
+                                        class="fa-solid fa-edit"></i></button>
+                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('1')"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="2"></td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-13</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Sarah Wilson</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Marketing Campaign</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Content Creation</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">7.5</td>
+                            <td class="px-4 py-3 text-sm text-slate-600"><span
+                                    class="pill bg-yellow-100 text-yellow-800">Submitted</span></td>
+                            <td class="px-4 py-3">
+                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('2')"><i
+                                        class="fa-solid fa-edit"></i></button>
+                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('2')"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="3"></td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-13</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Mike Johnson</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">API Development</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Backend Services</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">8.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600"><span
+                                    class="pill bg-blue-100 text-blue-800">Draft</span></td>
+                            <td class="px-4 py-3">
+                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('3')"><i
+                                        class="fa-solid fa-edit"></i></button>
+                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('3')"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="4"></td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-12</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Emily Davis</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Sales Analytics</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Data Analysis</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">6.5</td>
+                            <td class="px-4 py-3 text-sm text-slate-600"><span
+                                    class="pill bg-green-100 text-green-800">Approved</span></td>
+                            <td class="px-4 py-3">
+                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('4')"><i
+                                        class="fa-solid fa-edit"></i></button>
+                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('4')"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="5"></td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-12</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Alex Brown</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">HR System</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">User Training</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">4.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600"><span
+                                    class="pill bg-yellow-100 text-yellow-800">Submitted</span></td>
+                            <td class="px-4 py-3">
+                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('5')"><i
+                                        class="fa-solid fa-edit"></i></button>
+                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('5')"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -171,7 +286,68 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="approvalsTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                    <tbody id="approvalsTableBody" class="bg-white divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">John Smith</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Jan 8-14, 2025</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-14</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">40.0</td>
+                            <td class="px-4 py-3">
+                                <button
+                                    class="px-2 py-1 border rounded-lg text-sm mr-2 hover:bg-green-50 hover:border-green-300"
+                                    onclick="approve('John Smith','Jan 8-14, 2025')"><i
+                                        class="fa-solid fa-check mr-1"></i> Approve</button>
+                                <button class="px-2 py-1 border rounded-lg text-sm hover:bg-red-50 hover:border-red-300"
+                                    onclick="reject('John Smith','Jan 8-14, 2025')"><i
+                                        class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">Sarah Wilson</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Jan 8-14, 2025</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-14</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">38.5</td>
+                            <td class="px-4 py-3">
+                                <button
+                                    class="px-2 py-1 border rounded-lg text-sm mr-2 hover:bg-green-50 hover:border-green-300"
+                                    onclick="approve('Sarah Wilson','Jan 8-14, 2025')"><i
+                                        class="fa-solid fa-check mr-1"></i> Approve</button>
+                                <button class="px-2 py-1 border rounded-lg text-sm hover:bg-red-50 hover:border-red-300"
+                                    onclick="reject('Sarah Wilson','Jan 8-14, 2025')"><i
+                                        class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">Mike Johnson</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Jan 8-14, 2025</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-13</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">42.0</td>
+                            <td class="px-4 py-3">
+                                <button
+                                    class="px-2 py-1 border rounded-lg text-sm mr-2 hover:bg-green-50 hover:border-green-300"
+                                    onclick="approve('Mike Johnson','Jan 8-14, 2025')"><i
+                                        class="fa-solid fa-check mr-1"></i> Approve</button>
+                                <button class="px-2 py-1 border rounded-lg text-sm hover:bg-red-50 hover:border-red-300"
+                                    onclick="reject('Mike Johnson','Jan 8-14, 2025')"><i
+                                        class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">Emily Davis</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">Jan 8-14, 2025</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-13</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">35.5</td>
+                            <td class="px-4 py-3">
+                                <button
+                                    class="px-2 py-1 border rounded-lg text-sm mr-2 hover:bg-green-50 hover:border-green-300"
+                                    onclick="approve('Emily Davis','Jan 8-14, 2025')"><i
+                                        class="fa-solid fa-check mr-1"></i> Approve</button>
+                                <button class="px-2 py-1 border rounded-lg text-sm hover:bg-red-50 hover:border-red-300"
+                                    onclick="reject('Emily Davis','Jan 8-14, 2025')"><i
+                                        class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -199,7 +375,57 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Total</th>
                         </tr>
                     </thead>
-                    <tbody id="payrollTableBody" class="bg-white divide-y divide-slate-200"></tbody>
+                    <tbody id="payrollTableBody" class="bg-white divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">John Smith</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">40.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">42.0</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">Sarah Wilson</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">38.5</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">8.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">46.5</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">Mike Johnson</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">40.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">4.5</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">44.5</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">Emily Davis</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">35.5</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">4.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">39.5</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">Alex Brown</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">32.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">1.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">8.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">41.0</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">Lisa Garcia</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">40.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">0.5</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">40.5</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-sm text-slate-600">David Chen</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">37.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">1.5</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">2.0</td>
+                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">40.5</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -230,7 +456,15 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Project</label>
-                            <select id="eProject" class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                            <select id="eProject" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option value="Website Redesign">Website Redesign</option>
+                                <option value="Marketing Campaign">Marketing Campaign</option>
+                                <option value="API Development">API Development</option>
+                                <option value="Sales Analytics">Sales Analytics</option>
+                                <option value="HR System">HR System</option>
+                                <option value="Mobile App">Mobile App</option>
+                                <option value="Database Migration">Database Migration</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Task</label>
@@ -277,6 +511,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Success Toast -->
+    <div id="successToast"
+        class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
+        <div class="flex items-center">
+            <i class="fa-solid fa-check-circle mr-2"></i>
+            <span id="successMessage"></span>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="errorToast"
+        class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
+        <div class="flex items-center">
+            <i class="fa-solid fa-exclamation-circle mr-2"></i>
+            <span id="errorMessage"></span>
+        </div>
+    </div>
+
+    <!-- Info Toast -->
+    <div id="infoToast"
+        class="fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
+        <div class="flex items-center">
+            <i class="fa-solid fa-info-circle mr-2"></i>
+            <span id="infoMessage"></span>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -294,285 +555,493 @@
 </style>
 
 <script>
-    // State
-    let entries = [];     // [{id,date,employee,employee_email,project,task,hours,status,notes}]
-    let approvals = [];   // [{employee, period, submitted_at, total_hours, ids:[]}]
-    let payroll = [];     // [{employee, regular, overtime, leave, total}]
-    let departments = [];
-    let projects = [];
-    let periodRange = { start: '', end: '' };
+    // Static dummy data
+    let entries = [
+        { id: '1', date: '2025-01-14', employee: 'John Smith', employee_email: 'john.smith@company.com', project: 'Website Redesign', task: 'Frontend Development', hours: 8.0, status: 'Approved', notes: 'Completed login page redesign' },
+        { id: '2', date: '2025-01-13', employee: 'Sarah Wilson', employee_email: 'sarah.wilson@company.com', project: 'Marketing Campaign', task: 'Content Creation', hours: 7.5, status: 'Submitted', notes: 'Created blog content for Q1 launch' },
+        { id: '3', date: '2025-01-13', employee: 'Mike Johnson', employee_email: 'mike.johnson@company.com', project: 'API Development', task: 'Backend Services', hours: 8.0, status: 'Draft', notes: 'Working on user authentication API' },
+        { id: '4', date: '2025-01-12', employee: 'Emily Davis', employee_email: 'emily.davis@company.com', project: 'Sales Analytics', task: 'Data Analysis', hours: 6.5, status: 'Approved', notes: 'Analyzed Q4 sales performance' },
+        { id: '5', date: '2025-01-12', employee: 'Alex Brown', employee_email: 'alex.brown@company.com', project: 'HR System', task: 'User Training', hours: 4.0, status: 'Submitted', notes: 'Conducted training session for new hires' },
+        { id: '6', date: '2025-01-11', employee: 'Lisa Garcia', employee_email: 'lisa.garcia@company.com', project: 'Mobile App', task: 'UI Design', hours: 7.0, status: 'Approved', notes: 'Designed user profile screens' },
+        { id: '7', date: '2025-01-11', employee: 'David Chen', employee_email: 'david.chen@company.com', project: 'Database Migration', task: 'Data Transfer', hours: 8.5, status: 'Approved', notes: 'Migrated customer data to new system' },
+        { id: '8', date: '2025-01-10', employee: 'John Smith', employee_email: 'john.smith@company.com', project: 'Website Redesign', task: 'Testing', hours: 6.0, status: 'Approved', notes: 'Performed cross-browser testing' },
+    ];
 
-    // Helpers
-    async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
-    async function postJSON(u, d) { const r = await fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    let approvals = [
+        { employee: 'John Smith', period: 'Jan 8-14, 2025', submitted_at: '2025-01-14', total_hours: 40.0, ids: ['1', '8'] },
+        { employee: 'Sarah Wilson', period: 'Jan 8-14, 2025', submitted_at: '2025-01-14', total_hours: 38.5, ids: ['2'] },
+        { employee: 'Mike Johnson', period: 'Jan 8-14, 2025', submitted_at: '2025-01-13', total_hours: 42.0, ids: ['3'] },
+        { employee: 'Emily Davis', period: 'Jan 8-14, 2025', submitted_at: '2025-01-13', total_hours: 35.5, ids: ['4'] },
+    ];
+
+    let payroll = [
+        { employee: 'John Smith', regular: 40.0, overtime: 2.0, leave: 0.0, total: 42.0 },
+        { employee: 'Sarah Wilson', regular: 38.5, overtime: 0.0, leave: 8.0, total: 46.5 },
+        { employee: 'Mike Johnson', regular: 40.0, overtime: 4.5, leave: 0.0, total: 44.5 },
+        { employee: 'Emily Davis', regular: 35.5, overtime: 0.0, leave: 4.0, total: 39.5 },
+        { employee: 'Alex Brown', regular: 32.0, overtime: 1.0, leave: 8.0, total: 41.0 },
+        { employee: 'Lisa Garcia', regular: 40.0, overtime: 0.5, leave: 0.0, total: 40.5 },
+        { employee: 'David Chen', regular: 37.0, overtime: 1.5, leave: 2.0, total: 40.5 },
+    ];
+
+    let filteredEntries = [...entries];
+    let entryIdCounter = 9;
+
+    // Helper functions
     const qs = sel => document.querySelector(sel);
     const qsa = sel => Array.from(document.querySelectorAll(sel));
     const fmt = n => isNaN(n) ? '-' : Math.round(n * 100) / 100;
 
-    // Load
-    async function loadAll() {
-        try {
-            const q = encodeURIComponent(qs('#searchBox').value || '');
-            const dept = encodeURIComponent(qs('#deptFilter').value || '');
-            const per = qs('#periodSelect').value;
-            const [meta, e, a, p] = await Promise.all([
-                fetchJSON(`/api/timesheets/meta?period=${per}`),
-                fetchJSON(`/api/timesheets/entries?period=${per}&dept=${dept}&q=${q}`),
-                fetchJSON(`/api/timesheets/approvals?period=${per}&dept=${dept}`),
-                fetchJSON(`/api/timesheets/payroll?period=${per}&dept=${dept}`)
-            ]);
-
-            departments = meta.departments || [];
-            projects = meta.projects || [];
-            periodRange = meta.range || { start: '', end: '' };
-            entries = e || [];
-            approvals = a || [];
-            payroll = p || [];
-
-            // filters
-            const deptSel = qs('#deptFilter'); deptSel.innerHTML = '<option value="">All</option>';
-            departments.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; deptSel.appendChild(o); });
-            const projSel = qs('#eProject'); projSel.innerHTML = ''; projects.forEach(pr => { const o = document.createElement('option'); o.value = pr; o.textContent = pr; projSel.appendChild(o); });
-
-            // stats
-            const totalLogged = entries.reduce((s, x) => s + (x.hours || 0), 0);
-            const missing = (meta.missing || 0);
-            const approved = entries.filter(x => x.status === 'Approved').reduce((s, x) => s + (x.hours || 0), 0);
-            const payrollReady = payroll.reduce((s, x) => s + (x.total || 0), 0);
-            qs('#loggedHours').textContent = fmt(totalLogged);
-            qs('#missingEntries').textContent = missing;
-            qs('#approvedHours').textContent = fmt(approved);
-            qs('#payrollReady').textContent = fmt(payrollReady);
-
-            renderCurrentView();
-            qs('#loadingState').classList.add('hidden');
-        } catch (err) {
-            console.error(err);
-            qs('#loadingState').innerHTML = `
-        <div class="text-center py-12">
-          <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
-          <p class="text-red-600 mb-4">Failed to load timesheets</p>
-          <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
-        </div>`;
-        }
+    // Load and render functions
+    function loadAll() {
+        applyFilters();
+        renderCurrentView();
+        updateStats();
     }
 
-    // Views
-    function renderCurrentView() {
-        const v = qs('#viewType').value;
-        ['dashboard', 'entries', 'approvals', 'payroll'].forEach(k => qs('#' + k + 'View').classList.add('hidden'));
-        if (v === 'dashboard') { qs('#dashboardView').classList.remove('hidden'); renderDashboard(); }
-        if (v === 'entries') { qs('#entriesView').classList.remove('hidden'); renderEntries(); }
-        if (v === 'approvals') { qs('#approvalsView').classList.remove('hidden'); renderApprovals(); }
-        if (v === 'payroll') { qs('#payrollView').classList.remove('hidden'); renderPayroll(); }
+    function updateStats() {
+        const totalLogged = entries.reduce((s, x) => s + (x.hours || 0), 0);
+        const approved = entries.filter(x => x.status === 'Approved').reduce((s, x) => s + (x.hours || 0), 0);
+        const payrollReady = payroll.reduce((s, x) => s + (x.total || 0), 0);
+
+        qs('#loggedHours').textContent = fmt(totalLogged);
+        qs('#missingEntries').textContent = '7'; // Static value
+        qs('#approvedHours').textContent = fmt(approved);
+        qs('#payrollReady').textContent = fmt(payrollReady);
     }
 
-    function renderDashboard() {
-        drawHoursChart(entries, periodRange);
-        qs('#hoursRange').textContent = periodRange.start && periodRange.end ? `${periodRange.start} → ${periodRange.end}` : '—';
+    function applyFilters() {
+        const searchTerm = qs('#searchBox').value.toLowerCase();
+        const deptFilter = qs('#deptFilter').value;
 
-        const box = qs('#approvalsSummary'); box.innerHTML = '';
-        if (approvals.length === 0) { box.innerHTML = '<li class="text-slate-500">No pending approvals.</li>'; return; }
-        approvals.slice(0, 8).forEach(a => {
-            const li = document.createElement('li');
-            li.innerHTML = `<div class="flex items-center justify-between">
-        <span>${a.employee}</span>
-        <span class="pill">${fmt(a.total_hours)}h</span>
-      </div>
-      <div class="text-xs text-slate-500">${a.period} • ${a.submitted_at?.slice(0, 10) || '-'}</div>`;
-            box.appendChild(li);
+        filteredEntries = entries.filter(entry => {
+            const matchesSearch = !searchTerm ||
+                entry.employee.toLowerCase().includes(searchTerm) ||
+                entry.project.toLowerCase().includes(searchTerm) ||
+                entry.task.toLowerCase().includes(searchTerm);
+
+            // For simplicity, we'll assume department filtering works with employee names
+            const matchesDept = !deptFilter || entry.project.includes(deptFilter) || entry.employee.includes(deptFilter);
+
+            return matchesSearch && matchesDept;
         });
     }
 
-    function drawHoursChart(list, range) {
+    // View rendering
+    function renderCurrentView() {
+        const v = qs('#viewType').value;
+        ['dashboard', 'entries', 'approvals', 'payroll'].forEach(k =>
+            qs('#' + k + 'View').classList.add('hidden')
+        );
+
+        if (v === 'dashboard') {
+            qs('#dashboardView').classList.remove('hidden');
+            renderDashboard();
+        } else if (v === 'entries') {
+            qs('#entriesView').classList.remove('hidden');
+            renderEntries();
+        } else if (v === 'approvals') {
+            qs('#approvalsView').classList.remove('hidden');
+            renderApprovals();
+        } else if (v === 'payroll') {
+            qs('#payrollView').classList.remove('hidden');
+            renderPayroll();
+        }
+    }
+
+    function renderDashboard() {
+        drawHoursChart();
+        // Approvals summary is already static in HTML
+    }
+
+    function drawHoursChart() {
         const canvas = qs('#hoursCanvas');
         const ctx = canvas.getContext('2d');
         const W = canvas.width = canvas.clientWidth;
         const H = canvas.height;
+
         ctx.clearRect(0, 0, W, H);
-        if (!list.length) { ctx.fillStyle = '#64748b'; ctx.fillText('No data', 10, 20); return; }
 
-        // aggregate by date
-        const dayMap = {};
-        list.forEach(e => { const d = (e.date || '').slice(0, 10); if (!d) return; dayMap[d] = (dayMap[d] || 0) + (+e.hours || 0); });
-        const labels = Object.keys(dayMap).sort();
-        const values = labels.map(d => dayMap[d]);
-        if (values.length < 2) { ctx.fillStyle = '#64748b'; ctx.fillText('Not enough data', 10, 20); return; }
+        // Sample data for chart (hours by day)
+        const dailyHours = [32, 28, 35, 42, 38, 45, 40]; // 7 days
+        const labels = ['Jan 8', 'Jan 9', 'Jan 10', 'Jan 11', 'Jan 12', 'Jan 13', 'Jan 14'];
 
-        const min = Math.min(...values, 0), max = Math.max(...values, 8);
-        const pad = 16, x0 = pad, x1 = W - pad, y0 = H - pad, y1 = pad;
+        const max = Math.max(...dailyHours);
+        const min = 0;
+        const pad = 20;
+        const x0 = pad;
+        const x1 = W - pad;
+        const y0 = H - pad;
+        const y1 = pad;
 
-        ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
-        for (let i = 0; i < 4; i++) { const y = y0 - (i / 3) * (y0 - y1); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
+        // Draw grid lines
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = y0 - (i / 4) * (y0 - y1);
+            ctx.beginPath();
+            ctx.moveTo(x0, y);
+            ctx.lineTo(x1, y);
+            ctx.stroke();
+        }
 
-        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 2; ctx.beginPath();
-        values.forEach((v, i) => {
-            const x = x0 + (i / (values.length - 1)) * (x1 - x0);
-            const y = y0 - ((v - min) / (max - min || 1)) * (y0 - y1);
-            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        // Draw line chart
+        ctx.strokeStyle = '#0ea5e9';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        dailyHours.forEach((hours, i) => {
+            const x = x0 + (i / (dailyHours.length - 1)) * (x1 - x0);
+            const y = y0 - ((hours - min) / (max - min)) * (y0 - y1);
+
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+
+            // Draw points
+            ctx.fillStyle = '#0ea5e9';
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, 2 * Math.PI);
+            ctx.fill();
         });
+
         ctx.stroke();
+
+        // Draw labels
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px system-ui';
+        ctx.textAlign = 'center';
+
+        dailyHours.forEach((hours, i) => {
+            const x = x0 + (i / (dailyHours.length - 1)) * (x1 - x0);
+            ctx.fillText(labels[i], x, H - 5);
+        });
     }
 
     function renderEntries() {
-        const tbody = qs('#entriesTableBody'); tbody.innerHTML = '';
-        if (entries.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-slate-500 text-sm">No entries yet.</td></tr>`;
+        const tbody = qs('#entriesTableBody');
+        tbody.innerHTML = '';
+
+        if (filteredEntries.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-6 text-center text-slate-500 text-sm">No entries found.</td></tr>`;
             return;
         }
-        entries.forEach(e => {
-            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+
+        filteredEntries.forEach(e => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50';
+
+            let statusClass = 'pill';
+            if (e.status === 'Approved') statusClass += ' bg-green-100 text-green-800';
+            else if (e.status === 'Submitted') statusClass += ' bg-yellow-100 text-yellow-800';
+            else if (e.status === 'Draft') statusClass += ' bg-blue-100 text-blue-800';
+
             tr.innerHTML = `
-        <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="${e.id}"></td>
-        <td class="px-4 py-3 text-sm text-slate-600">${(e.date || '').slice(0, 10)}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${e.employee || '-'}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${e.project || '-'}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${e.task || '-'}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${fmt(e.hours)}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${e.status || '-'}</td>
-        <td class="px-4 py-3">
-          <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('${e.id}')"><i class="fa-solid fa-edit"></i></button>
-          <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('${e.id}')"><i class="fa-solid fa-trash"></i></button>
-        </td>`;
+                <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="${e.id}"></td>
+                <td class="px-4 py-3 text-sm text-slate-600">${e.date}</td>
+                <td class="px-4 py-3 text-sm text-slate-600">${e.employee}</td>
+                <td class="px-4 py-3 text-sm text-slate-600">${e.project}</td>
+                <td class="px-4 py-3 text-sm text-slate-600">${e.task}</td>
+                <td class="px-4 py-3 text-sm text-slate-600">${fmt(e.hours)}</td>
+                <td class="px-4 py-3 text-sm text-slate-600"><span class="${statusClass}">${e.status}</span></td>
+                <td class="px-4 py-3">
+                    <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('${e.id}')">
+                        <i class="fa-solid fa-edit"></i>
+                    </button>
+                    <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('${e.id}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            `;
             tbody.appendChild(tr);
         });
+
         qs('#selectAllRows').checked = false;
     }
 
     function renderApprovals() {
-        const tbody = qs('#approvalsTableBody'); tbody.innerHTML = '';
-        if (approvals.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500 text-sm">No submissions pending.</td></tr>`;
-            return;
-        }
-        approvals.forEach(a => {
-            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
-            tr.innerHTML = `
-        <td class="px-4 py-3 text-sm text-slate-600">${a.employee}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${a.period}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${(a.submitted_at || '').slice(0, 10)}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${fmt(a.total_hours)}</td>
-        <td class="px-4 py-3">
-          <button class="px-2 py-1 border rounded-lg text-sm mr-2" onclick="approve('${a.employee}','${a.period}')"><i class="fa-solid fa-check mr-1"></i> Approve</button>
-          <button class="px-2 py-1 border rounded-lg text-sm" onclick="reject('${a.employee}','${a.period}')"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
-        </td>`;
-            tbody.appendChild(tr);
-        });
+        // Approvals are already rendered statically in HTML
+        // In a real app, this would be dynamic
     }
 
     function renderPayroll() {
-        const tbody = qs('#payrollTableBody'); tbody.innerHTML = '';
-        if (payroll.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500 text-sm">No payroll data.</td></tr>`;
+        // Payroll data is already rendered statically in HTML
+        // In a real app, this would be dynamic
+    }
+
+    // Modal functions
+    function openEntryModal() {
+        qs('#entryModal').classList.remove('hidden');
+        // Set default date to today
+        qs('#eDate').value = new Date().toISOString().split('T')[0];
+    }
+
+    function closeEntryModal() {
+        qs('#entryModal').classList.add('hidden');
+        qs('#entryForm').reset();
+    }
+
+    function openImportModal() {
+        qs('#importModal').classList.remove('hidden');
+    }
+
+    function closeImportModal() {
+        qs('#importModal').classList.add('hidden');
+        qs('#csvFile').value = '';
+    }
+
+    // Entry actions
+    function saveEntry(data) {
+        const newEntry = {
+            id: String(entryIdCounter++),
+            date: data.date,
+            employee: 'Current User', // In real app, this would come from session
+            employee_email: 'current.user@company.com',
+            project: data.project,
+            task: data.task,
+            hours: parseFloat(data.hours),
+            status: 'Draft',
+            notes: data.notes || ''
+        };
+
+        entries.unshift(newEntry);
+        loadAll();
+        closeEntryModal();
+        showSuccess('Time entry saved successfully');
+    }
+
+    function editEntry(id) {
+        showInfo('Edit functionality would open a detailed edit form');
+    }
+
+    function deleteEntry(id) {
+        if (!confirm('Delete this entry?')) return;
+
+        entries = entries.filter(e => e.id !== id);
+        filteredEntries = filteredEntries.filter(e => e.id !== id);
+        renderEntries();
+        updateStats();
+        showSuccess('Entry deleted successfully');
+    }
+
+    // Approval actions
+    function approve(employee, period) {
+        showSuccess(`Approved timesheet for ${employee} - ${period}`);
+        // In real app, would update entry statuses to 'Approved'
+    }
+
+    function reject(employee, period) {
+        showInfo(`Rejected timesheet for ${employee} - ${period}`);
+        // In real app, would update entry statuses to 'Rejected'
+    }
+
+    function approveAll() {
+        if (!confirm('Approve all pending timesheets?')) return;
+        showSuccess('All timesheets approved');
+    }
+
+    function rejectAll() {
+        if (!confirm('Reject all pending timesheets?')) return;
+        showInfo('All timesheets rejected');
+    }
+
+    // Bulk actions
+    function bulkSubmit() {
+        const selected = qsa('.rowSel:checked');
+        if (selected.length === 0) {
+            showError('No entries selected');
             return;
         }
-        payroll.forEach(r => {
-            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
-            tr.innerHTML = `
-        <td class="px-4 py-3 text-sm text-slate-600">${r.employee}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${fmt(r.regular)}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${fmt(r.overtime)}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${fmt(r.leave)}</td>
-        <td class="px-4 py-3 text-sm text-slate-700 font-medium">${fmt(r.total)}</td>`;
-            tbody.appendChild(tr);
+
+        selected.forEach(checkbox => {
+            const id = checkbox.dataset.id;
+            const entry = entries.find(e => e.id === id);
+            if (entry) entry.status = 'Submitted';
         });
+
+        renderEntries();
+        updateStats();
+        showSuccess(`${selected.length} entries submitted for approval`);
     }
 
-    // Actions
-    function openEntryModal() { qs('#entryModal').classList.remove('hidden'); }
-    function closeEntryModal() { qs('#entryModal').classList.add('hidden'); qs('#entryForm').reset(); }
-    function openImportModal() { qs('#importModal').classList.remove('hidden'); }
-    function closeImportModal() { qs('#importModal').classList.add('hidden'); qs('#csvFile').value = ''; }
-
-    async function saveEntry(payload) {
-        await postJSON('/api/timesheets/entries/create', payload);
-        closeEntryModal(); await loadAll(); alert('Entry saved');
-    }
-    async function deleteEntry(id) {
-        if (!confirm('Delete this entry?')) return;
-        await postJSON('/api/timesheets/entries/delete', { id });
-        await loadAll();
-    }
-    function editEntry(id) { window.location.href = `/timesheets/entries/${id}`; }
-
-    async function approve(employee, period) { await postJSON('/api/timesheets/approve', { employee, period }); await loadAll(); }
-    async function reject(employee, period) { await postJSON('/api/timesheets/reject', { employee, period }); await loadAll(); }
-
-    async function approveAll() { await postJSON('/api/timesheets/approve-all', { period: qs('#periodSelect').value }); await loadAll(); }
-    async function rejectAll() { await postJSON('/api/timesheets/reject-all', { period: qs('#periodSelect').value }); await loadAll(); }
-
-    function exportCSV() {
-        const rows = [['date', 'employee', 'project', 'task', 'hours', 'status', 'notes']];
-        entries.forEach(e => rows.push([(e.date || '').slice(0, 10), e.employee || '', e.project || '', e.task || '', e.hours ?? '', e.status || '', (e.notes || '').replace(/\n/g, ' ')]));
-        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'timesheets.csv'; a.click(); URL.revokeObjectURL(url);
-    }
-
-    async function importCSV(file) {
-        // NOTE: Implement real CSV parsing server-side. Here we just send filename.
-        await postJSON('/api/timesheets/import', { file_name: file?.name || '' });
-        closeImportModal(); await loadAll(); alert('Import started');
-    }
-
-    function bulkSubmit() {
-        const ids = qsa('.rowSel:checked').map(c => c.dataset.id);
-        if (ids.length === 0) return alert('No rows selected');
-        postJSON('/api/timesheets/entries/submit', { ids }).then(() => { loadAll(); alert('Submitted'); }).catch(() => alert('Submit failed'));
-    }
     function bulkDelete() {
-        const ids = qsa('.rowSel:checked').map(c => c.dataset.id);
-        if (ids.length === 0) return alert('No rows selected');
-        if (!confirm(`Delete ${ids.length} entries?`)) return;
-        postJSON('/api/timesheets/entries/delete-batch', { ids }).then(loadAll);
+        const selected = qsa('.rowSel:checked');
+        if (selected.length === 0) {
+            showError('No entries selected');
+            return;
+        }
+
+        if (!confirm(`Delete ${selected.length} entries?`)) return;
+
+        const idsToDelete = Array.from(selected).map(cb => cb.dataset.id);
+        entries = entries.filter(e => !idsToDelete.includes(e.id));
+        filteredEntries = filteredEntries.filter(e => !idsToDelete.includes(e.id));
+
+        renderEntries();
+        updateStats();
+        showSuccess(`${selected.length} entries deleted`);
     }
 
+    // Export functions
+    function exportCSV() {
+        const headers = ['Date', 'Employee', 'Project', 'Task', 'Hours', 'Status', 'Notes'];
+        const rows = [headers];
+
+        filteredEntries.forEach(entry => {
+            rows.push([
+                entry.date,
+                entry.employee,
+                entry.project,
+                entry.task,
+                entry.hours,
+                entry.status,
+                entry.notes || ''
+            ]);
+        });
+
+        const csv = rows.map(row =>
+            row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
+        ).join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'timesheets.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        showSuccess('Timesheet data exported to CSV');
+    }
+
+    function importCSV() {
+        const fileInput = qs('#csvFile');
+        if (!fileInput.files[0]) {
+            showError('Please select a CSV file');
+            return;
+        }
+
+        closeImportModal();
+        showSuccess('CSV import started (demo - file processing would happen on server)');
+    }
+
+    // Toast notifications
+    function showToast(type, message) {
+        const toast = qs(`#${type}Toast`);
+        const messageEl = qs(`#${type}Message`);
+
+        messageEl.textContent = message;
+        toast.classList.remove('translate-x-full');
+
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+        }, 4000);
+    }
+
+    function showSuccess(message) {
+        showToast('success', message);
+    }
+
+    function showError(message) {
+        showToast('error', message);
+    }
+
+    function showInfo(message) {
+        showToast('info', message);
+    }
+
+    // Event listeners
     function setupEvents() {
         qs('#viewType').addEventListener('change', renderCurrentView);
         qs('#periodSelect').addEventListener('change', loadAll);
         qs('#deptFilter').addEventListener('change', loadAll);
-        qs('#searchBox').addEventListener('input', debounce(loadAll, 250));
+        qs('#searchBox').addEventListener('input', debounce(loadAll, 300));
         qs('#refreshBtn').addEventListener('click', loadAll);
-        qs('#exportBtn').addEventListener('click', exportCSV);
-        qs('#importBtn').addEventListener('click', openImportModal);
-        qs('#closeImportModal').addEventListener('click', closeImportModal);
-        qs('#cancelImport').addEventListener('click', closeImportModal);
-        qs('#confirmImport').addEventListener('click', () => importCSV(qs('#csvFile').files[0]));
 
+        // Modal events
         qs('#newEntryBtn').addEventListener('click', openEntryModal);
         qs('#closeEntryModal').addEventListener('click', closeEntryModal);
         qs('#cancelEntry').addEventListener('click', closeEntryModal);
+
+        qs('#importBtn').addEventListener('click', openImportModal);
+        qs('#closeImportModal').addEventListener('click', closeImportModal);
+        qs('#cancelImport').addEventListener('click', closeImportModal);
+        qs('#confirmImport').addEventListener('click', importCSV);
+
+        // Form submission
         qs('#entryForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const payload = {
+            const formData = new FormData(e.target);
+            const data = {
                 date: qs('#eDate').value,
-                hours: +qs('#eHours').value,
+                hours: qs('#eHours').value,
                 project: qs('#eProject').value,
                 task: qs('#eTask').value,
                 notes: qs('#eNotes').value
             };
-            saveEntry(payload).catch(() => alert('Failed to save'));
+
+            if (!data.date || !data.hours || !data.project) {
+                showError('Please fill in all required fields');
+                return;
+            }
+
+            saveEntry(data);
         });
 
+        // Bulk actions
         qs('#bulkSubmitBtn').addEventListener('click', bulkSubmit);
         qs('#bulkDeleteBtn').addEventListener('click', bulkDelete);
+
+        // Approval actions
         qs('#approveAllBtn')?.addEventListener('click', approveAll);
         qs('#rejectAllBtn')?.addEventListener('click', rejectAll);
-        qs('#selectAllRows').addEventListener('change', (e) => qsa('.rowSel').forEach(cb => cb.checked = e.target.checked));
-        qs('#exportPayrollBtn').addEventListener('click', exportCSV); // reuse simple export
-        qs('#lockPeriodBtn').addEventListener('click', async () => {
-            try { await postJSON('/api/timesheets/lock', { period: qs('#periodSelect').value }); alert('Period locked'); } catch { alert('Failed to lock'); }
+
+        // Select all checkbox
+        qs('#selectAllRows').addEventListener('change', (e) => {
+            qsa('.rowSel').forEach(cb => cb.checked = e.target.checked);
+        });
+
+        // Export actions
+        qs('#exportBtn').addEventListener('click', exportCSV);
+        qs('#exportPayrollBtn').addEventListener('click', exportCSV);
+
+        // Lock period
+        qs('#lockPeriodBtn').addEventListener('click', () => {
+            if (confirm('Lock this payroll period? This cannot be undone.')) {
+                showSuccess('Payroll period locked successfully');
+            }
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target.id === 'entryModal') closeEntryModal();
+            if (e.target.id === 'importModal') closeImportModal();
         });
     }
 
-    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
-
-    async function initializePage() {
-        qs('#loadingState').classList.remove('hidden');
-        await loadAll();
-        setupEvents();
+    // Utility function
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
+    // Initialize
+    function initializePage() {
+        loadAll();
+        setupEvents();
+        qs('#loadingState').classList.add('hidden');
+    }
+
+    // Start the application
     document.addEventListener('DOMContentLoaded', initializePage);
 </script>
 {% endblock %}

@@ -473,6 +473,33 @@
     </div>
 </div>
 
+<!-- Success Toast -->
+<div id="successToast"
+    class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
+    <div class="flex items-center">
+        <i class="fa-solid fa-check-circle mr-2"></i>
+        <span id="successMessage"></span>
+    </div>
+</div>
+
+<!-- Error Toast -->
+<div id="errorToast"
+    class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
+    <div class="flex items-center">
+        <i class="fa-solid fa-exclamation-circle mr-2"></i>
+        <span id="errorMessage"></span>
+    </div>
+</div>
+
+<!-- Info Toast -->
+<div id="infoToast"
+    class="fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
+    <div class="flex items-center">
+        <i class="fa-solid fa-info-circle mr-2"></i>
+        <span id="infoMessage"></span>
+    </div>
+</div>
+
 <script>
     // Initialize reports management
     document.addEventListener('DOMContentLoaded', function () {
@@ -484,6 +511,7 @@
     let filteredReports = [];
     let currentPage = 1;
     let totalPages = 1;
+    let reportIdCounter = 6;
 
     async function initializeReports() {
         await loadReportsData();
@@ -610,6 +638,37 @@
 
         // Schedule checkbox
         document.getElementById('scheduleReport').addEventListener('change', toggleScheduleOptions);
+
+        // Pagination controls
+        document.getElementById('prevPageBtn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderReports();
+            }
+        });
+
+        document.getElementById('nextPageBtn').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderReports();
+            }
+        });
+
+        // Download report from preview modal
+        document.getElementById('downloadReportBtn').addEventListener('click', () => {
+            showInfo('Download functionality would be implemented here');
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function (event) {
+            const modals = ['generateReportModal', 'reportPreviewModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    closeModal(modalId);
+                }
+            });
+        });
     }
 
     function openGenerateReportModal() {
@@ -713,13 +772,31 @@
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            console.log('Generating report:', reportData);
+            // Create a new report based on form data
+            const newReport = {
+                id: reportIdCounter++,
+                name: reportData.report_name || `${formatReportName(reportData.template_id)} - ${new Date().toLocaleDateString()}`,
+                type: reportData.report_type,
+                generated_date: new Date().toISOString(),
+                generated_by: "Current User",
+                file_size: `${(Math.random() * 3 + 0.5).toFixed(1)} MB`,
+                format: reportData.format,
+                status: "completed",
+                download_count: 0
+            };
 
-            showSuccess('Report generation started! You will be notified when it\'s ready.');
+            // Add to reports array
+            reports.unshift(newReport);
+            filteredReports = [...reports];
 
-            // Close modal and reload data
+            console.log('Generated report:', newReport);
+
+            showSuccess('Report generated successfully!');
+
+            // Close modal and update display
             closeModal('generateReportModal');
-            await loadReportsData();
+            updateSummaryStats();
+            renderReports();
 
             // Reset button
             submitBtn.innerHTML = originalText;
@@ -743,13 +820,61 @@
             // Simulate quick report generation
             await new Promise(resolve => setTimeout(resolve, 1500));
 
+            // Create new report
+            const newReport = {
+                id: reportIdCounter++,
+                name: `${formatReportName(reportType)} - ${new Date().toLocaleDateString()}`,
+                type: getReportTypeFromTemplate(reportType),
+                generated_date: new Date().toISOString(),
+                generated_by: "Current User",
+                file_size: `${(Math.random() * 3 + 0.5).toFixed(1)} MB`,
+                format: "pdf",
+                status: "completed",
+                download_count: 0
+            };
+
+            // Add to reports array
+            reports.unshift(newReport);
+            filteredReports = [...reports];
+
             showSuccess(`${formatReportName(reportType)} report generated successfully!`);
-            await loadReportsData();
+
+            updateSummaryStats();
+            renderReports();
 
         } catch (error) {
             console.error('Error generating quick report:', error);
             showError('Failed to generate report');
         }
+    }
+
+    function getReportTypeFromTemplate(template) {
+        const templateTypeMap = {
+            'employee_roster': 'hr',
+            'headcount_analysis': 'hr',
+            'turnover_report': 'hr',
+            'diversity_metrics': 'hr',
+            'recruitment_pipeline': 'hr',
+            'performance_summary': 'performance',
+            'goal_achievement': 'performance',
+            'review_completion': 'performance',
+            'top_performers': 'performance',
+            'training_completion': 'performance',
+            'payroll_summary': 'financial',
+            'cost_analysis': 'financial',
+            'expense_reports': 'financial',
+            'budget_variance': 'financial',
+            'contractor_payments': 'financial',
+            'attendance_summary': 'attendance',
+            'leave_analysis': 'attendance',
+            'overtime_report': 'attendance',
+            'tardiness_report': 'attendance',
+            'eeo_report': 'compliance',
+            'safety_incidents': 'compliance',
+            'policy_compliance': 'compliance',
+            'audit_trail': 'compliance'
+        };
+        return templateTypeMap[template] || 'hr';
     }
 
     function formatReportName(reportType) {
@@ -1219,25 +1344,28 @@
         }, 1000);
     }
 
+    function shareReport(reportId) {
+        const report = reports.find(r => r.id === reportId);
+        if (!report) return;
 
-    // Simple share functionality - in a real app, this would generate shareable links
-    const shareData = {
-        title: report.name,
-        text: `Check out this report: ${report.name}`,
-        url: window.location.href + `?report=${report.id}`
-    };
+        // Simple share functionality - in a real app, this would generate shareable links
+        const shareData = {
+            title: report.name,
+            text: `Check out this report: ${report.name}`,
+            url: window.location.href + `?report=${report.id}`
+        };
 
-    if (navigator.share) {
-        navigator.share(shareData);
-    } else {
-        // Fallback - copy link to clipboard
-        navigator.clipboard.writeText(shareData.url).then(() => {
-            showSuccess('Report link copied to clipboard!');
-        }).catch(() => {
-            showInfo('Share functionality not available');
-        });
+        if (navigator.share) {
+            navigator.share(shareData);
+        } else {
+            // Fallback - copy link to clipboard
+            navigator.clipboard.writeText(shareData.url).then(() => {
+                showSuccess('Report link copied to clipboard!');
+            }).catch(() => {
+                showInfo('Share functionality not available');
+            });
+        }
     }
-}
 
     function deleteReport(reportId) {
         const report = reports.find(r => r.id === reportId);
@@ -1254,61 +1382,38 @@
         }
     }
 
-    // Utility functions
+    // Toast notification functions
+    function showToast(type, message) {
+        const toast = document.getElementById(`${type}Toast`);
+        const messageElement = document.getElementById(`${type}Message`);
+
+        messageElement.textContent = message;
+        toast.classList.remove('translate-x-full');
+
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+        }, 3000);
+    }
+
     function showSuccess(message) {
-        // Implementation for success toast/notification
+        showToast('success', message);
         console.log('Success:', message);
-        // You can implement a toast notification here
-        alert('✅ ' + message);
     }
 
     function showError(message) {
-        // Implementation for error toast/notification
+        showToast('error', message);
         console.log('Error:', message);
-        alert('❌ ' + message);
     }
 
     function showInfo(message) {
-        // Implementation for info toast/notification
+        showToast('info', message);
         console.log('Info:', message);
-        alert('ℹ️ ' + message);
     }
 
-    // Close modals when clicking outside
-    window.addEventListener('click', function (event) {
-        const modals = ['generateReportModal', 'reportPreviewModal'];
-        modals.forEach(modalId => {
-            const modal = document.getElementById(modalId);
-            if (event.target === modal) {
-                closeModal(modalId);
-            }
-        });
-    });
-
-    // Pagination controls
-    document.getElementById('prevPageBtn').addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderReports();
-        }
-    });
-
-    document.getElementById('nextPageBtn').addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            renderReports();
-        }
-    });
-
-    // Download report from preview modal
-    document.getElementById('downloadReportBtn').addEventListener('click', () => {
-        // Get the current report ID from modal context
-        showInfo('Download functionality would be implemented here');
-    });
-
-    // Auto-refresh reports every 30 seconds
-    setInterval(() => {
-        loadReportsData();
-    }, 30000);
+    // Auto-refresh reports every 30 seconds (disabled for demo)
+    // setInterval(() => {
+    //     loadReportsData();
+    // }, 30000);
 </script>
 {% endblock %}
