@@ -746,6 +746,7 @@ def dashboard():
 @app.route("/feature/<role>/<sub>/<feature>")
 #@login_required
 def render_feature(role, sub, feature):
+    print(role, sub, feature)
     """
     Render specific feature pages dynamically.
     Example:
