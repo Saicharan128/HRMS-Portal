@@ -1,0 +1,1115 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-chart-line mr-2"></i> Performance Management
+            </h1>
+            <p class="text-slate-600 text-sm">Drive continuous performance reviews and goal tracking for your team</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Performance Overview Cards -->
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Total Goals</p>
+                    <p class="text-2xl font-bold text-slate-900" id="totalGoals">-</p>
+                </div>
+                <div class="p-3 bg-blue-100 rounded-xl">
+                    <i class="fa-solid fa-bullseye text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="text-sm text-green-600" id="goalCompletionRate">-% completion rate</span>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Total Reviews</p>
+                    <p class="text-2xl font-bold text-slate-900" id="totalReviews">-</p>
+                </div>
+                <div class="p-3 bg-purple-100 rounded-xl">
+                    <i class="fa-solid fa-star text-purple-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="text-sm text-green-600" id="reviewCompletionRate">-% finalized</span>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Active Cycle</p>
+                    <p class="text-lg font-semibold text-slate-900" id="activeCycle">-</p>
+                </div>
+                <div class="p-3 bg-green-100 rounded-xl">
+                    <i class="fa-regular fa-calendar text-green-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Avg. Progress</p>
+                    <p class="text-2xl font-bold text-slate-900" id="avgProgress">-</p>
+                </div>
+                <div class="p-3 bg-orange-100 rounded-xl">
+                    <i class="fa-solid fa-chart-bar text-orange-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Row -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Cycle:</label>
+                <select id="cycleFilter" class="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                    <option value="">All Cycles</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Department:</label>
+                <select id="deptFilter" class="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                    <option value="">All Departments</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Status:</label>
+                <select id="statusFilter" class="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                    <option value="">All Status</option>
+                </select>
+            </div>
+            <button onclick="refreshData()"
+                class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                <i class="fa-solid fa-refresh mr-1"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview Analytics -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Goal Progress Distribution -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-chart-pie mr-2"></i>Goal Progress Distribution
+            </h3>
+            <canvas id="progressChart" height="300"></canvas>
+        </div>
+
+        <!-- Department Performance -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-building mr-2"></i>Department Performance
+            </h3>
+            <div id="departmentStats" class="space-y-3">
+                <!-- Department stats will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Review Status Distribution -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-star mr-2"></i>Review Status
+            </h3>
+            <canvas id="reviewChart" height="300"></canvas>
+        </div>
+
+        <!-- Top Performers -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-trophy mr-2"></i>Top Performers
+            </h3>
+            <div id="topPerformers" class="space-y-2">
+                <!-- Top performers will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Goals Management -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-slate-800">
+                <i class="fa-solid fa-bullseye mr-2"></i>Team Goals Management
+            </h2>
+            <div class="flex gap-3">
+                <button id="createGoalBtn"
+                    class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                    <i class="fa-solid fa-plus mr-1"></i>Create Goal
+                </button>
+                <button id="bulkGoalBtn"
+                    class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 text-sm">
+                    <i class="fa-solid fa-users mr-1"></i>Bulk Actions
+                </button>
+            </div>
+        </div>
+
+        <div id="goalsTable" class="overflow-x-auto">
+            <!-- Goals table will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Performance Reviews Management -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-slate-800">
+                <i class="fa-solid fa-star mr-2"></i>Performance Reviews Management
+            </h2>
+            <div class="flex gap-3">
+                <button id="createReviewBtn"
+                    class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                    <i class="fa-solid fa-plus mr-1"></i>Create Review
+                </button>
+                <button id="bulkAssignBtn"
+                    class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 text-sm">
+                    <i class="fa-solid fa-users mr-1"></i>Bulk Assign
+                </button>
+            </div>
+        </div>
+
+        <div id="reviewsTable" class="overflow-x-auto">
+            <!-- Reviews table will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Performance Cycles Management -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-slate-800">
+                <i class="fa-regular fa-calendar mr-2"></i>Performance Cycles Management
+            </h2>
+            <button id="createCycleBtn" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i>Create Cycle
+            </button>
+        </div>
+
+        <div id="cyclesTable" class="space-y-4">
+            <!-- Cycles will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Analytics Trends -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-chart-line mr-2"></i>Goal Completion Trends
+            </h3>
+            <canvas id="trendsChart" height="300"></canvas>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-chart-bar mr-2"></i>Department Ratings
+            </h3>
+            <canvas id="ratingsChart" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Modal (using same structure as existing templates) -->
+<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-xl font-semibold text-slate-800"></h3>
+                <button onclick="hideModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="modalContent">
+                <!-- Modal content goes here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // Global variables
+    let cycles = [];
+    let currentCycle = null;
+    let dashboardData = {};
+    let charts = {};
+
+    // Utility functions (matching existing templates)
+    async function jget(url) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    }
+
+    async function jpost(url, data) {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    }
+
+    function showModal(title, content) {
+        document.getElementById("modalTitle").textContent = title;
+        document.getElementById("modalContent").innerHTML = content;
+        document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function hideModal() {
+        document.getElementById("modal").classList.add("hidden");
+    }
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function () {
+        loadInitialData();
+        setupEventListeners();
+    });
+
+    async function loadInitialData() {
+        try {
+            // Load cycles first
+            cycles = await jget('/api/perf/cycles');
+            populateCycleFilters();
+
+            // Load dashboard data
+            await loadDashboardData();
+
+            // Load all sections
+            await Promise.all([
+                loadGoalsData(),
+                loadReviewsData(),
+                loadCyclesData(),
+                loadAnalyticsData()
+            ]);
+
+        } catch (error) {
+            console.error('Error loading initial data:', error);
+            alert('Failed to load initial data');
+        }
+    }
+
+    function populateCycleFilters() {
+        const cycleFilter = document.getElementById('cycleFilter');
+        cycleFilter.innerHTML = '<option value="">All Cycles</option>';
+
+        cycles.forEach(cycle => {
+            const option = document.createElement('option');
+            option.value = cycle.id;
+            option.textContent = cycle.name;
+            if (cycle.status === 'Active') {
+                option.selected = true;
+                currentCycle = cycle;
+            }
+            cycleFilter.appendChild(option);
+        });
+    }
+
+    async function loadDashboardData() {
+        try {
+            dashboardData = await jget('/api/perf/dashboard');
+            updateDashboardCards();
+            loadOverviewCharts();
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        }
+    }
+
+    function updateDashboardCards() {
+        const { metrics, current_cycle } = dashboardData;
+
+        document.getElementById('totalGoals').textContent = metrics.cycle_goals;
+        document.getElementById('totalReviews').textContent = metrics.cycle_reviews;
+        document.getElementById('goalCompletionRate').textContent = `${metrics.goal_completion_rate}% completion rate`;
+        document.getElementById('reviewCompletionRate').textContent = `${metrics.review_completion_rate}% finalized`;
+        document.getElementById('activeCycle').textContent = current_cycle.name;
+
+        // Calculate average progress from department stats
+        const avgProgress = dashboardData.department_stats.reduce((sum, dept) => sum + dept.avg_progress, 0) / dashboardData.department_stats.length || 0;
+        document.getElementById('avgProgress').textContent = `${avgProgress.toFixed(1)}%`;
+    }
+
+    function loadOverviewCharts() {
+        createProgressChart();
+        createReviewChart();
+        loadDepartmentStats();
+        loadTopPerformers();
+    }
+
+    function createProgressChart() {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+
+        if (charts.progress) {
+            charts.progress.destroy();
+        }
+
+        const progressData = dashboardData.progress_distribution || {};
+
+        charts.progress = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(progressData),
+                datasets: [{
+                    data: Object.values(progressData),
+                    backgroundColor: [
+                        '#ef4444', '#f97316', '#eab308',
+                        '#22c55e', '#3b82f6', '#10b981'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    function createReviewChart() {
+        const ctx = document.getElementById('reviewChart').getContext('2d');
+
+        if (charts.review) {
+            charts.review.destroy();
+        }
+
+        const reviewData = dashboardData.status_distribution || {};
+
+        charts.review = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(reviewData),
+                datasets: [{
+                    data: Object.values(reviewData),
+                    backgroundColor: '#8b5cf6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function loadDepartmentStats() {
+        const container = document.getElementById('departmentStats');
+        const departments = dashboardData.department_stats || [];
+
+        container.innerHTML = departments.map(dept => `
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                <div>
+                    <p class="font-medium text-slate-800">${dept.department}</p>
+                    <p class="text-sm text-slate-600">${dept.goal_count} goals</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-lg font-bold text-blue-600">${dept.avg_progress}%</p>
+                    <div class="w-20 h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500 transition-all duration-300" style="width: ${dept.avg_progress}%"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function loadTopPerformers() {
+        try {
+            const analytics = await jget('/api/perf/analytics');
+
+            const container = document.getElementById('topPerformers');
+            const performers = analytics.top_performers || [];
+
+            container.innerHTML = performers.map((performer, index) => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-bold flex items-center justify-center">
+                            ${index + 1}
+                        </span>
+                        <div>
+                            <p class="font-medium text-slate-800">${performer.name}</p>
+                            <p class="text-sm text-slate-600">${performer.department}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-green-600">${performer.avg_progress}%</p>
+                        <p class="text-xs text-slate-500">${performer.goal_count} goals</p>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading top performers:', error);
+        }
+    }
+
+    async function loadGoalsData() {
+        try {
+            const cycleId = document.getElementById('cycleFilter').value;
+            const department = document.getElementById('deptFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            const params = new URLSearchParams();
+            if (cycleId) params.append('cycle_id', cycleId);
+            if (department) params.append('department', department);
+            if (status) params.append('status', status);
+
+            const goals = await jget(`/api/perf/team-goals?${params}`);
+            renderGoalsTable(goals);
+
+        } catch (error) {
+            console.error('Error loading goals data:', error);
+        }
+    }
+
+    function renderGoalsTable(goals) {
+        const container = document.getElementById('goalsTable');
+
+        if (goals.length === 0) {
+            container.innerHTML = '<p class="text-center text-slate-500 py-8">No goals found</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-slate-200">
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Employee</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Goal</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Progress</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Status</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Updated</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${goals.map(goal => `
+                        <tr class="border-b border-slate-100">
+                            <td class="p-3">
+                                <div>
+                                    <p class="font-medium text-slate-800">${goal.owner.name}</p>
+                                    <p class="text-sm text-slate-600">${goal.owner.subposition}</p>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <div>
+                                    <p class="font-medium text-slate-800">${goal.title}</p>
+                                    <p class="text-sm text-slate-600">${goal.description || ''}</p>
+                                    <span class="text-xs bg-slate-100 px-2 py-1 rounded-lg">Weight: ${goal.weight}%</span>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <div class="w-full bg-slate-200 rounded-full h-3">
+                                    <div class="h-3 rounded-full ${getProgressColor(goal.progress)}" style="width: ${goal.progress}%"></div>
+                                </div>
+                                <p class="text-sm text-slate-600 mt-1">${goal.progress}%</p>
+                            </td>
+                            <td class="p-3">
+                                <span class="px-2 py-1 rounded-lg text-xs font-medium ${getStatusClass(goal.status)}">${goal.status}</span>
+                            </td>
+                            <td class="p-3">
+                                <p class="text-sm text-slate-600">${formatDate(goal.updated_at)}</p>
+                            </td>
+                            <td class="p-3">
+                                <button onclick="viewGoalDetails(${goal.id})" class="text-blue-600 hover:text-blue-800 text-sm mr-2">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button onclick="editGoal(${goal.id})" class="text-slate-600 hover:text-slate-800 text-sm">
+                                    <i class="fa-solid fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    async function loadReviewsData() {
+        try {
+            const cycleId = document.getElementById('cycleFilter').value;
+            const department = document.getElementById('deptFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            const params = new URLSearchParams();
+            if (cycleId) params.append('cycle_id', cycleId);
+            if (department) params.append('department', department);
+            if (status) params.append('status', status);
+
+            const reviews = await jget(`/api/perf/team-reviews?${params}`);
+            renderReviewsTable(reviews);
+
+        } catch (error) {
+            console.error('Error loading reviews data:', error);
+        }
+    }
+
+    function renderReviewsTable(reviews) {
+        const container = document.getElementById('reviewsTable');
+
+        if (reviews.length === 0) {
+            container.innerHTML = '<p class="text-center text-slate-500 py-8">No reviews found</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-slate-200">
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Reviewee</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Reviewer</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Rating</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Status</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Updated</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${reviews.map(review => `
+                        <tr class="border-b border-slate-100">
+                            <td class="p-3">
+                                <div>
+                                    <p class="font-medium text-slate-800">${review.reviewee.name}</p>
+                                    <p class="text-sm text-slate-600">${review.reviewee.subposition}</p>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <div>
+                                    <p class="font-medium text-slate-800">${review.reviewer.name}</p>
+                                    <p class="text-sm text-slate-600">${review.reviewer.subposition || ''}</p>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                ${review.rating ?
+                `<div class="flex items-center">
+                                        ${Array.from({ length: 5 }, (_, i) =>
+                    `<i class="fa-solid fa-star text-sm ${i < review.rating ? 'text-yellow-400' : 'text-slate-300'}"></i>`
+                ).join('')}
+                                        <span class="ml-2 text-sm text-slate-600">${review.rating}/5</span>
+                                    </div>`
+                : '<span class="text-sm text-slate-500">Not rated</span>'
+            }
+                            </td>
+                            <td class="p-3">
+                                <span class="px-2 py-1 rounded-lg text-xs font-medium ${getStatusClass(review.status)}">${review.status}</span>
+                            </td>
+                            <td class="p-3">
+                                <p class="text-sm text-slate-600">${formatDate(review.updated_at)}</p>
+                            </td>
+                            <td class="p-3">
+                                <button onclick="viewReviewDetails(${review.id})" class="text-blue-600 hover:text-blue-800 text-sm mr-2">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button onclick="editReview(${review.id})" class="text-slate-600 hover:text-slate-800 text-sm">
+                                    <i class="fa-solid fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    async function loadCyclesData() {
+        const container = document.getElementById('cyclesTable');
+
+        container.innerHTML = cycles.map(cycle => `
+            <div class="border border-slate-200 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800">${cycle.name}</h3>
+                        <p class="text-sm text-slate-600">${cycle.start_date} to ${cycle.end_date}</p>
+                        <span class="px-2 py-1 rounded-lg text-xs font-medium ${getStatusClass(cycle.status)}">${cycle.status}</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editCycle(${cycle.id})" class="px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm">
+                            <i class="fa-solid fa-edit mr-1"></i>Edit
+                        </button>
+                        ${cycle.status === 'Active' ?
+                `<button onclick="closeCycle(${cycle.id})" class="px-3 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 text-sm">
+                                <i class="fa-solid fa-lock mr-1"></i>Close
+                            </button>`
+                : ''
+            }
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function loadAnalyticsData() {
+        try {
+            const analytics = await jget('/api/perf/analytics');
+            createTrendsChart(analytics.goal_trends);
+            createRatingsChart(analytics.department_ratings);
+        } catch (error) {
+            console.error('Error loading analytics data:', error);
+        }
+    }
+
+    function createTrendsChart(trendsData) {
+        const ctx = document.getElementById('trendsChart').getContext('2d');
+
+        if (charts.trends) {
+            charts.trends.destroy();
+        }
+
+        charts.trends = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: trendsData.map(d => d.month),
+                datasets: [{
+                    label: 'Completion Rate',
+                    data: trendsData.map(d => d.completion_rate),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+
+    function createRatingsChart(ratingsData) {
+        const ctx = document.getElementById('ratingsChart').getContext('2d');
+
+        if (charts.ratings) {
+            charts.ratings.destroy();
+        }
+
+        charts.ratings = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ratingsData.map(d => d.department),
+                datasets: [{
+                    label: 'Average Rating',
+                    data: ratingsData.map(d => d.avg_rating),
+                    backgroundColor: '#10b981'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5
+                    }
+                }
+            }
+        });
+    }
+
+    // Event listeners setup
+    function setupEventListeners() {
+        // Filter change listeners
+        document.getElementById('cycleFilter').addEventListener('change', refreshData);
+        document.getElementById('deptFilter').addEventListener('change', refreshData);
+        document.getElementById('statusFilter').addEventListener('change', refreshData);
+
+        // Button listeners
+        document.getElementById('createGoalBtn').addEventListener('click', () => {
+            showCreateGoalModal();
+        });
+
+        document.getElementById('createReviewBtn').addEventListener('click', () => {
+            showCreateReviewModal();
+        });
+
+        document.getElementById('createCycleBtn').addEventListener('click', () => {
+            showCreateCycleModal();
+        });
+
+        document.getElementById('bulkAssignBtn').addEventListener('click', () => {
+            showBulkAssignModal();
+        });
+
+        document.getElementById('bulkGoalBtn').addEventListener('click', () => {
+            showBulkGoalModal();
+        });
+
+        // Load department options
+        loadDepartmentOptions();
+    }
+
+    async function loadDepartmentOptions() {
+        try {
+            const users = await jget('/api/users');
+            const departments = [...new Set(users.map(u => u.subposition).filter(Boolean))];
+
+            const deptFilter = document.getElementById('deptFilter');
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                deptFilter.appendChild(option);
+            });
+
+            // Populate status filter
+            const statusFilter = document.getElementById('statusFilter');
+            const statuses = ['Draft', 'In Progress', 'Completed', 'Archived', 'Open', 'Submitted', 'Finalized'];
+            statuses.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                statusFilter.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error('Error loading department options:', error);
+        }
+    }
+
+    // Refresh all data
+    async function refreshData() {
+        await loadDashboardData();
+        await Promise.all([
+            loadGoalsData(),
+            loadReviewsData()
+        ]);
+    }
+
+    // Modal functions
+    function showCreateGoalModal() {
+        const cycleOpts = cycles.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+        showModal("Create New Goal", `
+            <form id="goalForm" class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cycle</label>
+                    <select name="cycle_id" required class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                        ${cycleOpts}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Employee Username</label>
+                    <input name="owner" required class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Enter username">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Goal Title</label>
+                    <input name="title" required class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Enter goal title">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                    <textarea name="description" rows="3" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Enter goal description"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Weight (%)</label>
+                    <input name="weight" type="number" min="1" max="100" value="20" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="hideModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">Create Goal</button>
+                </div>
+            </form>
+        `);
+
+        document.getElementById("goalForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                await jpost("/api/perf/goals", Object.fromEntries(new FormData(e.target).entries()));
+                hideModal();
+                loadGoalsData();
+                alert("Goal created successfully!");
+            } catch (error) {
+                alert("Error creating goal: " + error.message);
+            }
+        });
+    }
+
+    function showCreateReviewModal() {
+        const cycleOpts = cycles.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+        showModal("Create New Review", `
+            <form id="reviewForm" class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cycle</label>
+                    <select name="cycle_id" required class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                        ${cycleOpts}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Reviewee Username</label>
+                    <input name="reviewee" required class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Enter reviewee username">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Reviewer Username (optional)</label>
+                    <input name="reviewer" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Leave empty to assign to yourself">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="hideModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">Create Review</button>
+                </div>
+            </form>
+        `);
+
+        document.getElementById("reviewForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                await jpost("/api/perf/reviews", Object.fromEntries(new FormData(e.target).entries()));
+                hideModal();
+                loadReviewsData();
+                alert("Review created successfully!");
+            } catch (error) {
+                alert("Error creating review: " + error.message);
+            }
+        });
+    }
+
+    function showCreateCycleModal() {
+        showModal("Create New Cycle", `
+            <form id="cycleForm" class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cycle Name</label>
+                    <input name="name" required class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="e.g., H1 2025">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
+                    <input name="start_date" type="date" required class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">End Date</label>
+                    <input name="end_date" type="date" required class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="hideModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">Create Cycle</button>
+                </div>
+            </form>
+        `);
+
+        document.getElementById("cycleForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                await jpost("/api/perf/cycles", Object.fromEntries(new FormData(e.target).entries()));
+                hideModal();
+                // Reload cycles
+                cycles = await jget('/api/perf/cycles');
+                populateCycleFilters();
+                loadCyclesData();
+                alert("Cycle created successfully!");
+            } catch (error) {
+                alert("Error creating cycle: " + error.message);
+            }
+        });
+    }
+
+    function showBulkAssignModal() {
+        const cycleOpts = cycles.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+        showModal("Bulk Assign Reviews", `
+            <form id="bulkForm" class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cycle</label>
+                    <select name="cycle_id" required class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                        ${cycleOpts}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Assignments (one per line: reviewee_username,reviewer_username)</label>
+                    <textarea name="assignments" rows="8" required class="w-full rounded-xl border border-slate-300 px-3 py-2" 
+                        placeholder="john_doe,jane_smith&#10;alice_wilson,bob_jones&#10;..."></textarea>
+                    <p class="text-xs text-slate-500 mt-1">Format: reviewee_username,reviewer_username (one assignment per line)</p>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="hideModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700">Bulk Assign</button>
+                </div>
+            </form>
+        `);
+
+        document.getElementById("bulkForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                const formData = new FormData(e.target);
+                const cycleId = formData.get('cycle_id');
+                const assignmentsText = formData.get('assignments');
+
+                const assignments = assignmentsText.split('\n')
+                    .filter(line => line.trim())
+                    .map(line => {
+                        const [reviewee, reviewer] = line.split(',').map(s => s.trim());
+                        return { reviewee, reviewer };
+                    });
+
+                await jpost("/api/perf/bulk-assign", { cycle_id: cycleId, assignments });
+                hideModal();
+                loadReviewsData();
+                alert(`Successfully assigned ${assignments.length} reviews!`);
+            } catch (error) {
+                alert("Error bulk assigning reviews: " + error.message);
+            }
+        });
+    }
+
+    function showBulkGoalModal() {
+        showModal("Bulk Goal Actions", `
+            <div class="grid grid-cols-1 gap-4">
+                <div class="text-center">
+                    <p class="text-slate-600 mb-4">Choose a bulk action for goals:</p>
+                    <div class="grid grid-cols-1 gap-3">
+                        <button onclick="bulkUpdateStatus()" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">
+                            <i class="fa-solid fa-edit mr-2"></i>Bulk Update Status
+                        </button>
+                        <button onclick="bulkExportGoals()" class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700">
+                            <i class="fa-solid fa-download mr-2"></i>Export Goals Data
+                        </button>
+                        <button onclick="hideModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+
+    // Action functions
+    async function viewGoalDetails(goalId) {
+        showModal("Goal Details", "<p>Loading goal details...</p>");
+        // Implementation would fetch and display goal details
+    }
+
+    async function editGoal(goalId) {
+        showModal("Edit Goal", "<p>Loading goal editor...</p>");
+        // Implementation would fetch goal data and show edit form
+    }
+
+    async function viewReviewDetails(reviewId) {
+        showModal("Review Details", "<p>Loading review details...</p>");
+        // Implementation would fetch and display review details
+    }
+
+    async function editReview(reviewId) {
+        showModal("Edit Review", "<p>Loading review editor...</p>");
+        // Implementation would fetch review data and show edit form
+    }
+
+    async function editCycle(cycleId) {
+        const cycle = cycles.find(c => c.id === cycleId);
+        if (!cycle) return;
+
+        showModal("Edit Cycle", `
+            <form id="editCycleForm" class="grid grid-cols-1 gap-4">
+                <input type="hidden" name="id" value="${cycle.id}">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cycle Name</label>
+                    <input name="name" value="${cycle.name}" required class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
+                    <input name="start_date" type="date" value="${cycle.start_date}" required class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">End Date</label>
+                    <input name="end_date" type="date" value="${cycle.end_date}" required class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                    <select name="status" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                        <option value="Active" ${cycle.status === 'Active' ? 'selected' : ''}>Active</option>
+                        <option value="Closed" ${cycle.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="hideModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">Update Cycle</button>
+                </div>
+            </form>
+        `);
+
+        document.getElementById("editCycleForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                await jpost("/api/perf/cycles", Object.fromEntries(new FormData(e.target).entries()));
+                hideModal();
+                cycles = await jget('/api/perf/cycles');
+                populateCycleFilters();
+                loadCyclesData();
+                alert("Cycle updated successfully!");
+            } catch (error) {
+                alert("Error updating cycle: " + error.message);
+            }
+        });
+    }
+
+    async function closeCycle(cycleId) {
+        if (confirm('Are you sure you want to close this cycle? This action cannot be undone.')) {
+            try {
+                await jpost("/api/perf/cycles", { id: cycleId, status: 'Closed' });
+                cycles = await jget('/api/perf/cycles');
+                populateCycleFilters();
+                loadCyclesData();
+                alert("Cycle closed successfully!");
+            } catch (error) {
+                alert("Error closing cycle: " + error.message);
+            }
+        }
+    }
+
+    function bulkUpdateStatus() {
+        hideModal();
+        showModal("Bulk Update Status", "<p>Bulk status update functionality would be implemented here</p>");
+    }
+
+    function bulkExportGoals() {
+        hideModal();
+        // Implementation would export goals data to CSV/Excel
+        alert("Export functionality would be implemented here");
+    }
+
+    // Utility functions
+    function getProgressColor(progress) {
+        if (progress >= 100) return 'bg-green-500';
+        if (progress >= 75) return 'bg-blue-500';
+        if (progress >= 50) return 'bg-yellow-500';
+        if (progress >= 25) return 'bg-orange-500';
+        return 'bg-red-500';
+    }
+
+    function getStatusClass(status) {
+        const statusClasses = {
+            'Draft': 'bg-slate-100 text-slate-600',
+            'In Progress': 'bg-blue-100 text-blue-700',
+            'Completed': 'bg-green-100 text-green-700',
+            'Archived': 'bg-slate-100 text-slate-600',
+            'Open': 'bg-yellow-100 text-yellow-700',
+            'Submitted': 'bg-blue-100 text-blue-700',
+            'Finalized': 'bg-green-100 text-green-700',
+            'Active': 'bg-green-100 text-green-700',
+            'Closed': 'bg-slate-100 text-slate-600'
+        };
+        return statusClasses[status] || 'bg-slate-100 text-slate-600';
+    }
+
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString();
+    }
+</script>
+{% endblock %}

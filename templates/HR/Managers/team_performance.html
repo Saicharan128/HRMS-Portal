@@ -1,0 +1,1140 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-regular fa-chart-bar mr-2"></i> Team Performance
+            </h1>
+            <p class="text-slate-600 text-sm">Measure and analyze performance across teams</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Performance Alerts -->
+    <div id="alertsContainer" class="mt-6 hidden">
+        <!-- Alerts will be populated here -->
+    </div>
+
+    <!-- Key Performance Metrics -->
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Team Members</p>
+                    <p class="text-2xl font-bold text-slate-900" id="totalEmployees">-</p>
+                </div>
+                <div class="p-3 bg-blue-100 rounded-xl">
+                    <i class="fa-solid fa-users text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="text-sm text-slate-600" id="managersCount">- managers</span>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Avg Goal Progress</p>
+                    <p class="text-2xl font-bold text-slate-900" id="avgGoalProgress">-</p>
+                </div>
+                <div class="p-3 bg-green-100 rounded-xl">
+                    <i class="fa-solid fa-bullseye text-green-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="text-sm text-green-600" id="goalCompletionRate">-% completion</span>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Avg Review Rating</p>
+                    <p class="text-2xl font-bold text-slate-900" id="avgReviewRating">-</p>
+                </div>
+                <div class="p-3 bg-purple-100 rounded-xl">
+                    <i class="fa-solid fa-star text-purple-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="text-sm text-purple-600" id="reviewStats">- reviews</span>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Active Departments</p>
+                    <p class="text-2xl font-bold text-slate-900" id="totalDepartments">-</p>
+                </div>
+                <div class="p-3 bg-orange-100 rounded-xl">
+                    <i class="fa-solid fa-building text-orange-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="text-sm text-orange-600" id="recentActivity">- recent updates</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Trends Chart -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-slate-800">
+                <i class="fa-solid fa-chart-line mr-2"></i>Performance Trends
+            </h2>
+            <div class="flex gap-2">
+                <button id="trendsGoalsBtn" class="px-3 py-2 rounded-xl bg-blue-600 text-white text-sm">Goals</button>
+                <button id="trendsReviewsBtn"
+                    class="px-3 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm">Reviews</button>
+            </div>
+        </div>
+        <div class="h-80">
+            <canvas id="trendsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Department Performance Comparison -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Department Performance Table -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h2 class="text-xl font-semibold text-slate-800 mb-6">
+                <i class="fa-solid fa-building mr-2"></i>Department Performance
+            </h2>
+            <div id="departmentPerformance" class="space-y-4">
+                <!-- Department performance cards will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Performance Distribution Chart -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h2 class="text-xl font-semibold text-slate-800 mb-6">
+                <i class="fa-solid fa-chart-pie mr-2"></i>Performance Distribution
+            </h2>
+            <div class="h-80">
+                <canvas id="distributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Comparison and Individual Performance -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Team Comparison -->
+        <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-slate-800">
+                    <i class="fa-solid fa-balance-scale mr-2"></i>Team Comparison
+                </h2>
+                <div class="flex gap-2">
+                    <select id="comparisonMetric" class="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                        <option value="goal_progress">Goal Progress</option>
+                        <option value="review_rating">Review Rating</option>
+                        <option value="goal_completion">Goal Completion</option>
+                        <option value="review_completion">Review Completion</option>
+                    </select>
+                </div>
+            </div>
+            <div class="h-80">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Performers -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h2 class="text-xl font-semibold text-slate-800 mb-6">
+                <i class="fa-solid fa-trophy mr-2"></i>Top Performers
+            </h2>
+            <div id="topPerformers" class="space-y-3">
+                <!-- Top performers will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Performance Table -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-slate-800">
+                <i class="fa-solid fa-users mr-2"></i>Individual Performance
+            </h2>
+            <div class="flex gap-3">
+                <select id="departmentFilter" class="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                    <option value="">All Departments</option>
+                </select>
+                <select id="cycleFilter" class="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                    <option value="">Current Cycle</option>
+                </select>
+                <button onclick="exportPerformanceData()"
+                    class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 text-sm">
+                    <i class="fa-solid fa-download mr-1"></i>Export
+                </button>
+            </div>
+        </div>
+
+        <div id="individualPerformanceTable" class="overflow-x-auto">
+            <!-- Individual performance table will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Performance Insights -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 class="text-xl font-semibold text-slate-800 mb-6">
+            <i class="fa-solid fa-lightbulb mr-2"></i>Performance Insights
+        </h2>
+        <div id="performanceInsights" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Performance insights will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal for detailed views -->
+<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-xl font-semibold text-slate-800"></h3>
+                <button onclick="hideModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="modalContent">
+                <!-- Modal content goes here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // Global variables
+    let performanceData = {};
+    let departmentData = [];
+    let trendsData = [];
+    let comparisonData = [];
+    let individualData = [];
+    let charts = {};
+    let currentTrendsView = 'goals';
+
+    // Utility functions
+    async function jget(url) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    }
+
+    async function jpost(url, data) {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    }
+
+    function showModal(title, content) {
+        document.getElementById("modalTitle").textContent = title;
+        document.getElementById("modalContent").innerHTML = content;
+        document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function hideModal() {
+        document.getElementById("modal").classList.add("hidden");
+    }
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeEventListeners();
+        loadAllData();
+    });
+
+    function initializeEventListeners() {
+        // Trends chart toggle
+        document.getElementById('trendsGoalsBtn').addEventListener('click', () => {
+            switchTrendsView('goals');
+        });
+
+        document.getElementById('trendsReviewsBtn').addEventListener('click', () => {
+            switchTrendsView('reviews');
+        });
+
+        // Comparison metric change
+        document.getElementById('comparisonMetric').addEventListener('change', (e) => {
+            updateComparisonChart(e.target.value);
+        });
+
+        // Filter changes
+        document.getElementById('departmentFilter').addEventListener('change', loadIndividualPerformance);
+        document.getElementById('cycleFilter').addEventListener('change', loadIndividualPerformance);
+    }
+
+    async function loadAllData() {
+        try {
+            // Show loading state
+            showLoadingState();
+
+            // Load all data in parallel
+            const [overview, departments, trends, comparison, individual, alerts] = await Promise.all([
+                jget('/api/team/performance-overview'),
+                jget('/api/team/department-performance'),
+                jget('/api/team/performance-trends'),
+                jget('/api/team/performance-comparison'),
+                jget('/api/team/individual-performance'),
+                jget('/api/team/performance-alerts')
+            ]);
+
+            // Store data globally
+            performanceData = overview;
+            departmentData = departments;
+            trendsData = trends;
+            comparisonData = comparison;
+            individualData = individual;
+
+            // Update UI components
+            updateOverviewCards();
+            renderDepartmentPerformance();
+            createTrendsChart();
+            createDistributionChart();
+            createComparisonChart();
+            renderIndividualPerformance();
+            renderPerformanceInsights();
+            renderAlerts(alerts);
+            populateFilters();
+
+        } catch (error) {
+            console.error('Error loading data:', error);
+            showError('Failed to load performance data');
+        }
+    }
+
+    function showLoadingState() {
+        const loadingElements = [
+            'totalEmployees', 'avgGoalProgress', 'avgReviewRating', 'totalDepartments',
+            'managersCount', 'goalCompletionRate', 'reviewStats', 'recentActivity'
+        ];
+
+        loadingElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = 'Loading...';
+        });
+    }
+
+    function updateOverviewCards() {
+        const { overview, performance_metrics } = performanceData;
+
+        document.getElementById('totalEmployees').textContent = overview.total_employees;
+        document.getElementById('managersCount').textContent = `${overview.managers_count} managers`;
+        document.getElementById('avgGoalProgress').textContent = `${performance_metrics.avg_goal_progress}%`;
+        document.getElementById('goalCompletionRate').textContent = `${performance_metrics.goal_completion_rate}% completion`;
+        document.getElementById('avgReviewRating').textContent = performance_metrics.avg_review_rating;
+        document.getElementById('reviewStats').textContent = `${performance_metrics.cycle_reviews} reviews`;
+        document.getElementById('totalDepartments').textContent = overview.total_departments;
+        document.getElementById('recentActivity').textContent = `${performance_metrics.recent_goal_updates} recent updates`;
+    }
+
+    function renderDepartmentPerformance() {
+        const container = document.getElementById('departmentPerformance');
+
+        if (departmentData.length === 0) {
+            container.innerHTML = '<p class="text-center text-slate-500 py-4">No department data available</p>';
+            return;
+        }
+
+        container.innerHTML = departmentData.map(dept => `
+            <div class="border border-slate-200 rounded-xl p-4 hover:shadow-sm transition-shadow cursor-pointer" onclick="viewDepartmentDetails('${dept.department}')">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h3 class="font-semibold text-slate-800">${dept.department}</h3>
+                        <p class="text-sm text-slate-600">${dept.employee_count} members</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-lg font-bold text-blue-600">${dept.goals.avg_progress}%</span>
+                        <p class="text-xs text-slate-500">Avg Progress</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-slate-600">Goals: ${dept.goals.completed}/${dept.goals.total}</p>
+                        <div class="w-full bg-slate-200 rounded-full h-2 mt-1">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: ${dept.goals.completion_rate}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-slate-600">Reviews: ${dept.reviews.avg_rating}/5</p>
+                        <div class="flex items-center mt-1">
+                            ${Array.from({ length: 5 }, (_, i) =>
+            `<i class="fa-solid fa-star text-xs ${i < Math.round(dept.reviews.avg_rating) ? 'text-yellow-400' : 'text-slate-300'}"></i>`
+        ).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function createTrendsChart() {
+        const ctx = document.getElementById('trendsChart').getContext('2d');
+
+        if (charts.trends) {
+            charts.trends.destroy();
+        }
+
+        const labels = trendsData.map(d => d.month);
+        const datasets = currentTrendsView === 'goals' ? [
+            {
+                label: 'Goal Completion Rate (%)',
+                data: trendsData.map(d => d.goals.completion_rate),
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4
+            },
+            {
+                label: 'Avg Goal Progress (%)',
+                data: trendsData.map(d => d.goals.avg_progress),
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4
+            }
+        ] : [
+            {
+                label: 'Review Completion Rate (%)',
+                data: trendsData.map(d => d.reviews.completion_rate),
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                tension: 0.4
+            },
+            {
+                label: 'Avg Review Rating',
+                data: trendsData.map(d => d.reviews.avg_rating),
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                tension: 0.4,
+                yAxisID: 'rating'
+            }
+        ];
+
+        const scales = currentTrendsView === 'goals' ? {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                title: { display: true, text: 'Percentage (%)' }
+            }
+        } : {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                title: { display: true, text: 'Completion Rate (%)' }
+            },
+            rating: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                beginAtZero: true,
+                max: 5,
+                title: { display: true, text: 'Rating (1-5)' },
+                grid: { drawOnChartArea: false }
+            }
+        };
+
+        charts.trends = new Chart(ctx, {
+            type: 'line',
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales
+            }
+        });
+    }
+
+    function createDistributionChart() {
+        const ctx = document.getElementById('distributionChart').getContext('2d');
+
+        if (charts.distribution) {
+            charts.distribution.destroy();
+        }
+
+        // Create progress ranges for distribution
+        const progressRanges = {
+            '0-25%': 0,
+            '26-50%': 0,
+            '51-75%': 0,
+            '76-100%': 0
+        };
+
+        departmentData.forEach(dept => {
+            const progress = dept.goals.avg_progress;
+            if (progress <= 25) progressRanges['0-25%']++;
+            else if (progress <= 50) progressRanges['26-50%']++;
+            else if (progress <= 75) progressRanges['51-75%']++;
+            else progressRanges['76-100%']++;
+        });
+
+        charts.distribution = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(progressRanges),
+                datasets: [{
+                    data: Object.values(progressRanges),
+                    backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} teams (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function createComparisonChart(metric = 'goal_progress') {
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+
+        if (charts.comparison) {
+            charts.comparison.destroy();
+        }
+
+        const departments = comparisonData.departments || [];
+        const benchmark = comparisonData.benchmarks?.organization_average || {};
+
+        const labels = departments.map(d => d.department);
+        const data = departments.map(d => d.metrics[metric]);
+        const benchmarkValue = benchmark[metric] || 0;
+
+        charts.comparison = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: getMetricLabel(metric),
+                        data,
+                        backgroundColor: data.map(value =>
+                            value >= benchmarkValue ? '#22c55e' : '#f97316'
+                        ),
+                        borderColor: '#1f2937',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Organization Average',
+                        data: new Array(labels.length).fill(benchmarkValue),
+                        type: 'line',
+                        borderColor: '#ef4444',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function (context) {
+                                if (context.datasetIndex === 0) {
+                                    const dept = departments[context.dataIndex];
+                                    return `Team size: ${dept.team_size} members`;
+                                }
+                                return '';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: metric.includes('rating') ? 5 : 100,
+                        title: {
+                            display: true,
+                            text: metric.includes('rating') ? 'Rating (1-5)' : 'Percentage (%)'
+                        }
+                    }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const department = departments[index];
+                        viewDepartmentDetails(department.department);
+                    }
+                }
+            }
+        });
+    }
+
+    function renderIndividualPerformance() {
+        const container = document.getElementById('individualPerformanceTable');
+
+        if (individualData.length === 0) {
+            container.innerHTML = '<p class="text-center text-slate-500 py-8">No individual performance data available</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-slate-200">
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Employee</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Department</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Goals Progress</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Review Rating</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Last Activity</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${individualData.map(person => `
+                        <tr class="border-b border-slate-100 hover:bg-slate-50">
+                            <td class="p-3">
+                                <div>
+                                    <p class="font-medium text-slate-800">${person.user.name}</p>
+                                    <p class="text-sm text-slate-600">${person.user.designation || person.user.employee_type}</p>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <span class="px-2 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700">
+                                    ${person.user.subposition}
+                                </span>
+                            </td>
+                            <td class="p-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-16 bg-slate-200 rounded-full h-2">
+                                        <div class="h-2 rounded-full ${getProgressColor(person.goals.avg_progress)}" style="width: ${person.goals.avg_progress}%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">${person.goals.avg_progress}%</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">${person.goals.completed}/${person.goals.total} goals</p>
+                            </td>
+                            <td class="p-3">
+                                <div class="flex items-center gap-1">
+                                    ${Array.from({ length: 5 }, (_, i) =>
+            `<i class="fa-solid fa-star text-xs ${i < Math.round(person.reviews.avg_rating) ? 'text-yellow-400' : 'text-slate-300'}"></i>`
+        ).join('')}
+                                    <span class="ml-1 text-sm text-slate-600">${person.reviews.avg_rating}</span>
+                                </div>
+                                <p class="text-xs text-slate-500">${person.reviews.finalized}/${person.reviews.total} reviews</p>
+                            </td>
+                            <td class="p-3">
+                                <p class="text-sm text-slate-600">${person.last_activity.date ? formatDate(person.last_activity.date) : 'No activity'}</p>
+                            </td>
+                            <td class="p-3">
+                                <button onclick="viewIndividualDetails('${person.user.username}')" class="text-blue-600 hover:text-blue-800 text-sm mr-2">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button onclick="viewGoals('${person.user.username}')" class="text-green-600 hover:text-green-800 text-sm">
+                                    <i class="fa-solid fa-bullseye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    function renderPerformanceInsights() {
+        const container = document.getElementById('performanceInsights');
+
+        // Calculate insights from the data
+        const insights = generateInsights();
+
+        container.innerHTML = insights.map(insight => `
+            <div class="border border-slate-200 rounded-xl p-4 ${getInsightColorClass(insight.type)}">
+                <div class="flex items-start gap-3">
+                    <div class="p-2 rounded-lg ${getInsightIconBg(insight.type)}">
+                        <i class="${insight.icon} ${getInsightIconColor(insight.type)}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-slate-800 mb-1">${insight.title}</h4>
+                        <p class="text-sm text-slate-600 mb-2">${insight.description}</p>
+                        <p class="text-xs text-slate-500">${insight.recommendation}</p>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderAlerts(alerts) {
+        const container = document.getElementById('alertsContainer');
+
+        if (!alerts || alerts.length === 0) {
+            container.classList.add('hidden');
+            return;
+        }
+
+        container.classList.remove('hidden');
+        container.innerHTML = `
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-exclamation-triangle mr-2"></i>Performance Alerts
+                </h2>
+                <div class="space-y-3">
+                    ${alerts.map(alert => `
+                        <div class="flex items-start gap-3 p-3 rounded-xl ${getAlertBgClass(alert.type)}">
+                            <i class="fa-solid ${getAlertIcon(alert.type)} ${getAlertIconClass(alert.type)} mt-1"></i>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-slate-800">${alert.title}</h4>
+                                <p class="text-sm text-slate-600 mt-1">${alert.description}</p>
+                                <p class="text-xs text-slate-500 mt-1"><strong>Action:</strong> ${alert.action}</p>
+                            </div>
+                            <span class="px-2 py-1 rounded-lg text-xs font-medium ${getPriorityClass(alert.priority)}">
+                                ${alert.priority}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Load top performers in the sidebar
+    function loadTopPerformers() {
+        const container = document.getElementById('topPerformers');
+
+        // Sort individual data by goal progress
+        const topPerformers = individualData
+            .sort((a, b) => b.goals.avg_progress - a.goals.avg_progress)
+            .slice(0, 5);
+
+        if (topPerformers.length === 0) {
+            container.innerHTML = '<p class="text-center text-slate-500 py-4">No performance data available</p>';
+            return;
+        }
+
+        container.innerHTML = topPerformers.map((performer, index) => `
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:shadow-sm transition-shadow cursor-pointer" 
+                 onclick="viewIndividualDetails('${performer.user.username}')">
+                <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-bold flex items-center justify-center">
+                        ${index + 1}
+                    </span>
+                    <div>
+                        <p class="font-medium text-slate-800">${performer.user.name}</p>
+                        <p class="text-sm text-slate-600">${performer.user.subposition}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-green-600">${performer.goals.avg_progress}%</p>
+                    <p class="text-xs text-slate-500">${performer.goals.completed}/${performer.goals.total} goals</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Event handlers and helper functions
+    function switchTrendsView(view) {
+        currentTrendsView = view;
+
+        // Update button styles
+        document.getElementById('trendsGoalsBtn').className = view === 'goals'
+            ? 'px-3 py-2 rounded-xl bg-blue-600 text-white text-sm'
+            : 'px-3 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm';
+
+        document.getElementById('trendsReviewsBtn').className = view === 'reviews'
+            ? 'px-3 py-2 rounded-xl bg-blue-600 text-white text-sm'
+            : 'px-3 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm';
+
+        createTrendsChart();
+    }
+
+    function updateComparisonChart(metric) {
+        createComparisonChart(metric);
+    }
+
+    async function loadIndividualPerformance() {
+        try {
+            const department = document.getElementById('departmentFilter').value;
+            const cycle_id = document.getElementById('cycleFilter').value;
+
+            const params = new URLSearchParams();
+            if (department) params.append('department', department);
+            if (cycle_id) params.append('cycle_id', cycle_id);
+
+            individualData = await jget(`/api/team/individual-performance?${params}`);
+            renderIndividualPerformance();
+            loadTopPerformers(); // Update top performers when individual data changes
+        } catch (error) {
+            console.error('Error loading individual performance:', error);
+        }
+    }
+
+    async function populateFilters() {
+        try {
+            // Populate department filter
+            const departments = [...new Set(individualData.map(p => p.user.subposition).filter(Boolean))];
+            const departmentFilter = document.getElementById('departmentFilter');
+
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                departmentFilter.appendChild(option);
+            });
+
+            // Populate cycle filter
+            const cycles = await jget('/api/perf/cycles');
+            const cycleFilter = document.getElementById('cycleFilter');
+
+            cycles.forEach(cycle => {
+                const option = document.createElement('option');
+                option.value = cycle.id;
+                option.textContent = cycle.name;
+                if (cycle.status === 'Active') option.selected = true;
+                cycleFilter.appendChild(option);
+            });
+
+            // Load top performers after data is available
+            loadTopPerformers();
+        } catch (error) {
+            console.error('Error populating filters:', error);
+        }
+    }
+
+    // Modal functions
+    function viewDepartmentDetails(department) {
+        const deptData = departmentData.find(d => d.department === department);
+        if (!deptData) return;
+
+        showModal(`${department} Performance Details`, `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">Goals Performance</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Total Goals:</span>
+                            <span class="font-medium">${deptData.goals.total}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Completed:</span>
+                            <span class="font-medium">${deptData.goals.completed}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Completion Rate:</span>
+                            <span class="font-medium">${deptData.goals.completion_rate}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Avg Progress:</span>
+                            <span class="font-medium">${deptData.goals.avg_progress}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">Review Performance</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Total Reviews:</span>
+                            <span class="font-medium">${deptData.reviews.total}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Finalized:</span>
+                            <span class="font-medium">${deptData.reviews.finalized}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Completion Rate:</span>
+                            <span class="font-medium">${deptData.reviews.completion_rate}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Avg Rating:</span>
+                            <span class="font-medium">${deptData.reviews.avg_rating}/5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-200">
+                <h4 class="font-semibold mb-3">Team Members</h4>
+                <div class="max-h-60 overflow-y-auto">
+                    ${individualData.filter(p => p.user.subposition === department).map(person => `
+                        <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                            <div>
+                                <p class="font-medium">${person.user.name}</p>
+                                <p class="text-sm text-slate-600">${person.user.designation || person.user.employee_type}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-medium">${person.goals.avg_progress}% progress</p>
+                                <p class="text-sm text-slate-600">${person.reviews.avg_rating}/5 rating</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `);
+    }
+
+    function viewIndividualDetails(username) {
+        const person = individualData.find(p => p.user.username === username);
+        if (!person) return;
+
+        showModal(`${person.user.name} - Performance Details`, `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">Employee Information</h4>
+                    <div class="space-y-2">
+                        <div><span class="text-slate-600">Name:</span> ${person.user.name}</div>
+                        <div><span class="text-slate-600">Department:</span> ${person.user.subposition}</div>
+                        <div><span class="text-slate-600">Role:</span> ${person.user.designation || person.user.employee_type}</div>
+                        <div><span class="text-slate-600">Email:</span> ${person.user.email}</div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">Performance Summary</h4>
+                    <div class="space-y-2">
+                        <div><span class="text-slate-600">Goal Progress:</span> ${person.goals.avg_progress}%</div>
+                        <div><span class="text-slate-600">Goals Completed:</span> ${person.goals.completed}/${person.goals.total}</div>
+                        <div><span class="text-slate-600">Review Rating:</span> ${person.reviews.avg_rating}/5</div>
+                        <div><span class="text-slate-600">Reviews Completed:</span> ${person.reviews.finalized}/${person.reviews.total}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-slate-200">
+                <div class="flex gap-3">
+                    <button onclick="viewGoals('${username}')" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">
+                        View Goals
+                    </button>
+                    <button onclick="viewReviews('${username}')" class="px-4 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-700">
+                        View Reviews
+                    </button>
+                </div>
+            </div>
+        `);
+    }
+
+    function viewGoals(username) {
+        // This would redirect to goals page or show goals in modal
+        window.location.href = `/performance?user=${username}`;
+    }
+
+    function viewReviews(username) {
+        // This would redirect to reviews page or show reviews in modal
+        window.location.href = `/performance?user=${username}#reviews`;
+    }
+
+    function exportPerformanceData() {
+        // Convert individual performance data to CSV
+        const headers = ['Name', 'Department', 'Role', 'Goal Progress (%)', 'Goals Completed', 'Review Rating', 'Reviews Completed'];
+        const csvData = individualData.map(person => [
+            person.user.name,
+            person.user.subposition,
+            person.user.designation || person.user.employee_type,
+            person.goals.avg_progress,
+            `${person.goals.completed}/${person.goals.total}`,
+            person.reviews.avg_rating,
+            `${person.reviews.finalized}/${person.reviews.total}`
+        ]);
+
+        const csvContent = [headers, ...csvData]
+            .map(row => row.map(cell => `"${cell}"`).join(','))
+            .join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `team_performance_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Utility helper functions
+    function generateInsights() {
+        const insights = [];
+
+        if (departmentData.length === 0) return insights;
+
+        // High performing departments
+        const topDept = departmentData.reduce((prev, current) =>
+            (prev.goals.avg_progress > current.goals.avg_progress) ? prev : current, departmentData[0]);
+
+        if (topDept && topDept.goals.avg_progress > 0) {
+            insights.push({
+                type: 'success',
+                icon: 'fa-trophy',
+                title: 'Top Performing Department',
+                description: `${topDept.department} leads with ${topDept.goals.avg_progress}% average goal progress`,
+                recommendation: 'Consider sharing their best practices with other teams'
+            });
+        }
+
+        // Low performing departments
+        const lowDept = departmentData.find(dept => dept.goals.avg_progress < 50);
+        if (lowDept) {
+            insights.push({
+                type: 'warning',
+                icon: 'fa-exclamation-triangle',
+                title: 'Needs Attention',
+                description: `${lowDept.department} has ${lowDept.goals.avg_progress}% average progress`,
+                recommendation: 'Schedule one-on-one meetings to identify blockers'
+            });
+        }
+
+        // Review completion insight
+        const reviewData = departmentData.filter(dept => dept.reviews.total > 0);
+        if (reviewData.length > 0) {
+            const avgReviewCompletion = reviewData.reduce((sum, dept) => sum + dept.reviews.completion_rate, 0) / reviewData.length;
+            if (avgReviewCompletion < 70) {
+                insights.push({
+                    type: 'info',
+                    icon: 'fa-clock',
+                    title: 'Review Completion',
+                    description: `${avgReviewCompletion.toFixed(1)}% average review completion rate`,
+                    recommendation: 'Send reminders to managers about pending reviews'
+                });
+            }
+        }
+
+        // High performers insight
+        const highPerformers = individualData.filter(p => p.goals.avg_progress > 90).length;
+        if (highPerformers > 0) {
+            insights.push({
+                type: 'success',
+                icon: 'fa-star',
+                title: 'High Performers',
+                description: `${highPerformers} employees with >90% goal progress`,
+                recommendation: 'Consider them for leadership development programs'
+            });
+        }
+
+        // Team collaboration insight
+        const avgTeamSize = departmentData.reduce((sum, dept) => sum + dept.employee_count, 0) / departmentData.length;
+        if (avgTeamSize > 10) {
+            insights.push({
+                type: 'info',
+                icon: 'fa-users',
+                title: 'Team Structure',
+                description: `Average team size is ${Math.round(avgTeamSize)} members`,
+                recommendation: 'Consider team restructuring for better collaboration'
+            });
+        }
+
+        return insights;
+    }
+
+    function getMetricLabel(metric) {
+        const labels = {
+            'goal_progress': 'Goal Progress (%)',
+            'review_rating': 'Review Rating',
+            'goal_completion': 'Goal Completion (%)',
+            'review_completion': 'Review Completion (%)'
+        };
+        return labels[metric] || metric;
+    }
+
+    function getProgressColor(progress) {
+        if (progress >= 90) return 'bg-green-500';
+        if (progress >= 75) return 'bg-blue-500';
+        if (progress >= 50) return 'bg-yellow-500';
+        if (progress >= 25) return 'bg-orange-500';
+        return 'bg-red-500';
+    }
+
+    function getInsightColorClass(type) {
+        const classes = {
+            'success': 'border-green-200 bg-green-50',
+            'warning': 'border-yellow-200 bg-yellow-50',
+            'info': 'border-blue-200 bg-blue-50',
+            'error': 'border-red-200 bg-red-50'
+        };
+        return classes[type] || 'border-slate-200 bg-slate-50';
+    }
+
+    function getInsightIconBg(type) {
+        const classes = {
+            'success': 'bg-green-100',
+            'warning': 'bg-yellow-100',
+            'info': 'bg-blue-100',
+            'error': 'bg-red-100'
+        };
+        return classes[type] || 'bg-slate-100';
+    }
+
+    function getInsightIconColor(type) {
+        const classes = {
+            'success': 'text-green-600',
+            'warning': 'text-yellow-600',
+            'info': 'text-blue-600',
+            'error': 'text-red-600'
+        };
+        return classes[type] || 'text-slate-600';
+    }
+
+    function getAlertBgClass(type) {
+        const classes = {
+            'success': 'bg-green-50 border border-green-200',
+            'warning': 'bg-yellow-50 border border-yellow-200',
+            'info': 'bg-blue-50 border border-blue-200',
+            'error': 'bg-red-50 border border-red-200'
+        };
+        return classes[type] || 'bg-slate-50 border border-slate-200';
+    }
+
+    function getAlertIcon(type) {
+        const icons = {
+            'success': 'fa-check-circle',
+            'warning': 'fa-exclamation-triangle',
+            'info': 'fa-info-circle',
+            'error': 'fa-times-circle'
+        };
+        return icons[type] || 'fa-info-circle';
+    }
+
+    function getAlertIconClass(type) {
+        const classes = {
+            'success': 'text-green-600',
+            'warning': 'text-yellow-600',
+            'info': 'text-blue-600',
+            'error': 'text-red-600'
+        };
+        return classes[type] || 'text-slate-600';
+    }
+
+    function getPriorityClass(priority) {
+        const classes = {
+            'high': 'bg-red-100 text-red-700',
+            'medium': 'bg-yellow-100 text-yellow-700',
+            'low': 'bg-green-100 text-green-700'
+        };
+        return classes[priority] || 'bg-slate-100 text-slate-700';
+    }
+
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString();
+    }
+
+    function showError(message) {
+        // You can implement a toast notification here
+        alert(message);
+    }
+
+    // Auto-refresh data every 5 minutes
+    setInterval(() => {
+        loadAllData();
+    }, 5 * 60 * 1000);
+</script>
+{% endblock %}
