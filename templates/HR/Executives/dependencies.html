@@ -1,0 +1,548 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-diagram-project mr-2"></i> Dependencies
+            </h1>
+            <p class="text-slate-600 text-sm">Cross-function dependency maps.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="newWorkflowBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> New Workflow
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="builderTab" class="wf-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-sitemap mr-1"></i> Builder</button>
+            <button id="libraryTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-box-archive mr-1"></i> Library</button>
+            <button id="runsTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-play mr-1"></i> Runs</button>
+            <button id="analyticsTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-chart-line mr-1"></i> Analytics</button>
+            <button id="settingsTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-gear mr-1"></i> Settings</button>
+        </div>
+    </div>
+
+    <!-- Builder -->
+    <section id="builderPanel" class="wf-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-bolt mr-2"></i> Triggers
+                </h3>
+                <div id="triggerList" class="grid grid-cols-2 gap-2 text-sm">
+                    <button class="wf-chip" data-type="trigger" data-key="new_service_added"><i
+                            class="fa-solid fa-circle-plus mr-1"></i> New Service Added</button>
+                    <button class="wf-chip" data-type="trigger" data-key="pr_merged"><i
+                            class="fa-solid fa-code-merge mr-1"></i> PR Merged</button>
+                    <button class="wf-chip" data-type="trigger" data-key="schema_change_detected"><i
+                            class="fa-solid fa-database mr-1"></i> Schema Change</button>
+                    <button class="wf-chip" data-type="trigger" data-key="incident_reported"><i
+                            class="fa-solid fa-triangle-exclamation mr-1"></i> Incident Reported</button>
+                </div>
+
+                <h3 class="text-lg font-semibold text-slate-800 my-4"><i class="fa-solid fa-list-check mr-2"></i> Steps
+                </h3>
+                <div id="stepList" class="grid grid-cols-2 gap-2 text-sm">
+                    <button class="wf-chip" data-type="step" data-key="link_dependency"><i
+                            class="fa-solid fa-link mr-1"></i> Link Dependency</button>
+                    <button class="wf-chip" data-type="step" data-key="impact_analysis"><i
+                            class="fa-solid fa-magnifying-glass-chart mr-1"></i> Impact Analysis</button>
+                    <button class="wf-chip" data-type="step" data-key="owner_lookup"><i
+                            class="fa-solid fa-user-group mr-1"></i> Owner Lookup</button>
+                    <button class="wf-chip" data-type="step" data-key="notify_owners"><i
+                            class="fa-solid fa-bell mr-1"></i> Notify Owners</button>
+                    <button class="wf-chip" data-type="step" data-key="approve_change"><i
+                            class="fa-solid fa-thumbs-up mr-1"></i> Approve Change</button>
+                    <button class="wf-chip" data-type="step" data-key="run_checks"><i
+                            class="fa-solid fa-clipboard-check mr-1"></i> Run Checks</button>
+                    <button class="wf-chip" data-type="step" data-key="update_graph"><i
+                            class="fa-solid fa-project-diagram mr-1"></i> Update Graph</button>
+                    <button class="wf-chip" data-type="step" data-key="webhook"><i class="fa-solid fa-plug mr-1"></i>
+                        Webhook</button>
+                    <button class="wf-chip" data-type="step" data-key="import_from_repo"><i
+                            class="fa-solid fa-file-import mr-1"></i> Import From Repo</button>
+                </div>
+            </div>
+
+            <!-- Middle -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-layer-group mr-2"></i> Canvas
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <button id="clearCanvas"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
+                        <button id="saveWorkflow"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        <button id="publishWorkflow"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"><i
+                                class="fa-solid fa-rocket mr-1"></i> Publish</button>
+                    </div>
+                </div>
+                <ul id="canvas" class="space-y-2 text-sm min-h-[120px]"><!-- injected --></ul>
+            </div>
+
+            <!-- Right -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-microscope mr-2"></i>
+                    Inspector</h3>
+                <div id="inspector" class="space-y-3 text-sm">
+                    <div class="text-slate-500">Select a node to edit settings.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Library -->
+    <section id="libraryPanel" class="wf-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-box-archive mr-2"></i> Templates
+                </h3>
+                <button id="newTemplate"
+                    class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
+                        class="fa-solid fa-plus mr-1"></i> New</button>
+            </div>
+            <div id="templateList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"><!-- injected --></div>
+        </div>
+    </section>
+
+    <!-- Runs -->
+    <section id="runsPanel" class="wf-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-play mr-2"></i> Recent Runs</h3>
+                <select id="runFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                    <option value="all">All</option>
+                    <option value="success">Success</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 px-4">Time</th>
+                            <th class="py-2 px-4">Workflow</th>
+                            <th class="py-2 px-4">Triggered By</th>
+                            <th class="py-2 px-4">Status</th>
+                            <th class="py-2 px-4 w-24"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="runRows" class="text-slate-800"><!-- injected --></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics -->
+    <section id="analyticsPanel" class="wf-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-stopwatch mr-2"></i> Time to
+                    Map</h3>
+                <canvas id="ttcChart" height="220"></canvas>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-screwdriver-wrench mr-2"></i> Step Success Rate</h3>
+                <canvas id="successChart" height="220"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settingsPanel" class="wf-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-plug mr-2"></i> Integrations
+                </h3>
+                <div class="space-y-3 text-sm" id="intList"><!-- injected --></div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-lock mr-2"></i> Permissions
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Allow Owners to
+                        approve</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Allow SRE to edit</label>
+                    <label class="flex items-center gap-2"><input type="checkbox"> Require quorum for breaking
+                        changes</label>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-shield-halved mr-2"></i>
+                    Safety Checks</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Block cyclic
+                        dependencies</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" checked> Flag critical path
+                        impact</label>
+                    <label class="flex items-center gap-2"><input type="checkbox"> Enforce change freeze windows</label>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    /* ------------ Mock Data ------------ */
+    let CANVAS = [];
+    let SELECTED = null;
+
+    let TEMPLATES = [
+        {
+            id: 1, name: 'Service → DB Schema Change', nodes: [
+                { type: 'trigger', key: 'schema_change_detected' },
+                { type: 'step', key: 'import_from_repo' },
+                { type: 'step', key: 'impact_analysis', cfg: { radius: 2 } },
+                { type: 'step', key: 'owner_lookup' },
+                { type: 'step', key: 'notify_owners' },
+                { type: 'step', key: 'approve_change', cfg: { approver: 'Service Owners', sla: 12 } },
+                { type: 'step', key: 'run_checks', cfg: { suite: 'contract_tests' } },
+                { type: 'step', key: 'update_graph' }
+            ]
+        },
+        {
+            id: 2, name: 'New Service Onboarding', nodes: [
+                { type: 'trigger', key: 'new_service_added' },
+                { type: 'step', key: 'import_from_repo' },
+                { type: 'step', key: 'link_dependency' },
+                { type: 'step', key: 'update_graph' },
+                { type: 'step', key: 'notify_owners' }
+            ]
+        }
+    ];
+
+    let RUNS = [
+        { id: 901, at: '2025-09-14 12:10', wf: 'Service → DB Schema Change', who: 'System', status: 'success' },
+        { id: 902, at: '2025-09-14 19:05', wf: 'New Service Onboarding', who: 'DevOps Bot', status: 'success' },
+        { id: 903, at: '2025-09-15 08:45', wf: 'Incident Blast Radius', who: 'On-call', status: 'failed' }
+    ];
+
+    let INTEGRATIONS = [
+        { name: 'GitHub', state: 'Connected' },
+        { name: 'GitLab', state: 'Pending' },
+        { name: 'Jira', state: 'Connected' },
+        { name: 'PagerDuty', state: 'Connected' },
+        { name: 'Datadog', state: 'Connected' },
+        { name: 'Neo4j (Graph DB)', state: 'Connected' },
+        { name: 'Slack', state: 'Connected' }
+    ];
+
+    /* ------------ Elements & Init ------------ */
+    const $ = (id) => document.getElementById(id);
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.wf-tab').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.wf-tab').forEach(x => x.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                document.querySelectorAll('.wf-panel').forEach(p => p.classList.add('hidden'));
+                document.getElementById(name + 'Panel').classList.remove('hidden');
+                if (name === 'analytics') { ensureCharts(); drawCharts(); }
+            });
+        });
+
+        document.querySelectorAll('.wf-chip').forEach(chip => {
+            chip.addEventListener('click', () => addNode({ type: chip.dataset.type, key: chip.dataset.key, cfg: defaultCfg(chip.dataset.key) }));
+        });
+        $('clearCanvas').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); });
+        $('saveWorkflow').addEventListener('click', () => alert('✅ Workflow saved'));
+        $('publishWorkflow').addEventListener('click', () => alert('🚀 Workflow published'));
+        $('newWorkflowBtn').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); alert('✨ New workflow started'); });
+
+        $('newTemplate').addEventListener('click', () => { TEMPLATES.push({ id: Date.now(), name: 'Untitled Template', nodes: [...CANVAS] }); renderTemplates(); alert('✅ Template created'); });
+        $('runFilter').addEventListener('change', renderRuns);
+        renderIntegrations();
+
+        renderCanvas(); renderInspector(); renderTemplates(); renderRuns();
+    });
+
+    /* ------------ Builder ------------ */
+    function addNode(n) { CANVAS.push(n); renderCanvas(); }
+    function moveNode(i, d) { const j = i + d; if (j < 0 || j >= CANVAS.length) return;[CANVAS[i], CANVAS[j]] = [CANVAS[j], CANVAS[i]]; renderCanvas(); }
+    function removeNode(i) { CANVAS.splice(i, 1); if (SELECTED === i) SELECTED = null; renderCanvas(); renderInspector(); }
+    function selectNode(i) { SELECTED = i; renderInspector(); }
+
+    function renderCanvas() {
+        $('canvas').innerHTML = CANVAS.map((n, i) => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200 ${SELECTED === i ? 'ring-2 ring-blue-200' : ''}">
+      <div class="flex items-center gap-2">${icon(n.key)} <span class="font-medium">${label(n)}</span> ${n.type === 'trigger' ? badge('Trigger', 'amber') : ''}</div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},-1)">↑</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},1)">↓</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="selectNode(${i})">Edit</button>
+        <button class="px-2 py-1 text-xs rounded text-white bg-red-600 hover:bg-red-700" onclick="removeNode(${i})">Remove</button>
+      </div>
+    </li>
+  `).join('') || `<li class="text-slate-500 text-sm">No nodes yet. Click a Trigger or Step to add.</li>`;
+    }
+
+    function renderInspector() {
+        const box = $('inspector');
+        if (SELECTED === null) { box.innerHTML = '<div class="text-slate-500">Select a node to edit settings.</div>'; return; }
+        const n = CANVAS[SELECTED]; const cfg = n.cfg || {};
+        box.innerHTML = `
+    <div class="space-y-3">
+      <div class="flex items-center gap-2"><div>${icon(n.key)}</div><div class="font-medium">${label(n)}</div></div>
+      ${n.type === 'trigger' ? triggerEditor(cfg) : stepEditor(n.key, cfg)}
+      <div class="flex items-center justify-end gap-2">
+        <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="cancelEdit()">Cancel</button>
+        <button class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700" onclick="saveEdit()">Save</button>
+      </div>
+    </div>`;
+    }
+    function cancelEdit() { SELECTED = null; renderInspector(); }
+    function saveEdit() {
+        const form = document.querySelector('#inspector form');
+        if (!form) { SELECTED = null; renderInspector(); return; }
+        const data = Object.fromEntries(new FormData(form).entries());
+        const n = CANVAS[SELECTED]; n.cfg = { ...n.cfg, ...data };
+        alert('✅ Node updated'); SELECTED = null; renderInspector();
+    }
+
+    function triggerEditor(cfg) {
+        return `
+    <form class="space-y-3">
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">When</label>
+        <select name="when" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option value="immediate" ${sel(cfg.when, 'immediate')}>Immediate</option>
+          <option value="scheduled" ${sel(cfg.when, 'scheduled')}>Scheduled</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Filter (JEXL)</label>
+        <input name="filter" value="${esc(cfg.filter || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., service=='billing' || impact=='high'">
+      </div>
+    </form>`;
+    }
+
+    function stepEditor(key, cfg) {
+        if (key === 'webhook') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">URL</label><input name="url" value="${esc(cfg.url || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="https://hooks.example.com/update"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">Method</label>
+          <select name="method" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            <option ${sel(cfg.method, 'POST')}>POST</option><option ${sel(cfg.method, 'PUT')}>PUT</option>
+          </select>
+        </div>
+      </form>`;
+        }
+        if (key === 'approve_change') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">Approver</label><input name="approver" value="${esc(cfg.approver || 'Service Owners')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">SLA (hours)</label><input type="number" name="sla" value="${esc(cfg.sla || 24)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      </form>`;
+        }
+        if (key === 'notify_owners') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">Channel</label><input name="channel" value="${esc(cfg.channel || '#infra-alerts')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">Also Email</label>
+          <select name="email" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            <option ${sel(cfg.email, 'yes')}>yes</option><option ${sel(cfg.email, 'no')}>no</option>
+          </select>
+        </div>
+      </form>`;
+        }
+        if (key === 'impact_analysis') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">Traversal Radius</label><input type="number" name="radius" value="${esc(cfg.radius || 1)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">Include Transitives</label>
+          <select name="transitives" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            <option ${sel(cfg.transitives, 'yes')}>yes</option><option ${sel(cfg.transitives, 'no')}>no</option>
+          </select>
+        </div>
+      </form>`;
+        }
+        if (key === 'owner_lookup') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">Source</label>
+          <select name="source" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            <option ${sel(cfg.source, 'CODEOWNERS')}>CODEOWNERS</option><option ${sel(cfg.source, 'Jira')}>Jira</option><option ${sel(cfg.source, 'Service Catalog')}>Service Catalog</option>
+          </select>
+        </div>
+      </form>`;
+        }
+        if (key === 'run_checks') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">Suite</label><input name="suite" value="${esc(cfg.suite || 'smoke')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      </form>`;
+        }
+        if (key === 'import_from_repo') {
+            return `
+      <form class="space-y-3">
+        <div><label class="block text-xs text-slate-500 mb-1">Repo URL</label><input name="repo" value="${esc(cfg.repo || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="https://github.com/org/svc"></div>
+        <div><label class="block text-xs text-slate-500 mb-1">Manifest Path</label><input name="path" value="${esc(cfg.path || 'dependency.yaml')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      </form>`;
+        }
+        // generic (link_dependency, update_graph)
+        return `<form class="space-y-3"><div class="text-slate-500">No configurable fields.</div></form>`;
+    }
+
+    /* ------------ Library ------------ */
+    function renderTemplates() {
+        $('templateList').innerHTML = TEMPLATES.map(t => `
+    <div class="rounded-xl border border-slate-200 p-4 flex items-center justify-between">
+      <div>
+        <div class="font-medium text-slate-800">${t.name}</div>
+        <div class="text-xs text-slate-600">${t.nodes.map(label).join(' • ')}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="loadTemplate(${t.id})"><i class="fa-solid fa-arrow-down mr-1"></i> Load</button>
+        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteTemplate(${t.id})"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
+      </div>
+    </div>
+  `).join('') || `<div class="text-slate-500 text-sm">No templates</div>`;
+    }
+    function loadTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; CANVAS = t.nodes.map(n => ({ ...n, cfg: defaultCfg(n.key), ...n })); SELECTED = null; renderCanvas(); renderInspector(); }
+    function deleteTemplate(id) { TEMPLATES = TEMPLATES.filter(t => t.id !== id); renderTemplates(); }
+
+    /* ------------ Runs ------------ */
+    function renderRuns() {
+        const f = $('runFilter').value;
+        const data = f === 'all' ? RUNS : RUNS.filter(r => r.status === f);
+        $('runRows').innerHTML = data.map(r => {
+            const pill = r.status === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 text-slate-600">${r.at}</td>
+        <td class="py-2 px-4">${r.wf}</td>
+        <td class="py-2 px-4">${r.who}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${r.status}</span></td>
+        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Run details coming soon')">Details</button></td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No runs</td></tr>`;
+    }
+
+    /* ------------ Analytics ------------ */
+    let chartsReady = false, ttcC, successC;
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartsReady = true; return; }
+        if (chartsReady) return;
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
+    }
+    function drawCharts() {
+        const tctx = document.getElementById('ttcChart').getContext('2d');
+        const sctx = document.getElementById('successChart').getContext('2d');
+        ttcC && ttcC.destroy(); successC && successC.destroy();
+        ttcC = new Chart(tctx, { type: 'bar', data: { labels: ['Onboard', 'Schema Change', 'Incident', 'Refactor'], datasets: [{ label: 'Median Hours', data: [3, 6, 2, 4], backgroundColor: '#3b82f6' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+        successC = new Chart(sctx, { type: 'pie', data: { labels: ['Impact Analysis', 'Owner Lookup', 'Approval', 'Graph Update', 'Notify'], datasets: [{ data: [96, 94, 88, 98, 99], borderWidth: 2, borderColor: '#fff', backgroundColor: ['#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#ef4444'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+    }
+
+    /* ------------ Settings ------------ */
+    function renderIntegrations() {
+        $('intList').innerHTML = INTEGRATIONS.map(i => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="font-medium text-slate-800">${i.name}</div>
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded-full text-xs ${i.state === 'Connected' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${i.state}</span>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleInt('${i.name}')">${i.state === 'Connected' ? 'Disconnect' : 'Connect'}</button>
+      </div>
+    </div>`).join('');
+    }
+    function toggleInt(name) { INTEGRATIONS = INTEGRATIONS.map(x => x.name === name ? { ...x, state: x.state === 'Connected' ? 'Pending' : 'Connected' } : x); renderIntegrations(); }
+
+    /* ------------ Helpers ------------ */
+    function icon(k) {
+        const m = {
+            new_service_added: '<i class="fa-solid fa-circle-plus"></i>',
+            pr_merged: '<i class="fa-solid fa-code-merge"></i>',
+            schema_change_detected: '<i class="fa-solid fa-database"></i>',
+            incident_reported: '<i class="fa-solid fa-triangle-exclamation"></i>',
+            link_dependency: '<i class="fa-solid fa-link"></i>',
+            impact_analysis: '<i class="fa-solid fa-magnifying-glass-chart"></i>',
+            owner_lookup: '<i class="fa-solid fa-user-group"></i>',
+            notify_owners: '<i class="fa-solid fa-bell"></i>',
+            approve_change: '<i class="fa-solid fa-thumbs-up"></i>',
+            run_checks: '<i class="fa-solid fa-clipboard-check"></i>',
+            update_graph: '<i class="fa-solid fa-project-diagram"></i>',
+            webhook: '<i class="fa-solid fa-plug"></i>',
+            import_from_repo: '<i class="fa-solid fa-file-import"></i>'
+        }; return m[k] || '<i class="fa-solid fa-circle-dot"></i>';
+    }
+    function label(n) {
+        const names = {
+            new_service_added: 'New Service Added',
+            pr_merged: 'PR Merged',
+            schema_change_detected: 'Schema Change',
+            incident_reported: 'Incident Reported',
+            link_dependency: 'Link Dependency',
+            impact_analysis: 'Impact Analysis',
+            owner_lookup: 'Owner Lookup',
+            notify_owners: 'Notify Owners',
+            approve_change: 'Approve Change',
+            run_checks: 'Run Checks',
+            update_graph: 'Update Graph',
+            webhook: 'Webhook',
+            import_from_repo: 'Import From Repo'
+        }; return names[n.key] || n.key;
+    }
+    function defaultCfg(key) {
+        if (key === 'webhook') return { url: '', method: 'POST' };
+        if (key === 'approve_change') return { approver: 'Service Owners', sla: 24 };
+        if (key === 'notify_owners') return { channel: '#infra-alerts', email: 'yes' };
+        if (key === 'impact_analysis') return { radius: 1, transitives: 'yes' };
+        if (key === 'run_checks') return { suite: 'smoke' };
+        if (key === 'import_from_repo') return { repo: '', path: 'dependency.yaml' };
+        return {};
+    }
+    function badge(txt, tone) { const m = { emerald: 'bg-emerald-50 text-emerald-700', amber: 'bg-amber-50 text-amber-700', slate: 'bg-slate-100 text-slate-700' }; return `<span class="px-2 py-0.5 rounded-full ${m[tone] || m.slate} text-xs">${txt}</span>`; }
+    function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c])); }
+    function sel(v, exp) { return (String(v || '') === String(exp)) ? 'selected' : ''; }
+</script>
+
+<style>
+    .wf-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .wf-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .wf-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+
+    .wf-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .375rem;
+        border: 1px solid rgb(203, 213, 225);
+        background: white;
+        border-radius: .5rem;
+        padding: .375rem .5rem;
+        font-size: .875rem;
+    }
+
+    .wf-chip:hover {
+        background: #f8fafc;
+    }
+</style>
+{% endblock %}

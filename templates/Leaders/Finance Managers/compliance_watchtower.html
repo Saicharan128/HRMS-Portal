@@ -5,13 +5,21 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-semibold text-slate-800">
-                <i class="fa-solid fa-tower-observation mr-2"></i> Compliance Watchtower
+                <i class="fa-solid fa-shield-halved mr-2"></i> Compliance Watchtower
             </h1>
             <p class="text-slate-600 text-sm">Stay compliant with labor laws and regulations.</p>
         </div>
         <div class="flex items-center gap-2">
-            <button id="newAlertBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+            <button id="newAlertBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-bell mr-1"></i> New Alert
+            </button>
+            <button id="addPolicyBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-shield mr-1"></i> Add Policy
+            </button>
+            <button id="exportBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-download mr-1"></i> Export
             </button>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
@@ -23,280 +31,225 @@
     <!-- Tabs -->
     <div class="mb-6">
         <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="dashTab" class="cw-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-gauge-high mr-1"></i> Dashboard</button>
-            <button id="alertsTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-bell mr-1"></i> Alerts</button>
-            <button id="filingsTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-file-invoice mr-1"></i> Filings</button>
-            <button id="auditsTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-shield-halved mr-1"></i> Audits</button>
-            <button id="policiesTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-scroll mr-1"></i> Policies</button>
-            <button id="registersTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-clipboard-list mr-1"></i> Registers</button>
-            <button id="trainingTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-graduation-cap mr-1"></i> Training</button>
+            <button id="overviewTab" class="cw-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-chart-line mr-1"></i> Overview
+            </button>
+            <button id="rulesTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-gears mr-1"></i> Rules
+            </button>
+            <button id="auditsTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clipboard-check mr-1"></i> Audits
+            </button>
+            <button id="deadlinesTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-calendar-days mr-1"></i> Deadlines
+            </button>
         </div>
     </div>
 
-    <!-- Dashboard -->
-    <section id="dashPanel" class="cw-panel">
+    <!-- Overview -->
+    <section id="overviewPanel" class="cw-panel">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Scorecards -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-traffic-light mr-2"></i>
-                    Risk Snapshot</h3>
-                <ul id="riskSnapshot" class="space-y-2 text-sm"><!-- injected --></ul>
-            </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-calendar-check mr-2"></i>
-                    Upcoming Deadlines (30d)</h3>
-                <ul id="deadlinesList" class="space-y-2 text-sm"><!-- injected --></ul>
-            </div>
+            <!-- Score & Jurisdictions -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-earth-asia mr-2"></i> Country
-                        Coverage</h3>
-                    <select id="entityFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
-                        <option value="all">All Entities</option>
-                        <option value="india_co">India Pvt Ltd</option>
-                        <option value="us_inc">US Inc</option>
-                    </select>
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-gauge-high mr-2"></i> Compliance Score
+                    </h3>
+                    <span id="scoreBadge" class="px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700">Low
+                        Risk</span>
                 </div>
-                <ul id="countryMatrix" class="space-y-2 text-sm"><!-- injected --></ul>
+                <div class="relative h-40">
+                    <canvas id="scoreChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Open Issues</div>
+                        <div id="openIssuesCount" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Upcoming Deadlines (30d)</div>
+                        <div id="deadlineCount" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="mt-5">
+                    <div class="text-sm font-medium text-slate-700 mb-2">Active Jurisdictions</div>
+                    <div id="jurisdictionChips" class="flex flex-wrap gap-2"></div>
+                </div>
             </div>
 
-            <!-- Heatmap & Checks -->
+            <!-- Open Issues -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-triangle-exclamation mr-2"></i> Open Issues
+                    </h3>
+                    <button class="text-sm text-slate-600 hover:text-slate-800" id="ackAllBtn">
+                        <i class="fa-solid fa-check-double mr-1"></i> Acknowledge All
+                    </button>
+                </div>
+                <div id="issuesList" class="space-y-3"></div>
+            </div>
+
+            <!-- Upcoming Deadlines -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-hourglass-half mr-2"></i> Upcoming Deadlines
+                    </h3>
+                    <button id="addDeadlineBtn" class="text-sm text-slate-600 hover:text-slate-800">
+                        <i class="fa-solid fa-plus mr-1"></i> Add
+                    </button>
+                </div>
+                <div id="deadlinesList" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- Risk Matrix & Changes -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-fire-flame-curved mr-2"></i>
-                        Risk Heatmap</h3>
-                    <button id="recalcRisk"
-                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
-                            class="fa-solid fa-rotate mr-1"></i> Recalculate</button>
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-table-cells-large mr-2"></i> Risk Matrix
+                    </h3>
+                    <div class="text-sm text-slate-600" id="riskSummary">0 High • 0 Medium • 0 Low</div>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="heatGrid"><!-- injected --></div>
+                <div class="relative h-56">
+                    <canvas id="riskChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-list-check mr-2"></i> Quick
-                    Checks</h3>
-                <div id="checksList" class="space-y-2 text-sm"><!-- injected --></div>
-                <button id="markAllChecks"
-                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
-                        class="fa-solid fa-check mr-1"></i> Mark All Done</button>
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-arrows-rotate mr-2"></i> Recent Changes
+                </h3>
+                <div id="changesFeed" class="space-y-3"></div>
             </div>
         </div>
     </section>
 
-    <!-- Alerts -->
-    <section id="alertsPanel" class="cw-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between p-4 border-b border-slate-200">
-                <div class="relative w-full md:w-[28rem]">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input id="alertSearch" placeholder="Search alert, jurisdiction, or keyword"
-                        class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
-                    <button id="alertClear"
-                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
+    <!-- Rules -->
+    <section id="rulesPanel" class="cw-panel hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-slate-800">
+                <i class="fa-solid fa-gears mr-2"></i> Rules Engine
+            </h3>
+            <button id="newRuleBtn" class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New Rule
+            </button>
+        </div>
+        <div id="rulesList" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- Audits -->
+    <section id="auditsPanel" class="cw-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-clipboard-check mr-2"></i> Audit Log
+                </h3>
                 <div class="flex items-center gap-2">
-                    <select id="alertFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                    <select id="auditFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
+                        <option value="policy">Policy</option>
+                        <option value="employee">Employee</option>
+                        <option value="payroll">Payroll</option>
                     </select>
-                    <button id="ackAll"
-                        class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm hover:bg-slate-900"><i
-                            class="fa-solid fa-check-double mr-1"></i> Acknowledge All</button>
+                    <button id="exportAuditBtn"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
-                            <th class="py-2 px-4">Alert</th>
-                            <th class="py-2 px-4">Jurisdiction</th>
-                            <th class="py-2 px-4">Severity</th>
-                            <th class="py-2 px-4">Effective</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 pr-4">Time</th>
+                            <th class="py-2 pr-4">Actor</th>
+                            <th class="py-2 pr-4">Action</th>
+                            <th class="py-2 pr-4">Target</th>
+                            <th class="py-2 pr-4">Status</th>
                         </tr>
                     </thead>
-                    <tbody id="alertRows" class="text-slate-800"><!-- injected --></tbody>
+                    <tbody id="auditRows" class="text-slate-800"></tbody>
                 </table>
             </div>
         </div>
     </section>
 
-    <!-- Filings -->
-    <section id="filingsPanel" class="cw-panel hidden">
+    <!-- Deadlines -->
+    <section id="deadlinesPanel" class="cw-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-invoice mr-2"></i>
-                        Statutory Filings</h3>
-                    <div class="flex items-center gap-2">
-                        <select id="filingFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
-                            <option value="all">All</option>
-                            <option value="due_30">Due ≤30d</option>
-                            <option value="overdue">Overdue</option>
-                        </select>
-                        <button id="uploadEvidence"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
-                                class="fa-solid fa-upload mr-1"></i> Evidence</button>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="text-left text-slate-500 border-b">
-                            <tr>
-                                <th class="py-2 px-4">Return</th>
-                                <th class="py-2 px-4">Jurisdiction</th>
-                                <th class="py-2 px-4">Due</th>
-                                <th class="py-2 px-4">Status</th>
-                                <th class="py-2 px-4 w-28"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="filingRows" class="text-slate-800"><!-- injected --></tbody>
-                    </table>
-                </div>
-            </div>
-
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-route mr-2"></i> Filing
-                    Timeline</h3>
-                <ul id="filingTimeline" class="space-y-2 text-sm"><!-- injected --></ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Audits -->
-    <section id="auditsPanel" class="cw-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-clipboard-check mr-2"></i>
-                        Audit Cases</h3>
-                    <button id="newAudit"
-                        class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
-                            class="fa-solid fa-plus mr-1"></i> New</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="text-left text-slate-500 border-b">
-                            <tr>
-                                <th class="py-2 px-4">Case</th>
-                                <th class="py-2 px-4">Scope</th>
-                                <th class="py-2 px-4">Owner</th>
-                                <th class="py-2 px-4">Status</th>
-                                <th class="py-2 px-4 w-28"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="auditRows" class="text-slate-800"><!-- injected --></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-lock mr-2"></i> Evidence
-                    Locker</h3>
-                <ul id="evidenceList" class="space-y-2 text-sm"><!-- injected --></ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Policies -->
-    <section id="policiesPanel" class="cw-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-scroll mr-2"></i> Policy Library
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-calendar-plus mr-2"></i> Add Deadline
                 </h3>
-                <button id="newPolicy" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
-                        class="fa-solid fa-plus mr-1"></i> New</button>
-            </div>
-            <ul id="policyList" class="space-y-3 text-sm"><!-- injected --></ul>
-        </div>
-    </section>
-
-    <!-- Registers -->
-    <section id="registersPanel" class="cw-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-id-card mr-2"></i> Licenses
-                    & Permits</h3>
-                <ul id="licenseList" class="space-y-2 text-sm"><!-- injected --></ul>
-            </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-book mr-2"></i> Registers
-                </h3>
-                <ul id="regList" class="space-y-2 text-sm"><!-- injected --></ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Training -->
-    <section id="trainingPanel" class="cw-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-graduation-cap mr-2"></i>
-                        Mandatory Trainings</h3>
-                    <select id="trainFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
-                        <option value="all">All</option>
-                        <option value="due">Due</option>
-                        <option value="overdue">Overdue</option>
-                        <option value="completed">Completed</option>
+                <div class="space-y-3">
+                    <input id="dlTitle" type="text" placeholder="Title"
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <input id="dlDate" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <select id="dlJurisdiction" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <option value="US-CA">US-CA</option>
+                        <option value="US-NY">US-NY</option>
+                        <option value="IN">IN</option>
+                        <option value="EU">EU</option>
+                        <option value="UK">UK</option>
                     </select>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="text-left text-slate-500 border-b">
-                            <tr>
-                                <th class="py-2 px-4">Course</th>
-                                <th class="py-2 px-4">Audience</th>
-                                <th class="py-2 px-4">Due</th>
-                                <th class="py-2 px-4">Status</th>
-                                <th class="py-2 px-4 w-24"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="trainRows" class="text-slate-800"><!-- injected --></tbody>
-                    </table>
+                    <button id="createDeadline"
+                        class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                        <i class="fa-solid fa-plus mr-1"></i> Create
+                    </button>
                 </div>
             </div>
-
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-bullseye mr-2"></i>
-                    Completion KPI</h3>
-                <canvas id="kpiChart" height="220"></canvas>
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-calendar-days mr-2"></i> All Deadlines
+                    </h3>
+                    <div class="text-sm text-slate-600"><span id="dlCount">0</span> total</div>
+                </div>
+                <div id="allDeadlines" class="space-y-3"></div>
             </div>
         </div>
     </section>
 </div>
 
-<!-- Evidence Modal -->
-<div id="evidenceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<!-- New Rule Modal -->
+<div id="ruleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-slate-800">Upload Evidence</h3>
-                    <button id="closeEvidence" class="text-slate-400 hover:text-slate-600"><i
-                            class="fa-solid fa-times text-xl"></i></button>
+                    <h3 class="text-lg font-semibold text-slate-800">New Rule</h3>
+                    <button id="closeRuleModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
                 </div>
                 <div class="p-6 space-y-4">
-                    <input class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                        placeholder="Title e.g., PF Challan Aug 2025">
-                    <textarea class="w-full rounded-lg border border-slate-300 px-3 py-2" rows="3"
-                        placeholder="Notes (optional)"></textarea>
-                    <div class="flex items-center justify-end gap-2">
-                        <button id="cancelEvidence"
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Trigger</label>
+                        <select id="ruleTrigger" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="new_hire">New Hire</option>
+                            <option value="benefit_change">Benefit Change</option>
+                            <option value="overtime">Overtime Exceeded</option>
+                            <option value="termination">Termination</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Condition</label>
+                        <input id="ruleCondition" type="text" placeholder="e.g., location == 'US-CA'"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Action</label>
+                        <input id="ruleAction" type="text" placeholder="Create task, notify, block change..."
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="cancelRule"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="saveEvidence"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
-                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        <button id="saveRule" class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save Rule
+                        </button>
                     </div>
                 </div>
             </div>
@@ -304,292 +257,270 @@
     </div>
 </div>
 
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <script>
-    /* ------- Mock Data ------- */
-    let RISK = [
-        { k: 'Wage & Hour', lvl: 'medium' }, { k: 'Contractor Classif.', lvl: 'high' },
-        { k: 'Leave & Benefits', lvl: 'low' }, { k: 'Safety/OSH', lvl: 'medium' }
+    // ---- Dummy Data (static) ----
+    const JURISDICTIONS = ['US-CA', 'US-NY', 'US-TX', 'EU', 'IN', 'UK'];
+    const ISSUES = [
+        { id: 1, sev: 'high', title: 'Meal break compliance', j: 'US-CA', due: '2025-09-20' },
+        { id: 2, sev: 'medium', title: 'Overtime policy mismatch', j: 'US-NY', due: '2025-09-25' },
+        { id: 3, sev: 'low', title: 'Missing handbook ack', j: 'IN', due: '2025-10-05' }
     ];
-    let DEADLINES = [
-        { k: 'PF/401k monthly remittance', due: '2025-09-15', j: 'IN' },
-        { k: 'ESIC/Health contribution', due: '2025-09-15', j: 'IN' },
-        { k: '941/Withholding deposit', due: '2025-09-30', j: 'US' }
+    const DEADLINES = [
+        { id: 11, title: 'CA Pay Data Reporting', date: '2025-10-01', j: 'US-CA' },
+        { id: 12, title: 'EU Working Time Report', date: '2025-10-15', j: 'EU' },
+        { id: 13, title: 'PF Registration Audit', date: '2025-09-30', j: 'IN' }
     ];
-    let MATRIX = [
-        { cc: 'IN', name: 'India', coverage: '90%', gaps: 2 },
-        { cc: 'US', name: 'United States', coverage: '85%', gaps: 3 },
-        { cc: 'UK', name: 'United Kingdom', coverage: '100%', gaps: 0 }
+    const CHANGES = [
+        { ts: '2025-09-12 10:05', text: 'US-CA minimum wage update parsed and applied.' },
+        { ts: '2025-09-11 18:22', text: 'EU leave policy clarified for part-time workers.' },
+        { ts: '2025-09-10 09:10', text: 'New NY overtime threshold flagged.' }
     ];
-    let CHECKS = [
-        { id: 1, text: 'Minimum wage tables updated', done: false },
-        { id: 2, text: 'Overtime rules synced to HRIS', done: true },
-        { id: 3, text: 'Leave carryover verified', done: false }
+    let RULES = [
+        { id: 101, name: 'Overtime Alert', enabled: true, trigger: 'overtime', condition: 'hours>40 & location in [US-CA,US-NY]', action: 'Notify HR + block payroll' },
+        { id: 102, name: 'New Hire I-9', enabled: true, trigger: 'new_hire', condition: "location=='US-CA'", action: 'Create checklist + due in 3d' },
+        { id: 103, name: 'Benefits Change Review', enabled: false, trigger: 'benefit_change', condition: 'any', action: 'Legal review ticket' }
     ];
-    let ALERTS = [
-        { id: 'A-901', t: 'Gratuity threshold change', j: 'IN', sev: 'high', eff: '2025-10-01' },
-        { id: 'A-902', t: 'FLSA salary basis increase', j: 'US', sev: 'medium', eff: '2025-12-01' },
-        { id: 'A-903', t: 'Sick-leave expansion', j: 'UK', sev: 'low', eff: '2025-09-20' }
-    ];
-    let FILINGS = [
-        { id: 'F-101', r: 'PF ECR', j: 'IN', due: '2025-09-15', st: 'due' },
-        { id: 'F-102', r: 'ESIC', j: 'IN', due: '2025-09-15', st: 'due' },
-        { id: 'F-201', r: '941 Deposit', j: 'US', due: '2025-09-30', st: 'scheduled' },
-        { id: 'F-301', r: 'Gender Pay Gap', j: 'UK', due: '2026-04-04', st: 'scheduled' }
-    ];
-    let TIMELINE = [
-        { d: '2025-09-10', txt: 'Auto-fill returns generated' },
-        { d: '2025-09-12', txt: 'HR signed-off payroll basis' },
-        { d: '2025-09-15', txt: 'PF/ESIC submissions due' },
-        { d: '2025-09-30', txt: 'US 941 deposit due' }
-    ];
-    let AUDITS = [
-        { id: 'AU-41', scope: 'FLSA Overtime', owner: 'Priya S', st: 'open' },
-        { id: 'AU-42', scope: 'IN Contractor Review', owner: 'Arjun R', st: 'in progress' }
-    ];
-    let EVIDENCE = [
-        { name: 'PF Challan Aug 2025.pdf', at: '2025-09-12' },
-        { name: 'ESIC Receipt Aug 2025.pdf', at: '2025-09-12' }
-    ];
-    let POLICIES = [
-        { name: 'Code of Conduct', ver: 'v3.1', eff: '2025-08-01' },
-        { name: 'Leave Policy (IN)', ver: 'v2.4', eff: '2025-07-15' }
-    ];
-    let LICENSES = [
-        { name: 'Shops & Establishments (BLR)', exp: '2026-03-31', ok: true },
-        { name: 'Professional Tax (KA)', exp: '2026-01-01', ok: true }
-    ];
-    let REGISTERS = [
-        { name: 'Register of Wages', loc: 'IN', status: 'maintained' },
-        { name: 'Accident Register', loc: 'IN', status: 'maintained' }
-    ];
-    let TRAIN = [
-        { course: 'POSH/Anti-harassment', audience: 'All (IN)', due: '2025-09-25', st: 'due' },
-        { course: 'Workplace Safety', audience: 'Ops', due: '2025-09-10', st: 'overdue' },
-        { course: 'Code of Conduct', audience: 'All', due: '2025-08-20', st: 'completed' }
+    let AUDIT = [
+        { time: '2025-09-12 12:31', actor: 'Priya S', action: 'Updated policy', target: 'Overtime Rules (US-CA)', status: 'Success', type: 'policy' },
+        { time: '2025-09-11 16:02', actor: 'System', action: 'Generated alert', target: 'Meal break compliance', status: 'Info', type: 'employee' },
+        { time: '2025-09-09 09:40', actor: 'Alex R', action: 'Exported report', target: 'Pay Data', status: 'Success', type: 'payroll' }
     ];
 
-    /* ------- Helpers ------- */
-    const $ = (id) => document.getElementById(id);
-    const pill = (t) => t === 'high' ? 'bg-red-50 text-red-700' : t === 'medium' ? 'bg-amber-50 text-amber-700' : t === 'low' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700';
-    function fmtDate(d) { return d; }
+    // ---- Panels ----
+    const panels = {
+        overview: document.getElementById('overviewPanel'),
+        rules: document.getElementById('rulesPanel'),
+        audits: document.getElementById('auditsPanel'),
+        deadlines: document.getElementById('deadlinesPanel')
+    };
 
-    /* ------- Init ------- */
+    // ---- Init ----
     document.addEventListener('DOMContentLoaded', () => {
-        // Tabs
-        document.querySelectorAll('.cw-tab').forEach(b => {
-            b.addEventListener('click', (e) => {
-                document.querySelectorAll('.cw-tab').forEach(x => x.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                const name = e.currentTarget.id.replace('Tab', '');
-                document.querySelectorAll('.cw-panel').forEach(p => p.classList.add('hidden'));
-                document.getElementById(name + 'Panel').classList.remove('hidden');
-                if (name === 'training') { ensureCharts(); drawCharts(); }
-            });
-        });
-
-        // Dashboard
-        $('entityFilter').addEventListener('change', renderMatrix);
-        $('recalcRisk').addEventListener('click', renderHeatmap);
-        $('markAllChecks').addEventListener('click', () => { CHECKS = CHECKS.map(c => ({ ...c, done: true })); renderChecks(); });
-
-        // Alerts
-        $('alertFilter').addEventListener('change', renderAlerts);
-        const as = $('alertSearch'), ac = $('alertClear');
-        as.addEventListener('input', () => { ac.classList.toggle('hidden', !as.value.trim()); renderAlerts(); });
-        ac.addEventListener('click', () => { as.value = ''; ac.classList.add('hidden'); renderAlerts(); });
-        $('ackAll').addEventListener('click', () => alert('✅ All alerts acknowledged'));
-
-        // Filings
-        $('filingFilter').addEventListener('change', renderFilings);
-        $('uploadEvidence').addEventListener('click', openEvidence);
-        $('closeEvidence').addEventListener('click', closeEvidence);
-        $('cancelEvidence').addEventListener('click', closeEvidence);
-        $('saveEvidence').addEventListener('click', () => { EVIDENCE.push({ name: 'Evidence_' + Date.now() + '.pdf', at: new Date().toISOString().slice(0, 10) }); closeEvidence(); renderEvidence(); });
-
-        // Audits
-        $('newAudit').addEventListener('click', () => { AUDITS.push({ id: 'AU-' + Date.now(), scope: 'Custom', owner: 'You', st: 'open' }); renderAudits(); });
-
-        // Training
-        $('trainFilter').addEventListener('change', renderTraining);
-
-        // Initial renders
-        renderRisk(); renderDeadlines(); renderMatrix(); renderHeatmap(); renderChecks();
-        renderAlerts(); renderFilings(); renderTimeline(); renderAudits(); renderEvidence(); renderPolicies();
-        renderLicenses(); renderRegisters(); renderTraining();
+        setupTabs();
+        wireButtons();
+        renderOverview();
+        renderRules();
+        renderAudits();
+        renderDeadlines();
+        drawScore();
+        drawRisk();
     });
 
-    /* ------- Dashboard Renders ------- */
-    function renderRisk() {
-        $('riskSnapshot').innerHTML = RISK.map(r => `
-    <li class="flex items-center justify-between p-2 rounded ${pill(r.lvl)}">
-      <span>${r.k}</span><span class="text-xs capitalize">${r.lvl}</span>
-    </li>`).join('');
-    }
-    function renderDeadlines() {
-        $('deadlinesList').innerHTML = DEADLINES.map(d => `
-    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
-      <span>${d.k} • <span class="text-slate-500">${d.j}</span></span>
-      <span class="text-xs">${fmtDate(d.due)}</span>
-    </li>`).join('') || `<li class="text-slate-500">No deadlines</li>`;
-    }
-    function renderMatrix() {
-        const data = MATRIX; // could filter by entity
-        $('countryMatrix').innerHTML = data.map(m => `
-    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
-      <span>${m.name}</span>
-      <span class="text-xs text-slate-600">${m.coverage} • Gaps: ${m.gaps}</span>
-    </li>`).join('');
-    }
-    function renderHeatmap() {
-        const cells = [
-            { k: 'Wage & Hour', lvl: 'medium' }, { k: 'OT/Rest', lvl: 'high' }, { k: 'Leave', lvl: 'low' }, { k: 'Contractor', lvl: 'high' },
-            { k: 'Safety', lvl: 'medium' }, { k: 'Privacy', lvl: 'low' }, { k: 'Taxes', lvl: 'medium' }, { k: 'Benefits', lvl: 'low' }
-        ];
-        $('heatGrid').innerHTML = cells.map(c => `
-    <div class="p-3 rounded border border-slate-200 ${pill(c.lvl)}">
-      <div class="text-sm font-medium">${c.k}</div>
-      <div class="text-xs capitalize">${c.lvl}</div>
-    </div>`).join('');
-    }
-    function renderChecks() {
-        $('checksList').innerHTML = CHECKS.map(c => `
-    <div class="flex items-center justify-between p-2 rounded bg-slate-50">
-      <label class="flex items-center gap-2"><input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleCheck(${c.id}, this.checked)"> <span>${c.text}</span></label>
-      ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
-    </div>`).join('');
-    }
-    function toggleCheck(id, on) { const x = CHECKS.find(c => c.id === id); if (x) { x.done = on; renderChecks(); } }
-
-    /* ------- Alerts ------- */
-    function renderAlerts() {
-        const f = $('alertFilter').value;
-        const q = ($('alertSearch').value || '').toLowerCase();
-        const data = ALERTS.filter(a => (f === 'all' || a.sev === f) && (!q || [a.t, a.j, a.id].some(x => String(x).toLowerCase().includes(q))));
-        $('alertRows').innerHTML = data.map(a => `
-    <tr class="border-b last:border-0">
-      <td class="py-2 px-4 font-medium">${a.t}</td>
-      <td class="py-2 px-4">${a.j}</td>
-      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill(a.sev)} capitalize">${a.sev}</span></td>
-      <td class="py-2 px-4">${fmtDate(a.eff)}</td>
-      <td class="py-2 px-4 text-right">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Acknowledged')">Ack</button>
-      </td>
-    </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No alerts</td></tr>`;
-    }
-
-    /* ------- Filings ------- */
-    function renderFilings() {
-        const f = $('filingFilter').value;
-        const now = new Date();
-        const data = FILINGS.filter(x => {
-            if (f === 'due_30') return (new Date(x.due) - now) / (1000 * 60 * 60 * 24) <= 30 && (new Date(x.due) - now) >= 0;
-            if (f === 'overdue') return new Date(x.due) < now;
-            return true;
+    // ---- Tabs ----
+    function setupTabs() {
+        document.querySelectorAll('.cw-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.cw-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                panels[name].classList.remove('hidden');
+            });
         });
-        $('filingRows').innerHTML = data.map(x => {
-            const tone = new Date(x.due) < now ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700';
-            const tag = x.st === 'scheduled' ? 'bg-slate-100 text-slate-700' : tone;
-            return `
-      <tr class="border-b last:border-0">
-        <td class="py-2 px-4 font-medium">${x.r}</td>
-        <td class="py-2 px-4">${x.j}</td>
-        <td class="py-2 px-4">${fmtDate(x.due)}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${tag}">${x.st}</span></td>
-        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Mark filed')">Mark Filed</button></td>
-      </tr>`;
-        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No filings</td></tr>`;
-    }
-    function renderTimeline() {
-        $('filingTimeline').innerHTML = TIMELINE.map(t => `
-    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
-      <span>${t.txt}</span><span class="text-xs">${t.d}</span>
-    </li>`).join('');
     }
 
-    /* ------- Audits ------- */
+    // ---- Buttons / Alerts ----
+    function wireButtons() {
+        document.getElementById('newAlertBtn').addEventListener('click', () => alert('🔔 New alert created (demo)'));
+        document.getElementById('addPolicyBtn').addEventListener('click', () => alert('📄 Policy added (demo)'));
+        document.getElementById('exportBtn').addEventListener('click', () => alert('✅ Export started'));
+        document.getElementById('exportAuditBtn').addEventListener('click', () => alert('✅ Audit CSV queued'));
+        document.getElementById('ackAllBtn').addEventListener('click', () => {
+            document.querySelectorAll('.issue-row').forEach(r => r.classList.add('opacity-60'));
+            alert('✅ All issues acknowledged');
+        });
+        document.getElementById('addDeadlineBtn').addEventListener('click', () => document.getElementById('deadlinesTab').click());
+        document.getElementById('createDeadline').addEventListener('click', createDeadline);
+        document.getElementById('newRuleBtn').addEventListener('click', openRuleModal);
+        document.getElementById('closeRuleModal').addEventListener('click', closeRuleModal);
+        document.getElementById('cancelRule').addEventListener('click', closeRuleModal);
+        document.getElementById('saveRule').addEventListener('click', saveRule);
+    }
+
+    // ---- Overview Rendering ----
+    function renderOverview() {
+        document.getElementById('openIssuesCount').textContent = ISSUES.length;
+        document.getElementById('deadlineCount').textContent = DEADLINES.filter(d => daysFromNow(d.date) <= 30).length;
+        document.getElementById('jurisdictionChips').innerHTML = JURISDICTIONS.map(j => chip(j)).join('');
+        document.getElementById('issuesList').innerHTML =
+            ISSUES.map(i => issueRow(i)).join('') || emptyState('All clear! No open issues.');
+        document.getElementById('deadlinesList').innerHTML =
+            DEADLINES.slice().sort((a, b) => a.date.localeCompare(b.date)).map(d => deadlineRow(d, true)).join('') ||
+            emptyState('No upcoming deadlines.');
+        document.getElementById('changesFeed').innerHTML =
+            CHANGES.map(c => `<div class="rounded-lg bg-slate-50 p-3">
+        <div class="text-xs text-slate-500">${c.ts}</div>
+        <div class="text-sm text-slate-800">${c.text}</div>
+      </div>`).join('');
+        const hi = ISSUES.filter(i => i.sev === 'high').length;
+        const md = ISSUES.filter(i => i.sev === 'medium').length;
+        const lo = ISSUES.filter(i => i.sev === 'low').length;
+        document.getElementById('riskSummary').textContent = `${hi} High • ${md} Medium • ${lo} Low`;
+    }
+
+    // ---- Charts ----
+    function drawScore() {
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        const pct = Math.max(0, Math.min(100, 92 - ISSUES.length * 6));
+        const color = pct >= 85 ? '#10b981' : pct >= 70 ? '#f59e0b' : '#ef4444';
+        document.getElementById('scoreBadge').textContent =
+            pct >= 85 ? 'Low Risk' : pct >= 70 ? 'Moderate Risk' : 'High Risk';
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: { datasets: [{ data: [pct, 100 - pct], backgroundColor: [color, '#e5e7eb'], borderWidth: 0 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, resizeDelay: 200,
+                cutout: '70%',
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                animation: false
+            }
+        });
+    }
+
+    function drawRisk() {
+        const ctx = document.getElementById('riskChart').getContext('2d');
+        const pts = ISSUES.map(i => ({ x: sevX(i.sev), y: daysFromNow(i.due), r: i.sev === 'high' ? 8 : i.sev === 'medium' ? 6 : 5, label: i.title }));
+        new Chart(ctx, {
+            type: 'scatter',
+            data: { datasets: [{ data: pts, pointRadius: pts.map(p => p.r) }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, resizeDelay: 200,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.raw.label} • ${c.raw.y}d` } } },
+                scales: {
+                    x: { title: { display: true, text: 'Severity (Low → High)' }, min: 1, max: 3, ticks: { stepSize: 1, callback: v => ({ 1: 'Low', 2: 'Med', 3: 'High' })[v] } },
+                    y: { title: { display: true, text: 'Days until due' }, beginAtZero: true }
+                }
+            }
+        });
+    }
+    function sevX(s) { return s === 'low' ? 1 : s === 'medium' ? 2 : 3; }
+
+    // ---- Rules ----
+    function renderRules() {
+        const wrap = document.getElementById('rulesList');
+        wrap.innerHTML = RULES.map(r => `
+      <div class="rounded-xl border border-slate-200 bg-white p-4 flex items-start justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-slate-800">${r.name}</span>
+            ${badge(r.enabled ? 'Enabled' : 'Disabled', r.enabled ? 'emerald' : 'slate')}
+          </div>
+          <div class="text-sm text-slate-600 mt-1"><b>Trigger:</b> ${labelTrigger(r.trigger)}</div>
+          <div class="text-sm text-slate-600"><b>Condition:</b> ${r.condition}</div>
+          <div class="text-sm text-slate-600"><b>Action:</b> ${r.action}</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="toggleRule(${r.id})">
+            <i class="fa-solid ${r.enabled ? 'fa-pause' : 'fa-play'} mr-1"></i> ${r.enabled ? 'Disable' : 'Enable'}
+          </button>
+          <button class="px-3 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 text-sm" onclick="deleteRule(${r.id})">
+            <i class="fa-solid fa-trash mr-1"></i> Delete
+          </button>
+        </div>
+      </div>
+    `).join('') || emptyState('No rules yet.');
+    }
+    function openRuleModal() { document.getElementById('ruleModal').classList.remove('hidden'); }
+    function closeRuleModal() { document.getElementById('ruleModal').classList.add('hidden'); }
+    function saveRule() {
+        const t = document.getElementById('ruleTrigger').value;
+        const c = (document.getElementById('ruleCondition').value || 'any').trim();
+        const a = (document.getElementById('ruleAction').value || 'Notify').trim();
+        const name = `${labelTrigger(t)} Rule`;
+        RULES.push({ id: Date.now(), name, enabled: true, trigger: t, condition: c, action: a });
+        closeRuleModal(); renderRules(); alert('✅ Rule saved');
+    }
+    function toggleRule(id) { const r = RULES.find(x => x.id === id); if (r) { r.enabled = !r.enabled; renderRules(); } }
+    function deleteRule(id) { RULES = RULES.filter(x => x.id !== id); renderRules(); }
+    function labelTrigger(t) { return ({ new_hire: 'New Hire', benefit_change: 'Benefit Change', overtime: 'Overtime Exceeded', termination: 'Termination' })[t] || t; }
+
+    // ---- Audits ----
     function renderAudits() {
-        $('auditRows').innerHTML = AUDITS.map(a => {
-            const tone = a.st === 'open' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700';
-            return `
+        const rows = document.getElementById('auditRows');
+        const render = data => rows.innerHTML = data.map(a => `
       <tr class="border-b last:border-0">
-        <td class="py-2 px-4 font-medium">${a.id}</td>
-        <td class="py-2 px-4">${a.scope}</td>
-        <td class="py-2 px-4">${a.owner}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${tone} capitalize">${a.st}</span></td>
-        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Audit details')">Details</button></td>
-      </tr>`;
-        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No audits</td></tr>`;
-    }
-    function renderEvidence() {
-        $('evidenceList').innerHTML = EVIDENCE.map(e => `
-    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
-      <span>${e.name}</span><span class="text-xs">${e.at}</span>
-    </li>`).join('') || `<li class="text-slate-500">No evidence</li>`;
-    }
-    function openEvidence() { $('evidenceModal').classList.remove('hidden'); }
-    function closeEvidence() { $('evidenceModal').classList.add('hidden'); }
-
-    /* ------- Policies ------- */
-    function renderPolicies() {
-        $('policyList').innerHTML = POLICIES.map(p => `
-    <li class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-      <div><div class="font-medium text-slate-800">${p.name}</div><div class="text-xs text-slate-600">${p.ver} • Effective ${p.eff}</div></div>
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Open policy')">Open</button>
-    </li>`).join('');
+        <td class="py-2 pr-4 text-slate-600">${a.time}</td>
+        <td class="py-2 pr-4">${a.actor}</td>
+        <td class="py-2 pr-4">${a.action}</td>
+        <td class="py-2 pr-4">${a.target}</td>
+        <td class="py-2 pr-4">${statusBadge(a.status)}</td>
+      </tr>`).join('');
+        render(AUDIT);
+        document.getElementById('auditFilter').addEventListener('change', (e) => {
+            const v = e.target.value;
+            render(v === 'all' ? AUDIT : AUDIT.filter(x => x.type === v));
+        });
     }
 
-    /* ------- Registers ------- */
-    function renderLicenses() {
-        $('licenseList').innerHTML = LICENSES.map(l => `
-    <li class="flex items-center justify-between p-2 rounded ${l.ok ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
-      <span>${l.name}</span><span class="text-xs">Expires ${l.exp}</span>
-    </li>`).join('');
+    // ---- Deadlines ----
+    function renderDeadlines() {
+        const list = document.getElementById('allDeadlines');
+        list.innerHTML = DEADLINES.slice().sort((a, b) => a.date.localeCompare(b.date))
+            .map(d => deadlineRow(d, false)).join('') || emptyState('No deadlines recorded.');
+        document.getElementById('dlCount').textContent = DEADLINES.length;
     }
-    function renderRegisters() {
-        $('regList').innerHTML = REGISTERS.map(r => `
-    <li class="flex items-center justify-between p-2 rounded bg-slate-50">
-      <span>${r.name} (${r.loc})</span><span class="text-xs capitalize">${r.status}</span>
-    </li>`).join('');
-    }
-
-    /* ------- Training ------- */
-    function renderTraining() {
-        const f = $('trainFilter').value;
-        const data = f === 'all' ? TRAIN : TRAIN.filter(t => t.st === f);
-        $('trainRows').innerHTML = data.map(t => {
-            const tone = t.st === 'completed' ? 'bg-emerald-50 text-emerald-700' : t.st === 'overdue' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700';
-            return `
-      <tr class="border-b last:border-0">
-        <td class="py-2 px-4 font-medium">${t.course}</td>
-        <td class="py-2 px-4">${t.audience}</td>
-        <td class="py-2 px-4">${t.due}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${tone} capitalize">${t.st}</span></td>
-        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Send reminder')">Remind</button></td>
-      </tr>`;
-        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No trainings</td></tr>`;
+    function createDeadline() {
+        const title = (document.getElementById('dlTitle').value || '').trim();
+        const date = document.getElementById('dlDate').value;
+        const j = document.getElementById('dlJurisdiction').value;
+        if (!title || !date) { alert('❌ Title and date required'); return; }
+        DEADLINES.push({ id: Date.now(), title, date, j });
+        document.getElementById('dlTitle').value = ''; document.getElementById('dlDate').value = '';
+        renderDeadlines(); renderOverview(); drawRisk(); alert('✅ Deadline added');
     }
 
-    /* ------- Charts (Training KPI) ------- */
-    let chartLoaded = false, kpiC;
-    function ensureCharts() {
-        if (typeof Chart !== 'undefined') { chartLoaded = true; return; }
-        if (chartLoaded) return;
-        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        s.onload = () => { chartLoaded = true; drawCharts(); };
-        document.head.appendChild(s);
+    // ---- UI helpers ----
+    function chip(txt) { return `<span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">${txt}</span>`; }
+    function badge(txt, tone) { const m = { emerald: 'bg-emerald-50 text-emerald-700', slate: 'bg-slate-100 text-slate-700', amber: 'bg-amber-50 text-amber-700', red: 'bg-red-50 text-red-700' }; return `<span class="px-2 py-0.5 rounded-full ${m[tone] || m.slate} text-xs">${txt}</span>`; }
+    function statusBadge(s) { const c = s === 'Success' ? 'emerald' : s === 'Info' ? 'amber' : 'red'; return badge(s, c); }
+    function issueRow(i) {
+        const clr = i.sev === 'high' ? 'red' : i.sev === 'medium' ? 'amber' : 'slate';
+        return `
+      <div class="issue-row flex items-start justify-between p-3 rounded-lg bg-slate-50">
+        <div>
+          <div class="flex items-center gap-2">
+            ${badge(i.sev.toUpperCase(), clr)}
+            <span class="font-medium text-slate-800">${i.title}</span>
+          </div>
+          <div class="text-xs text-slate-600 mt-1">${i.j} • Due in ${daysFromNow(i.due)} days</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="snoozeIssue(${i.id})">
+            <i class="fa-solid fa-clock mr-1"></i> Snooze
+          </button>
+          <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="resolveIssue(${i.id})">
+            <i class="fa-solid fa-check mr-1"></i> Resolve
+          </button>
+        </div>
+      </div>`;
     }
-    function drawCharts() {
-        const ctx = document.getElementById('kpiChart').getContext('2d'); if (!ctx) return;
-        kpiC && kpiC.destroy();
-        const counts = { completed: TRAIN.filter(t => t.st === 'completed').length, due: TRAIN.filter(t => t.st === 'due').length, overdue: TRAIN.filter(t => t.st === 'overdue').length };
-        kpiC = new Chart(ctx, { type: 'pie', data: { labels: ['Completed', 'Due', 'Overdue'], datasets: [{ data: [counts.completed, counts.due, counts.overdue], borderWidth: 2, borderColor: '#fff', backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+    function deadlineRow(d, compact) {
+        const warn = daysFromNow(d.date) <= 7 ? 'bg-amber-50' : 'bg-slate-50';
+        return `
+      <div class="flex items-start justify-between p-3 rounded-lg ${warn}">
+        <div>
+          <div class="font-medium text-slate-800">${d.title}</div>
+          <div class="text-xs text-slate-600">${d.j} • ${d.date}${compact ? '' : ' • Due in ' + daysFromNow(d.date) + ' days'}</div>
+        </div>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="removeDeadline(${d.id})">
+          <i class="fa-solid fa-xmark mr-1"></i> Remove
+        </button>
+      </div>`;
     }
+    function emptyState(msg) { return `<div class="text-slate-500 text-center py-6">${msg}</div>`; }
+    function daysFromNow(dateStr) { const d = new Date(dateStr), now = new Date(); return Math.max(0, Math.ceil((d - now) / (1000 * 60 * 60 * 24))); }
+    function snoozeIssue(id) { alert('⏰ Snoozed 7 days (demo)'); }
+    function resolveIssue(id) { const i = ISSUES.findIndex(x => x.id === id); if (i > -1) { ISSUES.splice(i, 1); renderOverview(); drawScore(); drawRisk(); } }
+    function removeDeadline(id) { const i = DEADLINES.findIndex(x => x.id === id); if (i > -1) { DEADLINES.splice(i, 1); renderDeadlines(); renderOverview(); drawRisk(); } }
 </script>
 
 <style>
     .cw-tab.active {
         background-color: #1e293b;
-        color: white;
+        color: #fff;
     }
 
     .cw-tab:not(.active) {

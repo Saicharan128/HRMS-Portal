@@ -1,0 +1,589 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-file-shield mr-2"></i> Form 16 Publishing
+            </h1>
+            <p class="text-slate-600 text-sm">Generate, approve, and publish Form 16.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btnGenerate" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-gears mr-1"></i> Generate Now
+            </button>
+            <button id="btnApprove" class="px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm">
+                <i class="fa-solid fa-check-double mr-1"></i> Approve Selected
+            </button>
+            <button id="btnPublish" class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                <i class="fa-solid fa-paper-plane mr-1"></i> Publish Selected
+            </button>
+            <button id="btnExport"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-arrow-down mr-1"></i> Export Logs
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab" class="pp-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-gauge-high mr-1"></i> Overview
+            </button>
+            <button id="queueTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-list-check mr-1"></i> Queue
+            </button>
+            <button id="templatesTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-file-code mr-1"></i> Templates
+            </button>
+            <button id="historyTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
+            </button>
+            <button id="settingsTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-gear mr-1"></i> Settings
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overviewPanel" class="pp-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- KPIs -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-calendar-day mr-2"></i> Current AY
+                    </h3>
+                    <span id="cycleBadge" class="px-2 py-1 text-xs rounded bg-amber-50 text-amber-700">Draft</span>
+                </div>
+                <div class="grid grid-cols-5 gap-3">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Employees</div>
+                        <div id="kpiTotal" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Generated</div>
+                        <div id="kpiGen" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Approved</div>
+                        <div id="kpiApp" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Published</div>
+                        <div id="kpiPub" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Failed</div>
+                        <div id="kpiFail" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="relative h-40 mt-4">
+                    <canvas id="progressChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div class="mt-4 flex items-center gap-2">
+                    <select id="cyclePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                        <option>AY 2025–26</option>
+                        <option>AY 2024–25</option>
+                        <option>AY 2023–24</option>
+                    </select>
+                    <button id="btnDryRun"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-vial mr-1"></i> Dry Run
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mix -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-chart-pie mr-2"></i> Status Mix
+                    </h3>
+                </div>
+                <div class="relative h-40">
+                    <canvas id="mixChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div id="mixLegend" class="mt-3 text-sm text-slate-700"></div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-3">
+                    <i class="fa-solid fa-bolt mr-2"></i> Quick Actions
+                </h3>
+                <div class="space-y-3">
+                    <button id="btnPreview"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-eye mr-2"></i> Preview sample Form 16
+                    </button>
+                    <button id="btnNotify"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-bell mr-2"></i> Send publish notification
+                    </button>
+                    <button id="btnRollback"
+                        class="w-full px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-left">
+                        <i class="fa-solid fa-rotate-left mr-2"></i> Rollback last publish
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Queue -->
+    <section id="queuePanel" class="pp-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-list-check mr-2"></i> Generation Queue — AY 2025–26
+                </h3>
+                <div class="flex items-center gap-2">
+                    <input id="searchInput" type="text" placeholder="Search name or status..."
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                    <select id="statusFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="draft">Draft</option>
+                        <option value="generated">Generated</option>
+                        <option value="approved">Approved</option>
+                        <option value="published">Published</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4"><input type="checkbox" id="chkAll"></th>
+                            <th class="py-2 pr-4">Employee</th>
+                            <th class="py-2 pr-4">Dept</th>
+                            <th class="py-2 pr-4">PAN (last4)</th>
+                            <th class="py-2 pr-4">Status</th>
+                            <th class="py-2 pr-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="queueRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Templates -->
+    <section id="templatesPanel" class="pp-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-file-code mr-2"></i> Templates
+                    </h3>
+                    <button id="btnNewTpl"
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                        <i class="fa-solid fa-plus mr-1"></i> New
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 pr-4">Name</th>
+                                <th class="py-2 pr-4">Paper</th>
+                                <th class="py-2 pr-4">Locale</th>
+                                <th class="py-2 pr-4">Status</th>
+                                <th class="py-2 pr-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tplRows" class="text-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-circle-info mr-2"></i> Tips
+                </h3>
+                <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
+                    <li>Include employer TAN, PAN, and address.</li>
+                    <li>Show Part A (TRACES) & Part B (salary details).</li>
+                    <li>Embed QR code or verifiable hash (demo).</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- History -->
+    <section id="historyPanel" class="pp-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-table mr-2"></i> Publish History
+                </h3>
+                <div class="text-sm text-slate-600">Last 10 runs</div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Time</th>
+                            <th class="py-2 pr-4">AY</th>
+                            <th class="py-2 pr-4">Generated</th>
+                            <th class="py-2 pr-4">Approved</th>
+                            <th class="py-2 pr-4">Published</th>
+                            <th class="py-2 pr-4">Failed</th>
+                            <th class="py-2 pr-4">By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="histRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settingsPanel" class="pp-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-envelope mr-2"></i> Delivery
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center gap-2"><input id="stEmail" type="checkbox" checked> Email PDF to
+                        employee</label>
+                    <label class="flex items-center gap-2"><input id="stPortal" type="checkbox" checked> Publish to
+                        self-service portal</label>
+                    <label class="flex items-center gap-2"><input id="stLock" type="checkbox"> Lock after
+                        publish</label>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-shield-halved mr-2"></i> Security
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center gap-2"><input id="stPwd" type="checkbox" checked> PDF password
+                        protect (DOB+PAN last4)</label>
+                    <label class="flex items-center gap-2"><input id="stWater" type="checkbox"> Watermark
+                        “Confidential”</label>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-clock mr-2"></i> Scheduling
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="block">Publish on:
+                        <input id="stTime" type="datetime-local"
+                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </label>
+                    <button id="stSave"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm mt-2">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Generate Modal -->
+<div id="genModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Generate Form 16</h3>
+                    <button id="closeGenModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4 text-sm">
+                    <label class="flex items-center gap-2"><input id="optRecalc" type="checkbox" checked> Recalculate
+                        tax totals</label>
+                    <label class="flex items-center gap-2"><input id="optSkipPub" type="checkbox"> Generate only (don’t
+                        publish)</label>
+                    <label class="flex items-center gap-2"><input id="optNotify" type="checkbox" checked> Prepare
+                        notification emails</label>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="cancelGen"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="runGen" class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                            <i class="fa-solid fa-play mr-1"></i> Run
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+    // ---- Demo Data ----
+    const QUEUE = [
+        { id: 1, name: 'Ananya Rao', dept: 'Engineering', pan4: '3ZP9', status: 'generated' },
+        { id: 2, name: 'Rohit Mehta', dept: 'Engineering', pan4: '7KQ2', status: 'published' },
+        { id: 3, name: 'Sara Khan', dept: 'Finance', pan4: '1AB4', status: 'draft' },
+        { id: 4, name: 'Vikram S', dept: 'Sales', pan4: '5LM8', status: 'failed' },
+        { id: 5, name: 'Priya N', dept: 'HR', pan4: '9RT6', status: 'approved' },
+        { id: 6, name: 'Aditya J', dept: 'Support', pan4: '2WX1', status: 'draft' }
+    ];
+    const TEMPLATES = [
+        { id: 101, name: 'Form 16 - Part B (A4)', paper: 'A4', locale: 'en-IN', status: 'Active' },
+        { id: 102, name: 'Form 16 - Compact', paper: 'A4', locale: 'en-IN', status: 'Inactive' }
+    ];
+    const HISTORY = [
+        { ts: '2025-09-10 18:30', ay: 'AY 2024–25', gen: 54, app: 54, pub: 53, fail: 1, by: 'System' },
+        { ts: '2025-08-10 18:25', ay: 'AY 2023–24', gen: 53, app: 53, pub: 53, fail: 0, by: 'TaxBot' },
+        { ts: '2025-07-10 18:20', ay: 'AY 2022–23', gen: 52, app: 52, pub: 52, fail: 0, by: 'TaxBot' }
+    ];
+
+    // ---- Panels/Tabs ----
+    const panels = {
+        overview: document.getElementById('overviewPanel'),
+        queue: document.getElementById('queuePanel'),
+        templates: document.getElementById('templatesPanel'),
+        history: document.getElementById('historyPanel'),
+        settings: document.getElementById('settingsPanel')
+    };
+
+    // ---- Charts refs ----
+    let _progressChart, _mixChart;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTabs();
+        wireButtons();
+        renderKPIs();
+        drawProgress();
+        drawMix();
+        renderQueue();
+        renderTemplates();
+        renderHistory();
+    });
+
+    function setupTabs() {
+        document.querySelectorAll('.pp-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.pp-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                panels[name].classList.remove('hidden');
+            });
+        });
+    }
+
+    function wireButtons() {
+        document.getElementById('btnGenerate').addEventListener('click', openGen);
+        document.getElementById('closeGenModal').addEventListener('click', closeGen);
+        document.getElementById('cancelGen').addEventListener('click', closeGen);
+        document.getElementById('runGen').addEventListener('click', runGeneration);
+
+        document.getElementById('btnApprove').addEventListener('click', approveSelected);
+        document.getElementById('btnPublish').addEventListener('click', publishSelected);
+        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Logs exported (demo)'));
+        document.getElementById('btnDryRun').addEventListener('click', () => alert('🧪 Dry run complete (demo)'));
+        document.getElementById('btnPreview').addEventListener('click', () => alert('👀 Sample Form 16 opened (demo)'));
+        document.getElementById('btnNotify').addEventListener('click', () => alert('📧 Notifications sent (demo)'));
+        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Last publish rolled back (demo)'));
+        document.getElementById('cyclePicker').addEventListener('change', () => alert('🔁 Switched AY (demo)'));
+
+        document.getElementById('searchInput').addEventListener('input', renderQueue);
+        document.getElementById('statusFilter').addEventListener('change', renderQueue);
+        document.getElementById('chkAll').addEventListener('change', toggleAll);
+        document.getElementById('btnNewTpl').addEventListener('click', () => alert('🧩 New template (demo)'));
+        document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved'));
+    }
+
+    // ---- Overview/KPIs ----
+    function renderKPIs() {
+        const total = QUEUE.length;
+        const gen = QUEUE.filter(q => q.status === 'generated').length;
+        const app = QUEUE.filter(q => q.status === 'approved').length;
+        const pub = QUEUE.filter(q => q.status === 'published').length;
+        const fail = QUEUE.filter(q => q.status === 'failed').length;
+        document.getElementById('kpiTotal').textContent = total;
+        document.getElementById('kpiGen').textContent = gen;
+        document.getElementById('kpiApp').textContent = app;
+        document.getElementById('kpiPub').textContent = pub;
+        document.getElementById('kpiFail').textContent = fail;
+        const badge = document.getElementById('cycleBadge');
+        const allDone = pub === total && total > 0;
+        const inFlight = gen + app + pub > 0 && !allDone;
+        badge.textContent = allDone ? 'Published' : (inFlight ? 'In Progress' : 'Draft');
+        badge.className = 'px-2 py-1 text-xs rounded ' + (allDone ? 'bg-emerald-50 text-emerald-700' : (inFlight ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700'));
+    }
+
+    function drawProgress() {
+        const gen = QUEUE.filter(q => q.status === 'generated').length;
+        const app = QUEUE.filter(q => q.status === 'approved').length;
+        const pub = QUEUE.filter(q => q.status === 'published').length;
+        const fail = QUEUE.filter(q => q.status === 'failed').length;
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        if (_progressChart) _progressChart.destroy();
+        _progressChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['Generated', 'Approved', 'Published', 'Failed'], datasets: [{ label: 'Count', data: [gen, app, pub, fail] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+    }
+
+    function drawMix() {
+        const counts = {
+            draft: QUEUE.filter(q => q.status === 'draft').length,
+            generated: QUEUE.filter(q => q.status === 'generated').length,
+            approved: QUEUE.filter(q => q.status === 'approved').length,
+            published: QUEUE.filter(q => q.status === 'published').length,
+            failed: QUEUE.filter(q => q.status === 'failed').length
+        };
+        const ctx = document.getElementById('mixChart').getContext('2d');
+        if (_mixChart) _mixChart.destroy();
+        _mixChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts) }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } }, animation: false }
+        });
+        document.getElementById('mixLegend').innerHTML =
+            Object.entries(counts).map(([k, v]) => `<div class="flex items-center justify-between text-sm"><span class="capitalize">${k}</span><span>${v}</span></div>`).join('');
+    }
+
+    // ---- Queue ----
+    function renderQueue() {
+        const q = (document.getElementById('searchInput').value || '').toLowerCase();
+        const st = document.getElementById('statusFilter').value;
+        const rows = QUEUE
+            .filter(r => (st === 'all' ? true : r.status === st))
+            .filter(r => r.name.toLowerCase().includes(q) || r.status.toLowerCase().includes(q) || (r.pan4 || '').toLowerCase().includes(q))
+            .slice().sort((a, b) => a.name.localeCompare(b.name));
+        document.getElementById('queueRows').innerHTML = rows.map(rowQueue).join('') ||
+            `<tr><td colspan="6" class="py-6 text-center text-slate-500">No records.</td></tr>`;
+    }
+    function rowQueue(r) {
+        return `<tr class="border-b last:border-0">
+      <td class="py-2 pr-4"><input type="checkbox" class="rowChk" data-id="${r.id}" ${r.status === 'published' ? 'disabled' : ''}></td>
+      <td class="py-2 pr-4">${r.name}</td>
+      <td class="py-2 pr-4">${r.dept}</td>
+      <td class="py-2 pr-4">${r.pan4 || '—'}</td>
+      <td class="py-2 pr-4">${badgePlain(r.status)}</td>
+      <td class="py-2 pr-4">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="preview(${r.id})">
+          <i class="fa-solid fa-eye mr-1"></i> Preview
+        </button>
+        ${r.status === 'draft' ? `<button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="markGenerated(${r.id})"><i class="fa-solid fa-hammer mr-1"></i> Generate</button>` : ''}
+        ${r.status === 'generated' ? `<button class="px-2 py-1 rounded text-white bg-indigo-600 hover:bg-indigo-700 text-xs" onclick="markApproved(${r.id})"><i class="fa-solid fa-check mr-1"></i> Approve</button>` : ''}
+      </td>
+    </tr>`;
+    }
+    function toggleAll(e) {
+        document.querySelectorAll('.rowChk').forEach(c => { if (!c.disabled) c.checked = e.target.checked; });
+    }
+    function preview(id) { const rec = QUEUE.find(x => x.id === id); alert(`👀 Preview: ${rec?.name} (${rec?.dept}) — PAN ****${rec?.pan4}`); }
+    function markGenerated(id) {
+        const r = QUEUE.find(x => x.id === id); if (!r) return;
+        r.status = 'generated'; refreshAll();
+    }
+    function markApproved(id) {
+        const r = QUEUE.find(x => x.id === id); if (!r) return;
+        r.status = 'approved'; refreshAll();
+    }
+    function approveSelected() {
+        const ids = [...document.querySelectorAll('.rowChk:checked')].map(x => Number(x.dataset.id));
+        if (ids.length === 0) { alert('🔎 Select at least one row'); return; }
+        ids.forEach(id => {
+            const r = QUEUE.find(x => x.id === id);
+            if (r && r.status === 'generated') { r.status = 'approved'; }
+        });
+        refreshAll(); alert('✅ Approved (demo)');
+    }
+    function publishSelected() {
+        const ids = [...document.querySelectorAll('.rowChk:checked')].map(x => Number(x.dataset.id));
+        if (ids.length === 0) { alert('🔎 Select at least one row'); return; }
+        ids.forEach(id => {
+            const r = QUEUE.find(x => x.id === id);
+            if (r && (r.status === 'approved' || r.status === 'generated')) { r.status = 'published'; }
+        });
+        refreshAll(); alert('✅ Published (demo)');
+    }
+    function refreshAll() { renderKPIs(); drawProgress(); drawMix(); renderQueue(); }
+
+    // ---- Templates ----
+    function renderTemplates() {
+        document.getElementById('tplRows').innerHTML = TEMPLATES.map(t => `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4">${t.name}</td>
+        <td class="py-2 pr-4">${t.paper}</td>
+        <td class="py-2 pr-4">${t.locale}</td>
+        <td class="py-2 pr-4">${badgePlain(t.status.toLowerCase())}</td>
+        <td class="py-2 pr-4">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('🧪 Test render (demo)')">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Test
+          </button>
+          <button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="alert('✏️ Edit template (demo)')">
+            <i class="fa-solid fa-pen mr-1"></i> Edit
+          </button>
+        </td>
+      </tr>`).join('');
+    }
+
+    // ---- History ----
+    function renderHistory() {
+        document.getElementById('histRows').innerHTML = HISTORY.map(h => `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+        <td class="py-2 pr-4">${h.ay}</td>
+        <td class="py-2 pr-4">${h.gen}</td>
+        <td class="py-2 pr-4">${h.app}</td>
+        <td class="py-2 pr-4">${h.pub}</td>
+        <td class="py-2 pr-4">${h.fail}</td>
+        <td class="py-2 pr-4">${h.by}</td>
+      </tr>`).join('');
+    }
+
+    // ---- Generate Modal ----
+    function openGen() { document.getElementById('genModal').classList.remove('hidden'); }
+    function closeGen() { document.getElementById('genModal').classList.add('hidden'); }
+    function runGeneration() {
+        // demo: move all drafts to generated
+        QUEUE.filter(x => x.status === 'draft').forEach(x => x.status = 'generated');
+        closeGen(); refreshAll();
+        alert('⚙️ Generation complete (demo)');
+    }
+
+    // ---- Utils ----
+    function badgePlain(s) {
+        const m = {
+            draft: 'bg-slate-100 text-slate-700',
+            generated: 'bg-blue-50 text-blue-700',
+            approved: 'bg-indigo-50 text-indigo-700',
+            published: 'bg-emerald-50 text-emerald-700',
+            failed: 'bg-red-50 text-red-700',
+            active: 'bg-emerald-50 text-emerald-700',
+            inactive: 'bg-slate-100 text-slate-700'
+        };
+        const k = (s || '').toLowerCase();
+        const label = k.charAt(0).toUpperCase() + k.slice(1);
+        return `<span class="px-2 py-0.5 rounded-full ${m[k] || m['draft']} text-xs">${label}</span>`;
+    }
+</script>
+
+<style>
+    .pp-tab.active {
+        background-color: #1e293b;
+        color: #fff;
+    }
+
+    .pp-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .pp-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

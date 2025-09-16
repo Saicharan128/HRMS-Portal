@@ -1,0 +1,463 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-diagram-next mr-2"></i> Dependencies
+            </h1>
+            <p class="text-slate-600 text-sm">Visualize process/task dependencies.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Add Task / Link (Dummy) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h2 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-plus mr-2"></i> Add Task (Dummy)
+            </h2>
+            <form id="taskForm" class="grid grid-cols-1 md:grid-cols-6 gap-3">
+                <div class="md:col-span-2">
+                    <label class="block text-sm text-slate-600 mb-1">Key *</label>
+                    <input name="key" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="T-101">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-sm text-slate-600 mb-1">Title *</label>
+                    <input name="title" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Design DB schema">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Owner</label>
+                    <input name="owner" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Charan">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Duration (d)</label>
+                    <input name="dur" type="number" min="0" value="1"
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Status</label>
+                    <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <option>Planned</option>
+                        <option>In Progress</option>
+                        <option>Blocked</option>
+                        <option>Done</option>
+                    </select>
+                </div>
+                <div class="md:col-span-6">
+                    <label class="block text-sm text-slate-600 mb-1">Notes</label>
+                    <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Optional">
+                </div>
+                <div class="md:col-span-6 flex items-center gap-3">
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-plus mr-1"></i> Add
+                    </button>
+                    <span id="taskMsg" class="text-sm text-slate-600"></span>
+                </div>
+            </form>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h2 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-link mr-2"></i> Add Dependency (A → B)
+            </h2>
+            <form id="depForm" class="grid grid-cols-1 md:grid-cols-6 gap-3">
+                <div class="md:col-span-3">
+                    <label class="block text-sm text-slate-600 mb-1">Predecessor (A) *</label>
+                    <input name="from" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="T-101">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-sm text-slate-600 mb-1">Successor (B) *</label>
+                    <input name="to" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="T-102">
+                </div>
+                <div class="md:col-span-6 flex items-center gap-3">
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-link mr-1"></i> Link
+                    </button>
+                    <button id="btnLayout" type="button"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">
+                        <i class="fa-solid fa-border-all mr-1"></i> Auto layout
+                    </button>
+                    <button id="btnDetect" type="button"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">
+                        <i class="fa-solid fa-arrows-rotate mr-1"></i> Detect cycles
+                    </button>
+                    <button id="btnExport" type="button"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">
+                        <i class="fa-solid fa-file-export mr-1"></i> Export JSON
+                    </button>
+                    <span id="depMsg" class="text-sm text-slate-600"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filters & KPIs -->
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+        <input id="q" placeholder="Search key/title/owner…"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">Any Status</option>
+            <option>Planned</option>
+            <option>In Progress</option>
+            <option>Blocked</option>
+            <option>Done</option>
+        </select>
+        <input id="fOwner" placeholder="Owner" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <button id="btnClear"
+            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Tasks</div>
+            <div id="kpiTasks" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Links</div>
+            <div id="kpiLinks" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Critical Path (days)</div>
+            <div id="kpiCP" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Cycles</div>
+            <div id="kpiCycles" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+    </div>
+
+    <!-- Graph + List -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Graph -->
+        <div class="rounded-2xl border border-slate-200 bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                <div class="text-slate-800 font-semibold"><i class="fa-solid fa-project-diagram mr-2"></i> Graph</div>
+                <div class="text-xs text-slate-500">Drag nodes • Zoom: Ctrl + wheel</div>
+            </div>
+            <div class="p-2">
+                <svg id="graph" class="w-full h-[460px] bg-slate-50 rounded-xl border border-slate-200"></svg>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="rounded-2xl border border-slate-200 bg-white">
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
+                    class="fa-solid fa-list mr-2"></i> Tasks</div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-slate-700">
+                    <thead class="bg-slate-50 text-slate-600">
+                        <tr>
+                            <th class="px-4 py-2">Key</th>
+                            <th class="px-4 py-2">Title</th>
+                            <th class="px-4 py-2">Owner</th>
+                            <th class="px-4 py-2">Dur</th>
+                            <th class="px-4 py-2">Status</th>
+                            <th class="px-4 py-2">Depends On</th>
+                            <th class="px-4 py-2 w-48">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rows" class="divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+            <div id="listMsg" class="p-3 text-sm text-slate-600"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ---------------- Dummy Store ---------------- */
+    const KEY = "dummy_dependencies";
+    let STORE = JSON.parse(localStorage.getItem(KEY) || "null") || {
+        tasks: [
+            { key: "T-101", title: "Design DB schema", owner: "Charan", dur: 2, status: "In Progress", notes: "" },
+            { key: "T-102", title: "API scaffolding", owner: "Priya", dur: 3, status: "Planned", notes: "" },
+            { key: "T-103", title: "UI wireframes", owner: "Meera", dur: 2, status: "Planned", notes: "" },
+            { key: "T-104", title: "Integrations", owner: "Arjun", dur: 4, status: "Planned", notes: "" }
+        ],
+        links: [
+            { from: "T-101", to: "T-102" },
+            { from: "T-103", to: "T-102" },
+            { from: "T-102", to: "T-104" }
+        ]
+    };
+    function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); }
+
+    /* ---------------- Elements ---------------- */
+    const taskForm = document.getElementById("taskForm");
+    const depForm = document.getElementById("depForm");
+    const taskMsg = document.getElementById("taskMsg");
+    const depMsg = document.getElementById("depMsg");
+    const rows = document.getElementById("rows");
+    const listMsg = document.getElementById("listMsg");
+    const q = document.getElementById("q");
+    const fStatus = document.getElementById("fStatus");
+    const fOwner = document.getElementById("fOwner");
+    const btnClear = document.getElementById("btnClear");
+    const btnLayout = document.getElementById("btnLayout");
+    const btnDetect = document.getElementById("btnDetect");
+    const btnExport = document.getElementById("btnExport");
+    const svg = document.getElementById("graph");
+
+    const kpiTasks = document.getElementById("kpiTasks");
+    const kpiLinks = document.getElementById("kpiLinks");
+    const kpiCP = document.getElementById("kpiCP");
+    const kpiCycles = document.getElementById("kpiCycles");
+
+    /* ---------------- Helpers ---------------- */
+    function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
+    function td(el) { const x = document.createElement("td"); x.className = "px-4 py-2"; x.appendChild(el); return x; }
+    function input(v, cls = "w-36") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
+    function select(opts, cur) {
+        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm";
+        opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s;
+    }
+
+    /* ---------------- Graph Utilities ---------------- */
+    // Basic layered DAG layout (Kahn topological levels). If cycles exist, layout still runs by ignoring cycle edges.
+    function buildGraphData() {
+        const tasks = STORE.tasks;
+        const links = STORE.links;
+        const keyToTask = Object.fromEntries(tasks.map(t => [t.key, t]));
+        // adjacency + indegree
+        const adj = {}; const indeg = {};
+        tasks.forEach(t => { adj[t.key] = []; indeg[t.key] = 0; });
+        links.forEach(e => { if (adj[e.from]) { adj[e.from].push(e.to); if (e.to in indeg) indeg[e.to]++; } });
+        // Kahn layering
+        const levels = {}; let lvl = 0;
+        let q = [...Object.keys(indeg).filter(k => indeg[k] === 0)];
+        const seen = new Set();
+        while (q.length) {
+            const next = [];
+            q.forEach(k => { levels[k] = lvl; seen.add(k); (adj[k] || []).forEach(v => { if (--indeg[v] === 0) next.push(v); }); });
+            lvl++; q = next;
+        }
+        // Any remaining nodes (in cycles) get last level
+        Object.keys(keyToTask).forEach(k => { if (!(k in levels)) levels[k] = lvl; });
+
+        // Compute positions
+        const margin = 40, colW = 220, rowH = 120;
+        const cols = Math.max(...Object.values(levels)) + 1;
+        const rowsPerCol = {}; Object.entries(levels).forEach(([k, c]) => { rowsPerCol[c] = (rowsPerCol[c] || 0) + 1; });
+        const coords = {}; const rowIndex = {};
+        Object.entries(levels).forEach(([k, c]) => {
+            const idx = (rowIndex[c] = (rowIndex[c] || 0) + 1) - 1;
+            const x = margin + c * colW;
+            const y = margin + idx * rowH;
+            coords[k] = { x, y };
+        });
+        return { tasks, links, coords, levels };
+    }
+    function draw() {
+        // clear
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+        const { tasks, links, coords } = buildGraphData();
+
+        // autosize
+        const w = Math.max(...Object.values(coords).map(p => p.x)) + 260;
+        const h = Math.max(...Object.values(coords).map(p => p.y)) + 140;
+        svg.setAttribute("viewBox", `0 0 ${Math.max(w, 600)} ${Math.max(h, 400)}`);
+
+        // defs
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        const m = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+        m.setAttribute("id", "arrow"); m.setAttribute("markerWidth", "10"); m.setAttribute("markerHeight", "8"); m.setAttribute("refX", "8"); m.setAttribute("refY", "4"); m.setAttribute("orient", "auto");
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path"); path.setAttribute("d", "M0,0 L10,4 L0,8 Z"); path.setAttribute("fill", "#475569");
+        m.appendChild(path); defs.appendChild(m); svg.appendChild(defs);
+
+        // edges
+        links.forEach(e => {
+            const a = coords[e.from], b = coords[e.to]; if (!a || !b) return;
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const x1 = a.x + 160, y1 = a.y + 40, x2 = b.x, y2 = b.y + 40;
+            const c = `M ${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 40} ${y2}, ${x2} ${y2}`;
+            line.setAttribute("d", c);
+            line.setAttribute("stroke", "#94a3b8"); line.setAttribute("stroke-width", "2"); line.setAttribute("fill", "none");
+            line.setAttribute("marker-end", "url(#arrow)");
+            svg.appendChild(line);
+        });
+
+        // nodes
+        tasks.forEach(t => {
+            const p = coords[t.key]; if (!p) return;
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.setAttribute("transform", `translate(${p.x},${p.y})`);
+            g.style.cursor = "grab";
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("rx", "12"); rect.setAttribute("ry", "12"); rect.setAttribute("width", "160"); rect.setAttribute("height", "80");
+            rect.setAttribute("fill", "#ffffff"); rect.setAttribute("stroke", "#cbd5e1");
+            rect.setAttribute("filter", "drop-shadow(0 1px 1px rgba(0,0,0,0.05))");
+            const tit = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tit.setAttribute("x", "12"); tit.setAttribute("y", "24"); tit.setAttribute("font-size", "12"); tit.setAttribute("fill", "#0f172a"); tit.textContent = `${t.key} · ${t.title}`;
+            const sub = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            sub.setAttribute("x", "12"); sub.setAttribute("y", "46"); sub.setAttribute("font-size", "11"); sub.setAttribute("fill", "#475569");
+            sub.textContent = `${t.owner || "—"} • ${t.dur || 0}d • ${t.status}`;
+            g.appendChild(rect); g.appendChild(tit); g.appendChild(sub);
+            svg.appendChild(g);
+
+            // drag
+            let ox = 0, oy = 0, dragging = false;
+            g.addEventListener("pointerdown", (e) => { dragging = true; g.style.cursor = "grabbing"; ox = e.clientX; oy = e.clientY; g.setPointerCapture(e.pointerId); });
+            g.addEventListener("pointermove", (e) => {
+                if (!dragging) return; const dx = e.clientX - ox, dy = e.clientY - oy; ox = e.clientX; oy = e.clientY;
+                const tr = g.getAttribute("transform"); const m = /translate\(([-\d.]+),([-\d.]+)\)/.exec(tr); const nx = +m[1] + dx, ny = +m[2] + dy; g.setAttribute("transform", `translate(${nx},${ny})`);
+            });
+            g.addEventListener("pointerup", () => { dragging = false; g.style.cursor = "grab"; });
+        });
+    }
+
+    /* ---------------- Analytics ---------------- */
+    function buildIndex() { const byKey = {}; STORE.tasks.forEach(t => byKey[t.key] = t); return byKey; }
+    function topoSort() {
+        const tasks = STORE.tasks.map(t => t.key); const indeg = {}; const adj = {};
+        tasks.forEach(k => { indeg[k] = 0; adj[k] = []; });
+        STORE.links.forEach(e => { if (indeg[e.to] != null) { indeg[e.to]++; adj[e.from].push(e.to); } });
+        const q = []; Object.keys(indeg).forEach(k => { if (indeg[k] === 0) q.push(k); });
+        const order = []; while (q.length) { const k = q.shift(); order.push(k); adj[k].forEach(v => { if (--indeg[v] === 0) q.push(v); }); }
+        const hasCycle = order.length !== tasks.length;
+        return { order, hasCycle };
+    }
+    function criticalPathDays() {
+        // Longest path (sum of durations) in DAG using topo order; if cycle, ignore it and return best effort.
+        const { order } = topoSort(); const byKey = buildIndex();
+        const dur = {}; STORE.tasks.forEach(t => dur[t.key] = Number(t.dur || 0));
+        const dist = {}; STORE.tasks.forEach(t => dist[t.key] = dur[t.key]);
+        const preds = {}; STORE.links.forEach(e => { preds[e.to] = preds[e.to] || []; preds[e.to].push(e.from); });
+
+        (order.length ? order : STORE.tasks.map(t => t.key)).forEach(k => {
+            (preds[k] || []).forEach(p => { dist[k] = Math.max(dist[k], (dist[p] || dur[p]) + dur[k]); });
+        });
+        return Math.max(0, ...Object.values(dist));
+    }
+    function depsOf(key) { return STORE.links.filter(e => e.to === key).map(e => e.from); }
+
+    /* ---------------- Rendering ---------------- */
+    function filtered() {
+        const term = (q.value || "").toLowerCase().trim();
+        const st = fStatus.value; const own = (fOwner.value || "").toLowerCase().trim();
+        return STORE.tasks.filter(t => {
+            if (term && !(`${t.key} ${t.title}`.toLowerCase().includes(term))) return false;
+            if (st && t.status !== st) return false;
+            if (own && !(t.owner || "").toLowerCase().includes(own)) return false;
+            return true;
+        });
+    }
+    function updateKPIs() {
+        kpiTasks.textContent = String(STORE.tasks.length);
+        kpiLinks.textContent = String(STORE.links.length);
+        const cyc = topoSort().hasCycle ? 1 : 0;
+        kpiCycles.textContent = String(cyc);
+        kpiCP.textContent = String(criticalPathDays());
+    }
+    function loadList() {
+        rows.innerHTML = "";
+        const data = filtered();
+        const byKey = buildIndex();
+        data.forEach(t => {
+            const tr = document.createElement("tr");
+            const keyI = input(t.key, "w-28");
+            const titleI = input(t.title, "w-56");
+            const ownerI = input(t.owner || "", "w-32");
+            const durI = input(t.dur || 0, "w-20"); durI.type = "number"; durI.min = 0;
+            const statusS = select(["Planned", "In Progress", "Blocked", "Done"], t.status || "Planned");
+            const depsSpan = document.createElement("span"); depsSpan.textContent = depsOf(t.key).join(", ") || "—";
+
+            const actions = document.createElement("div");
+            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
+            actions.append(saveBtn, delBtn);
+
+            tr.append(td(keyI), td(titleI), td(ownerI), td(durI), td(statusS), td(depsSpan), td(actions));
+            rows.appendChild(tr);
+
+            function save() {
+                // Update key safely
+                const newKey = keyI.value.trim();
+                if (newKey !== t.key && byKey[newKey]) { listMsg.className = "p-3 text-sm text-rose-700"; listMsg.textContent = "Key already exists."; return; }
+                // rewrite links if key changed
+                STORE.links.forEach(e => { if (e.from === t.key) e.from = newKey; if (e.to === t.key) e.to = newKey; });
+                t.key = newKey; t.title = titleI.value.trim(); t.owner = ownerI.value.trim(); t.dur = Number(durI.value || 0); t.status = statusS.value;
+                persist(); draw(); updateKPIs(); loadList();
+                listMsg.className = "p-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
+                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "p-3 text-sm text-slate-600"; }, 1200);
+            }
+            saveBtn.addEventListener("click", save);
+            delBtn.addEventListener("click", () => {
+                if (!confirm("Delete this task and its links?")) return;
+                STORE.tasks = STORE.tasks.filter(x => x !== t);
+                STORE.links = STORE.links.filter(e => e.from !== t.key && e.to !== t.key);
+                persist(); draw(); updateKPIs(); loadList();
+            });
+        });
+
+        listMsg.textContent = data.length ? "" : "No tasks.";
+    }
+
+    /* ---------------- Events ---------------- */
+    taskForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fd = new FormData(taskForm);
+        const key = (fd.get("key") || "").toString().trim();
+        const title = (fd.get("title") || "").toString().trim();
+        if (!key || !title) { flash(taskMsg, "Key and Title required", true); return; }
+        if (STORE.tasks.find(t => t.key === key)) { flash(taskMsg, "Key already exists", true); return; }
+        STORE.tasks.unshift({
+            key, title,
+            owner: (fd.get("owner") || "").toString().trim(),
+            dur: Number(fd.get("dur") || 0), status: (fd.get("status") || "Planned").toString(),
+            notes: (fd.get("notes") || "").toString().trim()
+        });
+        persist(); taskForm.reset(); flash(taskMsg, "Task added ✓"); draw(); updateKPIs(); loadList();
+    });
+
+    depForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fd = new FormData(depForm);
+        const from = (fd.get("from") || "").toString().trim();
+        const to = (fd.get("to") || "").toString().trim();
+        if (!from || !to || from === to) { flash(depMsg, "Invalid link", true); return; }
+        if (!STORE.tasks.find(t => t.key === from) || !STORE.tasks.find(t => t.key === to)) { flash(depMsg, "Task not found", true); return; }
+        if (STORE.links.find(e => e.from === from && e.to === to)) { flash(depMsg, "Already linked", true); return; }
+        STORE.links.push({ from, to }); persist(); flash(depMsg, "Linked ✓"); draw(); updateKPIs(); loadList();
+    });
+
+    btnLayout.addEventListener("click", () => { draw(); });
+    btnDetect.addEventListener("click", () => {
+        const cyc = topoSort().hasCycle;
+        kpiCycles.textContent = cyc ? "1" : "0";
+        flash(depMsg, cyc ? "Cycle detected" : "No cycles");
+    });
+    btnExport.addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(STORE, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = url; a.download = "dependencies.json"; a.click(); URL.revokeObjectURL(url);
+    });
+    [q, fStatus, fOwner].forEach(el => el.addEventListener("input", () => loadList()));
+    btnClear.addEventListener("click", () => { q.value = ""; fStatus.value = ""; fOwner.value = ""; loadList(); });
+
+    /* ---------------- Init ---------------- */
+    draw(); updateKPIs(); loadList();
+
+    /* ---------------- Zoom (Ctrl + wheel) ---------------- */
+    svg.addEventListener("wheel", (e) => {
+        if (!e.ctrlKey) return;
+        e.preventDefault();
+        const vb = svg.viewBox.baseVal;
+        const k = (e.deltaY < 0) ? 0.9 : 1.1;
+        const cx = e.offsetX / svg.clientWidth * vb.width + vb.x;
+        const cy = e.offsetY / svg.clientHeight * vb.height + vb.y;
+        vb.x = cx - (cx - vb.x) * k; vb.y = cy - (cy - vb.y) * k;
+        vb.width *= k; vb.height *= k;
+    }, { passive: false });
+</script>
+{% endblock %}

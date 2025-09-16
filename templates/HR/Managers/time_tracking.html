@@ -1,0 +1,318 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-business-time mr-2"></i> Time tracking
+            </h1>
+            <p class="text-slate-600 text-sm">Monitor hours/shifts/productivity.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Manual Entry (Dummy) -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
+        <h2 class="text-lg font-semibold text-slate-800 mb-4">
+            <i class="fa-solid fa-clipboard-list mr-2"></i> Add Manual Entry (Dummy)
+        </h2>
+        <form id="entryForm" class="grid grid-cols-1 md:grid-cols-8 gap-4">
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Employee *</label>
+                <input name="employee" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="e.g., E001 - Charan">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Date *</label>
+                <input name="date" type="date" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">In *</label>
+                <input name="in_time" type="time" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Out *</label>
+                <input name="out_time" type="time" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Break (min)</label>
+                <input name="break_min" type="number" min="0" value="0"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Shift</label>
+                <select name="shift" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <option>General</option>
+                    <option>Morning</option>
+                    <option>Night</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Project / Task</label>
+                <input name="project" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="e.g., HRMS | Timesheets">
+            </div>
+            <div class="md:col-span-8">
+                <label class="block text-sm text-slate-600 mb-1">Notes</label>
+                <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="Optional notes">
+            </div>
+            <div class="md:col-span-8 flex items-center gap-3">
+                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                    <i class="fa-solid fa-plus mr-1"></i> Add Entry
+                </button>
+                <span id="entryMsg" class="text-sm text-slate-600"></span>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filters + Metrics -->
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+        <input id="qEmp" placeholder="Search employee / project…"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fTo" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fProject" placeholder="Project/Task"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fShift" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">All Shifts</option>
+            <option>General</option>
+            <option>Morning</option>
+            <option>Night</option>
+        </select>
+        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">Any Status</option>
+            <option>Logged</option>
+            <option>Approved</option>
+            <option>Rejected</option>
+        </select>
+    </div>
+
+    <!-- KPI Chips -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Total Hours</div>
+            <div id="kpiTotal" class="text-xl font-semibold text-slate-800">0.0 h</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Avg / Day</div>
+            <div id="kpiAvg" class="text-xl font-semibold text-slate-800">0.0 h</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Overtime (&gt;8h)</div>
+            <div id="kpiOT" class="text-xl font-semibold text-slate-800">0.0 h</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Productivity*</div>
+            <div id="kpiProd" class="text-xl font-semibold text-slate-800">—</div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+        <table class="min-w-full text-sm text-left text-slate-700">
+            <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                    <th class="px-4 py-2">Employee</th>
+                    <th class="px-4 py-2">Date</th>
+                    <th class="px-4 py-2">In</th>
+                    <th class="px-4 py-2">Out</th>
+                    <th class="px-4 py-2">Break</th>
+                    <th class="px-4 py-2">Hours</th>
+                    <th class="px-4 py-2">Project</th>
+                    <th class="px-4 py-2">Shift</th>
+                    <th class="px-4 py-2">Status</th>
+                    <th class="px-4 py-2 w-64">Notes</th>
+                    <th class="px-4 py-2 w-56">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="rows" class="divide-y divide-slate-200"></tbody>
+        </table>
+    </div>
+    <div class="mt-2 text-xs text-slate-500">*Productivity is a simple dummy score = (approved hours / total hours) ×
+        100.</div>
+    <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
+</div>
+
+<script>
+    /* ---------- Dummy store (localStorage) ---------- */
+    const KEY = "dummy_time_tracking";
+    let STORE = JSON.parse(localStorage.getItem(KEY) || "null") || [
+        { id: 1, employee: "E001 - Charan", date: "2025-09-12", in_time: "09:55", out_time: "18:20", break_min: 45, project: "HRMS | Timesheets", shift: "General", status: "Approved", notes: "Feature planning" },
+        { id: 2, employee: "E014 - Priya", date: "2025-09-12", in_time: "08:05", out_time: "16:10", break_min: 30, project: "Payroll API", shift: "Morning", status: "Logged", notes: "Bug fixes" },
+        { id: 3, employee: "E009 - Arjun", date: "2025-09-11", in_time: "22:00", out_time: "06:30", break_min: 40, project: "Data Sync", shift: "Night", status: "Approved", notes: "Night release" }
+    ];
+    function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); }
+
+    /* ---------- Elements ---------- */
+    const rows = document.getElementById("rows");
+    const listMsg = document.getElementById("listMsg");
+    const entryForm = document.getElementById("entryForm");
+    const entryMsg = document.getElementById("entryMsg");
+
+    const qEmp = document.getElementById("qEmp");
+    const fFrom = document.getElementById("fFrom");
+    const fTo = document.getElementById("fTo");
+    const fProject = document.getElementById("fProject");
+    const fShift = document.getElementById("fShift");
+    const fStatus = document.getElementById("fStatus");
+
+    const kpiTotal = document.getElementById("kpiTotal");
+    const kpiAvg = document.getElementById("kpiAvg");
+    const kpiOT = document.getElementById("kpiOT");
+    const kpiProd = document.getElementById("kpiProd");
+
+    /* ---------- Helpers ---------- */
+    function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2"; c.appendChild(el); return c; }
+    function input(v, cls = "w-28") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
+    function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 1; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
+    function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
+    function minutes(hhmm) { if (!hhmm) return null; const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; }
+    function hoursStr(min) { return (min / 60).toFixed(1) + " h"; }
+    function workMinutes(r) {
+        const inM = minutes(r.in_time), outM = minutes(r.out_time);
+        if (inM == null || outM == null) return 0;
+        // handle overnight
+        let diff = outM - inM; if (diff < 0) diff += 24 * 60;
+        const br = Number(r.break_min || 0);
+        return Math.max(0, diff - br);
+    }
+    function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
+
+    /* ---------- Filtering ---------- */
+    function withinDate(d) {
+        const v = new Date(d).setHours(0, 0, 0, 0);
+        const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null;
+        const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null;
+        if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true;
+    }
+    function filtered() {
+        const q = (qEmp.value || "").toLowerCase().trim();
+        const pj = (fProject.value || "").toLowerCase().trim();
+        const sh = fShift.value; const st = fStatus.value;
+        return STORE.filter(r => {
+            if (q && !(`${r.employee} ${r.project}`.toLowerCase().includes(q))) return false;
+            if (pj && !(r.project || "").toLowerCase().includes(pj)) return false;
+            if (sh && r.shift !== sh) return false;
+            if (st && r.status !== st) return false;
+            if (!withinDate(r.date)) return false;
+            return true;
+        });
+    }
+
+    /* ---------- KPIs ---------- */
+    function updateKPIs(data) {
+        if (!data.length) { kpiTotal.textContent = "0.0 h"; kpiAvg.textContent = "0.0 h"; kpiOT.textContent = "0.0 h"; kpiProd.textContent = "—"; return; }
+        const mins = data.map(workMinutes);
+        const sum = mins.reduce((a, b) => a + b, 0);
+        const perDayMap = {};
+        data.forEach(r => { perDayMap[r.date] = (perDayMap[r.date] || 0) + workMinutes(r); });
+        const days = Object.keys(perDayMap).length || 1;
+        const ot = mins.reduce((a, b) => a + Math.max(0, b - 480), 0); // >8h
+        const approvedMin = data.filter(r => r.status === "Approved").map(workMinutes).reduce((a, b) => a + b, 0);
+        const prod = sum ? Math.round((approvedMin / sum) * 100) : 0;
+
+        kpiTotal.textContent = hoursStr(sum);
+        kpiAvg.textContent = hoursStr(sum / days);
+        kpiOT.textContent = hoursStr(ot);
+        kpiProd.textContent = prod + " %";
+    }
+
+    /* ---------- Render ---------- */
+    function load() {
+        rows.innerHTML = "";
+        const data = filtered();
+        updateKPIs(data);
+
+        data.forEach(r => {
+            const tr = document.createElement("tr");
+
+            const empI = input(r.employee, "w-48");
+            const dateI = input(r.date, "w-32"); dateI.type = "date";
+            const inI = input(r.in_time || "", "w-24"); inI.type = "time";
+            const outI = input(r.out_time || "", "w-24"); outI.type = "time";
+            const brI = input(r.break_min ?? 0, "w-20"); brI.type = "number"; brI.min = 0;
+            const hrs = document.createElement("span"); hrs.textContent = hoursStr(workMinutes(r));
+            const projI = input(r.project || "", "w-48");
+            const shiftS = select(["General", "Morning", "Night"], r.shift || "General");
+            const statusS = select(["Logged", "Approved", "Rejected"], r.status || "Logged");
+            const notesT = textArea(r.notes || "");
+
+            const actions = document.createElement("div");
+            const approveBtn = document.createElement("button");
+            approveBtn.className = "px-2 py-1 mr-2 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700";
+            approveBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Approve';
+            const rejectBtn = document.createElement("button");
+            rejectBtn.className = "px-2 py-1 mr-2 rounded-md bg-rose-600 text-white text-xs hover:bg-rose-700";
+            rejectBtn.innerHTML = '<i class="fa-solid fa-xmark mr-1"></i>Reject';
+            const saveBtn = document.createElement("button");
+            saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900";
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            const delBtn = document.createElement("button");
+            delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50";
+            delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
+            actions.append(approveBtn, rejectBtn, saveBtn, delBtn);
+
+            tr.append(td(empI), td(dateI), td(inI), td(outI), td(brI), td(hrs),
+                td(projI), td(shiftS), td(statusS), td(notesT), td(actions));
+            rows.appendChild(tr);
+
+            function recalcAndSave() {
+                r.employee = empI.value.trim();
+                r.date = dateI.value;
+                r.in_time = inI.value;
+                r.out_time = outI.value;
+                r.break_min = Number(brI.value || 0);
+                r.project = projI.value.trim();
+                r.shift = shiftS.value;
+                r.status = statusS.value;
+                r.notes = notesT.value;
+                persist();
+                hrs.textContent = hoursStr(workMinutes(r));
+                updateKPIs(filtered());
+                listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
+                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+            }
+
+            saveBtn.addEventListener("click", recalcAndSave);
+            approveBtn.addEventListener("click", () => { statusS.value = "Approved"; recalcAndSave(); });
+            rejectBtn.addEventListener("click", () => { statusS.value = "Rejected"; recalcAndSave(); });
+            delBtn.addEventListener("click", () => {
+                if (!confirm("Delete this entry?")) return;
+                STORE = STORE.filter(x => x.id !== r.id); persist(); load();
+            });
+        });
+
+        listMsg.textContent = data.length ? "" : "No entries.";
+    }
+
+    /* ---------- Create (dummy) ---------- */
+    entryForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fd = new FormData(entryForm);
+        const employee = (fd.get("employee") || "").toString().trim();
+        const date = (fd.get("date") || "").toString();
+        const in_time = (fd.get("in_time") || "").toString();
+        const out_time = (fd.get("out_time") || "").toString();
+        const break_min = Number(fd.get("break_min") || 0);
+        const shift = (fd.get("shift") || "General").toString();
+        const project = (fd.get("project") || "").toString().trim();
+        const notes = (fd.get("notes") || "").toString().trim();
+
+        if (!employee || !date || !in_time || !out_time) { flash(entryMsg, "Missing required fields.", true); return; }
+        const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
+        STORE.unshift({ id, employee, date, in_time, out_time, break_min, project, shift, status: "Logged", notes });
+        persist(); entryForm.reset(); flash(entryMsg, "Entry added ✓"); load();
+    });
+
+    /* ---------- Live filtering ---------- */
+    [qEmp, fFrom, fTo, fProject, fShift, fStatus].forEach(el => el.addEventListener("input", load));
+
+    /* ---------- Init ---------- */
+    load();
+</script>
+{% endblock %}

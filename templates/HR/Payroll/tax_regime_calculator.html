@@ -1,0 +1,573 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-scale-balanced mr-2"></i> Tax Regime Calculator
+            </h1>
+            <p class="text-slate-600 text-sm">Org defaults, guidance, and what-if.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btnRunAudit" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-magnifying-glass-chart mr-1"></i> Run Audit
+            </button>
+            <button id="btnApplyDefaults"
+                class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                <i class="fa-solid fa-toggle-on mr-1"></i> Apply Org Defaults
+            </button>
+            <button id="btnExport"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-arrow-down mr-1"></i> Export
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab" class="trc-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-gauge-high mr-1"></i> Overview</button>
+            <button id="calculatorTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-calculator mr-1"></i> Calculator</button>
+            <button id="guidanceTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-circle-info mr-1"></i> Guidance</button>
+            <button id="whatifTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-wand-magic-sparkles mr-1"></i> What-If</button>
+            <button id="historyTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-clock-rotate-left mr-1"></i> History</button>
+            <button id="settingsTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+                    class="fa-solid fa-gear mr-1"></i> Settings</button>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overviewPanel" class="trc-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- KPIs -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-building mr-2"></i> Org
+                        Snapshot</h3>
+                    <span id="orgBadge" class="px-2 py-1 text-xs rounded bg-amber-50 text-amber-700">Draft</span>
+                </div>
+                <div class="grid grid-cols-4 gap-3">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Employees</div>
+                        <div id="kpiEmp" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Default</div>
+                        <div id="kpiDefault" class="text-xl font-semibold text-slate-800">New</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Better on Default</div>
+                        <div id="kpiBetter" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Savings (₹)</div>
+                        <div id="kpiSavings" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="relative h-40 mt-4"><canvas id="kpiChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div class="mt-4 flex items-center gap-2">
+                    <select id="fyPicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                        <option>FY 2025–26</option>
+                        <option>FY 2024–25</option>
+                    </select>
+                    <button id="btnValidate"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-spell-check mr-1"></i> Validate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mix -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-chart-pie mr-2"></i> Regime
+                        Mix</h3>
+                </div>
+                <div class="relative h-40"><canvas id="mixChart" class="absolute inset-0 w-full h-full"></canvas></div>
+                <div id="mixLegend" class="mt-3 text-sm text-slate-700"></div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-bolt mr-2"></i> Quick
+                    Actions</h3>
+                <div class="space-y-3">
+                    <button id="btnPreview"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-eye mr-2"></i> Preview employee advice
+                    </button>
+                    <button id="btnSharePDF"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-file-pdf mr-2"></i> Share guidance PDF (demo)
+                    </button>
+                    <button id="btnRollback"
+                        class="w-full px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-left">
+                        <i class="fa-solid fa-rotate-left mr-2"></i> Rollback last apply
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator -->
+    <section id="calculatorPanel" class="trc-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-calculator mr-2"></i> Employee
+                    Calculator</h3>
+                <div class="flex items-center gap-2">
+                    <input id="calcSearch" type="text" placeholder="Search name or code..."
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                    <select id="calcFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="new">New better</option>
+                        <option value="old">Old better</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Employee</th>
+                            <th class="py-2 pr-4">Code</th>
+                            <th class="py-2 pr-4">CTC (₹)</th>
+                            <th class="py-2 pr-4">Deductions (₹)</th>
+                            <th class="py-2 pr-4">Suggested</th>
+                            <th class="py-2 pr-4">Savings vs other (₹)</th>
+                            <th class="py-2 pr-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calcRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guidance -->
+    <section id="guidancePanel" class="trc-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-circle-info mr-2"></i>
+                        Guidance</h3>
+                    <button id="btnSendTips"
+                        class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Send Tips (demo)
+                    </button>
+                </div>
+                <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
+                    <li>Default regime applied org-wide unless employee opts out.</li>
+                    <li>Old regime benefits higher when deductions are substantial.</li>
+                    <li>Use what-if tool to compare with planned deductions.</li>
+                </ul>
+                <div class="mt-4 rounded-xl border border-slate-200 p-4 bg-slate-50 text-sm">
+                    <div class="font-medium mb-2">Announcement Template (snippet)</div>
+                    <pre
+                        class="whitespace-pre-wrap text-slate-700">Hi {{name}}, we compared both regimes for you. Suggested: {{suggested}}. Estimated savings: ₹{{savings}}. You can opt out by {{deadline}}.</pre>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-list-check mr-2"></i>
+                    Checklist</h3>
+                <ul class="space-y-2 text-sm text-slate-700">
+                    <li>Confirm org default for FY.</li>
+                    <li>Upload latest deduction declarations.</li>
+                    <li>Publish employee advice & opt-out window.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- What-If -->
+    <section id="whatifPanel" class="trc-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>
+                What-If Scenario</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-3 text-sm">
+                    <label class="block">Annual CTC (₹)
+                        <input id="wfCtc" type="number" value="1200000"
+                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </label>
+                    <label class="block">Deductions 80C (₹)
+                        <input id="wf80c" type="number" value="150000"
+                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </label>
+                    <label class="block">80D (₹)
+                        <input id="wf80d" type="number" value="25000"
+                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </label>
+                    <label class="block">HRA Exemption (₹)
+                        <input id="wfHra" type="number" value="0"
+                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </label>
+                    <button id="btnCompute"
+                        class="w-full px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                        <i class="fa-solid fa-equals mr-1"></i> Compute
+                    </button>
+                </div>
+                <div class="lg:col-span-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="rounded-xl border border-slate-200 p-4">
+                            <div class="text-sm text-slate-500 mb-1">Tax (New Regime)</div>
+                            <div id="wfNew" class="text-2xl font-semibold text-slate-800">₹0</div>
+                        </div>
+                        <div class="rounded-xl border border-slate-200 p-4">
+                            <div class="text-sm text-slate-500 mb-1">Tax (Old Regime)</div>
+                            <div id="wfOld" class="text-2xl font-semibold text-slate-800">₹0</div>
+                        </div>
+                        <div class="rounded-xl border border-slate-200 p-4 md:col-span-2">
+                            <div class="text-sm text-slate-500 mb-1">Suggested</div>
+                            <div id="wfSug" class="text-xl font-semibold text-emerald-700">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- History -->
+    <section id="historyPanel" class="trc-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-table mr-2"></i> Change History
+                </h3>
+                <div class="text-sm text-slate-600">Last 10 events</div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Time</th>
+                            <th class="py-2 pr-4">Action</th>
+                            <th class="py-2 pr-4">By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="histRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settingsPanel" class="trc-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-toggle-on mr-2"></i>
+                    Defaults</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="block">Default regime for FY
+                        <select id="stDefault" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option value="new" selected>New</option>
+                            <option value="old">Old</option>
+                        </select>
+                    </label>
+                    <label class="flex items-center gap-2"><input id="stAutoAdvise" type="checkbox" checked>
+                        Auto-publish employee advice</label>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-bell mr-2"></i> Reminders
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="block">Opt-out deadline<input id="stDeadline" type="date"
+                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+                    <label class="flex items-center gap-2"><input id="stNudges" type="checkbox" checked> Nudge those
+                        worse on default</label>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-floppy-disk mr-2"></i> Save
+                </h3>
+                <button id="stSave"
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                </button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal -->
+<div id="demoModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="modalTitle" class="text-lg font-semibold text-slate-800">Preview</h3>
+                    <button id="closeModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div id="modalBody" class="p-6 text-sm space-y-2">
+                    <p>👀 This is a demo preview.</p>
+                </div>
+                <div class="px-6 pb-6 flex items-center justify-end gap-2">
+                    <button id="dismissModal"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+    // ---- Demo Data ----
+    const EMP = [
+        { id: 1, name: 'Ananya Rao', code: 'EMP001', ctc: 1200000, ded: 225000 }, // old better
+        { id: 2, name: 'Rohit Mehta', code: 'EMP002', ctc: 900000, ded: 50000 }, // new better
+        { id: 3, name: 'Sara Khan', code: 'EMP003', ctc: 1600000, ded: 300000 }, // old better
+        { id: 4, name: 'Vikram S', code: 'EMP004', ctc: 700000, ded: 20000 }  // new better
+    ];
+    const HISTORY = [
+        { ts: '2025-09-12 10:05', action: 'Applied default = New for FY25–26', by: 'Payroll' },
+        { ts: '2025-08-30 16:20', action: 'Published employee advice', by: 'System' },
+        { ts: '2025-08-05 11:10', action: 'Ran audit on 54 employees', by: 'Payroll' }
+    ];
+
+    // ---- Panels/Tabs ----
+    const panels = {
+        overview: document.getElementById('overviewPanel'),
+        calculator: document.getElementById('calculatorPanel'),
+        guidance: document.getElementById('guidancePanel'),
+        whatif: document.getElementById('whatifPanel'),
+        history: document.getElementById('historyPanel'),
+        settings: document.getElementById('settingsPanel')
+    };
+    let _kpiChart, _mixChart;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTabs();
+        wireButtons();
+        renderKPIs();
+        drawCharts();
+        renderCalculator();
+        renderHistory();
+    });
+
+    function setupTabs() {
+        document.querySelectorAll('.trc-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.trc-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                panels[name].classList.remove('hidden');
+            });
+        });
+    }
+
+    function wireButtons() {
+        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed (demo)'));
+        document.getElementById('btnRunAudit').addEventListener('click', () => { renderKPIs(); drawCharts(); alert('📊 Audit complete (demo)'); });
+        document.getElementById('btnApplyDefaults').addEventListener('click', () => alert('✅ Defaults applied (demo)'));
+        document.getElementById('btnExport').addEventListener('click', () => alert('⬇️ Exported (demo)'));
+        document.getElementById('btnPreview').addEventListener('click', () => openModal('Advice Preview', 'Personalized guidance would appear here.'));
+        document.getElementById('btnSharePDF').addEventListener('click', () => alert('📄 Guidance PDF shared (demo)'));
+        document.getElementById('stSave').addEventListener('click', () => alert('💾 Settings saved'));
+
+        document.getElementById('calcSearch').addEventListener('input', renderCalculator);
+        document.getElementById('calcFilter').addEventListener('change', renderCalculator);
+
+        document.getElementById('btnCompute').addEventListener('click', computeWhatIf);
+
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        document.getElementById('dismissModal').addEventListener('click', closeModal);
+    }
+
+    function openModal(title, bodyText) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalBody').innerHTML = `<p class="text-slate-700">${bodyText}</p>`;
+        document.getElementById('demoModal').classList.remove('hidden');
+    }
+    function closeModal() { document.getElementById('demoModal').classList.add('hidden'); }
+
+    // ---- Tax helpers (high-level demo only) ----
+    // NOTE: This is a simplified calculator for demo UI.
+    function taxNewRegime(income) {
+        // sample slabs FY25-26 demo (not authoritative)
+        const slabs = [
+            { upto: 300000, rate: 0.00 },
+            { upto: 700000, rate: 0.05 },
+            { upto: 1000000, rate: 0.10 },
+            { upto: 1200000, rate: 0.15 },
+            { upto: 1500000, rate: 0.20 },
+            { upto: Infinity, rate: 0.30 }
+        ];
+        let prev = 0, tax = 0;
+        for (const s of slabs) {
+            const amt = Math.max(0, Math.min(income, s.upto) - prev);
+            tax += amt * s.rate;
+            prev = s.upto;
+            if (income <= s.upto) break;
+        }
+        return Math.max(0, Math.round(tax));
+    }
+    function taxOldRegime(income, deductions, hra = 0) {
+        const taxable = Math.max(0, income - deductions - hra - 50000); // standard deduction demo
+        const slabs = [
+            { upto: 250000, rate: 0.00 },
+            { upto: 500000, rate: 0.05 },
+            { upto: 1000000, rate: 0.20 },
+            { upto: Infinity, rate: 0.30 }
+        ];
+        let prev = 0, tax = 0;
+        for (const s of slabs) {
+            const amt = Math.max(0, Math.min(taxable, s.upto) - prev);
+            tax += amt * s.rate;
+            prev = s.upto;
+            if (taxable <= s.upto) break;
+        }
+        return Math.max(0, Math.round(tax));
+    }
+
+    // ---- Overview ----
+    function renderKPIs() {
+        const defaultReg = document.getElementById('stDefault') ? document.getElementById('stDefault').value : 'new';
+        const mix = EMP.map(e => {
+            const tNew = taxNewRegime(e.ctc);
+            const tOld = taxOldRegime(e.ctc, e.ded, 0);
+            const sug = tNew <= tOld ? 'new' : 'old';
+            return { sug, save: Math.abs(tNew - tOld) };
+        });
+        const betterOnDefault = mix.filter(m => m.sug === defaultReg).length;
+        const savingsSum = mix.reduce((a, b) => a + b.save, 0);
+        document.getElementById('kpiEmp').textContent = EMP.length;
+        document.getElementById('kpiDefault').textContent = defaultReg.charAt(0).toUpperCase() + defaultReg.slice(1);
+        document.getElementById('kpiBetter').textContent = betterOnDefault;
+        document.getElementById('kpiSavings').textContent = savingsSum.toLocaleString('en-IN');
+        const badge = document.getElementById('orgBadge');
+        const ready = EMP.length > 0;
+        badge.textContent = ready ? 'Ready' : 'Draft';
+        badge.className = 'px-2 py-1 text-xs rounded ' + (ready ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700');
+    }
+
+    function drawCharts() {
+        const ctx1 = document.getElementById('kpiChart').getContext('2d');
+        if (_kpiChart) _kpiChart.destroy();
+        _kpiChart = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Employees', 'Better on Default', 'Savings (₹)'],
+                datasets: [{
+                    label: 'Org', data: [
+                        EMP.length,
+                        Number(document.getElementById('kpiBetter').textContent) || 0,
+                        Number((document.getElementById('kpiSavings').textContent || '0').replaceAll(',', '')) || 0
+                    ]
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
+        });
+
+        const defReg = (document.getElementById('stDefault') ? document.getElementById('stDefault').value : 'new');
+        const mix = { new: 0, old: 0 };
+        EMP.forEach(e => {
+            const tNew = taxNewRegime(e.ctc), tOld = taxOldRegime(e.ctc, e.ded, 0);
+            (tNew <= tOld ? mix.new++ : mix.old++);
+        });
+        const ctx2 = document.getElementById('mixChart').getContext('2d');
+        if (_mixChart) _mixChart.destroy();
+        _mixChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: { labels: ['New better', 'Old better'], datasets: [{ data: [mix.new, mix.old] }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } }, animation: false }
+        });
+        document.getElementById('mixLegend').innerHTML =
+            `<div class="flex items-center justify-between text-sm"><span>New better</span><span>${mix.new}</span></div>` +
+            `<div class="flex items-center justify-between text-sm"><span>Old better</span><span>${mix.old}</span></div>` +
+            `<div class="flex items-center justify-between text-sm"><span>Default</span><span class="capitalize">${defReg}</span></div>`;
+    }
+
+    // ---- Calculator table ----
+    function renderCalculator() {
+        const q = (document.getElementById('calcSearch')?.value || '').toLowerCase();
+        const flt = document.getElementById('calcFilter')?.value || 'all';
+        const rows = EMP.map(e => {
+            const tNew = taxNewRegime(e.ctc);
+            const tOld = taxOldRegime(e.ctc, e.ded, 0);
+            const sug = tNew <= tOld ? 'new' : 'old';
+            const save = Math.abs(tNew - tOld);
+            return { ...e, sug, save, tNew, tOld };
+        })
+            .filter(r => (flt === 'all') ? true : r.sug === flt)
+            .filter(r => r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q))
+            .sort((a, b) => a.name.localeCompare(b.name));
+        document.getElementById('calcRows').innerHTML = rows.map(r => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 pr-4">${r.name}</td>
+      <td class="py-2 pr-4">${r.code}</td>
+      <td class="py-2 pr-4">₹${r.ctc.toLocaleString('en-IN')}</td>
+      <td class="py-2 pr-4">₹${r.ded.toLocaleString('en-IN')}</td>
+      <td class="py-2 pr-4">${badgeRegime(r.sug)}</td>
+      <td class="py-2 pr-4">₹${r.save.toLocaleString('en-IN')}</td>
+      <td class="py-2 pr-4">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50"
+                onclick="alert('Advice for ${r.name}: ${r.sug.toUpperCase()} (demo)')">
+          <i class="fa-solid fa-envelope-open-text mr-1"></i> Advise
+        </button>
+      </td>
+    </tr>`).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No records.</td></tr>`;
+    }
+
+    // ---- What-If compute ----
+    function computeWhatIf() {
+        const ctc = Number(document.getElementById('wfCtc').value || 0);
+        const d80c = Number(document.getElementById('wf80c').value || 0);
+        const d80d = Number(document.getElementById('wf80d').value || 0);
+        const hra = Number(document.getElementById('wfHra').value || 0);
+        const tNew = taxNewRegime(ctc);
+        const tOld = taxOldRegime(ctc, d80c + d80d, hra);
+        document.getElementById('wfNew').textContent = '₹' + tNew.toLocaleString('en-IN');
+        document.getElementById('wfOld').textContent = '₹' + tOld.toLocaleString('en-IN');
+        document.getElementById('wfSug').textContent = (tNew <= tOld ? 'New Regime' : 'Old Regime') + ` (Save ₹${Math.abs(tNew - tOld).toLocaleString('en-IN')})`;
+    }
+
+    // ---- History ----
+    function renderHistory() {
+        document.getElementById('histRows').innerHTML = HISTORY.map(h => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+      <td class="py-2 pr-4">${h.action}</td>
+      <td class="py-2 pr-4">${h.by}</td>
+    </tr>`).join('');
+    }
+
+    // ---- Utils ----
+    function badgeRegime(r) {
+        const map = { new: 'bg-emerald-50 text-emerald-700', old: 'bg-indigo-50 text-indigo-700' };
+        const label = r === 'new' ? 'New' : 'Old';
+        return `<span class="px-2 py-0.5 rounded-full ${map[r] || 'bg-slate-100 text-slate-700'} text-xs">${label}</span>`;
+    }
+</script>
+
+<style>
+    .trc-tab.active {
+        background-color: #1e293b;
+        color: #fff;
+    }
+
+    .trc-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .trc-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

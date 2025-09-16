@@ -31,14 +31,18 @@
     <!-- Tabs -->
     <div class="mb-6">
         <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="overviewTab" class="cw-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-chart-line mr-1"></i> Overview</button>
-            <button id="rulesTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-gears mr-1"></i> Rules</button>
-            <button id="auditsTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-clipboard-check mr-1"></i> Audits</button>
-            <button id="deadlinesTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-calendar-days mr-1"></i> Deadlines</button>
+            <button id="overviewTab" class="cw-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-chart-line mr-1"></i> Overview
+            </button>
+            <button id="rulesTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-gears mr-1"></i> Rules
+            </button>
+            <button id="auditsTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clipboard-check mr-1"></i> Audits
+            </button>
+            <button id="deadlinesTab" class="cw-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-calendar-days mr-1"></i> Deadlines
+            </button>
         </div>
     </div>
 
@@ -48,12 +52,15 @@
             <!-- Score & Jurisdictions -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-gauge-high mr-2"></i>
-                        Compliance Score</h3>
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-gauge-high mr-2"></i> Compliance Score
+                    </h3>
                     <span id="scoreBadge" class="px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700">Low
                         Risk</span>
                 </div>
-                <canvas id="scoreChart" height="160"></canvas>
+                <div class="relative h-40">
+                    <canvas id="scoreChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
                 <div class="grid grid-cols-2 gap-3 mt-4">
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Open Issues</div>
@@ -73,27 +80,27 @@
             <!-- Open Issues -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i
-                            class="fa-solid fa-triangle-exclamation mr-2"></i> Open Issues</h3>
-                    <button class="text-sm text-slate-600 hover:text-slate-800" id="ackAllBtn"><i
-                            class="fa-solid fa-check-double mr-1"></i> Acknowledge All</button>
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-triangle-exclamation mr-2"></i> Open Issues
+                    </h3>
+                    <button class="text-sm text-slate-600 hover:text-slate-800" id="ackAllBtn">
+                        <i class="fa-solid fa-check-double mr-1"></i> Acknowledge All
+                    </button>
                 </div>
-                <div id="issuesList" class="space-y-3">
-                    <!-- injected -->
-                </div>
+                <div id="issuesList" class="space-y-3"></div>
             </div>
 
             <!-- Upcoming Deadlines -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-hourglass-half mr-2"></i>
-                        Upcoming Deadlines</h3>
-                    <button id="addDeadlineBtn" class="text-sm text-slate-600 hover:text-slate-800"><i
-                            class="fa-solid fa-plus mr-1"></i> Add</button>
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-hourglass-half mr-2"></i> Upcoming Deadlines
+                    </h3>
+                    <button id="addDeadlineBtn" class="text-sm text-slate-600 hover:text-slate-800">
+                        <i class="fa-solid fa-plus mr-1"></i> Add
+                    </button>
                 </div>
-                <div id="deadlinesList" class="space-y-3">
-                    <!-- injected -->
-                </div>
+                <div id="deadlinesList" class="space-y-3"></div>
             </div>
         </div>
 
@@ -101,18 +108,20 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-table-cells-large mr-2"></i>
-                        Risk Matrix</h3>
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-table-cells-large mr-2"></i> Risk Matrix
+                    </h3>
                     <div class="text-sm text-slate-600" id="riskSummary">0 High • 0 Medium • 0 Low</div>
                 </div>
-                <canvas id="riskChart" height="220"></canvas>
+                <div class="relative h-56">
+                    <canvas id="riskChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-arrows-rotate mr-2"></i>
-                    Recent Changes</h3>
-                <div id="changesFeed" class="space-y-3">
-                    <!-- injected -->
-                </div>
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-arrows-rotate mr-2"></i> Recent Changes
+                </h3>
+                <div id="changesFeed" class="space-y-3"></div>
             </div>
         </div>
     </section>
@@ -120,21 +129,23 @@
     <!-- Rules -->
     <section id="rulesPanel" class="cw-panel hidden">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-gears mr-2"></i> Rules Engine</h3>
-            <button id="newRuleBtn" class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
-                    class="fa-solid fa-plus mr-1"></i> New Rule</button>
+            <h3 class="text-lg font-semibold text-slate-800">
+                <i class="fa-solid fa-gears mr-2"></i> Rules Engine
+            </h3>
+            <button id="newRuleBtn" class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New Rule
+            </button>
         </div>
-        <div id="rulesList" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- injected -->
-        </div>
+        <div id="rulesList" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
     </section>
 
     <!-- Audits -->
     <section id="auditsPanel" class="cw-panel hidden">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-clipboard-check mr-2"></i> Audit
-                    Log</h3>
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-clipboard-check mr-2"></i> Audit Log
+                </h3>
                 <div class="flex items-center gap-2">
                     <select id="auditFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
@@ -143,8 +154,9 @@
                         <option value="payroll">Payroll</option>
                     </select>
                     <button id="exportAuditBtn"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
-                            class="fa-solid fa-file-csv mr-1"></i> Export CSV</button>
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -158,9 +170,7 @@
                             <th class="py-2 pr-4">Status</th>
                         </tr>
                     </thead>
-                    <tbody id="auditRows" class="text-slate-800">
-                        <!-- injected -->
-                    </tbody>
+                    <tbody id="auditRows" class="text-slate-800"></tbody>
                 </table>
             </div>
         </div>
@@ -170,8 +180,9 @@
     <section id="deadlinesPanel" class="cw-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-calendar-plus mr-2"></i> Add
-                    Deadline</h3>
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-calendar-plus mr-2"></i> Add Deadline
+                </h3>
                 <div class="space-y-3">
                     <input id="dlTitle" type="text" placeholder="Title"
                         class="w-full rounded-lg border border-slate-300 px-3 py-2">
@@ -181,21 +192,22 @@
                         <option value="US-NY">US-NY</option>
                         <option value="IN">IN</option>
                         <option value="EU">EU</option>
+                        <option value="UK">UK</option>
                     </select>
                     <button id="createDeadline"
-                        class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
-                            class="fa-solid fa-plus mr-1"></i> Create</button>
+                        class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                        <i class="fa-solid fa-plus mr-1"></i> Create
+                    </button>
                 </div>
             </div>
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-calendar-days mr-2"></i> All
-                        Deadlines</h3>
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-calendar-days mr-2"></i> All Deadlines
+                    </h3>
                     <div class="text-sm text-slate-600"><span id="dlCount">0</span> total</div>
                 </div>
-                <div id="allDeadlines" class="space-y-3">
-                    <!-- injected -->
-                </div>
+                <div id="allDeadlines" class="space-y-3"></div>
             </div>
         </div>
     </section>
@@ -208,8 +220,9 @@
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-800">New Rule</h3>
-                    <button id="closeRuleModal" class="text-slate-400 hover:text-slate-600"><i
-                            class="fa-solid fa-times text-xl"></i></button>
+                    <button id="closeRuleModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
                 </div>
                 <div class="p-6 space-y-4">
                     <div>
@@ -234,9 +247,9 @@
                     <div class="flex items-center justify-end gap-2 pt-2">
                         <button id="cancelRule"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="saveRule"
-                            class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700"><i
-                                class="fa-solid fa-floppy-disk mr-1"></i> Save Rule</button>
+                        <button id="saveRule" class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save Rule
+                        </button>
                     </div>
                 </div>
             </div>
@@ -244,8 +257,11 @@
     </div>
 </div>
 
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <script>
-    // ---- Mock Data ----
+    // ---- Dummy Data (static) ----
     const JURISDICTIONS = ['US-CA', 'US-NY', 'US-TX', 'EU', 'IN', 'UK'];
     const ISSUES = [
         { id: 1, sev: 'high', title: 'Meal break compliance', j: 'US-CA', due: '2025-09-20' },
@@ -273,7 +289,7 @@
         { time: '2025-09-09 09:40', actor: 'Alex R', action: 'Exported report', target: 'Pay Data', status: 'Success', type: 'payroll' }
     ];
 
-    // ---- Elements ----
+    // ---- Panels ----
     const panels = {
         overview: document.getElementById('overviewPanel'),
         rules: document.getElementById('rulesPanel'),
@@ -284,30 +300,14 @@
     // ---- Init ----
     document.addEventListener('DOMContentLoaded', () => {
         setupTabs();
+        wireButtons();
         renderOverview();
         renderRules();
         renderAudits();
         renderDeadlines();
-
-        // Buttons
-        document.getElementById('newRuleBtn').addEventListener('click', openRuleModal);
-        document.getElementById('closeRuleModal').addEventListener('click', closeRuleModal);
-        document.getElementById('cancelRule').addEventListener('click', closeRuleModal);
-        document.getElementById('saveRule').addEventListener('click', saveRule);
-        document.getElementById('exportBtn').addEventListener('click', () => alert('✅ Export started'));
-        document.getElementById('exportAuditBtn').addEventListener('click', () => alert('✅ Audit CSV queued')));
-    document.getElementById('ackAllBtn').addEventListener('click', () => { document.querySelectorAll('.issue-row').forEach(r => r.classList.add('opacity-60')); alert('✅ All issues acknowledged'); });
-    document.getElementById('addDeadlineBtn').addEventListener('click', () => document.getElementById('deadlinesTab').click());
-    document.getElementById('createDeadline').addEventListener('click', createDeadline);
-
-    // Load Chart.js
-    if (typeof Chart === 'undefined') {
-        const s = document.createElement('script');
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        s.onload = () => { drawScore(); drawRisk(); };
-        document.head.appendChild(s);
-    } else { drawScore(); drawRisk(); }
-});
+        drawScore();
+        drawRisk();
+    });
 
     // ---- Tabs ----
     function setupTabs() {
@@ -322,25 +322,39 @@
         });
     }
 
+    // ---- Buttons / Alerts ----
+    function wireButtons() {
+        document.getElementById('newAlertBtn').addEventListener('click', () => alert('🔔 New alert created (demo)'));
+        document.getElementById('addPolicyBtn').addEventListener('click', () => alert('📄 Policy added (demo)'));
+        document.getElementById('exportBtn').addEventListener('click', () => alert('✅ Export started'));
+        document.getElementById('exportAuditBtn').addEventListener('click', () => alert('✅ Audit CSV queued'));
+        document.getElementById('ackAllBtn').addEventListener('click', () => {
+            document.querySelectorAll('.issue-row').forEach(r => r.classList.add('opacity-60'));
+            alert('✅ All issues acknowledged');
+        });
+        document.getElementById('addDeadlineBtn').addEventListener('click', () => document.getElementById('deadlinesTab').click());
+        document.getElementById('createDeadline').addEventListener('click', createDeadline);
+        document.getElementById('newRuleBtn').addEventListener('click', openRuleModal);
+        document.getElementById('closeRuleModal').addEventListener('click', closeRuleModal);
+        document.getElementById('cancelRule').addEventListener('click', closeRuleModal);
+        document.getElementById('saveRule').addEventListener('click', saveRule);
+    }
+
     // ---- Overview Rendering ----
     function renderOverview() {
-        // Score & counts
         document.getElementById('openIssuesCount').textContent = ISSUES.length;
         document.getElementById('deadlineCount').textContent = DEADLINES.filter(d => daysFromNow(d.date) <= 30).length;
         document.getElementById('jurisdictionChips').innerHTML = JURISDICTIONS.map(j => chip(j)).join('');
-        // Issues list
-        const issues = document.getElementById('issuesList');
-        issues.innerHTML = ISSUES.map(i => issueRow(i)).join('') || emptyState('All clear! No open issues.');
-        // Deadlines short list
-        const dlist = document.getElementById('deadlinesList');
-        dlist.innerHTML = DEADLINES.slice().sort((a, b) => a.date.localeCompare(b.date)).map(d => deadlineRow(d, true)).join('') || emptyState('No upcoming deadlines.');
-        // Changes
-        document.getElementById('changesFeed').innerHTML = CHANGES.map(c => `
-    <div class="rounded-lg bg-slate-50 p-3">
-      <div class="text-xs text-slate-500">${c.ts}</div>
-      <div class="text-sm text-slate-800">${c.text}</div>
-    </div>`).join('');
-        // Risk summary
+        document.getElementById('issuesList').innerHTML =
+            ISSUES.map(i => issueRow(i)).join('') || emptyState('All clear! No open issues.');
+        document.getElementById('deadlinesList').innerHTML =
+            DEADLINES.slice().sort((a, b) => a.date.localeCompare(b.date)).map(d => deadlineRow(d, true)).join('') ||
+            emptyState('No upcoming deadlines.');
+        document.getElementById('changesFeed').innerHTML =
+            CHANGES.map(c => `<div class="rounded-lg bg-slate-50 p-3">
+        <div class="text-xs text-slate-500">${c.ts}</div>
+        <div class="text-sm text-slate-800">${c.text}</div>
+      </div>`).join('');
         const hi = ISSUES.filter(i => i.sev === 'high').length;
         const md = ISSUES.filter(i => i.sev === 'medium').length;
         const lo = ISSUES.filter(i => i.sev === 'low').length;
@@ -350,13 +364,19 @@
     // ---- Charts ----
     function drawScore() {
         const ctx = document.getElementById('scoreChart').getContext('2d');
-        const pct = Math.max(0, Math.min(100, 92 - ISSUES.length * 6)); // simple heuristic
+        const pct = Math.max(0, Math.min(100, 92 - ISSUES.length * 6));
         const color = pct >= 85 ? '#10b981' : pct >= 70 ? '#f59e0b' : '#ef4444';
-        document.getElementById('scoreBadge').textContent = pct >= 85 ? 'Low Risk' : pct >= 70 ? 'Moderate Risk' : 'High Risk';
+        document.getElementById('scoreBadge').textContent =
+            pct >= 85 ? 'Low Risk' : pct >= 70 ? 'Moderate Risk' : 'High Risk';
         new Chart(ctx, {
             type: 'doughnut',
             data: { datasets: [{ data: [pct, 100 - pct], backgroundColor: [color, '#e5e7eb'], borderWidth: 0 }] },
-            options: { cutout: '70%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: false }
+            options: {
+                responsive: true, maintainAspectRatio: false, resizeDelay: 200,
+                cutout: '70%',
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                animation: false
+            }
         });
     }
 
@@ -367,9 +387,10 @@
             type: 'scatter',
             data: { datasets: [{ data: pts, pointRadius: pts.map(p => p.r) }] },
             options: {
+                responsive: true, maintainAspectRatio: false, resizeDelay: 200,
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.raw.label} • ${c.raw.y}d` } } },
                 scales: {
-                    x: { title: { display: true, text: 'Severity (Low → High)' }, min: 1, max: 3, ticks: { stepSize: 1, callback: (v) => ({ 1: 'Low', 2: 'Med', 3: 'High' })[v] } },
+                    x: { title: { display: true, text: 'Severity (Low → High)' }, min: 1, max: 3, ticks: { stepSize: 1, callback: v => ({ 1: 'Low', 2: 'Med', 3: 'High' })[v] } },
                     y: { title: { display: true, text: 'Days until due' }, beginAtZero: true }
                 }
             }
@@ -381,33 +402,33 @@
     function renderRules() {
         const wrap = document.getElementById('rulesList');
         wrap.innerHTML = RULES.map(r => `
-    <div class="rounded-xl border border-slate-200 bg-white p-4 flex items-start justify-between gap-4">
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="font-semibold text-slate-800">${r.name}</span>
-          ${r.enabled ? badge('Enabled', 'emerald') : badge('Disabled', 'slate')}
+      <div class="rounded-xl border border-slate-200 bg-white p-4 flex items-start justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-slate-800">${r.name}</span>
+            ${badge(r.enabled ? 'Enabled' : 'Disabled', r.enabled ? 'emerald' : 'slate')}
+          </div>
+          <div class="text-sm text-slate-600 mt-1"><b>Trigger:</b> ${labelTrigger(r.trigger)}</div>
+          <div class="text-sm text-slate-600"><b>Condition:</b> ${r.condition}</div>
+          <div class="text-sm text-slate-600"><b>Action:</b> ${r.action}</div>
         </div>
-        <div class="text-sm text-slate-600 mt-1"><b>Trigger:</b> ${labelTrigger(r.trigger)}</div>
-        <div class="text-sm text-slate-600"><b>Condition:</b> ${r.condition}</div>
-        <div class="text-sm text-slate-600"><b>Action:</b> ${r.action}</div>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="toggleRule(${r.id})">
+            <i class="fa-solid ${r.enabled ? 'fa-pause' : 'fa-play'} mr-1"></i> ${r.enabled ? 'Disable' : 'Enable'}
+          </button>
+          <button class="px-3 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 text-sm" onclick="deleteRule(${r.id})">
+            <i class="fa-solid fa-trash mr-1"></i> Delete
+          </button>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="toggleRule(${r.id})">
-          <i class="fa-solid ${r.enabled ? 'fa-pause' : 'fa-play'} mr-1"></i> ${r.enabled ? 'Disable' : 'Enable'}
-        </button>
-        <button class="px-3 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 text-sm" onclick="deleteRule(${r.id})">
-          <i class="fa-solid fa-trash mr-1"></i> Delete
-        </button>
-      </div>
-    </div>
-  `).join('') || emptyState('No rules yet.');
+    `).join('') || emptyState('No rules yet.');
     }
     function openRuleModal() { document.getElementById('ruleModal').classList.remove('hidden'); }
     function closeRuleModal() { document.getElementById('ruleModal').classList.add('hidden'); }
     function saveRule() {
         const t = document.getElementById('ruleTrigger').value;
-        const c = document.getElementById('ruleCondition').value.trim() || 'any';
-        const a = document.getElementById('ruleAction').value.trim() || 'Notify';
+        const c = (document.getElementById('ruleCondition').value || 'any').trim();
+        const a = (document.getElementById('ruleAction').value || 'Notify').trim();
         const name = `${labelTrigger(t)} Rule`;
         RULES.push({ id: Date.now(), name, enabled: true, trigger: t, condition: c, action: a });
         closeRuleModal(); renderRules(); alert('✅ Rule saved');
@@ -419,18 +440,7 @@
     // ---- Audits ----
     function renderAudits() {
         const rows = document.getElementById('auditRows');
-        rows.innerHTML = AUDIT.map(a => `
-    <tr class="border-b last:border-0">
-      <td class="py-2 pr-4 text-slate-600">${a.time}</td>
-      <td class="py-2 pr-4">${a.actor}</td>
-      <td class="py-2 pr-4">${a.action}</td>
-      <td class="py-2 pr-4">${a.target}</td>
-      <td class="py-2 pr-4">${statusBadge(a.status)}</td>
-    </tr>`).join('');
-        document.getElementById('auditFilter').addEventListener('change', (e) => {
-            const v = e.target.value;
-            const data = v === 'all' ? AUDIT : AUDIT.filter(x => x.type === v);
-            rows.innerHTML = data.map(a => `
+        const render = data => rows.innerHTML = data.map(a => `
       <tr class="border-b last:border-0">
         <td class="py-2 pr-4 text-slate-600">${a.time}</td>
         <td class="py-2 pr-4">${a.actor}</td>
@@ -438,13 +448,18 @@
         <td class="py-2 pr-4">${a.target}</td>
         <td class="py-2 pr-4">${statusBadge(a.status)}</td>
       </tr>`).join('');
+        render(AUDIT);
+        document.getElementById('auditFilter').addEventListener('change', (e) => {
+            const v = e.target.value;
+            render(v === 'all' ? AUDIT : AUDIT.filter(x => x.type === v));
         });
     }
 
     // ---- Deadlines ----
     function renderDeadlines() {
         const list = document.getElementById('allDeadlines');
-        list.innerHTML = DEADLINES.slice().sort((a, b) => a.date.localeCompare(b.date)).map(d => deadlineRow(d, false)).join('') || emptyState('No deadlines recorded.');
+        list.innerHTML = DEADLINES.slice().sort((a, b) => a.date.localeCompare(b.date))
+            .map(d => deadlineRow(d, false)).join('') || emptyState('No deadlines recorded.');
         document.getElementById('dlCount').textContent = DEADLINES.length;
     }
     function createDeadline() {
@@ -454,7 +469,7 @@
         if (!title || !date) { alert('❌ Title and date required'); return; }
         DEADLINES.push({ id: Date.now(), title, date, j });
         document.getElementById('dlTitle').value = ''; document.getElementById('dlDate').value = '';
-        renderDeadlines(); renderOverview(); alert('✅ Deadline added');
+        renderDeadlines(); renderOverview(); drawRisk(); alert('✅ Deadline added');
     }
 
     // ---- UI helpers ----
@@ -464,41 +479,48 @@
     function issueRow(i) {
         const clr = i.sev === 'high' ? 'red' : i.sev === 'medium' ? 'amber' : 'slate';
         return `
-  <div class="issue-row flex items-start justify-between p-3 rounded-lg bg-slate-50">
-    <div>
-      <div class="flex items-center gap-2">
-        ${badge(i.sev.toUpperCase(), clr)}
-        <span class="font-medium text-slate-800">${i.title}</span>
-      </div>
-      <div class="text-xs text-slate-600 mt-1">${i.j} • Due in ${daysFromNow(i.due)} days</div>
-    </div>
-    <div class="flex items-center gap-2">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="snoozeIssue(${i.id})"><i class="fa-solid fa-clock mr-1"></i> Snooze</button>
-      <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="resolveIssue(${i.id})"><i class="fa-solid fa-check mr-1"></i> Resolve</button>
-    </div>
-  </div>`;
+      <div class="issue-row flex items-start justify-between p-3 rounded-lg bg-slate-50">
+        <div>
+          <div class="flex items-center gap-2">
+            ${badge(i.sev.toUpperCase(), clr)}
+            <span class="font-medium text-slate-800">${i.title}</span>
+          </div>
+          <div class="text-xs text-slate-600 mt-1">${i.j} • Due in ${daysFromNow(i.due)} days</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="snoozeIssue(${i.id})">
+            <i class="fa-solid fa-clock mr-1"></i> Snooze
+          </button>
+          <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="resolveIssue(${i.id})">
+            <i class="fa-solid fa-check mr-1"></i> Resolve
+          </button>
+        </div>
+      </div>`;
     }
     function deadlineRow(d, compact) {
+        const warn = daysFromNow(d.date) <= 7 ? 'bg-amber-50' : 'bg-slate-50';
         return `
-  <div class="flex items-start justify-between p-3 rounded-lg ${daysFromNow(d.date) <= 7 ? 'bg-amber-50' : 'bg-slate-50'}">
-    <div>
-      <div class="font-medium text-slate-800">${d.title}</div>
-      <div class="text-xs text-slate-600">${d.j} • ${d.date}${compact ? '' : ' • Due in ' + daysFromNow(d.date) + ' days'}</div>
-    </div>
-    <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="removeDeadline(${d.id})"><i class="fa-solid fa-xmark mr-1"></i> Remove</button>
-  </div>`;
+      <div class="flex items-start justify-between p-3 rounded-lg ${warn}">
+        <div>
+          <div class="font-medium text-slate-800">${d.title}</div>
+          <div class="text-xs text-slate-600">${d.j} • ${d.date}${compact ? '' : ' • Due in ' + daysFromNow(d.date) + ' days'}</div>
+        </div>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="removeDeadline(${d.id})">
+          <i class="fa-solid fa-xmark mr-1"></i> Remove
+        </button>
+      </div>`;
     }
     function emptyState(msg) { return `<div class="text-slate-500 text-center py-6">${msg}</div>`; }
     function daysFromNow(dateStr) { const d = new Date(dateStr), now = new Date(); return Math.max(0, Math.ceil((d - now) / (1000 * 60 * 60 * 24))); }
-    function snoozeIssue(id) { alert('⏰ Snoozed 7 days'); }
-    function resolveIssue(id) { const idx = ISSUES.findIndex(x => x.id === id); if (idx > -1) { ISSUES.splice(idx, 1); renderOverview(); drawScore(); drawRisk(); } }
-    function removeDeadline(id) { const idx = DEADLINES.findIndex(x => x.id === id); if (idx > -1) { DEADLINES.splice(idx, 1); renderDeadlines(); renderOverview(); } }
+    function snoozeIssue(id) { alert('⏰ Snoozed 7 days (demo)'); }
+    function resolveIssue(id) { const i = ISSUES.findIndex(x => x.id === id); if (i > -1) { ISSUES.splice(i, 1); renderOverview(); drawScore(); drawRisk(); } }
+    function removeDeadline(id) { const i = DEADLINES.findIndex(x => x.id === id); if (i > -1) { DEADLINES.splice(i, 1); renderDeadlines(); renderOverview(); drawRisk(); } }
 </script>
 
 <style>
     .cw-tab.active {
         background-color: #1e293b;
-        color: white;
+        color: #fff;
     }
 
     .cw-tab:not(.active) {

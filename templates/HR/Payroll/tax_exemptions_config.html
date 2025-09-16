@@ -1,0 +1,563 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-receipt mr-2"></i> Tax Exemptions Config
+            </h1>
+            <p class="text-slate-600 text-sm">Manage sections, limits, and proof types.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btnNewSection" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i> New Section
+            </button>
+            <button id="btnNewProof" class="px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm">
+                <i class="fa-solid fa-file-circle-plus mr-1"></i> New Proof Type
+            </button>
+            <button id="btnExport"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-arrow-down mr-1"></i> Export
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab" class="tx-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-gauge-high mr-1"></i> Overview
+            </button>
+            <button id="sectionsTab" class="tx-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-list-check mr-1"></i> Sections
+            </button>
+            <button id="proofsTab" class="tx-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-file-circle-check mr-1"></i> Proof Types
+            </button>
+            <button id="historyTab" class="tx-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
+            </button>
+            <button id="settingsTab" class="tx-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-gear mr-1"></i> Settings
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overviewPanel" class="tx-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- KPIs -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-clipboard-list mr-2"></i> Current FY
+                    </h3>
+                    <span id="fyBadge" class="px-2 py-1 text-xs rounded bg-amber-50 text-amber-700">Draft</span>
+                </div>
+                <div class="grid grid-cols-4 gap-3">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Sections</div>
+                        <div id="kpiSections" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">With Limits</div>
+                        <div id="kpiLimits" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Proof Types</div>
+                        <div id="kpiProofs" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Inactive</div>
+                        <div id="kpiInactive" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="relative h-40 mt-4">
+                    <canvas id="kpiChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div class="mt-4 flex items-center gap-2">
+                    <select id="fyPicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                        <option>FY 2025–26</option>
+                        <option>FY 2024–25</option>
+                        <option>FY 2023–24</option>
+                    </select>
+                    <button id="btnValidate"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-spell-check mr-1"></i> Validate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mix -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-chart-pie mr-2"></i> Status Mix
+                    </h3>
+                </div>
+                <div class="relative h-40">
+                    <canvas id="mixChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div id="mixLegend" class="mt-3 text-sm text-slate-700"></div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-3">
+                    <i class="fa-solid fa-bolt mr-2"></i> Quick Actions
+                </h3>
+                <div class="space-y-3">
+                    <button id="btnPreview"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-eye mr-2"></i> Preview proof submission flow
+                    </button>
+                    <button id="btnSync"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-rotate mr-2"></i> Recompute payroll with latest exemptions
+                    </button>
+                    <button id="btnRollback"
+                        class="w-full px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-left">
+                        <i class="fa-solid fa-rotate-left mr-2"></i> Rollback last change
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sections -->
+    <section id="sectionsPanel" class="tx-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-list-check mr-2"></i> Sections & Limits
+                </h3>
+                <div class="flex items-center gap-2">
+                    <input id="secSearch" type="text" placeholder="Search section or code..."
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                    <select id="secStatus" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Section</th>
+                            <th class="py-2 pr-4">Code</th>
+                            <th class="py-2 pr-4">Annual Limit</th>
+                            <th class="py-2 pr-4">Carryover</th>
+                            <th class="py-2 pr-4">Proof Type</th>
+                            <th class="py-2 pr-4">Status</th>
+                            <th class="py-2 pr-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="secRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof Types -->
+    <section id="proofsPanel" class="tx-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-file-circle-check mr-2"></i> Proof Types
+                </h3>
+                <div class="flex items-center gap-2">
+                    <input id="proofSearch" type="text" placeholder="Search proof..."
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                    <select id="proofStatus" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="mandatory">Mandatory</option>
+                        <option value="optional">Optional</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Name</th>
+                            <th class="py-2 pr-4">Mime</th>
+                            <th class="py-2 pr-4">Max Size</th>
+                            <th class="py-2 pr-4">Validity</th>
+                            <th class="py-2 pr-4">Requirement</th>
+                            <th class="py-2 pr-4">Status</th>
+                            <th class="py-2 pr-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proofRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- History -->
+    <section id="historyPanel" class="tx-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-table mr-2"></i> Change History
+                </h3>
+                <div class="text-sm text-slate-600">Last 10 edits</div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Time</th>
+                            <th class="py-2 pr-4">Type</th>
+                            <th class="py-2 pr-4">Name</th>
+                            <th class="py-2 pr-4">Action</th>
+                            <th class="py-2 pr-4">By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="histRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settingsPanel" class="tx-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-calendar-day mr-2"></i> Windows
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="block">Proofs open from:
+                        <input id="stOpen" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </label>
+                    <label class="block">Proofs close on:
+                        <input id="stClose" type="date"
+                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </label>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-shield-halved mr-2"></i> Validation
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center gap-2"><input id="stDup" type="checkbox" checked> Disallow duplicate
+                        claims</label>
+                    <label class="flex items-center gap-2"><input id="stAuto" type="checkbox"> Auto-approve ≤
+                        ₹5,000</label>
+                    <label class="flex items-center gap-2"><input id="stCap" type="checkbox" checked> Enforce section
+                        limits</label>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-bell mr-2"></i> Reminders
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="block">Nudge days before close:
+                        <input id="stNudge" type="number" min="0" value="5"
+                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </label>
+                    <button id="stSave"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm mt-2">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal (Create/Edit) -->
+<div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="modalTitle" class="text-lg font-semibold text-slate-800">New</h3>
+                    <button id="closeModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4 text-sm" id="modalBody"></div>
+                <div class="px-6 pb-6 flex items-center justify-end gap-2">
+                    <button id="cancelEdit"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                    <button id="saveEdit" class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                        <i class="fa-solid fa-check mr-1"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+    // ---- Demo Data ----
+    const SECTIONS = [
+        { id: 1, name: 'Section 80C', code: '80C', limit: 150000, carryover: 'No', proof: 'Investment Receipts', status: 'active' },
+        { id: 2, name: 'Section 80D (Self)', code: '80D', limit: 25000, carryover: 'No', proof: 'Health Insurance', status: 'active' },
+        { id: 3, name: 'House Rent Allowance', code: 'HRA', limit: 'Rule-based', carryover: 'No', proof: 'Rent Receipts', status: 'active' },
+        { id: 4, name: 'Leave Travel Allowance', code: 'LTA', limit: 'Rule-based', carryover: 'Yes (policy)', proof: 'Travel Bills', status: 'inactive' }
+    ];
+    const PROOFS = [
+        { id: 11, name: 'Rent Receipts', mime: '.jpg,.png,.pdf', max: '5 MB', validity: 'Monthly', req: 'Mandatory', status: 'active' },
+        { id: 12, name: 'Insurance Premium', mime: '.pdf', max: '3 MB', validity: 'Annual', req: 'Mandatory', status: 'active' },
+        { id: 13, name: 'Mutual Fund Statement', mime: '.pdf', max: '10 MB', validity: 'Annual', req: 'Optional', status: 'inactive' }
+    ];
+    const HISTORY = [
+        { ts: '2025-09-14 12:10', type: 'Section', name: '80C', action: 'Limit verified', by: 'Payroll' },
+        { ts: '2025-09-01 09:00', type: 'Proof', name: 'Rent Receipts', action: 'Max size to 5 MB', by: 'System' },
+        { ts: '2025-08-18 15:30', type: 'Section', name: 'LTA', action: 'Deactivated', by: 'HR Admin' }
+    ];
+
+    // ---- Panels/Tabs ----
+    const panels = {
+        overview: document.getElementById('overviewPanel'),
+        sections: document.getElementById('sectionsPanel'),
+        proofs: document.getElementById('proofsPanel'),
+        history: document.getElementById('historyPanel'),
+        settings: document.getElementById('settingsPanel')
+    };
+    let _kpiChart, _mixChart;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTabs();
+        wireButtons();
+        renderKPIs();
+        drawCharts();
+        renderSections();
+        renderProofs();
+        renderHistory();
+    });
+
+    function setupTabs() {
+        document.querySelectorAll('.tx-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tx-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                panels[name].classList.remove('hidden');
+            });
+        });
+    }
+
+    function wireButtons() {
+        document.getElementById('btnNewSection').addEventListener('click', () => openModal('New Section', sectionForm()));
+        document.getElementById('btnNewProof').addEventListener('click', () => openModal('New Proof Type', proofForm()));
+        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Exported (demo)'));
+        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed (demo)'));
+        document.getElementById('btnPreview').addEventListener('click', () => alert('👀 Submission flow previewed (demo)'));
+        document.getElementById('btnSync').addEventListener('click', () => alert('🔁 Payroll recomputed (demo)'));
+        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Rolled back (demo)'));
+        document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved'));
+
+        document.getElementById('secSearch').addEventListener('input', renderSections);
+        document.getElementById('secStatus').addEventListener('change', renderSections);
+        document.getElementById('proofSearch').addEventListener('input', renderProofs);
+        document.getElementById('proofStatus').addEventListener('change', renderProofs);
+
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        document.getElementById('cancelEdit').addEventListener('click', closeModal);
+        document.getElementById('saveEdit').addEventListener('click', () => { closeModal(); alert('💾 Saved (demo)'); });
+    }
+
+    // ---- Overview/KPIs ----
+    function renderKPIs() {
+        const sections = SECTIONS.length;
+        const withLimits = SECTIONS.filter(x => x.limit !== 'Rule-based').length;
+        const proofs = PROOFS.length;
+        const inactive = SECTIONS.filter(x => x.status === 'inactive').length + PROOFS.filter(x => x.status === 'inactive').length;
+        document.getElementById('kpiSections').textContent = sections;
+        document.getElementById('kpiLimits').textContent = withLimits;
+        document.getElementById('kpiProofs').textContent = proofs;
+        document.getElementById('kpiInactive').textContent = inactive;
+
+        const badge = document.getElementById('fyBadge');
+        const ready = inactive === 0 && (sections + proofs) > 0;
+        badge.textContent = ready ? 'Ready' : ((sections + proofs) > 0 ? 'In Progress' : 'Draft');
+        badge.className = 'px-2 py-1 text-xs rounded ' + (ready ? 'bg-emerald-50 text-emerald-700' : ((sections + proofs) > 0 ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700'));
+    }
+
+    function drawCharts() {
+        const ctx1 = document.getElementById('kpiChart').getContext('2d');
+        if (_kpiChart) _kpiChart.destroy();
+        _kpiChart = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Sections', 'With Limits', 'Proof Types', 'Inactive'],
+                datasets: [{ label: 'Count', data: [SECTIONS.length, SECTIONS.filter(x => x.limit !== 'Rule-based').length, PROOFS.length, Number(document.getElementById('kpiInactive').textContent) || 0] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+
+        const counts = {
+            active: SECTIONS.filter(x => x.status === 'active').length + PROOFS.filter(x => x.status === 'active').length,
+            inactive: SECTIONS.filter(x => x.status === 'inactive').length + PROOFS.filter(x => x.status === 'inactive').length
+        };
+        const ctx2 = document.getElementById('mixChart').getContext('2d');
+        if (_mixChart) _mixChart.destroy();
+        _mixChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts) }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } }, animation: false }
+        });
+        document.getElementById('mixLegend').innerHTML =
+            Object.entries(counts).map(([k, v]) => `<div class="flex items-center justify-between text-sm"><span class="capitalize">${k}</span><span>${v}</span></div>`).join('');
+    }
+
+    // ---- Sections ----
+    function renderSections() {
+        const q = (document.getElementById('secSearch').value || '').toLowerCase();
+        const st = document.getElementById('secStatus').value;
+        const rows = SECTIONS
+            .filter(r => (st === 'all' ? true : r.status === st))
+            .filter(r => r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q) || (r.proof || '').toLowerCase().includes(q))
+            .slice().sort((a, b) => a.code.localeCompare(b.code));
+        document.getElementById('secRows').innerHTML = rows.map(rowSection).join('') || emptyRow(7);
+    }
+    function rowSection(r) {
+        const limit = typeof r.limit === 'number' ? `₹${(r.limit).toLocaleString('en-IN')}` : r.limit;
+        return `<tr class="border-b last:border-0">
+    <td class="py-2 pr-4">${r.name}</td>
+    <td class="py-2 pr-4">${r.code}</td>
+    <td class="py-2 pr-4">${limit}</td>
+    <td class="py-2 pr-4">${r.carryover}</td>
+    <td class="py-2 pr-4">${r.proof}</td>
+    <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
+    <td class="py-2 pr-4">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.code} (demo)')">
+        <i class="fa-solid fa-pen mr-1"></i> Edit
+      </button>
+    </td>
+  </tr>`;
+    }
+
+    // ---- Proof Types ----
+    function renderProofs() {
+        const q = (document.getElementById('proofSearch').value || '').toLowerCase();
+        const st = document.getElementById('proofStatus').value;
+        const rows = PROOFS
+            .filter(r => st === 'all' ? true : (st === 'inactive' ? r.status === 'inactive' : r.req.toLowerCase() === st))
+            .filter(r => r.name.toLowerCase().includes(q) || (r.mime || '').toLowerCase().includes(q))
+            .slice().sort((a, b) => a.name.localeCompare(b.name));
+        document.getElementById('proofRows').innerHTML = rows.map(rowProof).join('') || emptyRow(7);
+    }
+    function rowProof(r) {
+        return `<tr class="border-b last:border-0">
+    <td class="py-2 pr-4">${r.name}</td>
+    <td class="py-2 pr-4">${r.mime}</td>
+    <td class="py-2 pr-4">${r.max}</td>
+    <td class="py-2 pr-4">${r.validity}</td>
+    <td class="py-2 pr-4">${badgeLite(r.req)}</td>
+    <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
+    <td class="py-2 pr-4">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} (demo)')">
+        <i class="fa-solid fa-pen mr-1"></i> Edit
+      </button>
+    </td>
+  </tr>`;
+    }
+
+    // ---- History ----
+    function renderHistory() {
+        document.getElementById('histRows').innerHTML = HISTORY.map(h => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+      <td class="py-2 pr-4">${h.type}</td>
+      <td class="py-2 pr-4">${h.name}</td>
+      <td class="py-2 pr-4">${h.action}</td>
+      <td class="py-2 pr-4">${h.by}</td>
+    </tr>`).join('');
+    }
+
+    // ---- Modal helpers (demo only) ----
+    function openModal(title, body) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalBody').innerHTML = body;
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+    function closeModal() { document.getElementById('editModal').classList.add('hidden'); }
+
+    function sectionForm() {
+        return `
+    <label class="block">Section Name
+      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Section 80C">
+    </label>
+    <label class="block mt-2">Code
+      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="80C">
+    </label>
+    <label class="block mt-2">Annual Limit
+      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., 150000 or Rule-based">
+    </label>
+    <label class="block mt-2">Carryover
+      <select class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+        <option>No</option><option>Yes (policy)</option>
+      </select>
+    </label>
+    <label class="block mt-2">Default Proof Type
+      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Investment Receipts">
+    </label>
+    <div class="mt-2"><label class="flex items-center gap-2"><input type="checkbox" checked> Active</label></div>`;
+    }
+    function proofForm() {
+        return `
+    <label class="block">Proof Name
+      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Rent Receipts">
+    </label>
+    <label class="block mt-2">Allowed File Types
+      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder=".pdf,.jpg,.png">
+    </label>
+    <label class="block mt-2">Max Size (MB)
+      <input type="number" min="1" value="5" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+    </label>
+    <label class="block mt-2">Validity
+      <select class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+        <option>Monthly</option><option>Quarterly</option><option>Annual</option>
+      </select>
+    </label>
+    <label class="block mt-2">Requirement
+      <select class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+        <option>Mandatory</option><option>Optional</option>
+      </select>
+    </label>
+    <div class="mt-2"><label class="flex items-center gap-2"><input type="checkbox" checked> Active</label></div>`;
+    }
+
+    // ---- Utils ----
+    function badgeStatus(s) {
+        return `<span class="px-2 py-0.5 rounded-full ${s === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'} text-xs">${s.charAt(0).toUpperCase() + s.slice(1)}</span>`;
+    }
+    function badgeLite(s) { return `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs">${s}</span>`; }
+    function emptyRow(colspan) { return `<tr><td colspan="${colspan}" class="py-6 text-center text-slate-500">No records.</td></tr>`; }
+</script>
+
+<style>
+    .tx-tab.active {
+        background-color: #1e293b;
+        color: #fff;
+    }
+
+    .tx-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .tx-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}
