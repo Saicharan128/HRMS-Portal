@@ -132,10 +132,12 @@
                     {% elif employee_type == "Contractors / Remote staff" %}
                     {% set employee_type = "Contractors" %}
                     {% if subposition == "Remote Staff" %}
-                        {% set subposition = "Remote" %}
-                        {% else %}
-                        {% set subposition = subposition %}
-                        {% endif %}
+                    {% set subposition = "Remote" %}
+                    {% else %}
+                    {% set subposition = subposition %}
+                    {% endif %}
+                    {% elif employee_type == "CXOs" %}
+                    {% set subposition = "CTO" %}
                     {% else %}
                     {% set subposition = subposition %}
                     {% endif %}
