@@ -1,0 +1,401 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Expense reports
+            </h1>
+            <p class="text-slate-600 text-sm">Department/BU summaries.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Add Expense (Dummy) -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
+        <h2 class="text-lg font-semibold text-slate-800 mb-4">
+            <i class="fa-solid fa-plus-square mr-2"></i> Add Expense (Dummy)
+        </h2>
+        <form id="expForm" class="grid grid-cols-1 md:grid-cols-8 gap-4">
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Employee *</label>
+                <input name="employee" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="E001 - Charan">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Department *</label>
+                <input name="department" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="Engineering">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">BU *</label>
+                <input name="bu" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="Products / Services">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Date *</label>
+                <input name="date" type="date" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Category *</label>
+                <select name="category" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <option>Travel</option>
+                    <option>Meals</option>
+                    <option>Office</option>
+                    <option>Software</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Amount *</label>
+                <input name="amount" type="number" step="0.01" min="0" required
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Currency</label>
+                <input name="currency" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="INR">
+            </div>
+            <div class="flex items-center gap-2">
+                <input id="reimb" name="reimb" type="checkbox" class="h-4 w-4">
+                <label for="reimb" class="text-sm text-slate-700">Reimbursable</label>
+            </div>
+            <div class="md:col-span-8">
+                <label class="block text-sm text-slate-600 mb-1">Notes</label>
+                <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="Optional">
+            </div>
+            <div class="md:col-span-8 flex items-center gap-3">
+                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                    <i class="fa-solid fa-plus mr-1"></i> Add
+                </button>
+                <span id="formMsg" class="text-sm text-slate-600"></span>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-7 gap-2">
+        <input id="q" placeholder="Search employee / notes…"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fDept" placeholder="Department"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fBU" placeholder="BU" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fCat" placeholder="Category" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">Any Status</option>
+            <option>Pending</option>
+            <option>Approved</option>
+            <option>Rejected</option>
+        </select>
+        <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fTo" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Total Amount</div>
+            <div id="kpiTotal" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Reimbursable</div>
+            <div id="kpiReimb" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Non-reimb.</div>
+            <div id="kpiNonReimb" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Pending</div>
+            <div id="kpiPending" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Avg / Employee</div>
+            <div id="kpiAvgEmp" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+    </div>
+
+    <!-- Reports Table -->
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white mb-6">
+        <table class="min-w-full text-sm text-left text-slate-700">
+            <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                    <th class="px-4 py-2">Employee</th>
+                    <th class="px-4 py-2">Dept</th>
+                    <th class="px-4 py-2">BU</th>
+                    <th class="px-4 py-2">Date</th>
+                    <th class="px-4 py-2">Category</th>
+                    <th class="px-4 py-2">Amount</th>
+                    <th class="px-4 py-2">Curr</th>
+                    <th class="px-4 py-2">Reimb</th>
+                    <th class="px-4 py-2">Status</th>
+                    <th class="px-4 py-2 w-64">Notes</th>
+                    <th class="px-4 py-2 w-56">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="rows" class="divide-y divide-slate-200"></tbody>
+        </table>
+    </div>
+
+    <!-- Department Summary -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 mb-4">
+        <h3 class="text-slate-800 font-semibold mb-3"><i class="fa-solid fa-building mr-2"></i> Department Summary</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left text-slate-700">
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="px-4 py-2">Department</th>
+                        <th class="px-4 py-2">Reports</th>
+                        <th class="px-4 py-2">Total</th>
+                        <th class="px-4 py-2">Reimbursable</th>
+                        <th class="px-4 py-2">Non-reimb.</th>
+                        <th class="px-4 py-2">Approved</th>
+                        <th class="px-4 py-2">Pending</th>
+                    </tr>
+                </thead>
+                <tbody id="deptRows" class="divide-y divide-slate-200"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- BU Summary -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-4">
+        <h3 class="text-slate-800 font-semibold mb-3"><i class="fa-solid fa-sitemap mr-2"></i> BU Summary</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left text-slate-700">
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="px-4 py-2">BU</th>
+                        <th class="px-4 py-2">Reports</th>
+                        <th class="px-4 py-2">Total</th>
+                        <th class="px-4 py-2">Reimbursable</th>
+                        <th class="px-4 py-2">Non-reimb.</th>
+                        <th class="px-4 py-2">Approved</th>
+                        <th class="px-4 py-2">Pending</th>
+                    </tr>
+                </thead>
+                <tbody id="buRows" class="divide-y divide-slate-200"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
+</div>
+
+<script>
+    /* ---------- Dummy store (localStorage) ---------- */
+    const KEY = "dummy_expense_reports";
+    let STORE = JSON.parse(localStorage.getItem(KEY) || "null") || [
+        { id: 1, employee: "E001 - Charan", department: "Engineering", bu: "Products", date: "2025-09-12", category: "Software", amount: 2499, currency: "INR", reimb: true, status: "Approved", notes: "Git hosting" },
+        { id: 2, employee: "E014 - Priya", department: "Finance", bu: "Corporate", date: "2025-09-11", category: "Meals", amount: 1200, currency: "INR", reimb: true, status: "Pending", notes: "Client lunch" },
+        { id: 3, employee: "E009 - Arjun", department: "Engineering", bu: "Services", date: "2025-09-10", category: "Travel", amount: 5400, currency: "INR", reimb: true, status: "Rejected", notes: "Cab - missing bill" },
+        { id: 4, employee: "E021 - Meera", department: "HR", bu: "Corporate", date: "2025-09-09", category: "Office", amount: 1800, currency: "INR", reimb: false, status: "Approved", notes: "Stationery" }
+    ];
+    function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); }
+
+    /* ---------- Elements ---------- */
+    const rows = document.getElementById("rows");
+    const deptRows = document.getElementById("deptRows");
+    const buRows = document.getElementById("buRows");
+    const listMsg = document.getElementById("listMsg");
+
+    const expForm = document.getElementById("expForm");
+    const formMsg = document.getElementById("formMsg");
+
+    const q = document.getElementById("q");
+    const fDept = document.getElementById("fDept");
+    const fBU = document.getElementById("fBU");
+    const fCat = document.getElementById("fCat");
+    const fStatus = document.getElementById("fStatus");
+    const fFrom = document.getElementById("fFrom");
+    const fTo = document.getElementById("fTo");
+
+    const kpiTotal = document.getElementById("kpiTotal");
+    const kpiReimb = document.getElementById("kpiReimb");
+    const kpiNonReimb = document.getElementById("kpiNonReimb");
+    const kpiPending = document.getElementById("kpiPending");
+    const kpiAvgEmp = document.getElementById("kpiAvgEmp");
+
+    /* ---------- Helpers ---------- */
+    function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2"; c.appendChild(el); return c; }
+    function input(v, cls = "w-32") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
+    function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 1; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
+    function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
+    function money(n, cur) { const v = Number(n || 0); return (cur || "INR") + " " + v.toLocaleString(undefined, { maximumFractionDigits: 2 }); }
+    function withinDate(d) {
+        const v = new Date(d).setHours(0, 0, 0, 0);
+        const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null;
+        const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null;
+        if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true;
+    }
+
+    /* ---------- Filtering ---------- */
+    function filtered() {
+        const qv = (q.value || "").toLowerCase().trim();
+        const d = (fDept.value || "").toLowerCase().trim();
+        const b = (fBU.value || "").toLowerCase().trim();
+        const c = (fCat.value || "").toLowerCase().trim();
+        const st = fStatus.value;
+
+        return STORE.filter(r => {
+            if (qv && !(`${r.employee} ${r.notes}`.toLowerCase().includes(qv))) return false;
+            if (d && !(r.department || "").toLowerCase().includes(d)) return false;
+            if (b && !(r.bu || "").toLowerCase().includes(b)) return false;
+            if (c && !(r.category || "").toLowerCase().includes(c)) return false;
+            if (st && r.status !== st) return false;
+            if (!withinDate(r.date)) return false;
+            return true;
+        });
+    }
+
+    /* ---------- KPIs ---------- */
+    function updateKPIs(data) {
+        const tot = data.reduce((a, r) => a + Number(r.amount || 0), 0);
+        const reimb = data.filter(r => r.reimb).reduce((a, r) => a + Number(r.amount || 0), 0);
+        const non = tot - reimb;
+        const pend = data.filter(r => r.status === "Pending").length;
+        const byEmp = {};
+        data.forEach(r => { byEmp[r.employee] = (byEmp[r.employee] || 0) + Number(r.amount || 0); });
+        const avg = Object.keys(byEmp).length ? (Object.values(byEmp).reduce((a, b) => a + b, 0) / Object.keys(byEmp).length) : 0;
+
+        const cur = data[0]?.currency || "INR";
+        kpiTotal.textContent = money(tot, cur);
+        kpiReimb.textContent = money(reimb, cur);
+        kpiNonReimb.textContent = money(non, cur);
+        kpiPending.textContent = String(pend);
+        kpiAvgEmp.textContent = money(avg, cur);
+    }
+
+    /* ---------- Summaries ---------- */
+    function buildSummary(data, key) {
+        const map = {}; // key -> {count,total,reimb,non,approved,pending}
+        data.forEach(r => {
+            const k = (r[key] || "—");
+            map[k] = map[k] || { count: 0, total: 0, reimb: 0, non: 0, approved: 0, pending: 0 };
+            map[k].count += 1;
+            map[k].total += Number(r.amount || 0);
+            if (r.reimb) map[k].reimb += Number(r.amount || 0); else map[k].non += Number(r.amount || 0);
+            if (r.status === "Approved") map[k].approved += Number(r.amount || 0);
+            if (r.status === "Pending") map[k].pending += Number(r.amount || 0);
+        });
+        return map;
+    }
+
+    function renderSummary(tbody, map, currency) {
+        tbody.innerHTML = "";
+        Object.entries(map).sort(([a], [b]) => a.localeCompare(b)).forEach(([name, v]) => {
+            const tr = document.createElement("tr");
+            const tdC = (txt) => { const x = document.createElement("td"); x.className = "px-4 py-2"; x.textContent = txt; return x; };
+            tr.append(
+                tdC(name), tdC(v.count),
+                tdC(money(v.total, currency)),
+                tdC(money(v.reimb, currency)),
+                tdC(money(v.non, currency)),
+                tdC(money(v.approved, currency)),
+                tdC(money(v.pending, currency))
+            );
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* ---------- Render List ---------- */
+    function load() {
+        const data = filtered();
+        const cur = data[0]?.currency || "INR";
+        rows.innerHTML = "";
+
+        data.forEach(r => {
+            const tr = document.createElement("tr");
+            const empI = input(r.employee, "w-44");
+            const depI = input(r.department, "w-36");
+            const buI = input(r.bu, "w-36");
+            const dateI = input(r.date, "w-32"); dateI.type = "date";
+            const catI = input(r.category, "w-32");
+            const amtI = input(r.amount, "w-28"); amtI.type = "number"; amtI.step = "0.01"; amtI.min = 0;
+            const curI = input(r.currency || cur, "w-20");
+            const reimbS = select(["true", "false"], r.reimb ? "true" : "false");
+            const statusS = select(["Pending", "Approved", "Rejected"], r.status || "Pending");
+            const notesT = textArea(r.notes || "");
+
+            const actions = document.createElement("div");
+            const approveBtn = document.createElement("button");
+            approveBtn.className = "px-2 py-1 mr-2 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700";
+            approveBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Approve';
+            const rejectBtn = document.createElement("button");
+            rejectBtn.className = "px-2 py-1 mr-2 rounded-md bg-rose-600 text-white text-xs hover:bg-rose-700";
+            rejectBtn.innerHTML = '<i class="fa-solid fa-xmark mr-1"></i>Reject';
+            const saveBtn = document.createElement("button");
+            saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900";
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            const delBtn = document.createElement("button");
+            delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50";
+            delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
+            actions.append(approveBtn, rejectBtn, saveBtn, delBtn);
+
+            tr.append(
+                td(empI), td(depI), td(buI), td(dateI), td(catI),
+                td(amtI), td(curI), td(reimbS), td(statusS), td(notesT), td(actions)
+            );
+            rows.appendChild(tr);
+
+            function save() {
+                r.employee = empI.value.trim();
+                r.department = depI.value.trim();
+                r.bu = buI.value.trim();
+                r.date = dateI.value;
+                r.category = catI.value.trim();
+                r.amount = Number(amtI.value || 0);
+                r.currency = curI.value.trim() || "INR";
+                r.reimb = (reimbS.value === "true");
+                r.status = statusS.value;
+                r.notes = notesT.value;
+                persist(); refresh();
+                listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
+                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+            }
+            saveBtn.addEventListener("click", save);
+            approveBtn.addEventListener("click", () => { statusS.value = "Approved"; save(); });
+            rejectBtn.addEventListener("click", () => { statusS.value = "Rejected"; save(); });
+            delBtn.addEventListener("click", () => { if (!confirm("Delete this expense?")) return; STORE = STORE.filter(x => x.id !== r.id); persist(); refresh(); });
+        });
+
+        updateKPIs(data);
+        renderSummary(deptRows, buildSummary(data, "department"), cur);
+        renderSummary(buRows, buildSummary(data, "bu"), cur);
+
+        listMsg.textContent = data.length ? "" : "No expenses.";
+    }
+    function refresh() { load(); }
+
+    /* ---------- Create (dummy) ---------- */
+    expForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fd = new FormData(expForm);
+        const employee = (fd.get("employee") || "").toString().trim();
+        const department = (fd.get("department") || "").toString().trim();
+        const bu = (fd.get("bu") || "").toString().trim();
+        const date = (fd.get("date") || "").toString();
+        const category = (fd.get("category") || "").toString();
+        const amount = Number(fd.get("amount") || 0);
+        const currency = (fd.get("currency") || "INR").toString().trim();
+        const reimb = !!fd.get("reimb");
+        const notes = (fd.get("notes") || "").toString().trim();
+        if (!employee || !department || !bu || !date || !category || !amount) { formFlash("Missing required fields.", true); return; }
+
+        const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
+        STORE.unshift({ id, employee, department, bu, date, category, amount, currency, reimb, status: "Pending", notes });
+        persist(); expForm.reset(); formFlash("Added ✓"); refresh();
+    });
+    function formFlash(msg, bad = false) {
+        formMsg.textContent = msg; formMsg.className = "text-sm " + (bad ? "text-rose-700" : "text-emerald-700");
+        setTimeout(() => { formMsg.textContent = ""; formMsg.className = "text-sm text-slate-600"; }, 1500);
+    }
+
+    /* ---------- Live filters + init ---------- */
+    [q, fDept, fBU, fCat, fStatus, fFrom, fTo].forEach(el => el.addEventListener("input", load));
+    load();
+</script>
+{% endblock %}

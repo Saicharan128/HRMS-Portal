@@ -4,9 +4,9 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-semibold text-slate-800">
-                <i class="fa-solid fa-chart-line mr-2"></i> Performance
+                <i class="fa-solid fa-chart-line mr-2"></i> Performance Management
             </h1>
-            <p class="text-slate-600 text-sm">Drive continuous performance reviews and goal tracking.</p>
+            <p class="text-slate-600 text-sm">Drive continuous performance reviews and goal tracking for your team</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
             class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
@@ -14,313 +14,666 @@
         </a>
     </div>
 
-    <!-- 1) Cycles (Managers/HR can create) -->
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
-        <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-slate-800"><i class="fa-regular fa-calendar mr-2"></i> Cycles</h2>
-            <button id="cyNew" class="hidden px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
-                <i class="fa-solid fa-plus mr-1"></i> New cycle
+    <!-- Performance Overview Cards -->
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Total Goals</p>
+                    <p class="text-2xl font-bold text-slate-900">42</p>
+                </div>
+                <div class="p-3 bg-blue-100 rounded-xl">
+                    <i class="fa-solid fa-bullseye text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="text-sm text-green-600">78% completion rate</span>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Total Reviews</p>
+                    <p class="text-2xl font-bold text-slate-900">18</p>
+                </div>
+                <div class="p-3 bg-purple-100 rounded-xl">
+                    <i class="fa-solid fa-star text-purple-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="text-sm text-green-600">60% finalized</span>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Active Cycle</p>
+                    <p class="text-lg font-semibold text-slate-900">Q3 2025</p>
+                </div>
+                <div class="p-3 bg-green-100 rounded-xl">
+                    <i class="fa-regular fa-calendar text-green-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 text-sm">Avg. Progress</p>
+                    <p class="text-2xl font-bold text-slate-900">64%</p>
+                </div>
+                <div class="p-3 bg-orange-100 rounded-xl">
+                    <i class="fa-solid fa-chart-bar text-orange-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters (static placeholders) -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Cycle:</label>
+                <select class="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                    <option>All Cycles</option>
+                    <option selected>Q3 2025</option>
+                    <option>Q2 2025</option>
+                    <option>Q1 2025</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Department:</label>
+                <select class="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                    <option>All Departments</option>
+                    <option>Engineering</option>
+                    <option>Marketing</option>
+                    <option>Sales</option>
+                    <option>HR</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-700">Status:</label>
+                <select class="px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                    <option>All Status</option>
+                    <option>Draft</option>
+                    <option>In Progress</option>
+                    <option>Completed</option>
+                    <option>Archived</option>
+                    <option>Open</option>
+                    <option>Submitted</option>
+                    <option>Finalized</option>
+                </select>
+            </div>
+            <button class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                <i class="fa-solid fa-refresh mr-1"></i> Refresh
             </button>
         </div>
-        <div id="cycles" class="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </div>
 
-    <!-- 2) My Goals (or selected user) -->
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
-        <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-                <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-bullseye mr-2"></i> Goals</h2>
-                <select id="filterCycle" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
-                    <option value="">All cycles</option>
-                </select>
+    <!-- Overview Analytics -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Goal Progress Distribution -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-chart-pie mr-2"></i>Goal Progress Distribution
+            </h3>
+            <div class="relative h-72">
+                <canvas id="progressChart" class="absolute inset-0 w-full h-full"></canvas>
             </div>
-            <div class="flex items-center gap-2">
-                <input id="goUser" placeholder="username (mgr/hr)"
-                    class="hidden rounded-xl border border-slate-300 px-3 py-2 text-sm">
-                <button id="goLoad"
-                    class="hidden px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">Load</button>
-                <button id="goNew" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
-                    <i class="fa-solid fa-plus mr-1"></i> New goal
+        </div>
+
+        <!-- Department Performance -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-building mr-2"></i>Department Performance
+            </h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div>
+                        <p class="font-medium text-slate-800">Engineering</p>
+                        <p class="text-sm text-slate-600">18 goals</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-bold text-blue-600">72%</p>
+                        <div class="w-20 h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500" style="width:72%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div>
+                        <p class="font-medium text-slate-800">Marketing</p>
+                        <p class="text-sm text-slate-600">10 goals</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-bold text-blue-600">58%</p>
+                        <div class="w-20 h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500" style="width:58%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div>
+                        <p class="font-medium text-slate-800">Sales</p>
+                        <p class="text-sm text-slate-600">8 goals</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-bold text-blue-600">66%</p>
+                        <div class="w-20 h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500" style="width:66%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div>
+                        <p class="font-medium text-slate-800">HR</p>
+                        <p class="text-sm text-slate-600">6 goals</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-bold text-blue-600">54%</p>
+                        <div class="w-20 h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500" style="width:54%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Status Distribution -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-star mr-2"></i>Review Status
+            </h3>
+            <div class="relative h-72">
+                <canvas id="reviewChart" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Performers -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-trophy mr-2"></i>Top Performers
+            </h3>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-bold flex items-center justify-center">1</span>
+                        <div>
+                            <p class="font-medium text-slate-800">Alice Johnson</p>
+                            <p class="text-sm text-slate-600">Engineering</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-green-600">92%</p>
+                        <p class="text-xs text-slate-500">5 goals</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-bold flex items-center justify-center">2</span>
+                        <div>
+                            <p class="font-medium text-slate-800">Bob Smith</p>
+                            <p class="text-sm text-slate-600">Marketing</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-green-600">88%</p>
+                        <p class="text-xs text-slate-500">4 goals</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-bold flex items-center justify-center">3</span>
+                        <div>
+                            <p class="font-medium text-slate-800">Chitra Rao</p>
+                            <p class="text-sm text-slate-600">Sales</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-green-600">84%</p>
+                        <p class="text-xs text-slate-500">3 goals</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Goals Management (static) -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-slate-800">
+                <i class="fa-solid fa-bullseye mr-2"></i>Team Goals Management
+            </h2>
+            <div class="flex gap-3">
+                <button class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                    <i class="fa-solid fa-plus mr-1"></i>Create Goal
+                </button>
+                <button class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 text-sm">
+                    <i class="fa-solid fa-users mr-1"></i>Bulk Actions
                 </button>
             </div>
         </div>
-        <div id="goals" class="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+
+        <div class="overflow-x-auto" id="goalsTable">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-slate-200">
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Employee</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Goal</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Progress</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Status</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Updated</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-slate-100">
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Alice Johnson</p>
+                            <p class="text-sm text-slate-600">Engineering</p>
+                        </td>
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Launch new feature</p>
+                            <p class="text-sm text-slate-600">Feature rollout by October</p>
+                            <span class="text-xs bg-slate-100 px-2 py-1 rounded-lg">Weight: 30%</span>
+                        </td>
+                        <td class="p-3">
+                            <div class="w-full bg-slate-200 rounded-full h-3">
+                                <div class="h-3 rounded-full bg-blue-500" style="width:85%"></div>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-1">85%</p>
+                        </td>
+                        <td class="p-3"><span
+                                class="px-2 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-700">In
+                                Progress</span></td>
+                        <td class="p-3">
+                            <p class="text-sm text-slate-600">2025-09-10</p>
+                        </td>
+                        <td class="p-3">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm mr-2"><i
+                                    class="fa-solid fa-eye"></i></button>
+                            <button class="text-slate-600 hover:text-slate-800 text-sm"><i
+                                    class="fa-solid fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-slate-100">
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Bob Smith</p>
+                            <p class="text-sm text-slate-600">Marketing</p>
+                        </td>
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Campaign reach</p>
+                            <p class="text-sm text-slate-600">Target 1M impressions</p>
+                            <span class="text-xs bg-slate-100 px-2 py-1 rounded-lg">Weight: 20%</span>
+                        </td>
+                        <td class="p-3">
+                            <div class="w-full bg-slate-200 rounded-full h-3">
+                                <div class="h-3 rounded-full bg-yellow-500" style="width:50%"></div>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-1">50%</p>
+                        </td>
+                        <td class="p-3"><span
+                                class="px-2 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600">Draft</span>
+                        </td>
+                        <td class="p-3">
+                            <p class="text-sm text-slate-600">2025-09-12</p>
+                        </td>
+                        <td class="p-3">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm mr-2"><i
+                                    class="fa-solid fa-eye"></i></button>
+                            <button class="text-slate-600 hover:text-slate-800 text-sm"><i
+                                    class="fa-solid fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-slate-100">
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Chitra Rao</p>
+                            <p class="text-sm text-slate-600">Sales</p>
+                        </td>
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Upsell pipeline</p>
+                            <p class="text-sm text-slate-600">Close 10 enterprise upsells</p>
+                            <span class="text-xs bg-slate-100 px-2 py-1 rounded-lg">Weight: 25%</span>
+                        </td>
+                        <td class="p-3">
+                            <div class="w-full bg-slate-200 rounded-full h-3">
+                                <div class="h-3 rounded-full bg-green-500" style="width:100%"></div>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-1">100%</p>
+                        </td>
+                        <td class="p-3"><span
+                                class="px-2 py-1 rounded-lg text-xs font-medium bg-green-100 text-green-700">Completed</span>
+                        </td>
+                        <td class="p-3">
+                            <p class="text-sm text-slate-600">2025-09-05</p>
+                        </td>
+                        <td class="p-3">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm mr-2"><i
+                                    class="fa-solid fa-eye"></i></button>
+                            <button class="text-slate-600 hover:text-slate-800 text-sm"><i
+                                    class="fa-solid fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Diego Perez</p>
+                            <p class="text-sm text-slate-600">HR</p>
+                        </td>
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Hiring pipeline</p>
+                            <p class="text-sm text-slate-600">Fill 5 key roles</p>
+                            <span class="text-xs bg-slate-100 px-2 py-1 rounded-lg">Weight: 25%</span>
+                        </td>
+                        <td class="p-3">
+                            <div class="w-full bg-slate-200 rounded-full h-3">
+                                <div class="h-3 rounded-full bg-orange-500" style="width:30%"></div>
+                            </div>
+                            <p class="text-sm text-slate-600 mt-1">30%</p>
+                        </td>
+                        <td class="p-3"><span
+                                class="px-2 py-1 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-700">Open</span>
+                        </td>
+                        <td class="p-3">
+                            <p class="text-sm text-slate-600">2025-09-08</p>
+                        </td>
+                        <td class="p-3">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm mr-2"><i
+                                    class="fa-solid fa-eye"></i></button>
+                            <button class="text-slate-600 hover:text-slate-800 text-sm"><i
+                                    class="fa-solid fa-edit"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- 3) Reviews -->
+    <!-- Performance Reviews Management (static) -->
     <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
-        <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-slate-800"><i class="fa-regular fa-clipboard mr-2"></i> Reviews</h2>
-            <div class="flex items-center gap-2">
-                <select id="rvCycle" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
-                    <option value="">All cycles</option>
-                </select>
-                <button id="rvAssign"
-                    class="hidden px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-user-plus mr-1"></i> Assign review
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-slate-800">
+                <i class="fa-solid fa-star mr-2"></i>Performance Reviews Management
+            </h2>
+            <div class="flex gap-3">
+                <button class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                    <i class="fa-solid fa-plus mr-1"></i>Create Review
+                </button>
+                <button class="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 text-sm">
+                    <i class="fa-solid fa-users mr-1"></i>Bulk Assign
                 </button>
             </div>
         </div>
-        <div id="reviews" class="mt-3 space-y-3"></div>
-    </div>
-</div>
 
-<!-- Modal (quick & simple) -->
-<div id="modal" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-2xl border border-slate-200 p-5 w-[94%] max-w-xl">
-        <div class="flex items-center justify-between">
-            <h3 id="mTitle" class="text-lg font-semibold text-slate-800">Modal</h3>
-            <button id="mClose" class="h-8 w-8 rounded-lg border border-slate-300 hover:bg-slate-50">✕</button>
+        <div class="overflow-x-auto" id="reviewsTable">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-slate-200">
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Reviewee</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Reviewer</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Rating</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Status</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Updated</th>
+                        <th class="text-left p-3 text-sm font-medium text-slate-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-slate-100">
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Alice Johnson</p>
+                            <p class="text-sm text-slate-600">Engineering</p>
+                        </td>
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Sarah Lee</p>
+                            <p class="text-sm text-slate-600">Engineering Manager</p>
+                        </td>
+                        <td class="p-3">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
+                                <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
+                                <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
+                                <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
+                                <i class="fa-solid fa-star text-slate-300 text-sm"></i>
+                                <span class="ml-2 text-sm text-slate-600">4/5</span>
+                            </div>
+                        </td>
+                        <td class="p-3"><span
+                                class="px-2 py-1 rounded-lg text-xs font-medium bg-green-100 text-green-700">Finalized</span>
+                        </td>
+                        <td class="p-3">
+                            <p class="text-sm text-slate-600">2025-09-09</p>
+                        </td>
+                        <td class="p-3">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm mr-2"><i
+                                    class="fa-solid fa-eye"></i></button>
+                            <button class="text-slate-600 hover:text-slate-800 text-sm"><i
+                                    class="fa-solid fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-slate-100">
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Bob Smith</p>
+                            <p class="text-sm text-slate-600">Marketing</p>
+                        </td>
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Priya Nair</p>
+                            <p class="text-sm text-slate-600">Marketing Lead</p>
+                        </td>
+                        <td class="p-3"><span class="text-sm text-slate-500">Not rated</span></td>
+                        <td class="p-3"><span
+                                class="px-2 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-700">Submitted</span>
+                        </td>
+                        <td class="p-3">
+                            <p class="text-sm text-slate-600">2025-09-12</p>
+                        </td>
+                        <td class="p-3">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm mr-2"><i
+                                    class="fa-solid fa-eye"></i></button>
+                            <button class="text-slate-600 hover:text-slate-800 text-sm"><i
+                                    class="fa-solid fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Diego Perez</p>
+                            <p class="text-sm text-slate-600">HR</p>
+                        </td>
+                        <td class="p-3">
+                            <p class="font-medium text-slate-800">Anuj Gupta</p>
+                            <p class="text-sm text-slate-600">HR Manager</p>
+                        </td>
+                        <td class="p-3">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
+                                <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
+                                <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
+                                <i class="fa-solid fa-star text-slate-300 text-sm"></i>
+                                <i class="fa-solid fa-star text-slate-300 text-sm"></i>
+                                <span class="ml-2 text-sm text-slate-600">3/5</span>
+                            </div>
+                        </td>
+                        <td class="p-3"><span
+                                class="px-2 py-1 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-700">Open</span>
+                        </td>
+                        <td class="p-3">
+                            <p class="text-sm text-slate-600">2025-09-07</p>
+                        </td>
+                        <td class="p-3">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm mr-2"><i
+                                    class="fa-solid fa-eye"></i></button>
+                            <button class="text-slate-600 hover:text-slate-800 text-sm"><i
+                                    class="fa-solid fa-edit"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <div id="mBody" class="mt-4"></div>
+    </div>
+
+    <!-- Performance Cycles Management (static) -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-slate-800">
+                <i class="fa-regular fa-calendar mr-2"></i>Performance Cycles Management
+            </h2>
+            <button class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                <i class="fa-solid fa-plus mr-1"></i>Create Cycle
+            </button>
+        </div>
+
+        <div class="space-y-4" id="cyclesTable">
+            <div class="border border-slate-200 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800">Q3 2025</h3>
+                        <p class="text-sm text-slate-600">2025-07-01 to 2025-09-30</p>
+                        <span class="px-2 py-1 rounded-lg text-xs font-medium bg-green-100 text-green-700">Active</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm">
+                            <i class="fa-solid fa-edit mr-1"></i>Edit
+                        </button>
+                        <button class="px-3 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 text-sm">
+                            <i class="fa-solid fa-lock mr-1"></i>Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800">Q2 2025</h3>
+                        <p class="text-sm text-slate-600">2025-04-01 to 2025-06-30</p>
+                        <span class="px-2 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600">Closed</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm">
+                            <i class="fa-solid fa-edit mr-1"></i>Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800">Q1 2025</h3>
+                        <p class="text-sm text-slate-600">2025-01-01 to 2025-03-31</p>
+                        <span class="px-2 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600">Closed</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm">
+                            <i class="fa-solid fa-edit mr-1"></i>Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Trends -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-chart-line mr-2"></i>Goal Completion Trends
+            </h3>
+            <div class="relative h-72">
+                <canvas id="trendsChart" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-chart-bar mr-2"></i>Department Ratings
+            </h3>
+            <div class="relative h-72">
+                <canvas id="ratingsChart" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- Modal (static, hidden) -->
+<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-xl font-semibold text-slate-800"></h3>
+                <button class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script>
-    const IS_MGR = ["Leaders", "HR"].includes("{{ session.get('employee_type') }}");
+    // Charts: fixed-height wrappers + maintainAspectRatio:false + resizeDelay to prevent vertical creep
+    const commonOpts = {
+        responsive: true,
+        maintainAspectRatio: false,
+        resizeDelay: 200,
+        plugins: { legend: { position: 'bottom' } }
+    };
 
-    // ---- utils
-    async function jget(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function jpost(u, body) { const r = await fetch(u, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-    function showModal(title, bodyHTML) { document.getElementById("mTitle").textContent = title; const b = document.getElementById("mBody"); b.innerHTML = bodyHTML; modal.classList.remove("hidden"); modal.classList.add("flex"); }
-    function hideModal() { modal.classList.add("hidden"); modal.classList.remove("flex"); }
+    // Goal Progress Distribution (doughnut)
+    new Chart(document.getElementById('progressChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Not Started', 'In Progress', 'Completed'],
+            datasets: [{ data: [10, 20, 12] }]
+        },
+        options: commonOpts
+    });
 
-    const cyclesDiv = document.getElementById("cycles");
-    const filterCycle = document.getElementById("filterCycle");
-    const rvCycle = document.getElementById("rvCycle");
-    const goalsDiv = document.getElementById("goals");
-    const reviewsDiv = document.getElementById("reviews");
-    const cyNew = document.getElementById("cyNew");
-    const goNew = document.getElementById("goNew");
-    const goUser = document.getElementById("goUser");
-    const goLoad = document.getElementById("goLoad");
-    const modal = document.getElementById("modal");
-    document.getElementById("mClose").addEventListener("click", hideModal);
-
-    if (IS_MGR) { cyNew.classList.remove("hidden"); goUser.classList.remove("hidden"); goLoad.classList.remove("hidden"); document.getElementById("rvAssign").classList.remove("hidden"); }
-
-    // ---- load cycles
-    let CYCLES = [];
-    async function loadCycles() {
-        CYCLES = await jget("/api/perf/cycles");
-        cyclesDiv.innerHTML = "";
-        filterCycle.innerHTML = `<option value="">All cycles</option>`;
-        rvCycle.innerHTML = `<option value="">All cycles</option>`;
-        CYCLES.forEach(c => {
-            const card = document.createElement("div");
-            card.className = "rounded-xl border border-slate-200 bg-white p-4";
-            card.innerHTML = `<div class="text-sm text-slate-500">${c.status}</div>
-      <div class="text-lg font-semibold text-slate-800">${c.name}</div>
-      <div class="text-sm text-slate-600">${c.start_date} → ${c.end_date}</div>
-      ${IS_MGR ? `<button data-id="${c.id}" class="mt-2 px-3 py-1.5 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</button>` : ""}`;
-            cyclesDiv.appendChild(card);
-            filterCycle.insertAdjacentHTML("beforeend", `<option value="${c.id}">${c.name}</option>`);
-            rvCycle.insertAdjacentHTML("beforeend", `<option value="${c.id}">${c.name}</option>`);
-        });
-        // edit cycle
-        if (IS_MGR) {
-            cyclesDiv.querySelectorAll("button[data-id]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const c = CYCLES.find(x => x.id == btn.dataset.id);
-                    showModal("Edit cycle", `
-          <form id="cyForm" class="grid grid-cols-1 gap-3">
-            <input type="hidden" name="id" value="${c.id}">
-            <div><label class="text-sm">Name</label><input name="name" value="${c.name}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-            <div class="grid grid-cols-2 gap-3">
-              <div><label class="text-sm">Start</label><input name="start_date" type="date" value="${c.start_date}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-              <div><label class="text-sm">End</label><input name="end_date" type="date" value="${c.end_date}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-            </div>
-            <div>
-              <label class="text-sm">Status</label>
-              <select name="status" class="w-full rounded-xl border border-slate-300 px-3 py-2">
-                <option ${c.status === "Active" ? "selected" : ""}>Active</option>
-                <option ${c.status === "Closed" ? "selected" : ""}>Closed</option>
-              </select>
-            </div>
-            <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Save</button></div>
-          </form>
-        `);
-                    document.getElementById("cyForm").addEventListener("submit", async (e) => {
-                        e.preventDefault();
-                        const payload = Object.fromEntries(new FormData(e.target).entries());
-                        await jpost("/api/perf/cycles", payload);
-                        hideModal(); loadCycles(); loadGoals(); loadReviews();
-                    });
-                });
-            });
+    // Review Status (bar)
+    new Chart(document.getElementById('reviewChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Open', 'Submitted', 'Finalized'],
+            datasets: [{ label: 'Count', data: [6, 8, 4] }]
+        },
+        options: {
+            ...commonOpts,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
         }
-    }
-    cyNew.addEventListener("click", () => {
-        showModal("New cycle", `
-    <form id="cyForm" class="grid grid-cols-1 gap-3">
-      <div><label class="text-sm">Name</label><input name="name" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="H2 2025"></div>
-      <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-sm">Start</label><input name="start_date" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-        <div><label class="text-sm">End</label><input name="end_date" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-      </div>
-      <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Create</button></div>
-    </form>
-  `);
-        document.getElementById("cyForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            await jpost("/api/perf/cycles", Object.fromEntries(new FormData(e.target).entries()));
-            hideModal(); loadCycles();
-        });
     });
 
-    // ---- goals
-    async function loadGoals() {
-        const params = new URLSearchParams();
-        if (filterCycle.value) params.set("cycle_id", filterCycle.value);
-        if (IS_MGR && goUser.value.trim()) params.set("user", goUser.value.trim());
-        const rows = await jget(`/api/perf/goals?${params.toString()}`);
-        goalsDiv.innerHTML = "";
-        rows.forEach(g => {
-            const card = document.createElement("div");
-            card.className = "rounded-xl border border-slate-200 bg-white p-4";
-            card.innerHTML = `
-      <div class="text-xs text-slate-500">${g.cycle_name || "—"} ${g.owner ? `• ${g.owner}` : ""}</div>
-      <div class="font-semibold text-slate-800 mt-1">${g.title}</div>
-      <div class="text-sm text-slate-600">${g.description || ""}</div>
-      <div class="mt-2 text-sm">Weight: ${g.weight}%</div>
-      <div class="mt-1 text-sm">Progress: ${g.progress}%</div>
-      <div class="mt-2 flex items-center gap-2">
-        <button data-id="${g.id}" class="px-2 py-1 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Edit</button>
-        <button data-up="${g.id}" class="px-2 py-1 rounded-lg bg-slate-800 text-white text-sm">Update</button>
-      </div>`;
-            goalsDiv.appendChild(card);
-        });
-        // wire edit / update
-        goalsDiv.querySelectorAll("button[data-id]").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                const id = btn.dataset.id;
-                const g = (await jget(`/api/perf/goals?${IS_MGR && goUser.value ? `user=${encodeURIComponent(goUser.value)}&` : ``}`)).find(x => x.id == id);
-                showModal("Edit goal", `
-        <form id="gForm" class="grid grid-cols-1 gap-3">
-          <input type="hidden" name="id" value="${g.id}">
-          <input type="hidden" name="cycle_id" value="${g.cycle_id}">
-          ${IS_MGR ? `<div><label class="text-sm">Owner</label><input name="owner" value="${g.owner}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>` : ""}
-          <div><label class="text-sm">Title</label><input name="title" value="${g.title}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-          <div><label class="text-sm">Description</label><textarea name="description" class="w-full rounded-xl border border-slate-300 px-3 py-2">${g.description || ""}</textarea></div>
-          <div><label class="text-sm">Weight (%)</label><input type="number" min="0" max="100" name="weight" value="${g.weight}" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-          <div><label class="text-sm">Status</label>
-            <select name="status" class="w-full rounded-xl border border-slate-300 px-3 py-2">
-              ${["Draft", "In Progress", "Completed", "Archived"].map(s => `<option ${g.status === s ? "selected" : ""}>${s}</option>`).join("")}
-            </select>
-          </div>
-          <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Save</button></div>
-        </form>
-      `);
-                document.getElementById("gForm").addEventListener("submit", async (e) => {
-                    e.preventDefault();
-                    await jpost("/api/perf/goals", Object.fromEntries(new FormData(e.target).entries()));
-                    hideModal(); loadGoals();
-                });
-            });
-        });
-        goalsDiv.querySelectorAll("button[data-up]").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id = btn.dataset.up;
-                showModal("Update progress", `
-        <form id="uForm" class="grid grid-cols-1 gap-3">
-          <div><label class="text-sm">Progress (0-100)</label><input name="progress" type="number" min="0" max="100" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-          <div><label class="text-sm">Note</label><textarea name="note" class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea></div>
-          <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Save</button></div>
-        </form>
-      `);
-                document.getElementById("uForm").addEventListener("submit", async (e) => {
-                    e.preventDefault();
-                    await jpost(`/api/perf/goals/${id}/update`, Object.fromEntries(new FormData(e.target).entries()));
-                    hideModal(); loadGoals();
-                });
-            });
-        });
-    }
-
-    goNew.addEventListener("click", () => {
-        const cycleOpts = CYCLES.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
-        showModal("New goal", `
-    <form id="gForm" class="grid grid-cols-1 gap-3">
-      <div><label class="text-sm">Cycle</label><select name="cycle_id" class="w-full rounded-xl border border-slate-300 px-3 py-2">${cycleOpts}</select></div>
-      ${IS_MGR ? `<div><label class="text-sm">Owner</label><input name="owner" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="username"></div>` : ""}
-      <div><label class="text-sm">Title</label><input name="title" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-      <div><label class="text-sm">Description</label><textarea name="description" class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea></div>
-      <div><label class="text-sm">Weight (%)</label><input name="weight" type="number" min="0" max="100" value="20" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-      <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Create</button></div>
-    </form>
-  `);
-        document.getElementById("gForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            await jpost("/api/perf/goals", Object.fromEntries(new FormData(e.target).entries()));
-            hideModal(); loadGoals();
-        });
-    });
-    goLoad.addEventListener("click", () => loadGoals());
-
-    // filter by cycle
-    filterCycle.addEventListener("change", () => loadGoals());
-
-    // ---- reviews
-    async function loadReviews() {
-        const params = new URLSearchParams();
-        if (rvCycle.value) params.set("cycle_id", rvCycle.value);
-        if (IS_MGR) params.set("scope", "all");
-        const rows = await jget(`/api/perf/reviews?${params.toString()}`);
-        reviewsDiv.innerHTML = "";
-        rows.forEach(r => {
-            const box = document.createElement("div");
-            box.className = "rounded-xl border border-slate-200 bg-white p-4";
-            box.innerHTML = `
-      <div class="text-xs text-slate-500">${r.cycle_name || "—"} • ${r.status}</div>
-      <div class="mt-1 font-semibold text-slate-800">Reviewee: ${r.reviewee}</div>
-      <div class="text-sm text-slate-600">Reviewer: ${r.reviewer}</div>
-      <div class="mt-2 text-sm">Rating: ${r.rating ?? "—"}</div>
-      <div class="text-sm">${r.comments || ""}</div>
-      ${r.status !== "Finalized" && (r.reviewer === "{{ session.get('username') }}" || IS_MGR)
-                    ? `<div class="mt-2"><button data-id="${r.id}" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white text-sm">Edit</button></div>`
-                    : ""}`;
-            reviewsDiv.appendChild(box);
-        });
-        reviewsDiv.querySelectorAll("button[data-id]").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id = btn.dataset.id;
-                showModal("Submit review", `
-        <form id="rForm" class="grid grid-cols-1 gap-3">
-          <div><label class="text-sm">Rating (1-5)</label><input name="rating" type="number" min="1" max="5" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-          <div><label class="text-sm">Comments</label><textarea name="comments" class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea></div>
-          <div><label class="text-sm">Status</label>
-            <select name="status" class="w-full rounded-xl border border-slate-300 px-3 py-2">
-              <option>Submitted</option><option>Finalized</option>
-            </select>
-          </div>
-          <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Save</button></div>
-        </form>
-      `);
-                document.getElementById("rForm").addEventListener("submit", async (e) => {
-                    e.preventDefault();
-                    await jpost(`/api/perf/reviews/${id}`, Object.fromEntries(new FormData(e.target).entries()));
-                    hideModal(); loadReviews();
-                });
-            });
-        });
-    }
-    document.getElementById("rvAssign").addEventListener("click", () => {
-        const cycleOpts = CYCLES.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
-        showModal("Assign review", `
-    <form id="aForm" class="grid grid-cols-1 gap-3">
-      <div><label class="text-sm">Cycle</label><select name="cycle_id" class="w-full rounded-xl border border-slate-300 px-3 py-2">${cycleOpts}</select></div>
-      <div><label class="text-sm">Reviewee username</label><input name="reviewee" class="w-full rounded-xl border border-slate-300 px-3 py-2"></div>
-      <div class="flex justify-end"><button class="px-3 py-2 rounded-xl bg-slate-800 text-white">Assign</button></div>
-    </form>
-  `);
-        document.getElementById("aForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            await jpost("/api/perf/reviews", Object.fromEntries(new FormData(e.target).entries()));
-            hideModal(); loadReviews();
-        });
+    // Goal Completion Trends (line)
+    new Chart(document.getElementById('trendsChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+            datasets: [{
+                label: 'Completion Rate',
+                data: [48, 55, 61, 66, 71, 78],
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            ...commonOpts,
+            scales: { y: { beginAtZero: true, max: 100 } }
+        }
     });
 
-    // boot
-    Promise.all([loadCycles().then(loadGoals), loadReviews()]).catch(console.error);
+    // Department Ratings (bar)
+    new Chart(document.getElementById('ratingsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Engineering', 'Marketing', 'Sales', 'HR'],
+            datasets: [{ label: 'Avg Rating', data: [4.2, 3.7, 3.9, 3.5] }]
+        },
+        options: {
+            ...commonOpts,
+            scales: { y: { beginAtZero: true, max: 5 } }
+        }
+    });
 </script>
 {% endblock %}

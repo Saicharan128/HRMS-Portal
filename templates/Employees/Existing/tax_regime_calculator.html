@@ -1,0 +1,585 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-calculator mr-2"></i> Tax Regime Calculator
+            </h1>
+            <p class="text-slate-600 text-sm">Compare Old vs New regimes and choose.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="resetBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-rotate mr-1"></i> Reset
+            </button>
+            <button id="exportBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-download mr-1"></i> Download Summary
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab" class="trc-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-chart-line mr-1"></i> Overview
+            </button>
+            <button id="calculatorTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-sliders mr-1"></i> Calculator
+            </button>
+            <button id="whatifTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> What-if
+            </button>
+            <button id="historyTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
+            </button>
+            <button id="faqTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-circle-info mr-1"></i> FAQ
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overviewPanel" class="trc-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Summary -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-scale-balanced mr-2"></i> Summary
+                    </h3>
+                    <span id="bestBadge" class="px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700">New Regime
+                        wins</span>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Old Tax (₹)</div>
+                        <div id="oldTax" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">New Tax (₹)</div>
+                        <div id="newTax" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">You Save (₹)</div>
+                        <div id="youSave" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="relative h-40 mt-4">
+                    <canvas id="barChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Inputs (quick) -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-3">
+                    <i class="fa-solid fa-input-numeric mr-2"></i> Quick Inputs
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <label class="block text-slate-700 mb-1">Annual Gross Salary (₹)</label>
+                        <input id="inpGross" type="number" min="0"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2" value="1500000">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-700 mb-1">Old: 80C + 80CCD(1B) (₹)</label>
+                            <input id="inp80C" type="number" min="0"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2" value="200000">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 mb-1">Old: 80D (₹)</label>
+                            <input id="inp80D" type="number" min="0"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2" value="25000">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-700 mb-1">Old: HRA Exemption (₹)</label>
+                            <input id="inpHRA" type="number" min="0"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2" value="180000">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 mb-1">New: Employer NPS 80CCD(2) (₹)</label>
+                            <input id="inpCCD2" type="number" min="0"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2" value="60000">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end gap-2">
+                        <button id="recalcBtn"
+                            class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                            <i class="fa-solid fa-equals mr-1"></i> Calculate
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-3">
+                    <i class="fa-solid fa-circle-info mr-2"></i> Assumptions (demo)
+                </h3>
+                <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
+                    <li>Financial year: FY 2025–26 (demo slabs).</li>
+                    <li>Standard deduction ₹50,000 for salary in both regimes.</li>
+                    <li>Health &amp; education cess @ 4% on tax.</li>
+                    <li>Old regime allows typical deductions (80C/80D/HRA etc.).</li>
+                    <li>New regime allows employer NPS u/s 80CCD(2) (demo input).</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator -->
+    <section id="calculatorPanel" class="trc-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Old regime form -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-3">
+                    <i class="fa-solid fa-landmark mr-2"></i> Old Regime
+                </h3>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <label class="block text-slate-700 mb-1">Gross (₹)</label>
+                        <input id="oldGross" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1">Std Deduction (₹)</label>
+                        <input id="oldStd" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            value="50000">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1">80C + 80CCD(1B) (₹)</label>
+                        <input id="old80C" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1">80D (₹)</label>
+                        <input id="old80D" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1">HRA Exempt (₹)</label>
+                        <input id="oldHRA" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1">Other (₹)</label>
+                        <input id="oldOther" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            value="0">
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    <div>Taxable Income: <b id="oldTaxable">₹0</b></div>
+                    <div>Tax + Cess: <b id="oldOut">₹0</b></div>
+                </div>
+            </div>
+
+            <!-- New regime form -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-3">
+                    <i class="fa-solid fa-sun mr-2"></i> New Regime
+                </h3>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <label class="block text-slate-700 mb-1">Gross (₹)</label>
+                        <input id="newGross" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1">Std Deduction (₹)</label>
+                        <input id="newStd" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            value="50000">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1">Employer NPS 80CCD(2) (₹)</label>
+                        <input id="newCCD2" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1">Other (₹)</label>
+                        <input id="newOther" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            value="0">
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    <div>Taxable Income: <b id="newTaxable">₹0</b></div>
+                    <div>Tax + Cess: <b id="newOut">₹0</b></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 mt-6">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-chart-column mr-2"></i> Slab Impact
+                </h3>
+            </div>
+            <div class="relative h-48">
+                <canvas id="slabChart" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- What-if -->
+    <section id="whatifPanel" class="trc-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3"><i
+                            class="fa-solid fa-wand-magic-sparkles mr-2"></i> Tweak Inputs</h3>
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <label class="block text-slate-700 mb-1">Increase 80C by (₹)</label>
+                            <input id="wi80C" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                value="0">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 mb-1">Add Rent (HRA) (₹)</label>
+                            <input id="wiHRA" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                value="0">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 mb-1">Employer NPS Add (₹)</label>
+                            <input id="wiCCD2" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                value="0">
+                        </div>
+                        <button id="runWhatIf"
+                            class="w-full px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700">
+                            <i class="fa-solid fa-play mr-1"></i> Run
+                        </button>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-chart-area mr-2"></i>
+                        Result</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="rounded-lg bg-slate-50 p-3">
+                            <div class="text-xs text-slate-500">Old Tax (₹)</div>
+                            <div id="wiOld" class="text-xl font-semibold text-slate-800">0</div>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 p-3">
+                            <div class="text-xs text-slate-500">New Tax (₹)</div>
+                            <div id="wiNew" class="text-xl font-semibold text-slate-800">0</div>
+                        </div>
+                        <div class="rounded-lg bg-slate-50 p-3">
+                            <div class="text-xs text-slate-500">Best</div>
+                            <div id="wiBest" class="text-xl font-semibold text-slate-800">—</div>
+                        </div>
+                    </div>
+                    <div class="relative h-48 mt-4">
+                        <canvas id="whatIfChart" class="absolute inset-0 w-full h-full"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- History -->
+    <section id="historyPanel" class="trc-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-table mr-2"></i> Saved Runs
+                </h3>
+                <button id="saveRunBtn"
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-bookmark mr-1"></i> Save current
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Time</th>
+                            <th class="py-2 pr-4">Gross (₹)</th>
+                            <th class="py-2 pr-4">Old Tax (₹)</th>
+                            <th class="py-2 pr-4">New Tax (₹)</th>
+                            <th class="py-2 pr-4">Choice</th>
+                        </tr>
+                    </thead>
+                    <tbody id="histRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faqPanel" class="trc-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-circle-question mr-2"></i> FAQ
+            </h3>
+            <div class="space-y-3 text-sm text-slate-700">
+                <details class="rounded-lg bg-slate-50 p-3">
+                    <summary class="font-medium cursor-pointer">Which regime should I choose?</summary>
+                    <p class="mt-2">Pick the one with lower tax for your inputs. This tool compares both instantly.</p>
+                </details>
+                <details class="rounded-lg bg-slate-50 p-3">
+                    <summary class="font-medium cursor-pointer">Are slabs exact?</summary>
+                    <p class="mt-2">These are demo slabs/assumptions. Verify against the current rules before filing.
+                    </p>
+                </details>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+    // ---- Demo slab config (FY25-26 style) ----
+    // Old: 0-2.5L:0%, 2.5-5:5%, 5-10:20%, >10:30%
+    const OLD_SLABS = [
+        { up: 250000, rate: 0.00 },
+        { up: 500000, rate: 0.05 },
+        { up: 1000000, rate: 0.20 },
+        { up: Infinity, rate: 0.30 }
+    ];
+    // New: 0-3:0%, 3-6:5%, 6-9:10%, 9-12:15%, 12-15:20%, >15:30%
+    const NEW_SLABS = [
+        { up: 300000, rate: 0.00 },
+        { up: 600000, rate: 0.05 },
+        { up: 900000, rate: 0.10 },
+        { up: 1200000, rate: 0.15 },
+        { up: 1500000, rate: 0.20 },
+        { up: Infinity, rate: 0.30 }
+    ];
+    const CESS = 0.04;
+
+    // ---- State ----
+    let _barChart, _slabChart, _whatIfChart;
+
+    // ---- Helpers ----
+    function clamp(n) { return Math.max(0, Number(n || 0)); }
+    function fmt(n) { return (Math.round(n) || 0).toLocaleString('en-IN'); }
+
+    function slabTax(taxable, slabs) {
+        let rem = Math.max(0, taxable), prev = 0, tax = 0;
+        for (const s of slabs) {
+            const band = Math.min(rem, s.up - prev);
+            if (band > 0) tax += band * s.rate;
+            rem -= band; prev = s.up;
+            if (rem <= 0) break;
+        }
+        return tax;
+    }
+
+    function oldRegimeTax(gross, std, _80c, _80d, hra, other) {
+        const cap80C = Math.min(_80c, 200000); // demo: 80C+1B capped at 2L here
+        const cap80D = Math.min(_80d, 50000);
+        const totalDed = clamp(std) + clamp(cap80C) + clamp(cap80D) + clamp(hra) + clamp(other);
+        const taxable = Math.max(0, clamp(gross) - totalDed);
+        const base = slabTax(taxable, OLD_SLABS);
+        return { taxable, tax: base + base * CESS };
+    }
+
+    function newRegimeTax(gross, std, ccd2, other) {
+        const ccd2Cap = Math.min(clamp(ccd2), Math.round(clamp(gross) * 0.10)); // demo cap 10% of salary
+        const totalDed = clamp(std) + clamp(ccd2Cap) + clamp(other);
+        const taxable = Math.max(0, clamp(gross) - totalDed);
+        const base = slabTax(taxable, NEW_SLABS);
+        return { taxable, tax: base + base * CESS };
+    }
+
+    // ---- Wire & init ----
+    const panels = {
+        overview: document.getElementById('overviewPanel'),
+        calculator: document.getElementById('calculatorPanel'),
+        whatif: document.getElementById('whatifPanel'),
+        history: document.getElementById('historyPanel'),
+        faq: document.getElementById('faqPanel')
+    };
+
+    const HIST = []; // saved runs
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTabs();
+        wireButtons();
+        seedInputsFromQuick();
+        computeAll();
+        renderHistory();
+    });
+
+    function setupTabs() {
+        document.querySelectorAll('.trc-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.trc-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                panels[name].classList.remove('hidden');
+            });
+        });
+    }
+
+    function wireButtons() {
+        const ids = ['inpGross', 'inp80C', 'inp80D', 'inpHRA', 'inpCCD2'];
+        ids.forEach(id => document.getElementById(id).addEventListener('input', computeAll));
+        document.getElementById('recalcBtn').addEventListener('click', computeAll);
+        document.getElementById('resetBtn').addEventListener('click', resetAll);
+        document.getElementById('exportBtn').addEventListener('click', () => alert('📄 Summary downloaded (demo)'));
+        document.getElementById('runWhatIf').addEventListener('click', runWhatIf);
+        document.getElementById('saveRunBtn').addEventListener('click', saveRun);
+
+        ['oldGross', 'oldStd', 'old80C', 'old80D', 'oldHRA', 'oldOther',
+            'newGross', 'newStd', 'newCCD2', 'newOther'].forEach(id => {
+                document.getElementById(id).addEventListener('input', computeDetailed);
+            });
+    }
+
+    function seedInputsFromQuick() {
+        const g = clamp(document.getElementById('inpGross').value);
+        document.getElementById('oldGross').value = g;
+        document.getElementById('newGross').value = g;
+        document.getElementById('old80C').value = clamp(document.getElementById('inp80C').value);
+        document.getElementById('old80D').value = clamp(document.getElementById('inp80D').value);
+        document.getElementById('oldHRA').value = clamp(document.getElementById('inpHRA').value);
+        document.getElementById('newCCD2').value = clamp(document.getElementById('inpCCD2').value);
+    }
+
+    // ---- Main compute ----
+    function computeAll() {
+        seedInputsFromQuick();
+        computeDetailed();
+    }
+
+    function computeDetailed() {
+        const o = oldRegimeTax(
+            clamp(document.getElementById('oldGross').value),
+            clamp(document.getElementById('oldStd').value),
+            clamp(document.getElementById('old80C').value),
+            clamp(document.getElementById('old80D').value),
+            clamp(document.getElementById('oldHRA').value),
+            clamp(document.getElementById('oldOther').value)
+        );
+        const n = newRegimeTax(
+            clamp(document.getElementById('newGross').value),
+            clamp(document.getElementById('newStd').value),
+            clamp(document.getElementById('newCCD2').value),
+            clamp(document.getElementById('newOther').value)
+        );
+
+        // Overview tiles
+        document.getElementById('oldTax').textContent = fmt(o.tax);
+        document.getElementById('newTax').textContent = fmt(n.tax);
+        document.getElementById('youSave').textContent = fmt(Math.abs(o.tax - n.tax));
+        const badge = document.getElementById('bestBadge');
+        const newWins = n.tax < o.tax;
+        badge.textContent = newWins ? 'New Regime wins' : 'Old Regime wins';
+        badge.className = 'px-2 py-1 text-xs rounded ' + (newWins ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700');
+
+        // Calculator tiles
+        document.getElementById('oldTaxable').textContent = '₹' + fmt(o.taxable);
+        document.getElementById('oldOut').textContent = '₹' + fmt(o.tax);
+        document.getElementById('newTaxable').textContent = '₹' + fmt(n.taxable);
+        document.getElementById('newOut').textContent = '₹' + fmt(n.tax);
+
+        drawBars(o.tax, n.tax);
+        drawSlab(o.taxable, n.taxable);
+    }
+
+    // ---- Charts ----
+    function drawBars(oldVal, newVal) {
+        const ctx = document.getElementById('barChart').getContext('2d');
+        if (_barChart) _barChart.destroy();
+        _barChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['Old', 'New'], datasets: [{ label: 'Tax (₹)', data: [oldVal, newVal] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    function drawSlab(oldTaxable, newTaxable) {
+        const ctx = document.getElementById('slabChart').getContext('2d');
+        if (_slabChart) _slabChart.destroy();
+        _slabChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Taxable Income'],
+                datasets: [
+                    { label: 'Old', data: [oldTaxable] },
+                    { label: 'New', data: [newTaxable] }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, animation: false, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    // ---- What-if ----
+    function runWhatIf() {
+        const base = {
+            g: clamp(document.getElementById('inpGross').value),
+            c80c: clamp(document.getElementById('inp80C').value),
+            c80d: clamp(document.getElementById('inp80D').value),
+            hra: clamp(document.getElementById('inpHRA').value),
+            ccd2: clamp(document.getElementById('inpCCD2').value)
+        };
+        const adj = {
+            a80c: clamp(document.getElementById('wi80C').value),
+            ahra: clamp(document.getElementById('wiHRA').value),
+            accd2: clamp(document.getElementById('wiCCD2').value)
+        };
+        const o = oldRegimeTax(base.g, 50000, base.c80c + adj.a80c, base.c80d, base.hra + adj.ahra, 0);
+        const n = newRegimeTax(base.g, 50000, base.ccd2 + adj.accd2, 0);
+
+        document.getElementById('wiOld').textContent = fmt(o.tax);
+        document.getElementById('wiNew').textContent = fmt(n.tax);
+        document.getElementById('wiBest').textContent = n.tax < o.tax ? 'New' : 'Old';
+
+        const ctx = document.getElementById('whatIfChart').getContext('2d');
+        if (_whatIfChart) _whatIfChart.destroy();
+        _whatIfChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['Old', 'New'], datasets: [{ label: 'Tax (₹)', data: [o.tax, n.tax] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    // ---- History ----
+    function saveRun() {
+        const g = clamp(document.getElementById('inpGross').value);
+        const oldV = document.getElementById('oldOut').textContent.replace(/[^\d]/g, '') * 1;
+        const newV = document.getElementById('newOut').textContent.replace(/[^\d]/g, '') * 1;
+        HIST.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), g, old: oldV, nw: newV, choice: newV < oldV ? 'New' : 'Old' });
+        renderHistory();
+    }
+    function renderHistory() {
+        document.getElementById('histRows').innerHTML = HIST.map(h => `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+        <td class="py-2 pr-4">₹${fmt(h.g)}</td>
+        <td class="py-2 pr-4">₹${fmt(h.old)}</td>
+        <td class="py-2 pr-4">₹${fmt(h.nw)}</td>
+        <td class="py-2 pr-4"><span class="px-2 py-0.5 rounded-full ${h.choice === 'New' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'} text-xs">${h.choice}</span></td>
+      </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No saved runs yet.</td></tr>`;
+    }
+
+    // ---- Reset ----
+    function resetAll() {
+        document.getElementById('inpGross').value = 1500000;
+        document.getElementById('inp80C').value = 200000;
+        document.getElementById('inp80D').value = 25000;
+        document.getElementById('inpHRA').value = 180000;
+        document.getElementById('inpCCD2').value = 60000;
+        seedInputsFromQuick(); computeAll();
+    }
+</script>
+
+<style>
+    .trc-tab.active {
+        background-color: #1e293b;
+        color: #fff;
+    }
+
+    .trc-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .trc-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

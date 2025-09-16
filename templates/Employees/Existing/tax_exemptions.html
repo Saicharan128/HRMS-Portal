@@ -1,0 +1,567 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-shield-heart mr-2"></i> Tax Exemptions
+            </h1>
+            <p class="text-slate-600 text-sm">Declare eligible investments/exemptions.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="submitDeclBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-paper-plane mr-1"></i> Submit Declaration
+            </button>
+            <button id="downloadSummaryBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-download mr-1"></i> Download Summary (PDF)
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab" class="tx-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-chart-line mr-1"></i> Overview
+            </button>
+            <button id="declareTab" class="tx-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-list-check mr-1"></i> Declarations
+            </button>
+            <button id="proofsTab" class="tx-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-file-circle-check mr-1"></i> Proofs
+            </button>
+            <button id="limitsTab" class="tx-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-scale-balanced mr-1"></i> Limits & Rules
+            </button>
+            <button id="historyTab" class="tx-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overviewPanel" class="tx-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Allocation -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-diagram-project mr-2"></i> Allocation (FY 2025-26)
+                    </h3>
+                    <select id="regimePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                        <option value="new">New Regime</option>
+                        <option value="old">Old Regime</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Projected Tax (₹)</div>
+                        <div id="projTax" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Declared (₹)</div>
+                        <div id="declaredAmt" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Potential Save (₹)</div>
+                        <div id="potentialSave" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="relative h-40">
+                    <canvas id="allocChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Section mix -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-chart-pie mr-2"></i> Sections Mix
+                    </h3>
+                </div>
+                <div class="relative h-40">
+                    <canvas id="mixChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div id="mixLegend" class="mt-3 text-sm text-slate-700"></div>
+            </div>
+
+            <!-- Quick actions -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-bolt mr-2"></i> Quick Actions
+                    </h3>
+                </div>
+                <div class="space-y-3">
+                    <button id="whatIfBtn"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-sliders mr-2"></i> What-if optimizer
+                    </button>
+                    <button id="proofWindowBtn"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-calendar-check mr-2"></i> Proof submission window
+                    </button>
+                    <button id="raiseQueryBtn"
+                        class="w-full px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-left">
+                        <i class="fa-solid fa-circle-question mr-2"></i> Raise declaration query
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Declarations -->
+    <section id="declarePanel" class="tx-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Form -->
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-pen-to-square mr-2"></i> Add Declaration
+                    </h3>
+                    <div class="text-sm text-slate-600">
+                        <select id="sectionPicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                            <option value="80C">80C (PF/PPF/ELSS)</option>
+                            <option value="80D">80D (Health Insurance)</option>
+                            <option value="80CCD1B">80CCD(1B) (NPS)</option>
+                            <option value="HRA">HRA</option>
+                            <option value="LTA">LTA</option>
+                            <option value="HOME-INT">Home Loan Interest</option>
+                            <option value="EDU-INT">Education Loan Interest</option>
+                            <option value="DON">Donations (80G)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Amount (₹)</label>
+                        <input id="decAmt" type="number" min="0"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., 50000">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Period</label>
+                        <select id="decPeriod" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>Annual</option>
+                            <option>Monthly</option>
+                            <option>One-time</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                        <input id="decNotes" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="optional">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 mt-4">
+                    <button id="resetFormBtn"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Reset</button>
+                    <button id="addDeclBtn" class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                        <i class="fa-solid fa-plus mr-1"></i> Add
+                    </button>
+                </div>
+
+                <hr class="my-6">
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 pr-4">Section</th>
+                                <th class="py-2 pr-4">Amount (₹)</th>
+                                <th class="py-2 pr-4">Period</th>
+                                <th class="py-2 pr-4">Status</th>
+                                <th class="py-2 pr-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="declRows" class="text-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Limits tile -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-scale-balanced mr-2"></i> Available Limits
+                </h3>
+                <div id="limitCards" class="space-y-3 text-sm"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proofs -->
+    <section id="proofsPanel" class="tx-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-file-circle-check mr-2"></i> Proof Submission
+                </h3>
+                <div class="text-sm text-slate-600">
+                    Window: <span id="proofWindow">Dec 01 – Jan 15</span>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Section</th>
+                            <th class="py-2 pr-4">Declared (₹)</th>
+                            <th class="py-2 pr-4">Proof Status</th>
+                            <th class="py-2 pr-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proofRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Limits & Rules -->
+    <section id="limitsPanel" class="tx-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-book-open mr-2"></i> Key Limits (Old Regime)
+                </h3>
+                <div class="space-y-3 text-sm text-slate-700" id="limitsList"></div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-circle-info mr-2"></i> Notes
+                </h3>
+                <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
+                    <li>New regime allows select deductions only (e.g., NPS 80CCD(2), employer PF), most others
+                        unavailable.</li>
+                    <li>Declarations are indicative; payroll may adjust TDS on proof verification.</li>
+                    <li>Submit clear, legible proofs within the window to avoid year-end TDS spike.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- History -->
+    <section id="historyPanel" class="tx-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-table mr-2"></i> Declaration History
+                </h3>
+                <div class="flex items-center gap-2">
+                    <input id="searchHist" type="text" placeholder="Search section or note..."
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                    <select id="statusHist" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+            <div class="relative h-48 mb-4">
+                <canvas id="trendChart" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Time</th>
+                            <th class="py-2 pr-4">Section</th>
+                            <th class="py-2 pr-4">Amount (₹)</th>
+                            <th class="py-2 pr-4">Status</th>
+                            <th class="py-2 pr-4">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="histRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+    // ---- Dummy Data ----
+    const DECLS = [
+        { id: 1, sec: '80C', amt: 90000, period: 'Annual', status: 'pending', note: 'PPF + ELSS' },
+        { id: 2, sec: '80D', amt: 24000, period: 'Annual', status: 'approved', note: 'Family floater' },
+        { id: 3, sec: '80CCD(1B)', amt: 50000, period: 'One-time', status: 'pending', note: 'NPS Tier-I' },
+        { id: 4, sec: 'HRA', amt: 180000, period: 'Annual', status: 'pending', note: 'Metro rent' },
+        { id: 5, sec: 'LTA', amt: 30000, period: 'Annual', status: 'rejected', note: 'Missing tickets' }
+    ];
+    const LIMITS = [
+        { key: '80C', cap: 150000, note: 'Combined cap for PF/PPF/ELSS/LIC, etc.' },
+        { key: '80D', cap: '₹25,000 / ₹50,000 (senior parents)', note: 'Medical insurance premiums' },
+        { key: '80CCD(1B)', cap: 50000, note: 'Additional NPS deduction' },
+        { key: 'HRA', cap: 'Rule-based', note: 'Least of rent-excess, % of salary, actual HRA' },
+        { key: 'LTA', cap: 'Rule-based', note: '2 journeys in 4 years, economy fare caps' },
+        { key: 'Home Loan Interest', cap: '₹2,00,000 (self-occupied)', note: 'u/s 24(b)' },
+        { key: 'Education Loan Interest', cap: 'No limit (8 yrs)', note: 'u/s 80E' },
+        { key: 'Donations', cap: '50%/100% with/without limit', note: 'u/s 80G' }
+    ];
+    const PROOFS = [
+        { sec: '80C', amt: 90000, status: 'Pending' },
+        { sec: '80D', amt: 24000, status: 'Approved' },
+        { sec: '80CCD(1B)', amt: 50000, status: 'Pending' },
+        { sec: 'HRA', amt: 180000, status: 'Pending' },
+        { sec: 'LTA', amt: 30000, status: 'Rejected' }
+    ];
+    const HIST = [
+        { ts: '2025-09-12 10:05', sec: '80C', amt: 20000, status: 'approved', note: 'ELSS SIP' },
+        { ts: '2025-08-28 14:20', sec: 'HRA', amt: 150000, status: 'pending', note: 'Rent agreement uploaded' },
+        { ts: '2025-06-10 09:10', sec: 'LTA', amt: 30000, status: 'rejected', note: 'Clarify tickets' },
+        { ts: '2025-04-02 11:45', sec: '80D', amt: 24000, status: 'approved', note: 'Policy renewed' }
+    ];
+
+    // ---- Panels/Tabs ----
+    const panels = {
+        overview: document.getElementById('overviewPanel'),
+        declare: document.getElementById('declarePanel'),
+        proofs: document.getElementById('proofsPanel'),
+        limits: document.getElementById('limitsPanel'),
+        history: document.getElementById('historyPanel')
+    };
+
+    // ---- Charts refs ----
+    let _allocChart, _mixChart, _trendChart;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTabs();
+        wireButtons();
+        renderOverview();
+        renderDecls();
+        renderProofs();
+        renderLimits();
+        renderHistory();
+        drawAlloc();
+        drawMix();
+        drawTrend();
+    });
+
+    function setupTabs() {
+        document.querySelectorAll('.tx-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tx-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                panels[name].classList.remove('hidden');
+            });
+        });
+    }
+
+    function wireButtons() {
+        document.getElementById('submitDeclBtn').addEventListener('click', () => alert('✅ Declaration submitted (demo)'));
+        document.getElementById('downloadSummaryBtn').addEventListener('click', () => alert('📄 Summary PDF downloaded (demo)'));
+        document.getElementById('whatIfBtn').addEventListener('click', () => alert('🧮 Running what-if (demo)'));
+        document.getElementById('proofWindowBtn').addEventListener('click', () => alert('🗓️ Proof window details (demo)'));
+        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query opened (demo)'));
+        document.getElementById('regimePicker').addEventListener('change', renderOverview);
+
+        document.getElementById('addDeclBtn').addEventListener('click', addDecl);
+        document.getElementById('resetFormBtn').addEventListener('click', resetForm);
+
+        document.getElementById('searchHist').addEventListener('input', renderHistory);
+        document.getElementById('statusHist').addEventListener('change', renderHistory);
+    }
+
+    // ---- Overview ----
+    function renderOverview() {
+        const isNew = document.getElementById('regimePicker').value === 'new';
+        const declared = DECLS.reduce((a, d) => a + d.amt, 0);
+        const potentialSave = isNew ? 0 : Math.min(150000, DECLS.find(d => d.sec === '80C')?.amt || 0) * 0.2; // demo save
+        const projTax = isNew ? 142000 : 132000; // demo
+        document.getElementById('declaredAmt').textContent = fmt(declared);
+        document.getElementById('potentialSave').textContent = fmt(Math.round(potentialSave));
+        document.getElementById('projTax').textContent = fmt(projTax);
+    }
+
+    // ---- Declarations table ----
+    function renderDecls() {
+        const rows = DECLS.slice().sort((a, b) => a.sec.localeCompare(b.sec)).map(rowDecl).join('');
+        document.getElementById('declRows').innerHTML = rows || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No declarations.</td></tr>`;
+        renderLimitCards();
+    }
+    function rowDecl(d) {
+        return `<tr class="border-b last:border-0">
+      <td class="py-2 pr-4">${d.sec}</td>
+      <td class="py-2 pr-4">₹${fmt(d.amt)}</td>
+      <td class="py-2 pr-4">${d.period}</td>
+      <td class="py-2 pr-4">${badgePlain(d.status)}</td>
+      <td class="py-2 pr-4">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="editDecl(${d.id})">
+          <i class="fa-solid fa-pen mr-1"></i> Edit
+        </button>
+        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteDecl(${d.id})">
+          <i class="fa-solid fa-trash mr-1"></i> Remove
+        </button>
+      </td>
+    </tr>`;
+    }
+    function renderLimitCards() {
+        const map = groupBy(DECLS, 'sec');
+        const cards = LIMITS.map(l => {
+            const key = l.key.replace(' (self-occupied)', '').replace('Home Loan Interest', 'HOME-INT').replace('Education Loan Interest', 'EDU-INT');
+            const used = Object.keys(map).find(k => norm(k) === norm(l.key)) ? sum(map[Object.keys(map).find(k => norm(k) === norm(l.key))].map(x => x.amt)) : 0;
+            return `<div class="rounded-lg bg-slate-50 p-3 flex items-center justify-between">
+        <div>
+          <div class="font-medium text-slate-800">${l.key}</div>
+          <div class="text-xs text-slate-600">${l.note}</div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm">Used: ₹${fmt(used)}</div>
+          <div class="text-xs text-slate-600">Cap: ${typeof l.cap === 'number' ? '₹' + fmt(l.cap) : l.cap}</div>
+        </div>
+      </div>`;
+        }).join('');
+        document.getElementById('limitCards').innerHTML = cards;
+    }
+
+    // ---- Add/Edit/Delete ----
+    function addDecl() {
+        const sec = document.getElementById('sectionPicker').value;
+        const amt = Math.max(0, Number(document.getElementById('decAmt').value || 0));
+        const period = document.getElementById('decPeriod').value;
+        const note = (document.getElementById('decNotes').value || '').trim();
+        if (!amt) { alert('❌ Amount required'); return; }
+        DECLS.push({ id: Date.now(), sec: normOut(sec), amt, period, status: 'pending', note });
+        resetForm(); renderDecls(); renderOverview(); drawMix(); drawAlloc();
+    }
+    function editDecl(id) {
+        const d = DECLS.find(x => x.id === id); if (!d) return;
+        document.getElementById('sectionPicker').value = d.sec;
+        document.getElementById('decAmt').value = d.amt;
+        document.getElementById('decPeriod').value = d.period;
+        document.getElementById('decNotes').value = d.note || '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function deleteDecl(id) {
+        const i = DECLS.findIndex(x => x.id === id); if (i > -1) { DECLS.splice(i, 1); renderDecls(); renderOverview(); drawMix(); drawAlloc(); }
+    }
+    function resetForm() {
+        document.getElementById('decAmt').value = '';
+        document.getElementById('decNotes').value = '';
+    }
+
+    // ---- Proofs ----
+    function renderProofs() {
+        const rows = PROOFS.map(p => `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4">${p.sec}</td>
+        <td class="py-2 pr-4">₹${fmt(p.amt)}</td>
+        <td class="py-2 pr-4">${badgePlain(p.status.toLowerCase())}</td>
+        <td class="py-2 pr-4">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('📎 Uploading ${p.sec} proof (demo)')">
+            <i class="fa-solid fa-upload mr-1"></i> Upload
+          </button>
+          <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="alert('👀 View ${p.sec} proof (demo)')">
+            <i class="fa-solid fa-eye mr-1"></i> View
+          </button>
+        </td>
+      </tr>`).join('');
+        document.getElementById('proofRows').innerHTML = rows;
+    }
+
+    // ---- Limits list ----
+    function renderLimits() {
+        document.getElementById('limitsList').innerHTML = LIMITS.map(l => `
+      <div class="rounded-lg bg-slate-50 p-3">
+        <div class="font-medium text-slate-800">${l.key} — <span class="text-slate-600">${typeof l.cap === 'number' ? '₹' + fmt(l.cap) : l.cap}</span></div>
+        <div class="text-xs text-slate-600">${l.note}</div>
+      </div>`).join('');
+    }
+
+    // ---- History ----
+    function renderHistory() {
+        const q = (document.getElementById('searchHist').value || '').toLowerCase();
+        const st = document.getElementById('statusHist').value;
+        const rows = HIST
+            .filter(h => (st === 'all' ? true : h.status === st))
+            .filter(h => h.sec.toLowerCase().includes(q) || (h.note || '').toLowerCase().includes(q))
+            .slice().sort((a, b) => b.ts.localeCompare(a.ts));
+        document.getElementById('histRows').innerHTML = rows.map(h => `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+        <td class="py-2 pr-4">${h.sec}</td>
+        <td class="py-2 pr-4">₹${fmt(h.amt)}</td>
+        <td class="py-2 pr-4">${badgePlain(h.status)}</td>
+        <td class="py-2 pr-4">${h.note || ''}</td>
+      </tr>`).join('');
+    }
+
+    // ---- Charts ----
+    function drawAlloc() {
+        const ctx = document.getElementById('allocChart').getContext('2d');
+        const declared = DECLS.reduce((a, d) => a + d.amt, 0);
+        const projTax = 142000; // demo
+        if (_allocChart) _allocChart.destroy();
+        _allocChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['Declared', 'Projected Tax'], datasets: [{ label: 'Amount (₹)', data: [declared, projTax] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
+        });
+    }
+    function drawMix() {
+        const ctx = document.getElementById('mixChart').getContext('2d');
+        const bySec = groupSum(DECLS, 'sec', 'amt');
+        if (_mixChart) _mixChart.destroy();
+        _mixChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: Object.keys(bySec), datasets: [{ data: Object.values(bySec) }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } }, animation: false }
+        });
+        document.getElementById('mixLegend').innerHTML =
+            Object.entries(bySec).map(([k, v]) => `<div class="flex items-center justify-between text-sm"><span>${k}</span><span>₹${fmt(v)}</span></div>`).join('');
+    }
+    function drawTrend() {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        if (_trendChart) _trendChart.destroy();
+        const months = ['2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09'];
+        const vals = [20000, 22000, 24000, 26000, 50000, 30000]; // demo added declarations
+        _trendChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: months.map(labelMonth), datasets: [{ label: 'Declared (₹)', data: vals }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, animation: false }
+        });
+    }
+
+    // ---- Utils ----
+    function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
+    function sum(a) { return a.reduce((x, y) => x + y, 0); }
+    function groupBy(arr, key) { return arr.reduce((m, x) => ((m[x[key]] = m[x[key]] || []).push(x), m), {}); }
+    function groupSum(arr, key, val) { return arr.reduce((m, x) => (m[x[key]] = (m[x[key]] || 0) + (x[val] || 0), m), {}); }
+    function badgePlain(s) {
+        const k = s.toLowerCase();
+        const m = { approved: 'bg-emerald-50 text-emerald-700', pending: 'bg-amber-50 text-amber-700', rejected: 'bg-red-50 text-red-700' };
+        const label = k.charAt(0).toUpperCase() + k.slice(1);
+        return `<span class="px-2 py-0.5 rounded-full ${m[k] || 'bg-slate-100 text-slate-700'} text-xs">${label}</span>`;
+    }
+    function norm(s) { return s.replaceAll(/[^A-Za-z0-9]/g, '').toUpperCase(); }
+    function normOut(s) { return s; }
+    function labelMonth(ym) { const [y, m] = ym.split('-'); return new Date(Number(y), Number(m) - 1, 1).toLocaleString('en-IN', { month: 'short', year: 'numeric' }); }
+</script>
+
+<style>
+    .tx-tab.active {
+        background-color: #1e293b;
+        color: #fff;
+    }
+
+    .tx-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .tx-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

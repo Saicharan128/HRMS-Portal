@@ -1,0 +1,519 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-face-smile mr-2"></i> Company feedback
+            </h1>
+            <p class="text-slate-600 text-sm">Capture employee sentiment with surveys and feedback tools.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Builder + Quick Response (Dummy) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Create Survey -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h2 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-square-plus mr-2"></i> Create Survey (Dummy)
+            </h2>
+            <form id="svForm" class="grid grid-cols-1 md:grid-cols-6 gap-3">
+                <div class="md:col-span-3">
+                    <label class="block text-sm text-slate-600 mb-1">Title *</label>
+                    <input name="title" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Pulse check - Sept">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-sm text-slate-600 mb-1">Audience</label>
+                    <input name="audience" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="All / Engineering / HR">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Template</label>
+                    <select name="template" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <option>Custom</option>
+                        <option>NPS</option>
+                        <option>CSAT</option>
+                        <option>eNPS + Pulse</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Anonymous</label>
+                    <select name="anon" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <option>true</option>
+                        <option>false</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Start</label>
+                    <input name="start" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">End</label>
+                    <input name="end" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                </div>
+                <div class="md:col-span-6">
+                    <label class="block text-sm text-slate-600 mb-1">Description</label>
+                    <input name="desc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Purpose / context (optional)">
+                </div>
+
+                <!-- Question builder -->
+                <div class="md:col-span-6 rounded-xl border border-slate-200 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-slate-800 font-medium"><i class="fa-solid fa-list-check mr-2"></i> Questions
+                        </div>
+                        <button id="addQ" type="button"
+                            class="px-3 py-1.5 rounded-md border border-slate-300 text-sm hover:bg-slate-50">
+                            <i class="fa-solid fa-plus mr-1"></i> Add question
+                        </button>
+                    </div>
+                    <div id="qRows" class="space-y-2"></div>
+                </div>
+
+                <div class="md:col-span-6 flex items-center gap-3">
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> Save Survey
+                    </button>
+                    <span id="svMsg" class="text-sm text-slate-600"></span>
+                </div>
+            </form>
+        </div>
+
+        <!-- Quick Response (Dummy) -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h2 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fa-solid fa-bolt mr-2"></i> Quick Response (Dummy)
+            </h2>
+            <form id="respForm" class="grid grid-cols-1 md:grid-cols-6 gap-3">
+                <div class="md:col-span-3">
+                    <label class="block text-sm text-slate-600 mb-1">Survey *</label>
+                    <select name="survey" id="respSurvey"
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-sm text-slate-600 mb-1">Respondent</label>
+                    <input name="respondent" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="E001 - Charan">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Dept</label>
+                    <input name="dept" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Engineering">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Rating (1–5)</label>
+                    <input name="rating" type="number" min="1" max="5" step="1"
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">NPS (0–10)</label>
+                    <input name="nps" type="number" min="0" max="10" step="1"
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                </div>
+                <div class="md:col-span-6">
+                    <label class="block text-sm text-slate-600 mb-1">Comment</label>
+                    <input name="comment" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Your feedback…">
+                </div>
+                <div class="md:col-span-6 flex items-center gap-3">
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Submit
+                    </button>
+                    <button id="exportCsv"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50" type="button">
+                        <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                    </button>
+                    <span id="respMsg" class="text-sm text-slate-600"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-7 gap-2">
+        <input id="q" placeholder="Search title/desc/comment…"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">Any Status</option>
+            <option>Draft</option>
+            <option>Live</option>
+            <option>Closed</option>
+        </select>
+        <input id="fDept" placeholder="Department"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fAnon" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">Anon/Named</option>
+            <option>true</option>
+            <option>false</option>
+        </select>
+        <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fTo" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <button id="clearFilters"
+            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Surveys</div>
+            <div id="kpiSurveys" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Responses</div>
+            <div id="kpiResponses" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Avg Rating</div>
+            <div id="kpiAvg" class="text-xl font-semibold text-slate-800">—</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">NPS</div>
+            <div id="kpiNps" class="text-xl font-semibold text-slate-800">—</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Positive % (comments)</div>
+            <div id="kpiPos" class="text-xl font-semibold text-slate-800">—</div>
+        </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Surveys -->
+        <div class="rounded-2xl border border-slate-200 bg-white">
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
+                    class="fa-solid fa-clipboard-list mr-2"></i> Surveys</div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-slate-700">
+                    <thead class="bg-slate-50 text-slate-600">
+                        <tr>
+                            <th class="px-4 py-2">Title</th>
+                            <th class="px-4 py-2">Audience</th>
+                            <th class="px-4 py-2">Status</th>
+                            <th class="px-4 py-2">Anon</th>
+                            <th class="px-4 py-2">Window</th>
+                            <th class="px-4 py-2 w-56">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="svRows" class="divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+            <div id="svListMsg" class="p-3 text-sm text-slate-600"></div>
+        </div>
+
+        <!-- Responses -->
+        <div class="rounded-2xl border border-slate-200 bg-white">
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
+                    class="fa-solid fa-inbox mr-2"></i> Responses</div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-slate-700">
+                    <thead class="bg-slate-50 text-slate-600">
+                        <tr>
+                            <th class="px-4 py-2">Survey</th>
+                            <th class="px-4 py-2">Respondent</th>
+                            <th class="px-4 py-2">Dept</th>
+                            <th class="px-4 py-2">Rating</th>
+                            <th class="px-4 py-2">NPS</th>
+                            <th class="px-4 py-2 w-64">Comment</th>
+                            <th class="px-4 py-2 w-40">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="respRows" class="divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+            <div id="respListMsg" class="p-3 text-sm text-slate-600"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* -------- Dummy store -------- */
+    const KEY = "dummy_company_feedback";
+    let STORE = JSON.parse(localStorage.getItem(KEY) || "null") || {
+        surveys: [
+            {
+                id: 1, title: "eNPS + Pulse (Q3)", audience: "All", desc: "Quarterly pulse", anon: true, start: "2025-09-10", end: "2025-09-25",
+                status: "Live", questions: [{ id: "q1", type: "nps", text: "How likely are you to recommend our company? (0–10)" },
+                { id: "q2", type: "rating", text: "Work-life balance (1–5)" },
+                { id: "q3", type: "text", text: "One thing to improve" }]
+            },
+            {
+                id: 2, title: "CSAT - HR tools", audience: "Engineering", desc: "Tooling satisfaction", anon: false, start: "2025-08-01", end: "2025-08-10",
+                status: "Closed", questions: [{ id: "q1", type: "rating", text: "Overall satisfaction (1–5)" },
+                { id: "q2", type: "text", text: "Comments" }]
+            }
+        ],
+        responses: [
+            { id: 101, surveyId: 1, respondent: "—", dept: "Engineering", date: "2025-09-12", rating: 5, nps: 9, comment: "Loving the new workflows!" },
+            { id: 102, surveyId: 1, respondent: "—", dept: "Finance", date: "2025-09-12", rating: 4, nps: 7, comment: "Good culture, improve laptops" },
+            { id: 103, surveyId: 2, respondent: "E009 - Arjun", dept: "Engineering", date: "2025-08-05", rating: 3, nps: null, comment: "HR tool is okay" }
+        ]
+    };
+    function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); }
+
+    /* -------- Elements -------- */
+    const svForm = document.getElementById("svForm"), svMsg = document.getElementById("svMsg"), qRows = document.getElementById("qRows"), addQ = document.getElementById("addQ");
+    const respForm = document.getElementById("respForm"), respMsg = document.getElementById("respMsg"), respSurvey = document.getElementById("respSurvey"), exportCsv = document.getElementById("exportCsv");
+    const svRows = document.getElementById("svRows"), svListMsg = document.getElementById("svListMsg");
+    const respRows = document.getElementById("respRows"), respListMsg = document.getElementById("respListMsg");
+    const q = document.getElementById("q"), fStatus = document.getElementById("fStatus"), fDept = document.getElementById("fDept"), fAnon = document.getElementById("fAnon"), fFrom = document.getElementById("fFrom"), fTo = document.getElementById("fTo");
+    const clearFilters = document.getElementById("clearFilters");
+    const kpiSurveys = document.getElementById("kpiSurveys"), kpiResponses = document.getElementById("kpiResponses"), kpiAvg = document.getElementById("kpiAvg"), kpiNps = document.getElementById("kpiNps"), kpiPos = document.getElementById("kpiPos");
+
+    /* -------- Helpers -------- */
+    function el(tag, cls = "", html = "") { const x = document.createElement(tag); if (cls) x.className = cls; if (html) x.innerHTML = html; return x; }
+    function td(child) { const t = el("td", "px-4 py-2 align-top"); t.appendChild(child); return t; }
+    function input(v, cls = "w-48") { const i = el("input", `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`); i.value = v ?? ""; return i; }
+    function select(opts, cur, cls = "w-40") { const s = el("select", `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`); opts.forEach(o => { const op = el("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
+    function flash(elm, msg, ok = true) { elm.textContent = msg; elm.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { elm.textContent = ""; elm.className = "text-sm text-slate-600"; }, 1500); }
+    function withinDate(d) {
+        const v = new Date(d).setHours(0, 0, 0, 0);
+        const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null;
+        const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null;
+        if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true;
+    }
+    const POS = ["love", "great", "good", "awesome", "nice", "happy", "thanks", "improve*not"]; // naive sentiment list
+
+    /* -------- Question row -------- */
+    function addQuestionRow(q = { id: crypto.randomUUID().slice(0, 8), type: "rating", text: "New question" }) {
+        const row = el("div", "rounded-lg border border-slate-200 p-3");
+        const g = el("div", "grid grid-cols-1 md:grid-cols-12 gap-2 items-center");
+        const type = select(["rating", "nps", "text", "mcq"], q.type, "md:col-span-2");
+        const text = input(q.text, "md:col-span-8");
+        const rm = el("button", "md:col-span-2 px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50");
+        rm.innerHTML = '<i class="fa-solid fa-trash-can"></i> Remove';
+        g.append(type, text, rm); row.appendChild(g); qRows.appendChild(row);
+        rm.addEventListener("click", () => row.remove());
+    }
+
+    /* -------- Filters -------- */
+    function filteredSurveys() {
+        const term = (q.value || "").toLowerCase().trim();
+        const st = fStatus.value, anon = fAnon.value;
+        return STORE.surveys.filter(s => {
+            if (term && !(`${s.title} ${s.desc}`.toLowerCase().includes(term))) return false;
+            if (st && s.status !== st) return false;
+            if (anon && String(s.anon) !== anon) return false;
+            return true;
+        });
+    }
+    function filteredResponses() {
+        const term = (q.value || "").toLowerCase().trim();
+        const dept = (fDept.value || "").toLowerCase().trim();
+        return STORE.responses.filter(r => {
+            const s = STORE.surveys.find(x => x.id === r.surveyId);
+            if (!s) return false;
+            if (fStatus.value && s.status !== fStatus.value) return false;
+            if (fAnon.value && String(s.anon) !== fAnon.value) return false;
+            if (dept && !(r.dept || "").toLowerCase().includes(dept)) return false;
+            if ((fFrom.value || fTo.value) && !withinDate(r.date)) return false;
+            if (term && !(`${s.title} ${r.comment || ""}`.toLowerCase().includes(term))) return false;
+            return true;
+        });
+    }
+
+    /* -------- KPIs -------- */
+    function updateKPIs() {
+        const rs = filteredResponses();
+        kpiSurveys.textContent = String(filteredSurveys().length);
+        kpiResponses.textContent = String(rs.length);
+        const ratings = rs.map(r => Number(r.rating)).filter(x => !isNaN(x));
+        kpiAvg.textContent = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2) : "—";
+        // NPS: %Promoters(9-10) - %Detractors(0-6)
+        const npsVals = rs.map(r => Number(r.nps)).filter(x => !isNaN(x));
+        if (npsVals.length) {
+            const prom = npsVals.filter(x => x >= 9).length / npsVals.length * 100;
+            const detr = npsVals.filter(x => x <= 6).length / npsVals.length * 100;
+            kpiNps.textContent = Math.round(prom - detr);
+        } else kpiNps.textContent = "—";
+        // naive positive %
+        if (rs.length) {
+            const pos = rs.filter(r => {
+                const c = (r.comment || "").toLowerCase();
+                return /love|great|awesome|good|nice|happy|thanks/.test(c);
+            }).length / rs.length * 100;
+            kpiPos.textContent = Math.round(pos) + " %";
+        } else kpiPos.textContent = "—";
+    }
+
+    /* -------- RENDER: Surveys -------- */
+    function loadSurveys() {
+        svRows.innerHTML = "";
+        const data = filteredSurveys();
+        // populate quick-response dropdown
+        respSurvey.innerHTML = data.map(s => `<option value="${s.id}">${s.title}</option>`).join("");
+        data.forEach(s => {
+            const tr = el("tr");
+            const titleI = input(s.title, "w-56");
+            const audI = input(s.audience || "", "w-40");
+            const statusS = select(["Draft", "Live", "Closed"], s.status || "Draft", "w-28");
+            const anonS = select(["true", "false"], String(s.anon), "w-24");
+            const win = el("span", "text-sm text-slate-700", `${s.start || "—"} → ${s.end || "—"}`);
+
+            const actions = el("div");
+            const detailsBtn = el("button", "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50", "<i class='fa-solid fa-caret-down mr-1'></i>Details");
+            const goLiveBtn = el("button", "px-2 py-1 mr-2 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700", "<i class='fa-solid fa-play mr-1'></i>Live");
+            const closeBtn = el("button", "px-2 py-1 mr-2 rounded-md bg-rose-600 text-white text-xs hover:bg-rose-700", "<i class='fa-solid fa-stop mr-1'></i>Close");
+            const saveBtn = el("button", "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900", "<i class='fa-solid fa-floppy-disk mr-1'></i>Save");
+            const delBtn = el("button", "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50", "<i class='fa-solid fa-trash-can mr-1'></i>Delete");
+            actions.append(detailsBtn, goLiveBtn, closeBtn, saveBtn, delBtn);
+
+            tr.append(td(titleI), td(audI), td(statusS), td(anonS), td(win), td(actions));
+            svRows.appendChild(tr);
+
+            // details (questions)
+            const tr2 = el("tr");
+            const td2 = el("td", "px-4 pb-4"); td2.colSpan = 6;
+            const det = el("details", "rounded-xl border border-slate-200 bg-white p-4");
+            const sum = el("summary", "cursor-pointer text-slate-800 font-medium", "Questions");
+            const qs = el("div", "space-y-2 mt-3");
+            (s.questions || []).forEach((q, idx) => {
+                const chip = el("div", "rounded-lg border border-slate-200 p-2 text-sm");
+                chip.textContent = `${idx + 1}. [${q.type}] ${q.text}`;
+                qs.appendChild(chip);
+            });
+            det.append(sum, qs); td2.appendChild(det); tr2.appendChild(td2); svRows.appendChild(tr2);
+
+            function save() {
+                s.title = titleI.value.trim(); s.audience = audI.value.trim(); s.status = statusS.value; s.anon = (anonS.value === "true");
+                persist(); loadAll(); svListMsg.textContent = "Saved."; svListMsg.className = "p-3 text-sm text-emerald-700";
+                setTimeout(() => { svListMsg.textContent = ""; svListMsg.className = "p-3 text-sm text-slate-600"; }, 1200);
+            }
+            saveBtn.addEventListener("click", save);
+            goLiveBtn.addEventListener("click", () => { statusS.value = "Live"; save(); });
+            closeBtn.addEventListener("click", () => { statusS.value = "Closed"; save(); });
+            delBtn.addEventListener("click", () => {
+                if (!confirm("Delete survey and its responses?")) return;
+                STORE.surveys = STORE.surveys.filter(x => x !== s);
+                STORE.responses = STORE.responses.filter(r => r.surveyId !== s.id);
+                persist(); loadAll();
+            });
+            detailsBtn.addEventListener("click", () => { det.open = !det.open; });
+        });
+        svListMsg.textContent = data.length ? "" : "No surveys.";
+    }
+
+    /* -------- RENDER: Responses -------- */
+    function loadResponses() {
+        respRows.innerHTML = "";
+        const data = filteredResponses();
+        data.forEach(r => {
+            const s = STORE.surveys.find(x => x.id === r.surveyId);
+            const tr = el("tr");
+            const sName = el("span", "", s ? s.title : "(deleted)");
+            const userI = input(s?.anon ? "—" : (r.respondent || "—"), "w-40");
+            userI.disabled = (s && s.anon);
+            const deptI = input(r.dept || "", "w-32");
+            const ratingI = input(r.rating ?? "", "w-20"); ratingI.type = "number"; ratingI.min = 1; ratingI.max = 5; ratingI.step = 1;
+            const npsI = input(r.nps ?? "", "w-20"); npsI.type = "number"; npsI.min = 0; npsI.max = 10; npsI.step = 1;
+            const commentT = input(r.comment || "", "w-64");
+
+            const actions = el("div");
+            const saveBtn = el("button", "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900", "<i class='fa-solid fa-floppy-disk mr-1'></i>Save");
+            const delBtn = el("button", "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50", "<i class='fa-solid fa-trash-can mr-1'></i>Delete");
+            actions.append(saveBtn, delBtn);
+
+            tr.append(td(sName), td(userI), td(deptI), td(ratingI), td(npsI), td(commentT), td(actions));
+            respRows.appendChild(tr);
+
+            saveBtn.addEventListener("click", () => {
+                r.respondent = s?.anon ? "—" : userI.value.trim();
+                r.dept = deptI.value.trim();
+                r.rating = ratingI.value ? Number(ratingI.value) : null;
+                r.nps = npsI.value ? Number(npsI.value) : null;
+                r.comment = commentT.value;
+                persist(); loadAll();
+                respListMsg.textContent = "Saved."; respListMsg.className = "p-3 text-sm text-emerald-700";
+                setTimeout(() => { respListMsg.textContent = ""; respListMsg.className = "p-3 text-sm text-slate-600"; }, 1200);
+            });
+            delBtn.addEventListener("click", () => {
+                if (!confirm("Delete response?")) return;
+                STORE.responses = STORE.responses.filter(x => x !== r);
+                persist(); loadAll();
+            });
+        });
+        respListMsg.textContent = data.length ? "" : "No responses.";
+    }
+
+    /* -------- Create Survey (dummy) -------- */
+    addQ.addEventListener("click", () => addQuestionRow());
+    svForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fd = new FormData(svForm);
+        const title = (fd.get("title") || "").toString().trim();
+        if (!title) { flash(svMsg, "Title required", true); return; }
+        // seed questions from template or builder
+        let questions = [];
+        qRows.querySelectorAll(".rounded-lg").forEach((row, idx) => {
+            const [typeSel, textI] = row.querySelectorAll("select, input");
+            const type = typeSel?.value || "text";
+            const text = textI?.value || `Q${idx + 1}`;
+            questions.push({ id: crypto.randomUUID().slice(0, 8), type, text });
+        });
+        const template = (fd.get("template") || "").toString();
+        if (!questions.length && template && template !== "Custom") {
+            if (template === "NPS") questions = [{ id: "q1", type: "nps", text: "How likely are you to recommend us? (0–10)" }];
+            if (template === "CSAT") questions = [{ id: "q1", type: "rating", text: "Overall satisfaction (1–5)" }, { id: "q2", type: "text", text: "Comments" }];
+            if (template === "eNPS + Pulse") questions = [{ id: "q1", type: "nps", text: "eNPS (0–10)" }, { id: "q2", type: "rating", text: "Manager support (1–5)" }, { id: "q3", type: "text", text: "One thing to improve" }];
+        }
+        const id = Math.max(0, ...STORE.surveys.map(s => s.id)) + 1;
+        STORE.surveys.unshift({
+            id, title,
+            audience: (fd.get("audience") || "").toString().trim(),
+            desc: (fd.get("desc") || "").toString().trim(),
+            anon: (fd.get("anon") || "true").toString() === "true",
+            start: (fd.get("start") || "").toString(), end: (fd.get("end") || "").toString(),
+            status: "Draft",
+            questions
+        });
+        persist(); svForm.reset(); qRows.innerHTML = ""; flash(svMsg, "Survey saved ✓"); loadAll();
+    });
+
+    /* -------- Submit Response (dummy) -------- */
+    respForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fd = new FormData(respForm);
+        const surveyId = Number(fd.get("survey"));
+        if (!surveyId) { flash(respMsg, "Pick a survey.", true); return; }
+        const s = STORE.surveys.find(x => x.id === surveyId);
+        const id = Math.max(100, ...STORE.responses.map(r => r.id)) + 1;
+        const respondent = s?.anon ? "—" : (fd.get("respondent") || "").toString().trim() || "—";
+        STORE.responses.unshift({
+            id, surveyId,
+            respondent,
+            dept: (fd.get("dept") || "").toString().trim(),
+            date: new Date().toISOString().slice(0, 10),
+            rating: fd.get("rating") ? Number(fd.get("rating")) : null,
+            nps: fd.get("nps") ? Number(fd.get("nps")) : null,
+            comment: (fd.get("comment") || "").toString()
+        });
+        persist(); respForm.reset(); flash(respMsg, "Submitted ✓"); loadAll();
+    });
+
+    /* -------- Export CSV -------- */
+    exportCsv.addEventListener("click", () => {
+        const rows = [["survey", "respondent", "dept", "date", "rating", "nps", "comment"]];
+        STORE.responses.forEach(r => {
+            const s = STORE.surveys.find(x => x.id === r.surveyId);
+            rows.push([s?.title || "", r.respondent || "", r.dept || "", r.date || "", r.rating ?? "", r.nps ?? "", (r.comment || "").replaceAll('"', '""')]);
+        });
+        const csv = rows.map(r => r.map(v => `"${String(v)}"`).join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv" }); const url = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = url; a.download = "feedback_responses.csv"; a.click(); URL.revokeObjectURL(url);
+    });
+
+    /* -------- Live filters -------- */
+    [q, fStatus, fDept, fAnon, fFrom, fTo].forEach(el => el.addEventListener("input", () => loadAll()));
+    clearFilters.addEventListener("click", () => { q.value = ""; fStatus.value = ""; fDept.value = ""; fAnon.value = ""; fFrom.value = ""; fTo.value = ""; loadAll(); });
+
+    /* -------- Init -------- */
+    function loadAll() { loadSurveys(); loadResponses(); updateKPIs(); }
+    addQuestionRow({ type: "rating", text: "Overall satisfaction (1–5)" }); // starter row
+    loadAll();
+</script>
+{% endblock %}

@@ -1,0 +1,478 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-wallet mr-2"></i> Pay &amp; Deductions
+            </h1>
+            <p class="text-slate-600 text-sm">Current cycle earnings, taxes, and deductions.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="downloadPayslipBtn"
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-download mr-1"></i> Download Payslip (PDF)
+            </button>
+            <button id="exportCsvBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab" class="pd-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-chart-line mr-1"></i> Overview
+            </button>
+            <button id="breakdownTab" class="pd-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-scale-balanced mr-1"></i> Breakdown
+            </button>
+            <button id="historyTab" class="pd-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
+            </button>
+            <button id="settingsTab" class="pd-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-gear mr-1"></i> Settings
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overviewPanel" class="pd-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Current Cycle -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-calendar-day mr-2"></i> Current Cycle
+                    </h3>
+                    <span id="cycleBadge" class="px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700">On
+                        Track</span>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Earnings (₹)</div>
+                        <div id="earnAmt" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Deductions (₹)</div>
+                        <div id="dedAmt" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Net (₹)</div>
+                        <div id="netAmt" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="relative h-40 mt-4">
+                    <canvas id="mixChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div class="mt-4 flex items-center gap-2">
+                    <select id="cyclePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                        <option>Sep 2025</option>
+                        <option>Aug 2025</option>
+                        <option>Jul 2025</option>
+                    </select>
+                    <select id="regimePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                        <option value="new">New Regime</option>
+                        <option value="old">Old Regime</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Components pie -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-chart-pie mr-2"></i> Components
+                    </h3>
+                </div>
+                <div class="relative h-40">
+                    <canvas id="pieChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div id="compLegend" class="mt-3 text-sm text-slate-700"></div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-bolt mr-2"></i> Quick Actions
+                    </h3>
+                </div>
+                <div class="space-y-3">
+                    <button id="viewStructureBtn"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-sitemap mr-2"></i> View salary structure
+                    </button>
+                    <button id="optimizeTaxBtn"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-sliders mr-2"></i> Optimize tax (what-if)
+                    </button>
+                    <button id="raiseQueryBtn"
+                        class="w-full px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-left">
+                        <i class="fa-solid fa-circle-question mr-2"></i> Raise a payroll query
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Breakdown -->
+    <section id="breakdownPanel" class="pd-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-list-check mr-2"></i> Earnings & Deductions
+                    </h3>
+                    <div class="text-sm text-slate-600">
+                        <select id="bdCycle" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                            <option>Sep 2025</option>
+                            <option>Aug 2025</option>
+                            <option>Jul 2025</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500 border-b">
+                            <tr>
+                                <th class="py-2 pr-4">Component</th>
+                                <th class="py-2 pr-4">Type</th>
+                                <th class="py-2 pr-4">Amount (₹)</th>
+                                <th class="py-2 pr-4">Taxable (₹)</th>
+                                <th class="py-2 pr-4">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bdRows" class="text-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-percent mr-2"></i> Tax Split
+                    </h3>
+                </div>
+                <div class="relative h-56">
+                    <canvas id="taxChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- History -->
+    <section id="historyPanel" class="pd-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-table mr-2"></i> Last 12 Months
+                </h3>
+                <div class="flex items-center gap-2">
+                    <input id="searchInput" type="text" placeholder="Search month or note..."
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                    <select id="typeFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="earning">Earning</option>
+                        <option value="deduction">Deduction</option>
+                    </select>
+                </div>
+            </div>
+            <div class="relative h-48 mb-4">
+                <canvas id="trendChart" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Month</th>
+                            <th class="py-2 pr-4">Gross (₹)</th>
+                            <th class="py-2 pr-4">Deductions (₹)</th>
+                            <th class="py-2 pr-4">Net (₹)</th>
+                            <th class="py-2 pr-4">Status</th>
+                            <th class="py-2 pr-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="histRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settingsPanel" class="pd-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-building-columns mr-2"></i> Bank Details
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div><b>Bank:</b> HDFC Bank</div>
+                    <div><b>Account:</b> **** 1234</div>
+                    <div><b>IFSC:</b> HDFC0000123</div>
+                    <button id="verifyBankBtn"
+                        class="mt-2 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> Verify
+                    </button>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-receipt mr-2"></i> Reimbursements
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div><b>Pending:</b> ₹2,500</div>
+                    <button id="submitBillsBtn"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-upload mr-1"></i> Submit bills
+                    </button>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-bell mr-2"></i> Notifications
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center gap-2"><input id="notifEmail" type="checkbox" checked> Email
+                        alerts</label>
+                    <label class="flex items-center gap-2"><input id="notifSMS" type="checkbox"> SMS alerts</label>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+    // ---- Dummy Data ----
+    const CYCLES = {
+        'Sep 2025': {
+            earnings: [
+                { name: 'Basic', amt: 55000, taxable: 55000, note: '' },
+                { name: 'HRA', amt: 22000, taxable: 11000, note: '50% exempt (demo)' },
+                { name: 'Special Allowance', amt: 18000, taxable: 18000, note: '' },
+                { name: 'Bonus', amt: 10000, taxable: 10000, note: 'Performance' }
+            ],
+            deductions: [
+                { name: 'TDS', amt: 16000, note: '' },
+                { name: 'EPF', amt: 7800, note: '' },
+                { name: 'Health Insurance', amt: 1200, note: '' }
+            ],
+            gross: 105000, ded: 25000, net: 80000
+        },
+        'Aug 2025': { gross: 102000, ded: 23800, net: 78200 },
+        'Jul 2025': { gross: 98000, ded: 22000, net: 76000 }
+    };
+
+    const HISTORY = [
+        { month: '2025-09', gross: 105000, ded: 25000, net: 80000, status: 'Processed' },
+        { month: '2025-08', gross: 102000, ded: 23800, net: 78200, status: 'Processed' },
+        { month: '2025-07', gross: 98000, ded: 22000, net: 76000, status: 'Processed' },
+        { month: '2025-06', gross: 98000, ded: 20500, net: 77500, status: 'Processed' },
+        { month: '2025-05', gross: 97000, ded: 20500, net: 76500, status: 'Processed' },
+        { month: '2025-04', gross: 96000, ded: 19800, net: 76200, status: 'Processed' },
+        { month: '2025-03', gross: 95000, ded: 19500, net: 75500, status: 'Processed' },
+        { month: '2025-02', gross: 94000, ded: 19000, net: 75000, status: 'Processed' },
+        { month: '2025-01', gross: 94000, ded: 19000, net: 75000, status: 'Processed' },
+        { month: '2024-12', gross: 93000, ded: 18800, net: 74200, status: 'Processed' },
+        { month: '2024-11', gross: 92000, ded: 18200, net: 73800, status: 'Processed' },
+        { month: '2024-10', gross: 91500, ded: 18000, net: 73500, status: 'Processed' }
+    ];
+
+    // ---- Panels/Tabs ----
+    const panels = {
+        overview: document.getElementById('overviewPanel'),
+        breakdown: document.getElementById('breakdownPanel'),
+        history: document.getElementById('historyPanel'),
+        settings: document.getElementById('settingsPanel')
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTabs();
+        wireButtons();
+        renderOverview();
+        renderBreakdown();
+        renderHistory();
+        drawMix();
+        drawPie();
+        drawTax();
+        drawTrend();
+    });
+
+    function setupTabs() {
+        document.querySelectorAll('.pd-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.pd-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                panels[name].classList.remove('hidden');
+            });
+        });
+    }
+
+    function wireButtons() {
+        document.getElementById('downloadPayslipBtn').addEventListener('click', () => alert('📄 Payslip downloaded (demo)'));
+        document.getElementById('exportCsvBtn').addEventListener('click', () => alert('✅ CSV exported (demo)'));
+        document.getElementById('viewStructureBtn').addEventListener('click', () => alert('🧩 Salary structure (demo)'));
+        document.getElementById('optimizeTaxBtn').addEventListener('click', () => alert('🧮 Running what-if (demo)'));
+        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened (demo)'));
+        document.getElementById('verifyBankBtn')?.addEventListener('click', () => alert('🏦 Bank verified (demo)'));
+        document.getElementById('submitBillsBtn')?.addEventListener('click', () => alert('🧾 Upload bills (demo)'));
+        document.getElementById('notifEmail')?.addEventListener('change', () => alert('🔔 Email alerts toggled'));
+        document.getElementById('notifSMS')?.addEventListener('change', () => alert('🔔 SMS alerts toggled'));
+        document.getElementById('cyclePicker').addEventListener('change', onCycleChange);
+        document.getElementById('regimePicker').addEventListener('change', () => alert('⚖️ Regime toggle (demo)'));
+        document.getElementById('bdCycle').addEventListener('change', renderBreakdown);
+        document.getElementById('searchInput').addEventListener('input', renderHistory);
+        document.getElementById('typeFilter').addEventListener('change', renderHistory);
+    }
+
+    // ---- Overview ----
+    function onCycleChange() { renderOverview(); renderBreakdown(); drawMix(); drawPie(); drawTax(); }
+    function renderOverview() {
+        const cyc = document.getElementById('cyclePicker').value;
+        const { gross = 0, ded = 0, net = 0 } = CYCLES[cyc] || {};
+        document.getElementById('earnAmt').textContent = fmt(gross);
+        document.getElementById('dedAmt').textContent = fmt(ded);
+        document.getElementById('netAmt').textContent = fmt(net);
+        const badge = document.getElementById('cycleBadge');
+        badge.textContent = net >= 78000 ? 'On Track' : 'Lower Net';
+        badge.className = 'px-2 py-1 text-xs rounded ' + (net >= 78000 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700');
+    }
+
+    // ---- Breakdown ----
+    function renderBreakdown() {
+        const cyc = document.getElementById('bdCycle').value;
+        const data = CYCLES[cyc] || {};
+        const rows = []
+            .concat((data.earnings || []).map(x => rowBD(x, 'Earning')))
+            .concat((data.deductions || []).map(x => rowBD({ ...x, taxable: 0 }, 'Deduction')));
+        document.getElementById('bdRows').innerHTML = rows.join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No data.</td></tr>`;
+    }
+    function rowBD(x, type) {
+        return `<tr class="border-b last:border-0">
+      <td class="py-2 pr-4">${x.name}</td>
+      <td class="py-2 pr-4">${type}</td>
+      <td class="py-2 pr-4">₹${fmt(x.amt || 0)}</td>
+      <td class="py-2 pr-4">₹${fmt(x.taxable || 0)}</td>
+      <td class="py-2 pr-4">${x.note || ''}</td>
+    </tr>`;
+    }
+
+    // ---- History ----
+    function renderHistory() {
+        const q = (document.getElementById('searchInput').value || '').toLowerCase();
+        const t = document.getElementById('typeFilter').value;
+        const rows = HISTORY
+            .filter(h => labelMonth(h.month).toLowerCase().includes(q))
+            .slice().sort((a, b) => b.month.localeCompare(a.month));
+        document.getElementById('histRows').innerHTML = rows.map(h => `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4">${labelMonth(h.month)}</td>
+        <td class="py-2 pr-4">₹${fmt(h.gross)}</td>
+        <td class="py-2 pr-4">₹${fmt(h.ded)}</td>
+        <td class="py-2 pr-4 font-medium">₹${fmt(h.net)}</td>
+        <td class="py-2 pr-4"><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">${h.status}</span></td>
+        <td class="py-2 pr-4">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('👀 Viewing ${labelMonth(h.month)} (demo)')">
+            <i class="fa-solid fa-eye mr-1"></i> View
+          </button>
+          <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="alert('📄 Downloading ${labelMonth(h.month)} (demo)')">
+            <i class="fa-solid fa-download mr-1"></i> PDF
+          </button>
+        </td>
+      </tr>`).join('');
+    }
+
+    // ---- Charts ----
+    let _mixChart, _pieChart, _taxChart, _trendChart;
+    function drawMix() {
+        const cyc = document.getElementById('cyclePicker').value;
+        const { gross = 0, ded = 0, net = 0 } = CYCLES[cyc] || {};
+        const ctx = document.getElementById('mixChart').getContext('2d');
+        if (_mixChart) _mixChart.destroy();
+        _mixChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['Gross', 'Deductions', 'Net'], datasets: [{ label: 'Amount (₹)', data: [gross, ded, net] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
+        });
+    }
+    function drawPie() {
+        const cyc = document.getElementById('cyclePicker').value;
+        const data = CYCLES[cyc] || { earnings: [], deductions: [] };
+        const comps = [
+            ...data.earnings?.map(e => ({ label: e.name, value: e.amt })) || [],
+            ...data.deductions?.map(d => ({ label: d.name, value: d.amt })) || []
+        ];
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        if (_pieChart) _pieChart.destroy();
+        _pieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: comps.map(c => c.label), datasets: [{ data: comps.map(c => c.value) }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '60%', animation: false }
+        });
+        document.getElementById('compLegend').innerHTML =
+            comps.map(c => `<div class="flex items-center justify-between text-sm"><span>${c.label}</span><span>₹${fmt(c.value)}</span></div>`).join('');
+    }
+    function drawTax() {
+        const cyc = document.getElementById('cyclePicker').value;
+        const d = (CYCLES[cyc]?.deductions) || [];
+        const tds = d.find(x => x.name === 'TDS')?.amt || 0, epf = d.find(x => x.name === 'EPF')?.amt || 0, other = (d.reduce((a, x) => a + x.amt, 0) - tds - epf);
+        const ctx = document.getElementById('taxChart').getContext('2d');
+        if (_taxChart) _taxChart.destroy();
+        _taxChart = new Chart(ctx, {
+            type: 'pie',
+            data: { labels: ['TDS', 'EPF', 'Other'], datasets: [{ data: [tds, epf, other] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, animation: false }
+        });
+    }
+    function drawTrend() {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        const labels = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => labelMonth(h.month));
+        const gross = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => h.gross);
+        const ded = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => h.ded);
+        const net = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => h.net);
+        if (_trendChart) _trendChart.destroy();
+        _trendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels, datasets: [
+                    { label: 'Gross', data: gross },
+                    { label: 'Deductions', data: ded },
+                    { label: 'Net', data: net }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, animation: false }
+        });
+    }
+
+    // ---- Helpers ----
+    function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
+    function labelMonth(ym) { const [y, m] = ym.split('-'); return new Date(Number(y), Number(m) - 1, 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' }); }
+</script>
+
+<style>
+    .pd-tab.active {
+        background-color: #1e293b;
+        color: #fff;
+    }
+
+    .pd-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .pd-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

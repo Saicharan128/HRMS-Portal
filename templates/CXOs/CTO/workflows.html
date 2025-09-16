@@ -1,0 +1,388 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-diagram-project mr-2"></i> Workflows
+            </h1>
+            <p class="text-slate-600 text-sm">Build workflows for approvals.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Create Workflow (Dummy) -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
+        <h2 class="text-lg font-semibold text-slate-800 mb-4">
+            <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Create Workflow (Dummy)
+        </h2>
+
+        <!-- Basics -->
+        <form id="wfForm" class="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Name *</label>
+                <input name="name" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="Expense > ₹5k – 2-step approval">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Entity *</label>
+                <select name="entity" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <option>Expense</option>
+                    <option>Timesheet</option>
+                    <option>Leave</option>
+                    <option>Purchase</option>
+                    <option>Attendance</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Trigger *</label>
+                <select name="trigger" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <option>On submit</option>
+                    <option>On edit</option>
+                    <option>Threshold breach</option>
+                </select>
+            </div>
+            <div class="md:col-span-6">
+                <label class="block text-sm text-slate-600 mb-1">Description</label>
+                <input name="desc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="Optional short description">
+            </div>
+
+            <!-- Conditions -->
+            <div class="md:col-span-6 rounded-xl border border-slate-200 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="text-slate-800 font-medium"><i class="fa-solid fa-filter mr-2"></i>Conditions (ALL must
+                        match)</div>
+                    <button id="addCond" type="button"
+                        class="px-3 py-1.5 rounded-md border border-slate-300 text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-plus mr-1"></i> Add condition
+                    </button>
+                </div>
+                <div id="condRows" class="grid grid-cols-1 md:grid-cols-12 gap-2"></div>
+            </div>
+
+            <!-- Steps -->
+            <div class="md:col-span-6 rounded-xl border border-slate-200 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="text-slate-800 font-medium"><i class="fa-solid fa-stairs mr-2"></i>Approval Steps
+                        (sequential)</div>
+                    <button id="addStep" type="button"
+                        class="px-3 py-1.5 rounded-md border border-slate-300 text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-plus mr-1"></i> Add step
+                    </button>
+                </div>
+                <div id="stepRows" class="space-y-2"></div>
+            </div>
+
+            <div class="md:col-span-6 flex items-center gap-3">
+                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i> Save Workflow
+                </button>
+                <span id="wfMsg" class="text-sm text-slate-600"></span>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+        <input id="q" placeholder="Search name / entity…"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fEntity" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">Any Entity</option>
+            <option>Expense</option>
+            <option>Timesheet</option>
+            <option>Leave</option>
+            <option>Purchase</option>
+            <option>Attendance</option>
+        </select>
+        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">Any Status</option>
+            <option>Active</option>
+            <option>Paused</option>
+        </select>
+        <select id="fTrigger" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">Any Trigger</option>
+            <option>On submit</option>
+            <option>On edit</option>
+            <option>Threshold breach</option>
+        </select>
+        <button id="clearFilters"
+            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Workflows</div>
+            <div id="kpiCount" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Active</div>
+            <div id="kpiActive" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Paused</div>
+            <div id="kpiPaused" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Avg Steps</div>
+            <div id="kpiAvgSteps" class="text-xl font-semibold text-slate-800">0.0</div>
+        </div>
+    </div>
+
+    <!-- List -->
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+        <table class="min-w-full text-sm text-left text-slate-700">
+            <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                    <th class="px-4 py-2">Name</th>
+                    <th class="px-4 py-2">Entity</th>
+                    <th class="px-4 py-2">Trigger</th>
+                    <th class="px-4 py-2">Steps</th>
+                    <th class="px-4 py-2">Status</th>
+                    <th class="px-4 py-2">Updated</th>
+                    <th class="px-4 py-2 w-64">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="rows" class="divide-y divide-slate-200"></tbody>
+        </table>
+    </div>
+    <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
+</div>
+
+<script>
+    /* ---------- Dummy store (localStorage) ---------- */
+    const KEY = "dummy_workflows";
+    let STORE = JSON.parse(localStorage.getItem(KEY) || "null") || [
+        {
+            id: 1, name: "Expense > ₹5000 – Manager + Finance", entity: "Expense", trigger: "On submit",
+            desc: "Two-step approval for high-value expenses",
+            conditions: [{ field: "amount", op: ">", value: "5000" }, { field: "currency", op: "=", value: "INR" }],
+            steps: [
+                { approver_type: "Role", approver: "Manager", sla_h: 24, auto_approve: false, escalate_to: "Finance Lead" },
+                { approver_type: "Role", approver: "Finance", sla_h: 24, auto_approve: true, escalate_to: "CFO" }
+            ],
+            status: "Active", updated_at: new Date().toISOString()
+        },
+        {
+            id: 2, name: "Timesheet – OT review", entity: "Timesheet", trigger: "Threshold breach",
+            desc: "Overtime (> 40h/week) requires TL approval",
+            conditions: [{ field: "weekly_hours", op: ">", value: "40" }],
+            steps: [{ approver_type: "Role", approver: "Team Lead", sla_h: 12, auto_approve: false, escalate_to: "HR" }],
+            status: "Paused", updated_at: new Date(Date.now() - 86400000).toISOString()
+        }
+    ];
+    function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); }
+
+    /* ---------- Elements ---------- */
+    const wfForm = document.getElementById("wfForm");
+    const wfMsg = document.getElementById("wfMsg");
+    const condRows = document.getElementById("condRows");
+    const stepRows = document.getElementById("stepRows");
+    const addCond = document.getElementById("addCond");
+    const addStep = document.getElementById("addStep");
+
+    const q = document.getElementById("q");
+    const fEntity = document.getElementById("fEntity");
+    const fStatus = document.getElementById("fStatus");
+    const fTrigger = document.getElementById("fTrigger");
+    const clearFilters = document.getElementById("clearFilters");
+
+    const rows = document.getElementById("rows");
+    const listMsg = document.getElementById("listMsg");
+
+    const kpiCount = document.getElementById("kpiCount");
+    const kpiActive = document.getElementById("kpiActive");
+    const kpiPaused = document.getElementById("kpiPaused");
+    const kpiAvgSteps = document.getElementById("kpiAvgSteps");
+
+    /* ---------- Helpers ---------- */
+    function el(tag, cls = "", html = "") { const x = document.createElement(tag); if (cls) x.className = cls; if (html) x.innerHTML = html; return x; }
+    function input(v, cls = "w-full") { const i = el("input", `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`); i.value = v ?? ""; return i; }
+    function select(opts, cur, cls = "w-full") { const s = el("select", `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`); opts.forEach(o => { const op = el("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
+    function smallBtn(icon, title) { const b = el("button", "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"); b.innerHTML = icon + " " + title; return b; }
+    function flash(elm, msg, ok = true) { elm.textContent = msg; elm.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { elm.textContent = ""; elm.className = "text-sm text-slate-600"; }, 1500); }
+
+    /* ---------- Condition Builder ---------- */
+    function addCondRow(c = { field: "amount", op: ">", value: "1000" }) {
+        const wrap = el("div", "col-span-1 md:col-span-12 grid grid-cols-12 gap-2 items-center");
+        const f = select(["amount", "currency", "category", "department", "weekly_hours", "project"], c.field, "col-span-4");
+        const o = select([">", "<", "=", "≥", "≤", "≠", "contains", "not contains"], c.op, "col-span-2");
+        const v = input(c.value, "col-span-5");
+        const rm = smallBtn('<i class="fa-solid fa-trash-can"></i>', ""); rm.classList.add("col-span-1", "text-rose-700");
+        rm.addEventListener("click", () => { wrap.remove(); });
+        wrap.append(f, o, v, rm);
+        condRows.appendChild(wrap);
+    }
+    addCond.addEventListener("click", () => addCondRow());
+
+    /* ---------- Steps Builder ---------- */
+    function addStepRow(s = { approver_type: "Role", approver: "Manager", sla_h: 24, auto_approve: false, escalate_to: "" }) {
+        const row = el("div", "rounded-lg border border-slate-200 p-3");
+        const g = el("div", "grid grid-cols-1 md:grid-cols-12 gap-2");
+        const t = select(["Role", "User", "Dynamic (manager)"], s.approver_type, "md:col-span-3");
+        const a = input(s.approver, "md:col-span-3"); a.placeholder = "e.g., Finance";
+        const sla = input(s.sla_h, "md:col-span-2"); sla.type = "number"; sla.min = 1; sla.placeholder = "SLA (h)";
+        const aa = el("label", "md:col-span-2 flex items-center gap-2 text-sm text-slate-700"); aa.innerHTML = '<input type="checkbox" class="h-4 w-4"> Auto-approve on SLA'; aa.querySelector("input").checked = !!s.auto_approve;
+        const esc = input(s.escalate_to, "md:col-span-2"); esc.placeholder = "Escalate to";
+        const up = smallBtn('<i class="fa-solid fa-arrow-up"></i>', ""); const down = smallBtn('<i class="fa-solid fa-arrow-down"></i>', ""); const rm = smallBtn('<i class="fa-solid fa-xmark"></i>', "");
+        const controls = el("div", "md:col-span-2 flex items-center gap-2"); controls.append(up, down, rm);
+
+        g.append(t, a, sla, aa, esc, controls); row.appendChild(g); stepRows.appendChild(row);
+
+        up.addEventListener("click", () => { const prev = row.previousElementSibling; if (prev) stepRows.insertBefore(row, prev); });
+        down.addEventListener("click", () => { const next = row.nextElementSibling; if (next) stepRows.insertBefore(next, row); });
+        rm.addEventListener("click", () => row.remove());
+    }
+    addStep.addEventListener("click", () => addStepRow());
+
+    /* ---------- Form Submit ---------- */
+    wfForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fd = new FormData(wfForm);
+        const name = (fd.get("name") || "").toString().trim();
+        const entity = (fd.get("entity") || "").toString();
+        const trigger = (fd.get("trigger") || "").toString();
+        const desc = (fd.get("desc") || "").toString().trim();
+        if (!name) { flash(wfMsg, "Name is required", true); return; }
+
+        // conditions
+        const conds = [];
+        condRows.querySelectorAll(".grid").forEach(row => {
+            const sel = row.querySelectorAll("select"); const inp = row.querySelector("input[type=text]");
+            const c = { field: sel[0]?.value, op: sel[1]?.value, value: inp?.value || "" };
+            if (c.field && c.op && c.value !== "") conds.push(c);
+        });
+
+        // steps
+        const steps = [];
+        stepRows.querySelectorAll(".rounded-lg").forEach(row => {
+            const sels = row.querySelectorAll("select");
+            const inputs = row.querySelectorAll("input");
+            const [t, a, sla, auto, esc] = [sels[0], inputs[0], inputs[1], inputs[2], inputs[3]];
+            steps.push({
+                approver_type: t?.value || "Role",
+                approver: a?.value || "",
+                sla_h: Number(sla?.value || 24),
+                auto_approve: !!auto?.checked,
+                escalate_to: esc?.value || ""
+            });
+        });
+
+        const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
+        STORE.unshift({ id, name, entity, trigger, desc, conditions: conds, steps, status: "Active", updated_at: new Date().toISOString() });
+        persist();
+        wfForm.reset(); condRows.innerHTML = ""; stepRows.innerHTML = "";
+        flash(wfMsg, "Workflow saved ✓"); load();
+    });
+
+    /* ---------- Filters ---------- */
+    [q, fEntity, fStatus, fTrigger].forEach(el => el.addEventListener("input", () => load()));
+    clearFilters.addEventListener("click", () => { q.value = ""; fEntity.value = ""; fStatus.value = ""; fTrigger.value = ""; load(); });
+
+    /* ---------- Render ---------- */
+    function filtered() {
+        const term = (q.value || "").toLowerCase().trim();
+        const en = fEntity.value; const st = fStatus.value; const tr = fTrigger.value;
+        return STORE.filter(r => {
+            if (term && !(`${r.name} ${r.entity}`.toLowerCase().includes(term))) return false;
+            if (en && r.entity !== en) return false;
+            if (st && r.status !== st) return false;
+            if (tr && r.trigger !== tr) return false;
+            return true;
+        });
+    }
+    function updateKPIs(data) {
+        kpiCount.textContent = data.length;
+        kpiActive.textContent = data.filter(w => w.status === "Active").length;
+        kpiPaused.textContent = data.filter(w => w.status === "Paused").length;
+        const avg = data.length ? (data.reduce((a, w) => a + (w.steps?.length || 0), 0) / data.length) : 0;
+        kpiAvgSteps.textContent = avg.toFixed(1);
+    }
+    function load() {
+        const data = filtered();
+        rows.innerHTML = "";
+        updateKPIs(data);
+
+        data.forEach(r => {
+            const tr = el("tr");
+
+            const nameI = input(r.name, "w-56");
+            const entS = select(["Expense", "Timesheet", "Leave", "Purchase", "Attendance"], r.entity, "w-36");
+            const trigS = select(["On submit", "On edit", "Threshold breach"], r.trigger, "w-40");
+            const stepsS = el("span"); stepsS.textContent = (r.steps || []).length + " step(s)";
+            const statusS = select(["Active", "Paused"], r.status, "w-28");
+            const upd = el("span"); upd.textContent = new Date(r.updated_at).toLocaleString();
+
+            const actions = el("div");
+            const detailsBtn = smallBtn('<i class="fa-solid fa-caret-down"></i>', "Details");
+            const toggleBtn = smallBtn('<i class="fa-solid fa-power-off"></i>', r.status === "Active" ? "Pause" : "Activate");
+            const saveBtn = smallBtn('<i class="fa-solid fa-floppy-disk"></i>', "Save");
+            const delBtn = smallBtn('<i class="fa-solid fa-trash-can"></i>', "Delete");
+            actions.append(detailsBtn, toggleBtn, saveBtn, delBtn);
+
+            tr.append(
+                td(nameI), td(entS), td(trigS), td(stepsS), td(statusS), td(upd), td(actions)
+            );
+            rows.appendChild(tr);
+
+            // details row
+            const tr2 = el("tr");
+            const td2 = el("td", "px-4 pb-4"); td2.colSpan = 7;
+            const det = el("details", "rounded-xl border border-slate-200 bg-white p-4");
+            const sum = el("summary", "cursor-pointer text-slate-800 font-medium", "Workflow design");
+            const inner = el("div", "grid grid-cols-1 md:grid-cols-2 gap-4 mt-3");
+            // conditions
+            const condBox = el("div", "rounded-lg border border-slate-200 p-3");
+            condBox.innerHTML = '<div class="text-sm font-medium text-slate-700 mb-2"><i class="fa-solid fa-filter mr-1"></i>Conditions</div>';
+            if ((r.conditions || []).length === 0) { condBox.appendChild(el("div", "text-sm text-slate-500", "—")); }
+            (r.conditions || []).forEach(c => {
+                const line = el("div", "text-sm"); line.textContent = `${c.field} ${c.op} ${c.value}`; condBox.appendChild(line);
+            });
+            // steps
+            const stepBox = el("div", "rounded-lg border border-slate-200 p-3");
+            stepBox.innerHTML = '<div class="text-sm font-medium text-slate-700 mb-2"><i class="fa-solid fa-stairs mr-1"></i>Steps</div>';
+            (r.steps || []).forEach((s, idx) => {
+                const card = el("div", "text-sm mb-2");
+                card.innerHTML = `<div class="font-medium">Step ${idx + 1}: ${s.approver_type} → ${s.approver || "(unset)"} </div>
+        <div class="text-slate-600">SLA: ${s.sla_h}h • Auto-approve: ${s.auto_approve ? "Yes" : "No"} • Escalate: ${s.escalate_to || "—"}</div>`;
+                stepBox.appendChild(card);
+            });
+            inner.append(condBox, stepBox);
+            det.append(sum, inner);
+            td2.appendChild(det); tr2.appendChild(td2); rows.appendChild(tr2);
+
+            detailsBtn.addEventListener("click", () => { det.open = !det.open; });
+
+            function save() {
+                r.name = nameI.value.trim();
+                r.entity = entS.value;
+                r.trigger = trigS.value;
+                r.status = statusS.value;
+                r.updated_at = new Date().toISOString();
+                persist(); load();
+                listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
+                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+            }
+            saveBtn.addEventListener("click", save);
+
+            toggleBtn.addEventListener("click", () => { statusS.value = (r.status === "Active") ? "Paused" : "Active"; save(); });
+
+            delBtn.addEventListener("click", () => {
+                if (!confirm("Delete this workflow?")) return;
+                STORE = STORE.filter(x => x.id !== r.id); persist(); load();
+            });
+        });
+
+        listMsg.textContent = data.length ? "" : "No workflows.";
+    }
+    function td(elm) { const td = document.createElement("td"); td.className = "px-4 py-2"; td.appendChild(elm); return td; }
+
+    /* ---------- Init ---------- */
+    load();
+</script>
+{% endblock %}

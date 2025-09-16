@@ -1,0 +1,440 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-file-shield mr-2"></i> Form 16
+            </h1>
+            <p class="text-slate-600 text-sm">Download Form 16 for tax filing.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="downloadSelectedBtn"
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-download mr-1"></i> Download Selected
+            </button>
+            <button id="emailBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-envelope mr-1"></i> Email to me
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab" class="f16-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-chart-line mr-1"></i> Overview
+            </button>
+            <button id="formsTab" class="f16-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-file-lines mr-1"></i> Certificates
+            </button>
+            <button id="requestsTab" class="f16-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clipboard-list mr-1"></i> Requests
+            </button>
+            <button id="helpTab" class="f16-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-circle-info mr-1"></i> Help
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overviewPanel" class="f16-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Status & Year picker -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-badge-check mr-2"></i> Availability
+                    </h3>
+                    <span id="availBadge"
+                        class="px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700">Available</span>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-slate-600">Financial Year</label>
+                        <select id="fyPicker" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                            <option>2024-25</option>
+                            <option>2023-24</option>
+                            <option>2022-23</option>
+                        </select>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3 text-sm">
+                        <div><b>PAN:</b> ABCDE1234F</div>
+                        <div><b>Employer TAN:</b> BLRE01234A</div>
+                        <div><b>Regime:</b> New (FY25)</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="downloadA"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                            <i class="fa-solid fa-file-arrow-down mr-1"></i> Part A
+                        </button>
+                        <button id="downloadB"
+                            class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                            <i class="fa-solid fa-file-arrow-down mr-1"></i> Part B
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TDS Trend -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-chart-column mr-2"></i> TDS by Quarter
+                    </h3>
+                </div>
+                <div class="relative h-40">
+                    <canvas id="tdsQuarterChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent activity -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-clock-rotate-left mr-2"></i> Recent Activity
+                    </h3>
+                    <button id="refreshBtn" class="text-sm text-slate-600 hover:text-slate-800">
+                        <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                    </button>
+                </div>
+                <div id="activityFeed" class="space-y-3"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certificates -->
+    <section id="formsPanel" class="f16-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-file-lines mr-2"></i> Form 16 Certificates
+                </h3>
+                <div class="flex items-center gap-2">
+                    <input id="searchInput" type="text" placeholder="Search FY or note..."
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                    <select id="statusFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="available">Available</option>
+                        <option value="processing">Processing</option>
+                        <option value="regenerate">Regenerate</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4"><input id="selectAll" type="checkbox"></th>
+                            <th class="py-2 pr-4">Financial Year</th>
+                            <th class="py-2 pr-4">Part</th>
+                            <th class="py-2 pr-4">TDS (₹)</th>
+                            <th class="py-2 pr-4">Net (₹)</th>
+                            <th class="py-2 pr-4">Status</th>
+                            <th class="py-2 pr-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="formRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Requests -->
+    <section id="requestsPanel" class="f16-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-clipboard-list mr-2"></i> Regeneration Requests
+                </h3>
+                <button id="newReqBtn"
+                    class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm">
+                    <i class="fa-solid fa-plus mr-1"></i> New Request
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Time</th>
+                            <th class="py-2 pr-4">FY</th>
+                            <th class="py-2 pr-4">Reason</th>
+                            <th class="py-2 pr-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reqRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Help -->
+    <section id="helpPanel" class="f16-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-circle-question mr-2"></i> FAQ
+                </h3>
+                <div class="space-y-3 text-sm text-slate-700">
+                    <details class="rounded-lg bg-slate-50 p-3">
+                        <summary class="font-medium cursor-pointer">What is Form 16?</summary>
+                        <p class="mt-2">Certificate of TDS on salary issued by employer (Part A & Part B).</p>
+                    </details>
+                    <details class="rounded-lg bg-slate-50 p-3">
+                        <summary class="font-medium cursor-pointer">How to open the PDF?</summary>
+                        <p class="mt-2">Password is your PAN in uppercase followed by DOB in DDMMYYYY (demo).</p>
+                    </details>
+                    <details class="rounded-lg bg-slate-50 p-3">
+                        <summary class="font-medium cursor-pointer">Mismatch in TDS?</summary>
+                        <p class="mt-2">Compare with AIS/26AS; raise a regeneration request with details.</p>
+                    </details>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-headset mr-2"></i> Support
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div><b>Email:</b> payroll@example.com</div>
+                    <div><b>SLA:</b> 2 business days</div>
+                    <button id="contactBtn"
+                        class="mt-2 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Contact Payroll
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- New Request Modal -->
+<div id="reqModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">New Regeneration Request</h3>
+                    <button id="closeReqModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Financial Year</label>
+                        <select id="reqFY" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>2024-25</option>
+                            <option>2023-24</option>
+                            <option>2022-23</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Reason</label>
+                        <input id="reqReason" type="text" placeholder="e.g., Address correction"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="cancelReq"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="saveReq" class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+    // ---- Dummy Data ----
+    const FORMS = [
+        { id: 1, fy: '2024-25', part: 'A', tds: 142000, net: 1184000, status: 'available', note: 'Signed on 10 Jun 2025' },
+        { id: 2, fy: '2024-25', part: 'B', tds: 142000, net: 1184000, status: 'available', note: '' },
+        { id: 3, fy: '2023-24', part: 'A', tds: 126500, net: 1099000, status: 'available', note: '' },
+        { id: 4, fy: '2023-24', part: 'B', tds: 126500, net: 1099000, status: 'available', note: '' },
+        { id: 5, fy: '2022-23', part: 'A', tds: 98000, net: 930000, status: 'regenerate', note: 'Mismatch reported' },
+        { id: 6, fy: '2022-23', part: 'B', tds: 98000, net: 930000, status: 'processing', note: 'Re-gen in progress' }
+    ];
+    const REQUESTS = [
+        { ts: '2025-09-11 16:40', fy: '2022-23', reason: 'Name update', status: 'Processing' },
+        { ts: '2025-07-02 10:15', fy: '2023-24', reason: 'PAN masked PDF', status: 'Resolved' }
+    ];
+    const ACTIVITY = [
+        { ts: '2025-09-12 09:20', text: 'Downloaded Part B (FY 2024-25).' },
+        { ts: '2025-06-10 12:05', text: 'Form 16 (FY 2024-25) published.' }
+    ];
+
+    // ---- Panels/Tabs ----
+    const panels = {
+        overview: document.getElementById('overviewPanel'),
+        forms: document.getElementById('formsPanel'),
+        requests: document.getElementById('requestsPanel'),
+        help: document.getElementById('helpPanel')
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTabs();
+        wireButtons();
+        renderOverview();
+        renderActivity();
+        renderForms();
+        renderRequests();
+        drawTdsQuarter();
+    });
+
+    function setupTabs() {
+        document.querySelectorAll('.f16-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.f16-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                panels[name].classList.remove('hidden');
+            });
+        });
+    }
+
+    // ---- Buttons ----
+    function wireButtons() {
+        document.getElementById('downloadA').addEventListener('click', () => alert('📄 Downloading Part A (demo)'));
+        document.getElementById('downloadB').addEventListener('click', () => alert('📄 Downloading Part B (demo)'));
+        document.getElementById('emailBtn').addEventListener('click', () => alert('✉️ Sent to your email (demo)'));
+        document.getElementById('refreshBtn').addEventListener('click', renderActivity);
+        document.getElementById('downloadSelectedBtn').addEventListener('click', () => {
+            const ids = Array.from(document.querySelectorAll('.rowCheck:checked')).map(c => Number(c.value));
+            alert('📦 Downloading ' + ids.length + ' item(s) (demo)');
+        });
+        document.getElementById('searchInput').addEventListener('input', renderForms);
+        document.getElementById('statusFilter').addEventListener('change', renderForms);
+        document.getElementById('selectAll').addEventListener('change', e => {
+            document.querySelectorAll('.rowCheck').forEach(c => c.checked = e.target.checked);
+        });
+        document.getElementById('newReqBtn').addEventListener('click', openReqModal);
+        document.getElementById('closeReqModal').addEventListener('click', closeReqModal);
+        document.getElementById('cancelReq').addEventListener('click', closeReqModal);
+        document.getElementById('saveReq').addEventListener('click', saveRequest);
+        document.getElementById('fyPicker').addEventListener('change', renderOverview);
+        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket (demo)'));
+    }
+
+    // ---- Overview ----
+    function renderOverview() {
+        const fy = document.getElementById('fyPicker').value;
+        const parts = FORMS.filter(f => f.fy === fy);
+        const available = parts.every(p => p.status === 'available');
+        const badge = document.getElementById('availBadge');
+        badge.textContent = available ? 'Available' : 'Partial';
+        badge.className = 'px-2 py-1 text-xs rounded ' + (available ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700');
+    }
+
+    function renderActivity() {
+        document.getElementById('activityFeed').innerHTML = ACTIVITY.map(a => `
+      <div class="rounded-lg bg-slate-50 p-3">
+        <div class="text-xs text-slate-500">${a.ts}</div>
+        <div class="text-sm text-slate-800">${a.text}</div>
+      </div>`).join('');
+    }
+
+    // ---- Certificates table ----
+    function renderForms() {
+        const q = (document.getElementById('searchInput').value || '').toLowerCase();
+        const st = document.getElementById('statusFilter').value;
+        const rows = FORMS
+            .filter(f => (st === 'all' ? true : f.status === st))
+            .filter(f => f.fy.toLowerCase().includes(q) || f.note.toLowerCase().includes(q))
+            .slice().sort((a, b) => b.fy.localeCompare(a.fy) || a.part.localeCompare(b.part));
+        document.getElementById('formRows').innerHTML = rows.map(rowForm).join('') ||
+            `<tr><td colspan="7" class="py-6 text-center text-slate-500">No matching records.</td></tr>`;
+    }
+
+    function rowForm(f) {
+        return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4"><input class="rowCheck" type="checkbox" value="${f.id}"></td>
+        <td class="py-2 pr-4">${f.fy}</td>
+        <td class="py-2 pr-4">Part ${f.part}</td>
+        <td class="py-2 pr-4">₹${fmt(f.tds)}</td>
+        <td class="py-2 pr-4">₹${fmt(f.net)}</td>
+        <td class="py-2 pr-4">${statusBadgePlain(f.status)}</td>
+        <td class="py-2 pr-4">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="preview('${f.fy}','${f.part}')">
+            <i class="fa-solid fa-eye mr-1"></i> Preview
+          </button>
+          <button class="px-2 py-1 rounded text-white ${f.status === 'available' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-400 cursor-not-allowed'} text-xs" ${f.status !== 'available' ? 'disabled' : ''} onclick="download('${f.fy}','${f.part}')">
+            <i class="fa-solid fa-download mr-1"></i> PDF
+          </button>
+        </td>
+      </tr>`;
+    }
+
+    // ---- Requests ----
+    function renderRequests() {
+        document.getElementById('reqRows').innerHTML = REQUESTS.map(r => `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4 text-slate-600">${r.ts}</td>
+        <td class="py-2 pr-4">${r.fy}</td>
+        <td class="py-2 pr-4">${r.reason}</td>
+        <td class="py-2 pr-4">${statusBadgePlain(r.status.toLowerCase())}</td>
+      </tr>`).join('');
+    }
+    function openReqModal() { document.getElementById('reqModal').classList.remove('hidden'); }
+    function closeReqModal() { document.getElementById('reqModal').classList.add('hidden'); }
+    function saveRequest() {
+        const fy = document.getElementById('reqFY').value;
+        const reason = (document.getElementById('reqReason').value || '').trim();
+        if (!reason) { alert('❌ Reason required'); return; }
+        REQUESTS.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), fy, reason, status: 'Processing' });
+        closeReqModal(); renderRequests(); alert('✅ Request submitted');
+    }
+
+    // ---- Charts ----
+    function drawTdsQuarter() {
+        const ctx = document.getElementById('tdsQuarterChart').getContext('2d');
+        const fy = document.getElementById('fyPicker').value;
+        const t = FORMS.filter(f => f.fy === fy && f.part === 'B')[0]?.tds || 0;
+        const q = [Math.round(t * 0.22), Math.round(t * 0.26), Math.round(t * 0.25), Math.round(t * 0.27)];
+        new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['Q1', 'Q2', 'Q3', 'Q4'], datasets: [{ label: 'TDS (₹)', data: q }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    // ---- Actions ----
+    function preview(fy, part) { alert('👀 Preview Form 16 ' + fy + ' Part ' + part + ' (demo)'); }
+    function download(fy, part) { alert('📄 Downloading Form 16 ' + fy + ' Part ' + part + ' (demo)'); }
+
+    // ---- Helpers ----
+    function fmt(n) { return n.toLocaleString('en-IN'); }
+    function statusBadgePlain(s) {
+        const m = { available: 'bg-emerald-50 text-emerald-700', processing: 'bg-amber-50 text-amber-700', regenerate: 'bg-red-50 text-red-700', resolved: 'bg-emerald-50 text-emerald-700' };
+        const label = s.charAt(0).toUpperCase() + s.slice(1);
+        return `<span class="px-2 py-0.5 rounded-full ${m[s] || 'bg-slate-100 text-slate-700'} text-xs">${label}</span>`;
+    }
+</script>
+
+<style>
+    .f16-tab.active {
+        background-color: #1e293b;
+        color: #fff;
+    }
+
+    .f16-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .f16-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

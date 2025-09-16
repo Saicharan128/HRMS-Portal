@@ -1,0 +1,312 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-diagram-project mr-2"></i> Projects
+            </h1>
+            <p class="text-slate-600 text-sm">Assign, monitor, and track projects and resource allocation.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+    </div>
+
+    <!-- Create project -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 class="text-lg font-semibold text-slate-800 mb-3">
+            <i class="fa-solid fa-square-plus mr-2"></i> New Project
+        </h2>
+        <form id="createForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Name *</label>
+                <input name="name" required class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Status</label>
+                <select name="status" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                    <option>Planned</option>
+                    <option>Active</option>
+                    <option>On Hold</option>
+                    <option>Completed</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Start date</label>
+                <input name="start_date" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">End date</label>
+                <input name="end_date" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Description</label>
+                <textarea name="description" rows="2"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea>
+            </div>
+
+            <!-- Team picker -->
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Team (select users)</label>
+                <div class="flex flex-wrap gap-2" id="teamChips"></div>
+                <div class="mt-2 flex gap-2">
+                    <input id="userSearch" placeholder="Search users…"
+                        class="w-64 rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+                    <button id="addUserBtn" type="button"
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-user-plus mr-1"></i> Add
+                    </button>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Tip: search by name/email/username; click Add to include.</p>
+            </div>
+
+            <!-- Allocations -->
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Allocations (hours)</label>
+                <div id="allocTable" class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-600">
+                            <tr>
+                                <th class="py-2 pr-3">Member</th>
+                                <th class="py-2 pr-3 w-40">Hours</th>
+                                <th class="py-2 pr-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="allocBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 flex items-center justify-between">
+                <p class="text-xs text-slate-500">Fields marked * are required.</p>
+                <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                    Create
+                </button>
+            </div>
+        </form>
+        <div id="createMsg" class="mt-3 text-sm"></div>
+    </div>
+
+    <!-- Projects list -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800">
+                <i class="fa-solid fa-list-check mr-2"></i> My Projects
+            </h2>
+            <div class="flex items-center gap-2">
+                <input id="q" placeholder="Search…" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <select id="fStatus" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                    <option value="">All</option>
+                    <option>Planned</option>
+                    <option>Active</option>
+                    <option>On Hold</option>
+                    <option>Completed</option>
+                </select>
+                <button id="refreshBtn"
+                    class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="text-left text-slate-600 border-b">
+                    <tr>
+                        <th class="py-2 pr-3">Name</th>
+                        <th class="py-2 pr-3">Status</th>
+                        <th class="py-2 pr-3">Progress</th>
+                        <th class="py-2 pr-3">Dates</th>
+                        <th class="py-2 pr-3">Team</th>
+                        <th class="py-2 pr-3 w-56">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="rows" class="align-top"></tbody>
+            </table>
+        </div>
+        <div id="listMsg" class="mt-3 text-sm"></div>
+    </div>
+</div>
+
+<script>
+    async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function postJSON(url, data) { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function putJSON(url, data) { const r = await fetch(url, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function del(url) { const r = await fetch(url, { method: "DELETE" }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+
+    const usersCache = { all: [] };
+    async function loadUsers() {
+        // default: all employees to assign
+        usersCache.all = await fetchJSON("/api/users?type=Employees");
+    }
+    function findUserMatches(q) {
+        q = (q || "").toLowerCase().trim();
+        if (!q) return usersCache.all.slice(0, 10);
+        return usersCache.all.filter(u =>
+            (u.name || "").toLowerCase().includes(q) ||
+            (u.email || "").toLowerCase().includes(q) ||
+            (u.username || "").toLowerCase().includes(q)
+        ).slice(0, 10);
+    }
+
+    // --- create form state ---
+    const createForm = document.getElementById("createForm");
+    const createMsg = document.getElementById("createMsg");
+    const teamChips = document.getElementById("teamChips");
+    const userSearch = document.getElementById("userSearch");
+    const addUserBtn = document.getElementById("addUserBtn");
+    const allocBody = document.getElementById("allocBody");
+
+    const team = new Set();               // usernames
+    const allocations = new Map();        // username -> hours
+
+    function renderTeam() {
+        teamChips.innerHTML = "";
+        allocBody.innerHTML = "";
+        [...team].forEach(u => {
+            const chip = document.createElement("span");
+            chip.className = "inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-1 text-sm";
+            chip.innerHTML = `<i class="fa-solid fa-user"></i> ${u}
+      <button type="button" class="ml-1 text-slate-500 hover:text-rose-600" aria-label="Remove">&times;</button>`;
+            chip.querySelector("button").addEventListener("click", () => { team.delete(u); allocations.delete(u); renderTeam(); });
+            teamChips.appendChild(chip);
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+      <td class="py-2 pr-3">${u}</td>
+      <td class="py-2 pr-3"><input type="number" min="0" value="${allocations.get(u) || 0}"
+           class="w-28 rounded-lg border border-slate-300 px-2 py-1 text-sm"></td>
+      <td class="py-2 pr-3"><button type="button" class="px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50">Set</button></td>`;
+            const input = tr.querySelector("input");
+            tr.querySelector("button").addEventListener("click", () => { allocations.set(u, parseInt(input.value || 0)); });
+            allocBody.appendChild(tr);
+        });
+    }
+
+    addUserBtn.addEventListener("click", () => {
+        const matches = findUserMatches(userSearch.value);
+        if (!matches.length) { createMsg.className = "mt-3 text-sm text-rose-700"; createMsg.textContent = "No user match."; return; }
+        // add first match quickly; you can upgrade to a dropdown later
+        const u = matches[0].username;
+        if (!team.has(u)) team.add(u);
+        renderTeam();
+        createMsg.textContent = "";
+    });
+
+    createForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        createMsg.textContent = "Saving…";
+        try {
+            // lock in allocations present in inputs
+            allocBody.querySelectorAll("tr").forEach(tr => {
+                const u = tr.children[0].textContent.trim();
+                const v = tr.querySelector("input").value;
+                allocations.set(u, parseInt(v || 0));
+            });
+            const payload = Object.fromEntries(new FormData(createForm).entries());
+            payload.team = [...team];
+            payload.allocations = Object.fromEntries(allocations.entries());
+            await postJSON("/api/projects", payload);
+            createMsg.className = "mt-3 text-sm text-emerald-700"; createMsg.textContent = "Project created ✓";
+            createForm.reset(); team.clear(); allocations.clear(); renderTeam();
+            await loadList();
+        } catch (err) { console.error(err); createMsg.className = "mt-3 text-sm text-rose-700"; createMsg.textContent = "Failed to create project."; }
+    });
+
+    // --- list grid ---
+    const rows = document.getElementById("rows");
+    const listMsg = document.getElementById("listMsg");
+    const qEl = document.getElementById("q");
+    const fStatus = document.getElementById("fStatus");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    function select(opts, cur) {
+        const s = document.createElement("select");
+        s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm";
+        opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); });
+        return s;
+    }
+
+    function progressBar(val) {
+        const outer = document.createElement("div");
+        outer.className = "w-40 h-2 rounded-full bg-slate-200";
+        const inner = document.createElement("div");
+        inner.className = "h-2 rounded-full bg-slate-800";
+        inner.style.width = (Math.max(0, Math.min(100, val || 0))) + "%";
+        outer.appendChild(inner);
+        return outer;
+    }
+
+    async function loadList() {
+        listMsg.textContent = "Loading…";
+        const params = new URLSearchParams();
+        if (qEl.value.trim()) params.set("q", qEl.value.trim());
+        if (fStatus.value) params.set("status", fStatus.value);
+        const data = await fetchJSON(`/api/projects${params.toString() ? `?${params.toString()}` : ""}`);
+        rows.innerHTML = "";
+        data.forEach(p => {
+            const tr = document.createElement("tr");
+
+            // editable fields
+            const nameI = document.createElement("input");
+            nameI.value = p.name; nameI.className = "w-56 rounded-lg border border-slate-300 px-2 py-1 text-sm";
+
+            const statusS = select(["Planned", "Active", "On Hold", "Completed"], p.status);
+            const progressI = document.createElement("input");
+            progressI.type = "number"; progressI.min = "0"; progressI.max = "100";
+            progressI.value = p.progress; progressI.className = "w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm";
+
+            const dates = document.createElement("div");
+            dates.className = "text-xs text-slate-600";
+            dates.textContent = `${p.start_date || "—"} → ${p.end_date || "—"}`;
+
+            const teamDiv = document.createElement("div");
+            teamDiv.className = "flex flex-wrap gap-1";
+            (p.team || []).forEach(u => {
+                const tag = document.createElement("span");
+                tag.className = "inline-flex items-center rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-xs";
+                tag.innerHTML = `<i class="fa-solid fa-user mr-1"></i>${u}`;
+                teamDiv.appendChild(tag);
+            });
+
+            const actions = document.createElement("div");
+            const saveBtn = document.createElement("button");
+            saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900";
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            const delBtn = document.createElement("button");
+            delBtn.className = "px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50";
+            delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
+            actions.append(saveBtn, delBtn);
+
+            // build row
+            const tds = [nameI, statusS, (() => { const box = progressBar(p.progress); box.style.minWidth = "10rem"; return box; })(), dates, teamDiv, actions]
+                .map(el => { const td = document.createElement("td"); td.className = "py-2 pr-3 align-middle"; td.appendChild(el); return td; });
+            tds.forEach(td => tr.appendChild(td));
+            rows.appendChild(tr);
+
+            // events
+            saveBtn.addEventListener("click", async () => {
+                try {
+                    await putJSON(`/api/projects/${p.id}`, { name: nameI.value.trim(), status: statusS.value, progress: progressI.value });
+                    listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
+                    await loadList();
+                } catch (e) { console.error(e); listMsg.className = "mt-3 text-sm text-rose-700"; listMsg.textContent = "Save failed."; }
+            });
+            delBtn.addEventListener("click", async () => {
+                if (!confirm("Delete this project?")) return;
+                try { await del(`/api/projects/${p.id}`); await loadList(); }
+                catch (e) { listMsg.className = "mt-3 text-sm text-rose-700"; listMsg.textContent = "Delete failed."; }
+            });
+        });
+        listMsg.textContent = data.length ? "" : "No projects yet.";
+    }
+
+    [qEl, fStatus].forEach(el => el.addEventListener("input", () => loadList().catch(console.error)));
+    refreshBtn.addEventListener("click", () => loadList().catch(console.error));
+
+    Promise.all([loadUsers(), loadList()]).catch(console.error);
+</script>
+{% endblock %}

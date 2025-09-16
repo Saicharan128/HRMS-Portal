@@ -5,9 +5,9 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-semibold text-slate-800">
-                <i class="fa-solid fa-sitemap mr-2"></i> Organizational Chart
+                <i class="fa-solid fa-sitemap mr-2"></i> Organizational Flow Chart
             </h1>
-            <p class="text-slate-600 text-sm">Visualize reporting structures and organizational hierarchy.</p>
+            <p class="text-slate-600 text-sm">Top-down flow layout with connectors, pan & zoom.</p>
         </div>
         <div class="flex items-center gap-2">
             <button id="editModeBtn"
@@ -27,7 +27,7 @@
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-slate-700">View:</label>
                 <select id="viewType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                    <option value="hierarchy">Hierarchy View</option>
+                    <option value="flow" selected>Flow View</option>
                     <option value="departments">Department View</option>
                     <option value="list">List View</option>
                 </select>
@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <!-- Statistics -->
+    <!-- Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-users mr-1"></i> Total Employees</div>
@@ -71,29 +71,41 @@
         </div>
     </div>
 
-    <!-- Main Org Chart Container -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6">
+    <!-- Main Container -->
+    <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
         <div id="loadingState" class="text-center py-12">
             <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
             <p class="text-slate-600">Loading organizational structure...</p>
         </div>
 
-        <!-- Hierarchy View -->
-        <div id="hierarchyView" class="hidden">
-            <div id="orgChart" class="overflow-x-auto">
-                <!-- Dynamic org chart will be rendered here -->
+        <!-- FLOW VIEW (SVG) -->
+        <div id="flowView" class="hidden">
+            <div id="flowWrapper" class="relative h-[70vh]">
+                <!-- Pan & Zoom viewport -->
+                <div id="pzContainer" class="absolute inset-0 overflow-hidden bg-slate-50">
+                    <div id="pzContent" class="origin-top-left" style="transform: translate(40px,40px) scale(1);">
+                        <svg id="flowSvg" width="2000" height="1200" class="block">
+                            <defs>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6"
+                                    markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#cbd5e1"></path>
+                                </marker>
+                            </defs>
+                            <g id="edges"></g>
+                            <g id="nodes"></g>
+                        </svg>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Department View -->
-        <div id="departmentView" class="hidden">
-            <div id="departmentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Department cards will be rendered here -->
-            </div>
+        <!-- DEPARTMENT VIEW -->
+        <div id="departmentView" class="hidden p-6">
+            <div id="departmentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
 
-        <!-- List View -->
-        <div id="listView" class="hidden">
+        <!-- LIST VIEW -->
+        <div id="listView" class="hidden p-6">
             <div class="overflow-x-auto">
                 <table class="min-w-full">
                     <thead class="bg-slate-50">
@@ -107,15 +119,13 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="listTableBody" class="bg-white divide-y divide-slate-200">
-                        <!-- Rows will be populated here -->
-                    </tbody>
+                    <tbody id="listTableBody" class="bg-white divide-y divide-slate-200"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Edit Structure Modal -->
+    <!-- Edit Modal -->
     <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
@@ -130,28 +140,21 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Employee</label>
-                            <select id="employeeSelect" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                                <!-- Options will be populated -->
-                            </select>
+                            <select id="employeeSelect"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
                         </div>
-
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Reports To</label>
                             <select id="managerSelect" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                                 <option value="">No Manager (Top Level)</option>
-                                <!-- Options will be populated -->
                             </select>
                         </div>
-
                         <div class="flex justify-end gap-3 pt-4">
                             <button type="button" id="cancelBtn"
-                                class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">
-                                Cancel
-                            </button>
+                                class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
                             <button type="submit"
-                                class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">
-                                Save Changes
-                            </button>
+                                class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Save
+                                Changes</button>
                         </div>
                     </div>
                 </form>
@@ -161,611 +164,512 @@
 </div>
 
 <style>
-    /* Org Chart Styling */
-    .org-node {
-        position: relative;
-        display: inline-block;
-        margin: 10px;
-    }
-
-    .org-card {
-        background: white;
+    /* Cards used inside SVG (foreignObject) fallbacks use rect+text */
+    .node-card {
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
         border: 2px solid #e2e8f0;
         border-radius: 12px;
-        padding: 16px;
-        min-width: 200px;
-        text-align: center;
-        transition: all 0.3s ease;
-        cursor: pointer;
+        background: white;
+        padding: 12px 14px;
+        width: 220px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     }
 
-    .org-card:hover {
-        border-color: #64748b;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .node-title {
+        font-weight: 600;
+        color: #0f172a;
+        line-height: 1.2;
     }
 
-    .org-card.cxo {
+    .node-sub {
+        font-size: 12px;
+        color: #475569;
+    }
+
+    .node-meta {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 6px;
+    }
+
+    .node-cxo {
         border-color: #dc2626;
         background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
     }
 
-    .org-card.leader {
+    .node-leader {
         border-color: #2563eb;
         background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
     }
 
-    .org-card.hr {
+    .node-hr {
         border-color: #059669;
         background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
     }
 
-    .org-card.employee {
+    .node-emp {
         border-color: #7c3aed;
-        background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
-    }
-
-    .org-lines {
-        position: absolute;
-        pointer-events: none;
-    }
-
-    .org-line {
-        position: absolute;
-        background: #cbd5e1;
-        z-index: 1;
-    }
-
-    .org-line.vertical {
-        width: 2px;
-    }
-
-    .org-line.horizontal {
-        height: 2px;
-    }
-
-    .employee-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: #f1f5f9;
-        display: flex;
-        items-center: center;
-        justify-content: center;
-        margin: 0 auto 12px;
-        font-size: 18px;
-        color: #64748b;
-    }
-
-    .department-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 20px;
-        transition: all 0.3s ease;
-    }
-
-    .department-card:hover {
-        border-color: #64748b;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .collapsible {
-        cursor: pointer;
-    }
-
-    .collapsible .collapse-icon {
-        transition: transform 0.3s ease;
-    }
-
-    .collapsible.collapsed .collapse-icon {
-        transform: rotate(-90deg);
-    }
-
-    .collapsible.collapsed+.org-children {
-        display: none;
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
     }
 </style>
 
 <script>
-    // Global variables
-    let orgData = [];
+    // -------- Globals
+    let orgData = [];   // roots
     let allUsers = [];
     let editMode = false;
 
-    // Utility functions
+    // -------- Utils
     async function fetchJSON(url) {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
     }
-
     async function postJSON(url, data) {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
+        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
     }
-
-    function getInitials(name) {
-        return name.split(' ')
-            .map(word => word.charAt(0))
-            .join('')
-            .toUpperCase()
-            .substring(0, 2);
+    function getInitials(name) { return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
+    function typeClass(t) {
+        const s = (t || '').toLowerCase();
+        if (s === 'cxos') return 'node-cxo';
+        if (s === 'leaders') return 'node-leader';
+        if (s === 'hr') return 'node-hr';
+        return 'node-emp';
     }
+    function lerp(a, b, t) { return a + (b - a) * t; }
 
-    function getEmployeeTypeClass(employeeType) {
-        switch (employeeType?.toLowerCase()) {
-            case 'cxos': return 'cxo';
-            case 'leaders': return 'leader';
-            case 'hr': return 'hr';
-            default: return 'employee';
-        }
-    }
-
-    function getEmployeeTypeColor(employeeType) {
-        switch (employeeType?.toLowerCase()) {
-            case 'cxos': return '#dc2626';
-            case 'leaders': return '#2563eb';
-            case 'hr': return '#059669';
-            default: return '#7c3aed';
-        }
-    }
-
-    // Data loading and processing
+    // -------- Data build
     async function loadOrgData() {
         try {
             allUsers = await fetchJSON('/api/org/structure');
-            processOrgStructure();
-            updateStatistics();
-            renderCurrentView();
-        } catch (error) {
-            console.error('Error loading org data:', error);
-            showError('Failed to load organizational structure');
+        } catch (e) {
+            // Fallback demo data (if API not available)
+            allUsers = [
+                { id: 1, name: 'Aarav Patel', email: 'aarav@acme.com', employee_type: 'CXOs', subposition: 'CEO', designation: 'Chief Executive Officer' },
+                { id: 2, name: 'Meera Iyer', email: 'meera@acme.com', employee_type: 'Leaders', subposition: 'Engineering', designation: 'VP Engineering', manager_id: 1 },
+                { id: 3, name: 'Rahul Das', email: 'rahul@acme.com', employee_type: 'Leaders', subposition: 'Sales', designation: 'VP Sales', manager_id: 1 },
+                { id: 4, name: 'Sara Khan', email: 'sara@acme.com', employee_type: 'HR', subposition: 'HR', designation: 'Head of HR', manager_id: 1 },
+                { id: 5, name: 'Charan', email: 'charan@acme.com', employee_type: 'Employees', subposition: 'Engineering', designation: 'Full-stack Dev', manager_id: 2 },
+                { id: 6, name: 'Anil', email: 'anil@acme.com', employee_type: 'Employees', subposition: 'Engineering', designation: 'Backend Dev', manager_id: 2 },
+                { id: 7, name: 'Priya', email: 'priya@acme.com', employee_type: 'Employees', subposition: 'Sales', designation: 'AE', manager_id: 3 },
+                { id: 8, name: 'Elena', email: 'elena@acme.com', employee_type: 'Employees', subposition: 'HR', designation: 'HRBP', manager_id: 4 },
+            ];
         }
-    }
-
-    function processOrgStructure() {
-        // Build hierarchy from flat user data
-        const userMap = {};
-        const rootNodes = [];
-
-        // First pass: create user map
-        allUsers.forEach(user => {
-            userMap[user.id] = {
-                ...user,
-                children: [],
-                directReports: 0
-            };
-        });
-
-        // Second pass: build relationships
-        allUsers.forEach(user => {
-            if (user.manager_id && userMap[user.manager_id]) {
-                userMap[user.manager_id].children.push(userMap[user.id]);
-                userMap[user.manager_id].directReports++;
-            } else {
-                rootNodes.push(userMap[user.id]);
-            }
-        });
-
-        orgData = rootNodes;
+        processOrgStructure();
+        updateStatistics();
         populateFilters();
     }
 
-    function populateFilters() {
-        const departmentFilter = document.getElementById('departmentFilter');
-        const departments = [...new Set(allUsers.map(user => user.subposition).filter(Boolean))];
+    function processOrgStructure() {
+        const map = {};
+        allUsers.forEach(u => map[u.id] = { ...u, children: [] });
+        const roots = [];
+        allUsers.forEach(u => {
+            if (u.manager_id && map[u.manager_id]) map[u.manager_id].children.push(map[u.id]);
+            else roots.push(map[u.id]);
+        });
+        orgData = roots;
+    }
 
-        departmentFilter.innerHTML = '<option value="">All Departments</option>';
-        departments.forEach(dept => {
-            const option = document.createElement('option');
-            option.value = dept;
-            option.textContent = dept;
-            departmentFilter.appendChild(option);
+    function populateFilters() {
+        const sel = document.getElementById('departmentFilter');
+        const depts = [...new Set(allUsers.map(u => u.subposition).filter(Boolean))].sort();
+        sel.innerHTML = '<option value="">All Departments</option>';
+        depts.forEach(d => {
+            const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o);
         });
     }
 
     function updateStatistics() {
         document.getElementById('totalEmployees').textContent = allUsers.length;
-
-        const leadership = allUsers.filter(user =>
-            ['Leaders', 'CXOs', 'HR'].includes(user.employee_type) &&
-            ['Managers', 'Executives', 'CEO', 'CHRO', 'CFO', 'CTO/COO'].includes(user.subposition)
-        ).length;
+        const leadership = allUsers.filter(u => ['Leaders', 'CXOs', 'HR'].includes(u.employee_type || '')).length;
         document.getElementById('leadershipCount').textContent = leadership;
-
-        const departments = new Set(allUsers.map(user => user.subposition).filter(Boolean));
+        const departments = new Set(allUsers.map(u => u.subposition).filter(Boolean));
         document.getElementById('departmentCount').textContent = departments.size;
-
-        const usersWithReports = allUsers.filter(user =>
-            allUsers.some(other => other.manager_id === user.id)
-        );
-        const avgTeamSize = usersWithReports.length > 0
-            ? Math.round(allUsers.length / usersWithReports.length)
-            : 0;
-        document.getElementById('avgTeamSize').textContent = avgTeamSize;
+        const mgrs = new Set(allUsers.filter(u => allUsers.some(v => v.manager_id === u.id)).map(u => u.id));
+        document.getElementById('avgTeamSize').textContent = mgrs.size ? Math.round((allUsers.length - rootsCount()) / mgrs.size + 1) : 0;
+        function rootsCount() { return allUsers.filter(u => !u.manager_id).length; }
     }
 
-    // Rendering functions
+    // -------- Views
     function renderCurrentView() {
-        const viewType = document.getElementById('viewType').value;
-
-        // Hide all views
-        document.getElementById('hierarchyView').classList.add('hidden');
-        document.getElementById('departmentView').classList.add('hidden');
-        document.getElementById('listView').classList.add('hidden');
-
-        // Show selected view
-        switch (viewType) {
-            case 'hierarchy':
-                document.getElementById('hierarchyView').classList.remove('hidden');
-                renderHierarchyView();
-                break;
-            case 'departments':
-                document.getElementById('departmentView').classList.remove('hidden');
-                renderDepartmentView();
-                break;
-            case 'list':
-                document.getElementById('listView').classList.remove('hidden');
-                renderListView();
-                break;
-        }
+        const v = document.getElementById('viewType').value;
+        document.getElementById('flowView').classList.toggle('hidden', v !== 'flow');
+        document.getElementById('departmentView').classList.toggle('hidden', v !== 'departments');
+        document.getElementById('listView').classList.toggle('hidden', v !== 'list');
+        if (v === 'flow') renderFlowView();
+        if (v === 'departments') renderDepartmentView();
+        if (v === 'list') renderListView();
     }
 
-    function renderHierarchyView() {
-        const container = document.getElementById('orgChart');
-        container.innerHTML = '';
+    // -------- FLOW LAYOUT (top-down)
+    // Simple tree layout: assign x by leaf order, y by depth
+    function renderFlowView() {
+        const svg = document.getElementById('flowSvg');
+        const gEdges = document.getElementById('edges');
+        const gNodes = document.getElementById('nodes');
+        gEdges.innerHTML = ''; gNodes.innerHTML = '';
 
-        if (orgData.length === 0) {
-            container.innerHTML = `
-            <div class="text-center py-12">
-                <i class="fa-solid fa-users-slash text-slate-300 text-4xl mb-4"></i>
-                <h3 class="text-lg font-medium text-slate-800 mb-2">No organizational structure found</h3>
-                <p class="text-slate-600">Click "Edit Structure" to set up reporting relationships.</p>
-            </div>
-        `;
-            return;
-        }
+        // Filter by department if selected
+        const dept = document.getElementById('departmentFilter').value;
+        const filtered = dept
+            ? allUsers.filter(u => (u.subposition || '') === dept || isAncestorInDept(u, dept))
+            : allUsers.slice();
 
-        const orgTree = document.createElement('div');
-        orgTree.className = 'org-tree';
-
-        orgData.forEach(rootUser => {
-            orgTree.appendChild(createNodeElement(rootUser, 0));
+        // Build map + tree for filtered
+        const map = {}; filtered.forEach(u => map[u.id] = { ...u, children: [] });
+        const roots = [];
+        filtered.forEach(u => {
+            if (u.manager_id && map[u.manager_id]) map[u.manager_id].children.push(map[u.id]);
+            else roots.push(map[u.id]);
         });
 
-        container.appendChild(orgTree);
-    }
+        // Collapse/expand state (simple: expand all by default)
+        const expanded = new Set(filtered.map(u => u.id));
 
-    function createNodeElement(user, level) {
-        const nodeDiv = document.createElement('div');
-        nodeDiv.className = 'org-node';
-        nodeDiv.style.marginLeft = `${level * 40}px`;
+        // Layout parameters
+        const nodeW = 220, nodeH = 86, hGap = 48, vGap = 80, corner = 10;
 
-        const card = document.createElement('div');
-        card.className = `org-card ${getEmployeeTypeClass(user.employee_type)}`;
-
-        const hasChildren = user.children && user.children.length > 0;
-
-        card.innerHTML = `
-        <div class="employee-avatar">
-            <i class="fa-solid fa-user"></i>
-        </div>
-        <div class="font-semibold text-slate-800">${user.name}</div>
-        <div class="text-sm text-slate-600 mb-2">${user.subposition || user.employee_type}</div>
-        <div class="text-xs text-slate-500">${user.designation || '-'}</div>
-        ${hasChildren ? `
-            <div class="mt-2 text-xs text-slate-400">
-                <i class="fa-solid fa-users mr-1"></i>
-                ${user.children.length} direct report${user.children.length !== 1 ? 's' : ''}
-            </div>
-        ` : ''}
-        ${hasChildren ? `
-            <button class="collapse-btn mt-2 text-slate-400 hover:text-slate-600">
-                <i class="fa-solid fa-chevron-down collapse-icon"></i>
-            </button>
-        ` : ''}
-    `;
-
-        nodeDiv.appendChild(card);
-
-        if (hasChildren) {
-            const childrenContainer = document.createElement('div');
-            childrenContainer.className = 'org-children ml-8 mt-4';
-
-            user.children.forEach(child => {
-                childrenContainer.appendChild(createNodeElement(child, level + 1));
-            });
-
-            nodeDiv.appendChild(childrenContainer);
-
-            // Add collapse functionality
-            const collapseBtn = card.querySelector('.collapse-btn');
-            if (collapseBtn) {
-                collapseBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const icon = collapseBtn.querySelector('.collapse-icon');
-                    const children = childrenContainer;
-
-                    if (children.style.display === 'none') {
-                        children.style.display = 'block';
-                        icon.style.transform = 'rotate(0deg)';
-                    } else {
-                        children.style.display = 'none';
-                        icon.style.transform = 'rotate(-90deg)';
-                    }
-                });
+        // Compute layout
+        let xCounter = 0;
+        function assignLayout(node, depth) {
+            node.depth = depth;
+            if (!node.children || node.children.length === 0) {
+                node.x = xCounter * (nodeW + hGap);
+                xCounter += 1;
+            } else {
+                node.children.forEach(c => assignLayout(c, depth + 1));
+                // center parent above children
+                const minX = Math.min(...node.children.map(c => c.x));
+                const maxX = Math.max(...node.children.map(c => c.x));
+                node.x = (minX + maxX) / 2;
             }
+            node.y = depth * (nodeH + vGap);
+        }
+        roots.forEach(r => assignLayout(r, 0));
+
+        // Draw edges (curved)
+        function drawEdge(px, py, cx, cy) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const startX = px + nodeW / 2, startY = py + nodeH;
+            const endX = cx + nodeW / 2, endY = cy;
+            const midY = lerp(startY, endY, 0.5);
+            const d = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
+            path.setAttribute('d', d);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', '#cbd5e1');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('marker-end', 'url(#arrow)');
+            gEdges.appendChild(path);
         }
 
-        return nodeDiv;
+        // DFS to render
+        function renderNode(node) {
+            // Edges
+            (node.children || []).forEach(c => {
+                if (expanded.has(node.id)) drawEdge(node.x, node.y, c.x, c.y);
+            });
+
+            // Node group
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('transform', `translate(${node.x},${node.y})`);
+            gNodes.appendChild(g);
+
+            // Card
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('rx', corner); rect.setAttribute('ry', corner);
+            rect.setAttribute('width', nodeW); rect.setAttribute('height', nodeH);
+            rect.setAttribute('fill', '#fff');
+            rect.setAttribute('stroke', borderColor(node.employee_type));
+            rect.setAttribute('stroke-width', '2');
+            rect.style.filter = 'drop-shadow(0 2px 4px rgba(15, 23, 42, 0.06))';
+            g.appendChild(rect);
+
+            // Title
+            svgText(g, node.name || '-', 14, 16, '#0f172a', '600');
+            // Sub + dept
+            svgText(g, (node.designation || node.subposition || '-'), 12, 36, '#475569', '500');
+            // Meta
+            svgText(g, (node.email || ''), 11, 56, '#64748b', '400');
+
+            // Collapse/expand handle
+            if ((node.children || []).length) {
+                const cx = nodeW / 2, cy = nodeH - 10, r = 9;
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
+                circle.setAttribute('fill', '#f1f5f9'); circle.setAttribute('stroke', '#cbd5e1');
+                g.appendChild(circle);
+
+                const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                icon.setAttribute('x', cx); icon.setAttribute('y', cy + 3); icon.setAttribute('text-anchor', 'middle');
+                icon.setAttribute('font-size', '12'); icon.setAttribute('fill', '#475569');
+                icon.textContent = expanded.has(node.id) ? '−' : '+';
+                g.appendChild(icon);
+
+                circle.style.cursor = 'pointer'; icon.style.cursor = 'pointer';
+                const toggle = () => {
+                    if (expanded.has(node.id)) expanded.delete(node.id); else expanded.add(node.id);
+                    renderFlowView(); // simple re-render
+                };
+                circle.addEventListener('click', toggle);
+                icon.addEventListener('click', toggle);
+            }
+
+            if (expanded.has(node.id)) (node.children || []).forEach(renderNode);
+        }
+
+        roots.forEach(renderNode);
+
+        function svgText(parent, text, x, y, fill, weight) {
+            const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            t.setAttribute('x', 12); t.setAttribute('y', y);
+            t.setAttribute('fill', fill); t.setAttribute('font-size', x);
+            t.setAttribute('font-weight', weight);
+            t.textContent = text;
+            parent.appendChild(t);
+        }
+        function borderColor(t) {
+            const s = (t || '').toLowerCase();
+            if (s === 'cxos') return '#dc2626';
+            if (s === 'leaders') return '#2563eb';
+            if (s === 'hr') return '#059669';
+            return '#7c3aed';
+        }
     }
 
+    function isAncestorInDept(u, dept) {
+        // include a manager outside the dept if they manage someone in dept (keeps path)
+        const map = new Map(allUsers.map(x => [x.id, x]));
+        let cur = u;
+        while (cur && cur.manager_id) {
+            cur = map.get(cur.manager_id);
+            if (cur && (cur.subposition || '') === dept) return true;
+        }
+        return false;
+    }
+
+    // -------- Department view
     function renderDepartmentView() {
         const container = document.getElementById('departmentGrid');
         container.innerHTML = '';
+        const groups = {};
+        allUsers.forEach(u => {
+            const d = u.subposition || 'Unassigned';
+            (groups[d] || (groups[d] = [])).push(u);
+        });
+        Object.entries(groups).forEach(([dept, users]) => {
+            const managers = users.filter(u => users.some(v => v.manager_id === u.id));
+            const card = document.createElement('div');
+            card.className = 'department-card';
+            card.innerHTML = `
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
+            <i class="fa-solid fa-building text-slate-600"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-800">${dept}</h3>
+            <p class="text-sm text-slate-600">${users.length} employee${users.length !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
+        <div class="text-sm space-y-1">
+          <div class="flex justify-between"><span class="text-slate-600">Managers:</span><span class="font-medium">${managers.length}</span></div>
+          <div class="flex justify-between"><span class="text-slate-600">ICs:</span><span class="font-medium">${users.length - managers.length}</span></div>
+        </div>
+      `;
+            container.appendChild(card);
+        });
+    }
 
-        // Group users by department
+    // -------- List view
+    function renderListView() {
+        const tbody = document.getElementById('listTableBody'); tbody.innerHTML = '';
+        allUsers.forEach(u => {
+            const mgr = allUsers.find(x => x.id === u.manager_id);
+            const drCount = allUsers.filter(x => x.manager_id === u.id).length;
+            const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+        <td class="px-4 py-3">
+          <div class="flex items-center">
+            <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center mr-3 text-sm">${getInitials(u.name)}</div>
+            <div>
+              <div class="font-medium text-slate-800">${u.name}</div>
+              <div class="text-sm text-slate-500">${u.email || ''}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-3 text-sm text-slate-600">${u.designation || u.subposition || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${u.subposition || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${mgr ? mgr.name : 'None'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${drCount}</td>
+        <td class="px-4 py-3"><button onclick="editEmployee(${u.id})" class="text-slate-600 hover:text-slate-800"><i class="fa-solid fa-edit"></i></button></td>
+      `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // -------- Edit helpers
+    function editEmployee(userId) {
+        const user = allUsers.find(u => u.id === userId); if (!user) return;
+        // employee select
+        const eSel = document.getElementById('employeeSelect'); eSel.innerHTML = '';
+        allUsers.forEach(u => {
+            const o = document.createElement('option');
+            o.value = u.id; o.textContent = `${u.name} (${u.subposition || u.employee_type})`;
+            if (u.id === userId) o.selected = true; eSel.appendChild(o);
+        });
+        // manager select
+        const mSel = document.getElementById('managerSelect'); mSel.innerHTML = '<option value="">No Manager (Top Level)</option>';
+        allUsers.forEach(u => {
+            if (u.id !== userId) {
+                const o = document.createElement('option');
+                o.value = u.id; o.textContent = `${u.name} (${u.subposition || u.employee_type})`;
+                if (u.id === user.manager_id) o.selected = true; mSel.appendChild(o);
+            }
+        });
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+    async function saveReportingChange() {
+        const employee_id = document.getElementById('employeeSelect').value;
+        const manager_id = document.getElementById('managerSelect').value || null;
+        try {
+            await postJSON('/api/org/update-reporting', { employee_id, manager_id });
+            document.getElementById('editModal').classList.add('hidden');
+            await loadOrgData(); renderCurrentView(); alert('Success: Reporting structure updated');
+        } catch (e) { alert('Error: Failed to update reporting structure'); }
+    }
+
+    // -------- Pan & Zoom
+    function setupPanZoom() {
+        const container = document.getElementById('pzContainer');
+        const content = document.getElementById('pzContent');
+        let scale = 1, min = 0.5, max = 2;
+        let isPanning = false, start = { x: 0, y: 0 }, offset = { x: 40, y: 40 };
+
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const rect = content.getBoundingClientRect();
+            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            const dir = e.deltaY > 0 ? -1 : 1;
+            const factor = 1 + dir * 0.1;
+            const newScale = Math.min(max, Math.max(min, scale * factor));
+            const k = newScale / scale;
+            // Zoom to mouse position
+            offset.x = mx - k * (mx - offset.x);
+            offset.y = my - k * (my - offset.y);
+            scale = newScale;
+            apply();
+        }, { passive: false });
+
+        container.addEventListener('mousedown', (e) => {
+            isPanning = true; start.x = e.clientX; start.y = e.clientY; container.style.cursor = 'grabbing';
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isPanning) return;
+            offset.x += e.clientX - start.x; offset.y += e.clientY - start.y;
+            start.x = e.clientX; start.y = e.clientY; apply();
+        });
+        window.addEventListener('mouseup', () => { isPanning = false; container.style.cursor = 'default'; });
+        function apply() { content.style.transform = `translate(${offset.x}px,${offset.y}px) scale(${scale})`; }
+    }
+
+    // -------- Events
+    function setupEventListeners() {
+        document.getElementById('viewType').addEventListener('change', renderCurrentView);
+        document.getElementById('departmentFilter').addEventListener('change', renderCurrentView);
+
+        document.getElementById('expandAllBtn').addEventListener('click', () => { renderFlowView(); });
+        document.getElementById('collapseAllBtn').addEventListener('click', () => { /* minimal: user toggles per node */ });
+
+        document.getElementById('editModeBtn').addEventListener('click', () => {
+            editMode = !editMode;
+            const btn = document.getElementById('editModeBtn');
+            if (editMode) { btn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i> View Mode'; btn.classList.add('bg-slate-800', 'text-white'); }
+            else { btn.innerHTML = '<i class="fa-solid fa-edit mr-1"></i> Edit Structure'; btn.classList.remove('bg-slate-800', 'text-white'); }
+        });
+
+        document.getElementById('closeModalBtn').addEventListener('click', () => document.getElementById('editModal').classList.add('hidden'));
+        document.getElementById('cancelBtn').addEventListener('click', () => document.getElementById('editModal').classList.add('hidden'));
+        document.getElementById('editForm').addEventListener('submit', (e) => { e.preventDefault(); saveReportingChange(); });
+
+        setupPanZoom();
+    }
+
+    // -------- Department & List renderers (reuse from your version)
+    function getInitialsNode(name) { return getInitials(name); }
+    function renderDepartmentView() {
+        const container = document.getElementById('departmentGrid'); container.innerHTML = '';
         const departments = {};
         allUsers.forEach(user => {
             const dept = user.subposition || 'Unassigned';
-            if (!departments[dept]) {
-                departments[dept] = [];
-            }
-            departments[dept].push(user);
+            (departments[dept] || (departments[dept] = [])).push(user);
         });
-
         Object.entries(departments).forEach(([deptName, users]) => {
-            const deptCard = document.createElement('div');
-            deptCard.className = 'department-card';
-
-            const managers = users.filter(user =>
-                users.some(other => other.manager_id === user.id)
-            );
-
-            deptCard.innerHTML = `
-            <div class="flex items-center mb-4">
-                <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
-                    <i class="fa-solid fa-building text-slate-600"></i>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-slate-800">${deptName}</h3>
-                    <p class="text-sm text-slate-600">${users.length} employee${users.length !== 1 ? 's' : ''}</p>
-                </div>
-            </div>
-            
-            ${managers.length > 0 ? `
-                <div class="mb-4">
-                    <h4 class="text-sm font-medium text-slate-700 mb-2">Management</h4>
-                    <div class="space-y-2">
-                        ${managers.map(manager => `
-                            <div class="flex items-center text-sm">
-                                <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center mr-2 text-xs">
-                                    ${getInitials(manager.name)}
-                                </div>
-                                <span class="text-slate-800">${manager.name}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-            
-            <div class="text-sm space-y-1">
-                <div class="flex justify-between">
-                    <span class="text-slate-600">Total Staff:</span>
-                    <span class="font-medium">${users.length}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-600">Managers:</span>
-                    <span class="font-medium">${managers.length}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-600">Individual Contributors:</span>
-                    <span class="font-medium">${users.length - managers.length}</span>
-                </div>
-            </div>
-        `;
-
-            container.appendChild(deptCard);
+            const managers = users.filter(u => users.some(v => v.manager_id === u.id));
+            const card = document.createElement('div'); card.className = 'department-card';
+            card.innerHTML = `
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
+            <i class="fa-solid fa-building text-slate-600"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-800">${deptName}</h3>
+            <p class="text-sm text-slate-600">${users.length} employee${users.length !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
+        <div class="text-sm space-y-1">
+          <div class="flex justify-between"><span class="text-slate-600">Managers:</span><span class="font-medium">${managers.length}</span></div>
+          <div class="flex justify-between"><span class="text-slate-600">ICs:</span><span class="font-medium">${users.length - managers.length}</span></div>
+        </div>`;
+            container.appendChild(card);
         });
     }
 
     function renderListView() {
-        const tbody = document.getElementById('listTableBody');
-        tbody.innerHTML = '';
-
+        const tbody = document.getElementById('listTableBody'); tbody.innerHTML = '';
         allUsers.forEach(user => {
             const manager = allUsers.find(u => u.id === user.manager_id);
-            const directReports = allUsers.filter(u => u.manager_id === user.id);
-
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-slate-50';
-
+            const directReports = allUsers.filter(u => u.manager_id === user.id).length;
+            const row = document.createElement('tr'); row.className = 'hover:bg-slate-50';
             row.innerHTML = `
-            <td class="px-4 py-3">
-                <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center mr-3 text-sm">
-                        ${getInitials(user.name)}
-                    </div>
-                    <div>
-                        <div class="font-medium text-slate-800">${user.name}</div>
-                        <div class="text-sm text-slate-500">${user.email}</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-4 py-3 text-sm text-slate-600">
-                ${user.designation || user.subposition || '-'}
-            </td>
-            <td class="px-4 py-3 text-sm text-slate-600">
-                ${user.subposition || '-'}
-            </td>
-            <td class="px-4 py-3 text-sm text-slate-600">
-                ${manager ? manager.name : 'None'}
-            </td>
-            <td class="px-4 py-3 text-sm text-slate-600">
-                ${directReports.length}
-            </td>
-            <td class="px-4 py-3">
-                <button onclick="editEmployee(${user.id})" class="text-slate-600 hover:text-slate-800">
-                    <i class="fa-solid fa-edit"></i>
-                </button>
-            </td>
-        `;
-
+        <td class="px-4 py-3">
+          <div class="flex items-center">
+            <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center mr-3 text-sm">${getInitials(user.name)}</div>
+            <div>
+              <div class="font-medium text-slate-800">${user.name}</div>
+              <div class="text-sm text-slate-500">${user.email || ''}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-3 text-sm text-slate-600">${user.designation || user.subposition || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${user.subposition || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${manager ? manager.name : 'None'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${directReports}</td>
+        <td class="px-4 py-3"><button onclick="editEmployee(${user.id})" class="text-slate-600 hover:text-slate-800"><i class="fa-solid fa-edit"></i></button></td>
+      `;
             tbody.appendChild(row);
         });
     }
 
-    // Edit functionality
-    function editEmployee(userId) {
-        const user = allUsers.find(u => u.id === userId);
-        if (!user) return;
-
-        // Populate employee select
-        const employeeSelect = document.getElementById('employeeSelect');
-        employeeSelect.innerHTML = '';
-        allUsers.forEach(u => {
-            const option = document.createElement('option');
-            option.value = u.id;
-            option.textContent = `${u.name} (${u.subposition || u.employee_type})`;
-            option.selected = u.id === userId;
-            employeeSelect.appendChild(option);
-        });
-
-        // Populate manager select
-        const managerSelect = document.getElementById('managerSelect');
-        managerSelect.innerHTML = '<option value="">No Manager (Top Level)</option>';
-        allUsers.forEach(u => {
-            if (u.id !== userId) { // Can't report to themselves
-                const option = document.createElement('option');
-                option.value = u.id;
-                option.textContent = `${u.name} (${u.subposition || u.employee_type})`;
-                option.selected = u.id === user.manager_id;
-                managerSelect.appendChild(option);
-            }
-        });
-
-        document.getElementById('editModal').classList.remove('hidden');
-    }
-
-    async function saveReportingChange() {
-        const employeeId = document.getElementById('employeeSelect').value;
-        const managerId = document.getElementById('managerSelect').value || null;
-
-        try {
-            await postJSON('/api/org/update-reporting', {
-                employee_id: employeeId,
-                manager_id: managerId
-            });
-
-            document.getElementById('editModal').classList.add('hidden');
-            await loadOrgData(); // Refresh the data
-            showSuccess('Reporting structure updated successfully');
-        } catch (error) {
-            console.error('Error updating reporting structure:', error);
-            showError('Failed to update reporting structure');
-        }
-    }
-
-    // Event handlers
-    function setupEventListeners() {
-        // View type change
-        document.getElementById('viewType').addEventListener('change', renderCurrentView);
-
-        // Department filter
-        document.getElementById('departmentFilter').addEventListener('change', () => {
-            // Filter implementation can be added here
-            renderCurrentView();
-        });
-
-        // Expand/Collapse buttons
-        document.getElementById('expandAllBtn').addEventListener('click', () => {
-            document.querySelectorAll('.org-children').forEach(el => {
-                el.style.display = 'block';
-            });
-            document.querySelectorAll('.collapse-icon').forEach(icon => {
-                icon.style.transform = 'rotate(0deg)';
-            });
-        });
-
-        document.getElementById('collapseAllBtn').addEventListener('click', () => {
-            document.querySelectorAll('.org-children').forEach(el => {
-                el.style.display = 'none';
-            });
-            document.querySelectorAll('.collapse-icon').forEach(icon => {
-                icon.style.transform = 'rotate(-90deg)';
-            });
-        });
-
-        // Edit mode
-        document.getElementById('editModeBtn').addEventListener('click', () => {
-            editMode = !editMode;
-            const btn = document.getElementById('editModeBtn');
-            if (editMode) {
-                btn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i> View Mode';
-                btn.classList.add('bg-slate-800', 'text-white');
-            } else {
-                btn.innerHTML = '<i class="fa-solid fa-edit mr-1"></i> Edit Structure';
-                btn.classList.remove('bg-slate-800', 'text-white');
-            }
-        });
-
-        // Modal controls
-        document.getElementById('closeModalBtn').addEventListener('click', () => {
-            document.getElementById('editModal').classList.add('hidden');
-        });
-
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            document.getElementById('editModal').classList.add('hidden');
-        });
-
-        document.getElementById('editForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            saveReportingChange();
-        });
-    }
-
-    function showError(message) {
-        // You can implement toast notifications here
-        console.error(message);
-        alert('Error: ' + message);
-    }
-
-    function showSuccess(message) {
-        // You can implement toast notifications here
-        console.log(message);
-        alert('Success: ' + message);
-    }
-
+    // -------- Init
     async function initializePage() {
         document.getElementById('loadingState').classList.remove('hidden');
-
         try {
             await loadOrgData();
-            setupEventListeners();
             document.getElementById('loadingState').classList.add('hidden');
-        } catch (error) {
-            console.error('Error initializing org chart:', error);
+            document.getElementById('flowView').classList.remove('hidden');
+            setupEventListeners();
+            renderCurrentView();
+        } catch (e) {
             document.getElementById('loadingState').innerHTML = `
-            <div class="text-center py-12">
-                <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
-                <p class="text-red-600 mb-4">Failed to load organizational chart</p>
-                <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                    Try Again
-                </button>
-            </div>
-        `;
+        <div class="text-center py-12">
+          <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
+          <p class="text-red-600 mb-4">Failed to load organizational chart</p>
+          <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
+        </div>`;
         }
     }
-
-    // Initialize when page loads
     document.addEventListener('DOMContentLoaded', initializePage);
 </script>
-
 {% endblock %}

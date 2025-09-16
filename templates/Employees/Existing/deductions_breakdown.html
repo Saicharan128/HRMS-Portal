@@ -1,0 +1,483 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-scale-balanced mr-2"></i> Deductions Breakdown
+            </h1>
+            <p class="text-slate-600 text-sm">Statutory and voluntary deduction details.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="exportCsvBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab" class="db-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-chart-pie mr-1"></i> Overview
+            </button>
+            <button id="itemsTab" class="db-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-list-check mr-1"></i> Line Items
+            </button>
+            <button id="historyTab" class="db-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
+            </button>
+            <button id="policiesTab" class="db-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-book mr-1"></i> Policies
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overviewPanel" class="db-panel">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Current cycle split -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-circle-nodes mr-2"></i> Current Cycle Split
+                    </h3>
+                    <select id="cyclePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                        <option>Sep 2025</option>
+                        <option>Aug 2025</option>
+                        <option>Jul 2025</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Total (₹)</div>
+                        <div id="totDed" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Statutory (₹)</div>
+                        <div id="statDed" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="text-xs text-slate-500">Voluntary (₹)</div>
+                        <div id="volDed" class="text-xl font-semibold text-slate-800">0</div>
+                    </div>
+                </div>
+                <div class="relative h-40">
+                    <canvas id="splitChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Category breakdown -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-diagram-project mr-2"></i> Category Breakdown
+                    </h3>
+                </div>
+                <div class="relative h-40">
+                    <canvas id="catChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
+                <div id="catLegend" class="mt-3 text-sm text-slate-700"></div>
+            </div>
+
+            <!-- Quick actions -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-bolt mr-2"></i> Quick Actions
+                    </h3>
+                </div>
+                <div class="space-y-3">
+                    <button id="downloadBreakupBtn"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-file-arrow-down mr-2"></i> Download deduction breakup (PDF)
+                    </button>
+                    <button id="optimizeBtn"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
+                        <i class="fa-solid fa-sliders mr-2"></i> Optimize voluntary deductions
+                    </button>
+                    <button id="raiseQueryBtn"
+                        class="w-full px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-left">
+                        <i class="fa-solid fa-circle-question mr-2"></i> Raise a deduction query
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Line Items -->
+    <section id="itemsPanel" class="db-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-list-check mr-2"></i> Line Items (Current Cycle)
+                </h3>
+                <div class="flex items-center gap-2">
+                    <input id="searchInput" type="text" placeholder="Search name or note..."
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                    <select id="typeFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="statutory">Statutory</option>
+                        <option value="voluntary">Voluntary</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Name</th>
+                            <th class="py-2 pr-4">Type</th>
+                            <th class="py-2 pr-4">Amount (₹)</th>
+                            <th class="py-2 pr-4">Rule</th>
+                            <th class="py-2 pr-4">Notes</th>
+                            <th class="py-2 pr-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- History -->
+    <section id="historyPanel" class="db-panel hidden">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-chart-line mr-2"></i> 12-Month Trend
+                </h3>
+                <select id="histType" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                    <option value="total">Total</option>
+                    <option value="statutory">Statutory</option>
+                    <option value="voluntary">Voluntary</option>
+                </select>
+            </div>
+            <div class="relative h-48 mb-4">
+                <canvas id="trendChart" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="text-left text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Month</th>
+                            <th class="py-2 pr-4">Statutory (₹)</th>
+                            <th class="py-2 pr-4">Voluntary (₹)</th>
+                            <th class="py-2 pr-4">Total (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="histRows" class="text-slate-800"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Policies -->
+    <section id="policiesPanel" class="db-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-book-open mr-2"></i> Deduction Policies (Summary)
+                </h3>
+                <div class="space-y-3 text-sm text-slate-700">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <b>EPF:</b> 12% employee share on Basic+DA (statutory).
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <b>ESI:</b> 0.75% of gross where applicable (statutory).
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <b>TDS:</b> As per slab under selected regime (statutory).
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <b>Voluntary:</b> NPS (Tier-I), insurance, meal card, donations (opt-in).
+                    </div>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    <i class="fa-solid fa-headset mr-2"></i> Support
+                </h3>
+                <div class="space-y-2 text-sm">
+                    <div><b>Email:</b> payroll@example.com</div>
+                    <div><b>SLA:</b> 2 business days</div>
+                    <button id="contactBtn"
+                        class="mt-2 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Contact Payroll
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Detail Modal -->
+<div id="itemModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="itemModalTitle" class="text-lg font-semibold text-slate-800">Deduction</h3>
+                    <button id="closeItemModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-3 text-sm">
+                    <div id="itemMeta" class="text-slate-700"></div>
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div><b>Amount:</b> <span id="mAmt"></span></div>
+                        <div><b>Type:</b> <span id="mType"></span></div>
+                        <div><b>Rule:</b> <span id="mRule"></span></div>
+                        <div><b>Notes:</b> <span id="mNote"></span></div>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="raiseCorrBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">
+                            <i class="fa-solid fa-pen-to-square mr-1"></i> Raise Correction
+                        </button>
+                        <button id="downloadItemBtn"
+                            class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                            <i class="fa-solid fa-download mr-1"></i> Download Proof (PDF)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+    // ---- Dummy Data ----
+    const CYCLES = {
+        'Sep 2025': {
+            statutory: [
+                { id: 1, name: 'TDS', amt: 16000, rule: 'As per slab', note: '' },
+                { id: 2, name: 'EPF', amt: 7800, rule: '12% of Basic+DA', note: '' },
+                { id: 3, name: 'ESI', amt: 0, rule: '0.75% where applicable', note: 'N/A' }
+            ],
+            voluntary: [
+                { id: 11, name: 'NPS (Tier-I)', amt: 3000, rule: 'Employee opt-in', note: '10% cap (demo)' },
+                { id: 12, name: 'Health Insurance', amt: 1200, rule: 'Opt-in', note: 'Family floater' },
+                { id: 13, name: 'Meal Card', amt: 1500, rule: 'Opt-in', note: '' }
+            ]
+        },
+        'Aug 2025': {
+            statutory: [{ name: 'TDS', amt: 15500 }, { name: 'EPF', amt: 7800 }, { name: 'ESI', amt: 0 }],
+            voluntary: [{ name: 'NPS (Tier-I)', amt: 3000 }, { name: 'Health Insurance', amt: 1200 }, { name: 'Meal Card', amt: 1500 }]
+        },
+        'Jul 2025': {
+            statutory: [{ name: 'TDS', amt: 14800 }, { name: 'EPF', amt: 7800 }, { name: 'ESI', amt: 0 }],
+            voluntary: [{ name: 'NPS (Tier-I)', amt: 3000 }, { name: 'Health Insurance', amt: 1200 }, { name: 'Meal Card', amt: 1500 }]
+        }
+    };
+
+    const HISTORY = [
+        { month: '2025-09', stat: 23800, vol: 5700 },
+        { month: '2025-08', stat: 23300, vol: 5700 },
+        { month: '2025-07', stat: 22600, vol: 5700 },
+        { month: '2025-06', stat: 21200, vol: 5200 },
+        { month: '2025-05', stat: 21000, vol: 5200 },
+        { month: '2025-04', stat: 20500, vol: 5200 },
+        { month: '2025-03', stat: 19500, vol: 4800 },
+        { month: '2025-02', stat: 19000, vol: 4800 },
+        { month: '2025-01', stat: 19000, vol: 4800 },
+        { month: '2024-12', stat: 18800, vol: 4700 },
+        { month: '2024-11', stat: 18200, vol: 4700 },
+        { month: '2024-10', stat: 18000, vol: 4700 }
+    ];
+
+    // ---- Panels/Tabs ----
+    const panels = {
+        overview: document.getElementById('overviewPanel'),
+        items: document.getElementById('itemsPanel'),
+        history: document.getElementById('historyPanel'),
+        policies: document.getElementById('policiesPanel')
+    };
+
+    // ---- State ----
+    let _splitChart, _catChart, _trendChart;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTabs();
+        wireButtons();
+        renderOverview();
+        renderItems();
+        renderHistory();
+        drawSplit();
+        drawCategory();
+        drawTrend();
+    });
+
+    function setupTabs() {
+        document.querySelectorAll('.db-tab').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.db-tab').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', '');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                panels[name].classList.remove('hidden');
+            });
+        });
+    }
+
+    function wireButtons() {
+        document.getElementById('cyclePicker').addEventListener('change', onCycleChange);
+        document.getElementById('searchInput').addEventListener('input', renderItems);
+        document.getElementById('typeFilter').addEventListener('change', renderItems);
+        document.getElementById('exportCsvBtn').addEventListener('click', () => alert('✅ CSV exported (demo)'));
+        document.getElementById('downloadBreakupBtn').addEventListener('click', () => alert('📄 Breakup PDF generated (demo)'));
+        document.getElementById('optimizeBtn').addEventListener('click', () => alert('🧮 Optimization (demo)'));
+        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened (demo)'));
+        document.getElementById('contactBtn')?.addEventListener('click', () => alert('📬 Opening support ticket (demo)'));
+        document.getElementById('closeItemModal').addEventListener('click', closeItemModal);
+        document.getElementById('raiseCorrBtn').addEventListener('click', () => alert('✍️ Correction requested (demo)'));
+        document.getElementById('downloadItemBtn').addEventListener('click', () => alert('📎 Proof downloaded (demo)'));
+        document.getElementById('histType').addEventListener('change', drawTrend);
+    }
+
+    // ---- Overview ----
+    function onCycleChange() { renderOverview(); renderItems(); drawSplit(); drawCategory(); }
+    function renderOverview() {
+        const cyc = document.getElementById('cyclePicker').value;
+        const { statutory = [], voluntary = [] } = CYCLES[cyc] || {};
+        const s = sum(statutory.map(x => x.amt));
+        const v = sum(voluntary.map(x => x.amt));
+        document.getElementById('totDed').textContent = fmt(s + v);
+        document.getElementById('statDed').textContent = fmt(s);
+        document.getElementById('volDed').textContent = fmt(v);
+    }
+
+    // ---- Items ----
+    function renderItems() {
+        const cyc = document.getElementById('cyclePicker').value;
+        const q = (document.getElementById('searchInput').value || '').toLowerCase();
+        const t = document.getElementById('typeFilter').value;
+        const data = CYCLES[cyc] || { statutory: [], voluntary: [] };
+        const items = [
+            ...data.statutory.map(x => ({ ...x, type: 'statutory' })),
+            ...data.voluntary.map(x => ({ ...x, type: 'voluntary' }))
+        ]
+            .filter(x => (t === 'all' ? true : x.type === t))
+            .filter(x => x.name.toLowerCase().includes(q) || (x.note || '').toLowerCase().includes(q));
+
+        document.getElementById('itemRows').innerHTML = items.map(rowItem).join('') ||
+            `<tr><td colspan="6" class="py-6 text-center text-slate-500">No matching items.</td></tr>`;
+    }
+
+    function rowItem(x) {
+        return `<tr class="border-b last:border-0">
+      <td class="py-2 pr-4">${x.name}</td>
+      <td class="py-2 pr-4 capitalize">${x.type}</td>
+      <td class="py-2 pr-4">₹${fmt(x.amt)}</td>
+      <td class="py-2 pr-4">${x.rule || ''}</td>
+      <td class="py-2 pr-4">${x.note || ''}</td>
+      <td class="py-2 pr-4">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openItem('${x.name}','${x.type}','${x.amt}','${x.rule || ''}','${x.note || ''}')">
+          <i class="fa-solid fa-eye mr-1"></i> View
+        </button>
+      </td>
+    </tr>`;
+    }
+
+    // ---- History ----
+    function renderHistory() {
+        const rows = HISTORY.slice().sort((a, b) => b.month.localeCompare(a.month));
+        document.getElementById('histRows').innerHTML = rows.map(h => `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4">${labelMonth(h.month)}</td>
+        <td class="py-2 pr-4">₹${fmt(h.stat)}</td>
+        <td class="py-2 pr-4">₹${fmt(h.vol)}</td>
+        <td class="py-2 pr-4 font-medium">₹${fmt(h.stat + h.vol)}</td>
+      </tr>`).join('');
+    }
+
+    // ---- Charts ----
+    function drawSplit() {
+        const cyc = document.getElementById('cyclePicker').value;
+        const d = CYCLES[cyc] || { statutory: [], voluntary: [] };
+        const s = sum(d.statutory.map(x => x.amt));
+        const v = sum(d.voluntary.map(x => x.amt));
+        const ctx = document.getElementById('splitChart').getContext('2d');
+        if (_splitChart) _splitChart.destroy();
+        _splitChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: ['Statutory', 'Voluntary'], datasets: [{ data: [s, v] }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' } }, animation: false }
+        });
+    }
+
+    function drawCategory() {
+        const cyc = document.getElementById('cyclePicker').value;
+        const d = CYCLES[cyc] || { statutory: [], voluntary: [] };
+        const cats = [...d.statutory, ...d.voluntary].map(x => ({ label: x.name, value: x.amt }));
+        const ctx = document.getElementById('catChart').getContext('2d');
+        if (_catChart) _catChart.destroy();
+        _catChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: cats.map(c => c.label), datasets: [{ label: 'Amount (₹)', data: cats.map(c => c.value) }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
+        });
+        document.getElementById('catLegend').innerHTML =
+            cats.map(c => `<div class="flex items-center justify-between text-sm"><span>${c.label}</span><span>₹${fmt(c.value)}</span></div>`).join('');
+    }
+
+    function drawTrend() {
+        const t = document.getElementById('histType').value;
+        const labels = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => labelMonth(h.month));
+        const stat = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => h.stat);
+        const vol = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => h.vol);
+        const total = stat.map((s, i) => s + vol[i]);
+        const data = t === 'total' ? total : (t === 'statutory' ? stat : vol);
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        if (_trendChart) _trendChart.destroy();
+        _trendChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels, datasets: [{ label: t.charAt(0).toUpperCase() + t.slice(1), data }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, animation: false }
+        });
+    }
+
+    // ---- Modal ----
+    function openItem(name, type, amt, rule, note) {
+        document.getElementById('itemModalTitle').textContent = `${name}`;
+        document.getElementById('itemMeta').textContent = `${capitalize(type)} deduction`;
+        document.getElementById('mAmt').textContent = `₹${fmt(Number(amt))}`;
+        document.getElementById('mType').textContent = capitalize(type);
+        document.getElementById('mRule').textContent = rule || '-';
+        document.getElementById('mNote').textContent = note || '-';
+        document.getElementById('itemModal').classList.remove('hidden');
+    }
+    function closeItemModal() { document.getElementById('itemModal').classList.add('hidden'); }
+
+    // ---- Helpers ----
+    function sum(a) { return a.reduce((x, y) => x + y, 0); }
+    function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function labelMonth(ym) { const [y, m] = ym.split('-'); return new Date(Number(y), Number(m) - 1, 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' }); }
+</script>
+
+<style>
+    .db-tab.active {
+        background-color: #1e293b;
+        color: #fff;
+    }
+
+    .db-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .db-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+</style>
+{% endblock %}

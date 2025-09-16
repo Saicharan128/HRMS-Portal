@@ -247,9 +247,7 @@
                     <!-- Cost Breakdown -->
                     <div class="space-y-2">
                         <h4 class="text-sm font-medium text-slate-800">Breakdown</h4>
-                        <div id="costBreakdown" class="space-y-1 text-sm">
-                            <!-- Breakdown items will be populated here -->
-                        </div>
+                        <div id="costBreakdown" class="space-y-1 text-sm"></div>
                     </div>
 
                     <!-- Cost per Hour -->
@@ -312,9 +310,7 @@
                     <i class="fa-solid fa-chart-pie mr-2"></i> Team Cost Analysis
                 </h3>
 
-                <div id="teamResults" class="hidden space-y-4">
-                    <!-- Team totals will be shown here -->
-                </div>
+                <div id="teamResults" class="hidden space-y-4"></div>
 
                 <div id="teamEmptyState" class="text-center py-8 text-slate-500">
                     <i class="fa-solid fa-users text-4xl mb-4"></i>
@@ -392,9 +388,7 @@
                     <canvas id="budgetPieChart" height="300"></canvas>
                 </div>
 
-                <div id="budgetBreakdown" class="space-y-3">
-                    <!-- Budget breakdown will be populated here -->
-                </div>
+                <div id="budgetBreakdown" class="space-y-3"></div>
             </div>
         </div>
     </div>
@@ -412,9 +406,7 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="scenarioGrid">
-                <!-- Scenarios will be added here -->
-            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="scenarioGrid"></div>
 
             <div class="mt-6">
                 <div class="rounded-lg border border-slate-200 p-4">
@@ -502,13 +494,15 @@
     function initializeCostCalculator() {
         setupEventListeners();
         initializeDefaults();
+        // Ensure the default tab panel is visible
+        switchTab('position');
     }
 
     function setupEventListeners() {
-        // Tab switching
+        // Tab switching (use currentTarget to handle clicks on icons/text reliably)
         document.querySelectorAll('.calculator-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
-                const tabId = e.target.id.replace('Tab', '');
+                const tabId = e.currentTarget.id.replace('Tab', '');
                 switchTab(tabId);
             });
         });
@@ -535,22 +529,17 @@
         document.getElementById('exportBudgetBtn').addEventListener('click', exportBudget);
         document.getElementById('saveScenarioBtn').addEventListener('click', saveScenario);
 
-        // Auto-calculate on input change
+        // Auto-calc on key inputs
         const inputs = ['baseSalary', 'bonusPercent', 'equityValue', 'healthInsurance', 'retirement401k'];
         inputs.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.addEventListener('input', debounce(() => {
-                    if (document.getElementById('baseSalary').value) {
-                        calculatePositionCost();
-                    }
-                }, 500));
-            }
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', debounce(() => {
+                if (document.getElementById('baseSalary').value) calculatePositionCost();
+            }, 500));
         });
     }
 
     function initializeDefaults() {
-        // Set default values
         document.getElementById('payrollTax').value = '7.65';
         document.getElementById('workersComp').value = '0.5';
         document.getElementById('unemployment').value = '2.5';
@@ -565,37 +554,26 @@
         currentTab = tabName;
 
         // Update tab buttons
-        document.querySelectorAll('.calculator-tab').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        document.getElementById(tabName + 'Tab').classList.add('active');
+        document.querySelectorAll('.calculator-tab').forEach(tab => tab.classList.remove('active'));
+        const activeBtn = document.getElementById(tabName + 'Tab');
+        if (activeBtn) activeBtn.classList.add('active');
 
         // Show/hide panels
-        document.querySelectorAll('.calculator-panel').forEach(panel => {
-            panel.classList.add('hidden');
-        });
-
+        document.querySelectorAll('.calculator-panel').forEach(panel => panel.classList.add('hidden'));
         const panelMap = {
-            'position': 'positionCalculator',
-            'team': 'teamCalculator',
-            'budget': 'budgetPlanner',
-            'scenario': 'scenarioAnalysis'
+            position: 'positionCalculator',
+            team: 'teamCalculator',
+            budget: 'budgetPlanner',
+            scenario: 'scenarioAnalysis'
         };
-
-        if (panelMap[tabName]) {
-            document.getElementById(panelMap[tabName]).classList.remove('hidden');
-        }
+        const targetId = panelMap[tabName];
+        if (targetId) document.getElementById(targetId).classList.remove('hidden');
     }
 
     function calculatePositionCost() {
         const baseSalary = parseFloat(document.getElementById('baseSalary').value) || 0;
+        if (baseSalary === 0) { showError('Please enter a base salary'); return; }
 
-        if (baseSalary === 0) {
-            showError('Please enter a base salary');
-            return;
-        }
-
-        // Get all input values
         const bonusPercent = parseFloat(document.getElementById('bonusPercent').value) || 0;
         const equityValue = parseFloat(document.getElementById('equityValue').value) || 0;
         const healthInsurance = parseFloat(document.getElementById('healthInsurance').value) || 0;
@@ -608,38 +586,30 @@
         const workersComp = parseFloat(document.getElementById('workersComp').value) || 0;
         const unemployment = parseFloat(document.getElementById('unemployment').value) || 0;
 
-        // Calculate components
         const bonusAmount = baseSalary * (bonusPercent / 100);
         const retirement401kAmount = baseSalary * (retirement401k / 100);
         const annualHealthInsurance = healthInsurance * 12;
         const annualOfficeSpace = officeSpace * 12;
         const annualOtherBenefits = otherBenefits * 12;
 
-        // Calculate base compensation
         const totalCompensation = baseSalary + bonusAmount + equityValue;
-
-        // Calculate benefits
         const totalBenefits = annualHealthInsurance + retirement401kAmount + training + annualOtherBenefits;
 
-        // Calculate taxes
         const payrollTaxAmount = totalCompensation * (payrollTax / 100);
         const workersCompAmount = totalCompensation * (workersComp / 100);
         const unemploymentAmount = totalCompensation * (unemployment / 100);
         const totalTaxes = payrollTaxAmount + workersCompAmount + unemploymentAmount;
 
-        // Calculate total cost
         const totalAnnualCost = totalCompensation + totalBenefits + totalTaxes + equipment + annualOfficeSpace;
         const monthlyCost = totalAnnualCost / 12;
-        const hourlyRate = totalAnnualCost / (40 * 52); // 40 hours/week, 52 weeks/year
-        const benefitsRatio = ((totalBenefits / baseSalary) * 100);
+        const hourlyRate = totalAnnualCost / (40 * 52);
+        const benefitsRatio = (totalBenefits / baseSalary) * 100;
 
-        // Update UI
         document.getElementById('totalAnnualCost').textContent = formatCurrency(totalAnnualCost);
         document.getElementById('monthlyCost').textContent = formatCurrency(monthlyCost);
         document.getElementById('hourlyRate').textContent = formatCurrency(hourlyRate, false);
         document.getElementById('benefitsRatio').textContent = benefitsRatio.toFixed(1) + '%';
 
-        // Update breakdown
         const breakdown = [
             { label: 'Base Salary', amount: baseSalary },
             { label: 'Bonus', amount: bonusAmount },
@@ -652,29 +622,23 @@
             { label: 'Equipment', amount: equipment },
             { label: 'Payroll Taxes', amount: totalTaxes }
         ];
-
         const breakdownContainer = document.getElementById('costBreakdown');
         breakdownContainer.innerHTML = breakdown
-            .filter(item => item.amount > 0)
-            .map(item => `
-            <div class="flex justify-between">
-                <span class="text-slate-600">${item.label}:</span>
-                <span class="text-slate-800">${formatCurrency(item.amount)}</span>
-            </div>
-        `).join('');
+            .filter(i => i.amount > 0)
+            .map(i => `
+                <div class="flex justify-between">
+                    <span class="text-slate-600">${i.label}:</span>
+                    <span class="text-slate-800">${formatCurrency(i.amount)}</span>
+                </div>
+            `).join('');
 
-        // Show results
         document.getElementById('positionResults').classList.remove('hidden');
         document.getElementById('positionEmptyState').classList.add('hidden');
     }
 
-    function openAddMemberModal() {
-        document.getElementById('addMemberModal').classList.remove('hidden');
-    }
-
+    function openAddMemberModal() { document.getElementById('addMemberModal').classList.remove('hidden'); }
     function closeAddMemberModal() {
         document.getElementById('addMemberModal').classList.add('hidden');
-        // Reset form
         document.getElementById('memberRole').value = '';
         document.getElementById('memberLevel').value = 'entry';
         document.getElementById('memberCount').value = '1';
@@ -687,20 +651,9 @@
         const count = parseInt(document.getElementById('memberCount').value) || 1;
         const salary = parseFloat(document.getElementById('memberSalary').value) || 0;
 
-        if (!role || salary === 0) {
-            showError('Please fill in all required fields');
-            return;
-        }
+        if (!role || salary === 0) { showError('Please fill in all required fields'); return; }
 
-        const member = {
-            id: Date.now(),
-            role,
-            level,
-            count,
-            salary,
-            totalCost: salary * 1.4 * count // Rough multiplier for benefits and taxes
-        };
-
+        const member = { id: Date.now(), role, level, count, salary, totalCost: salary * 1.4 * count };
         teamMembers.push(member);
         renderTeamMembers();
         closeAddMemberModal();
@@ -708,37 +661,30 @@
 
     function renderTeamMembers() {
         const container = document.getElementById('teamMembers');
-
         if (teamMembers.length === 0) {
             container.innerHTML = '<p class="text-slate-500 text-center py-4">No team members added yet</p>';
             return;
         }
-
-        container.innerHTML = teamMembers.map(member => `
-        <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-            <div>
-                <div class="font-medium text-slate-800">${member.role}</div>
-                <div class="text-sm text-slate-600">${member.level} level • ${member.count} person(s)</div>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="text-right">
-                    <div class="font-medium text-slate-800">${formatCurrency(member.salary)}</div>
-                    <div class="text-xs text-slate-600">per person</div>
+        container.innerHTML = teamMembers.map(m => `
+            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+                <div>
+                    <div class="font-medium text-slate-800">${m.role}</div>
+                    <div class="text-sm text-slate-600">${m.level} level • ${m.count} person(s)</div>
                 </div>
-                <button onclick="removeTeamMember(${member.id})" 
-                    class="text-red-600 hover:text-red-800 p-1">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <div class="font-medium text-slate-800">${formatCurrency(m.salary)}</div>
+                        <div class="text-xs text-slate-600">per person</div>
+                    </div>
+                    <button onclick="removeTeamMember(${m.id})" class="text-red-600 hover:text-red-800 p-1">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
     }
 
-    function removeTeamMember(memberId) {
-        teamMembers = teamMembers.filter(member => member.id !== memberId);
-        renderTeamMembers();
-        calculateTeamCost();
-    }
+    function removeTeamMember(id) { teamMembers = teamMembers.filter(m => m.id !== id); renderTeamMembers(); calculateTeamCost(); }
 
     function calculateTeamCost() {
         if (teamMembers.length === 0) {
@@ -746,112 +692,86 @@
             document.getElementById('teamEmptyState').classList.remove('hidden');
             return;
         }
+        const totalSalaries = teamMembers.reduce((s, m) => s + (m.salary * m.count), 0);
+        const totalCost = teamMembers.reduce((s, m) => s + m.totalCost, 0);
+        const totalCount = teamMembers.reduce((s, m) => s + m.count, 0);
+        const averageSalary = totalSalaries / totalCount;
 
-        const totalSalaries = teamMembers.reduce((sum, member) => sum + (member.salary * member.count), 0);
-        const totalCost = teamMembers.reduce((sum, member) => sum + member.totalCost, 0);
-        const averageSalary = totalSalaries / teamMembers.reduce((sum, member) => sum + member.count, 0);
-
-        const resultsHTML = `
-        <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
-            <div class="text-sm text-blue-600 mb-1">Total Team Cost</div>
-            <div class="text-2xl font-bold text-blue-800">${formatCurrency(totalCost)}</div>
-            <div class="text-xs text-blue-600 mt-1">Annual including benefits & taxes</div>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4">
-            <div class="p-3 rounded-lg bg-slate-50">
-                <div class="text-sm text-slate-600">Team Size</div>
-                <div class="text-lg font-bold text-slate-800">${teamMembers.reduce((sum, m) => sum + m.count, 0)}</div>
+        document.getElementById('teamResults').innerHTML = `
+            <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                <div class="text-sm text-blue-600 mb-1">Total Team Cost</div>
+                <div class="text-2xl font-bold text-blue-800">${formatCurrency(totalCost)}</div>
+                <div class="text-xs text-blue-600 mt-1">Annual including benefits & taxes</div>
             </div>
-            <div class="p-3 rounded-lg bg-slate-50">
-                <div class="text-sm text-slate-600">Avg Salary</div>
-                <div class="text-lg font-bold text-slate-800">${formatCurrency(averageSalary)}</div>
-            </div>
-        </div>
-        
-        <div class="space-y-2">
-            <h4 class="text-sm font-medium text-slate-800">Cost by Role</h4>
-            ${teamMembers.map(member => `
-                <div class="flex justify-between text-sm">
-                    <span class="text-slate-600">${member.role} (${member.count}x):</span>
-                    <span class="font-medium text-slate-800">${formatCurrency(member.totalCost)}</span>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-3 rounded-lg bg-slate-50">
+                    <div class="text-sm text-slate-600">Team Size</div>
+                    <div class="text-lg font-bold text-slate-800">${totalCount}</div>
                 </div>
-            `).join('')}
-        </div>
-    `;
-
-        document.getElementById('teamResults').innerHTML = resultsHTML;
+                <div class="p-3 rounded-lg bg-slate-50">
+                    <div class="text-sm text-slate-600">Avg Salary</div>
+                    <div class="text-lg font-bold text-slate-800">${formatCurrency(averageSalary)}</div>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <h4 class="text-sm font-medium text-slate-800">Cost by Role</h4>
+                ${teamMembers.map(m => `
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600">${m.role} (${m.count}x):</span>
+                        <span class="font-medium text-slate-800">${formatCurrency(m.totalCost)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
         document.getElementById('teamResults').classList.remove('hidden');
         document.getElementById('teamEmptyState').classList.add('hidden');
     }
 
     function generateBudgetPlan() {
         const totalBudget = parseFloat(document.getElementById('totalBudget').value) || 0;
-        const growthRate = parseFloat(document.getElementById('growthRate').value) || 0;
-        const period = document.getElementById('budgetPeriod').value;
+        if (totalBudget === 0) { showError('Please enter a total budget amount'); return; }
 
-        if (totalBudget === 0) {
-            showError('Please enter a total budget amount');
-            return;
-        }
+        const allocation = { 'Salaries': 0.65, 'Benefits': 0.20, 'Equipment': 0.05, 'Training': 0.03, 'Office': 0.04, 'Other': 0.03 };
+        const data = Object.entries(allocation).map(([category, pct]) => ({ category, amount: totalBudget * pct, percentage: pct * 100 }));
 
-        // Generate budget allocation (simplified)
-        const allocation = {
-            'Salaries': 0.65,
-            'Benefits': 0.20,
-            'Equipment': 0.05,
-            'Training': 0.03,
-            'Office': 0.04,
-            'Other': 0.03
-        };
+        withChart(() => renderBudgetChart(data));
+        renderBudgetBreakdown(data);
+        document.getElementById('budgetUtilization').textContent = data.reduce((s, x) => s + x.percentage, 0).toFixed(1) + '%';
+    }
 
-        const budgetData = Object.entries(allocation).map(([category, percentage]) => ({
-            category,
-            amount: totalBudget * percentage,
-            percentage: percentage * 100
-        }));
-
-        renderBudgetChart(budgetData);
-        renderBudgetBreakdown(budgetData);
-
-        const utilization = budgetData.reduce((sum, item) => sum + item.percentage, 0);
-        document.getElementById('budgetUtilization').textContent = utilization.toFixed(1) + '%';
+    // Wait for Chart.js if needed
+    function withChart(fn) {
+        if (typeof Chart !== 'undefined') { fn(); return; }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        script.onload = fn;
+        document.head.appendChild(script);
     }
 
     function renderBudgetChart(data) {
         const ctx = document.getElementById('budgetPieChart').getContext('2d');
-
-        // Destroy existing chart
-        if (window.budgetChartInstance) {
-            window.budgetChartInstance.destroy();
-        }
-
+        if (window.budgetChartInstance) window.budgetChartInstance.destroy();
         window.budgetChartInstance = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: data.map(item => item.category),
+                labels: data.map(i => i.category),
                 datasets: [{
-                    data: data.map(item => item.amount),
-                    backgroundColor: [
-                        '#3b82f6', '#ef4444', '#10b981', '#f59e0b',
-                        '#8b5cf6', '#06b6d4', '#84cc16'
-                    ],
+                    data: data.map(i => i.amount),
+                    backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16'],
                     borderWidth: 2,
                     borderColor: '#ffffff'
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: 'right'
-                    },
+                    legend: { position: 'right' },
                     tooltip: {
                         callbacks: {
-                            label: function (context) {
-                                const percentage = ((context.raw / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
-                                return `${context.label}: ${formatCurrency(context.raw)} (${percentage}%)`;
+                            label: (ctx) => {
+                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = (ctx.raw / total * 100).toFixed(1);
+                                return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
                             }
                         }
                     }
@@ -862,12 +782,11 @@
 
     function renderBudgetBreakdown(data) {
         const container = document.getElementById('budgetBreakdown');
-        container.innerHTML = data.map((item, index) => {
-            const colors = ['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-cyan-500', 'bg-lime-500'];
-            return `
+        const colors = ['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-cyan-500', 'bg-lime-500'];
+        container.innerHTML = data.map((item, i) => `
             <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
                 <div class="flex items-center gap-3">
-                    <div class="w-4 h-4 rounded ${colors[index % colors.length]}"></div>
+                    <div class="w-4 h-4 rounded ${colors[i % colors.length]}"></div>
                     <span class="font-medium text-slate-800">${item.category}</span>
                 </div>
                 <div class="text-right">
@@ -875,113 +794,72 @@
                     <div class="text-sm text-slate-600">${item.percentage.toFixed(1)}%</div>
                 </div>
             </div>
-        `;
-        }).join('');
+        `).join('');
     }
 
     function addScenario() {
-        const scenario = {
-            id: Date.now(),
-            name: `Scenario ${scenarios.length + 1}`,
-            headcount: 50,
-            avgSalary: 75000,
-            benefits: 0.25,
-            growth: 0.1
-        };
-
+        const scenario = { id: Date.now(), name: `Scenario ${scenarios.length + 1}`, headcount: 50, avgSalary: 75000, benefits: 0.25, growth: 0.1 };
         scenarios.push(scenario);
         renderScenarios();
     }
 
     function renderScenarios() {
         const container = document.getElementById('scenarioGrid');
-
         if (scenarios.length === 0) {
             container.innerHTML = '<p class="col-span-3 text-slate-500 text-center py-8">No scenarios created yet</p>';
+            withChart(() => renderScenarioChart());
             return;
         }
-
-        container.innerHTML = scenarios.map(scenario => `
-        <div class="rounded-lg border border-slate-200 p-4">
-            <div class="flex items-center justify-between mb-3">
-                <input type="text" value="${scenario.name}" 
-                    onchange="updateScenarioName(${scenario.id}, this.value)"
-                    class="font-medium text-slate-800 bg-transparent border-none p-0 focus:ring-0">
-                <button onclick="removeScenario(${scenario.id})" 
-                    class="text-red-600 hover:text-red-800">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs text-slate-500 mb-1">Headcount</label>
-                    <input type="number" value="${scenario.headcount}" 
-                        onchange="updateScenario(${scenario.id}, 'headcount', this.value)"
-                        class="w-full text-sm rounded border border-slate-300 px-2 py-1">
+        container.innerHTML = scenarios.map(s => `
+            <div class="rounded-lg border border-slate-200 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <input type="text" value="${s.name}" onchange="updateScenarioName(${s.id}, this.value)"
+                        class="font-medium text-slate-800 bg-transparent border-none p-0 focus:ring-0">
+                    <button onclick="removeScenario(${s.id})" class="text-red-600 hover:text-red-800">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </div>
-                <div>
-                    <label class="block text-xs text-slate-500 mb-1">Avg Salary</label>
-                    <input type="number" value="${scenario.avgSalary}" 
-                        onchange="updateScenario(${scenario.id}, 'avgSalary', this.value)"
-                        class="w-full text-sm rounded border border-slate-300 px-2 py-1">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-500 mb-1">Benefits Rate</label>
-                    <input type="number" value="${scenario.benefits}" step="0.05" 
-                        onchange="updateScenario(${scenario.id}, 'benefits', this.value)"
-                        class="w-full text-sm rounded border border-slate-300 px-2 py-1">
-                </div>
-                
-                <div class="pt-2 border-t border-slate-200">
-                    <div class="text-sm text-slate-600">Total Cost</div>
-                    <div class="text-lg font-bold text-slate-800">
-                        ${formatCurrency(calculateScenarioCost(scenario))}
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Headcount</label>
+                        <input type="number" value="${s.headcount}" onchange="updateScenario(${s.id}, 'headcount', this.value)"
+                            class="w-full text-sm rounded border border-slate-300 px-2 py-1">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Avg Salary</label>
+                        <input type="number" value="${s.avgSalary}" onchange="updateScenario(${s.id}, 'avgSalary', this.value)"
+                            class="w-full text-sm rounded border border-slate-300 px-2 py-1">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-1">Benefits Rate</label>
+                        <input type="number" value="${s.benefits}" step="0.05" onchange="updateScenario(${s.id}, 'benefits', this.value)"
+                            class="w-full text-sm rounded border border-slate-300 px-2 py-1">
+                    </div>
+                    <div class="pt-2 border-t border-slate-200">
+                        <div class="text-sm text-slate-600">Total Cost</div>
+                        <div class="text-lg font-bold text-slate-800">${formatCurrency(calculateScenarioCost(s))}</div>
                     </div>
                 </div>
             </div>
-        </div>
-    `).join('');
-
-        renderScenarioChart();
+        `).join('');
+        withChart(() => renderScenarioChart());
     }
 
-    function calculateScenarioCost(scenario) {
-        const baseCost = scenario.headcount * scenario.avgSalary;
-        const benefitsCost = baseCost * scenario.benefits;
-        const taxesCost = baseCost * 0.1; // Simplified tax calculation
-        return baseCost + benefitsCost + taxesCost;
+    function calculateScenarioCost(s) {
+        const base = s.headcount * s.avgSalary;
+        const benefits = base * s.benefits;
+        const taxes = base * 0.1;
+        return base + benefits + taxes;
     }
 
-    function updateScenarioName(id, name) {
-        const scenario = scenarios.find(s => s.id === id);
-        if (scenario) {
-            scenario.name = name;
-        }
-    }
-
-    function updateScenario(id, field, value) {
-        const scenario = scenarios.find(s => s.id === id);
-        if (scenario) {
-            scenario[field] = parseFloat(value) || 0;
-            renderScenarios();
-        }
-    }
-
-    function removeScenario(id) {
-        scenarios = scenarios.filter(s => s.id !== id);
-        renderScenarios();
-    }
+    function updateScenarioName(id, name) { const s = scenarios.find(x => x.id === id); if (s) s.name = name; }
+    function updateScenario(id, field, value) { const s = scenarios.find(x => x.id === id); if (s) { s[field] = parseFloat(value) || 0; renderScenarios(); } }
+    function removeScenario(id) { scenarios = scenarios.filter(x => x.id !== id); renderScenarios(); }
 
     function renderScenarioChart() {
         const ctx = document.getElementById('scenarioChart').getContext('2d');
-
-        if (window.scenarioChartInstance) {
-            window.scenarioChartInstance.destroy();
-        }
-
+        if (window.scenarioChartInstance) window.scenarioChartInstance.destroy();
         if (scenarios.length === 0) return;
-
         window.scenarioChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -995,20 +873,13 @@
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
                 scales: {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: function (value) {
-                                return ' + (value / 1000000).toFixed(1) + 'M';
-                            }
+                            callback: (value) => '$' + (value / 1e6).toFixed(1) + 'M'
                         }
                     }
                 }
@@ -1016,66 +887,23 @@
         });
     }
 
-    function exportBudget() {
-        showSuccess('Budget export functionality would be implemented here');
-    }
-
-    function saveScenario() {
-        showSuccess('Scenario save functionality would be implemented here');
-    }
+    function exportBudget() { showSuccess('Budget export functionality would be implemented here'); }
+    function saveScenario() { showSuccess('Scenario save functionality would be implemented here'); }
 
     // Utility functions
     function formatCurrency(amount, showCents = true) {
-        const formatter = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: showCents ? 2 : 0,
-            maximumFractionDigits: showCents ? 2 : 0
-        });
-        return formatter.format(amount);
+        const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: showCents ? 2 : 0, maximumFractionDigits: showCents ? 2 : 0 });
+        return fmt.format(amount);
     }
+    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+    function showSuccess(msg) { alert('✅ ' + msg); }
+    function showError(msg) { alert('❌ ' + msg); }
 
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    function showSuccess(message) {
-        console.log('Success:', message);
-        alert('✅ ' + message);
-    }
-
-    function showError(message) {
-        console.log('Error:', message);
-        alert('❌ ' + message);
-    }
-
-    function showInfo(message) {
-        console.log('Info:', message);
-        alert('ℹ️ ' + message);
-    }
-
-    // Close modal when clicking outside
-    window.addEventListener('click', function (event) {
+    // Close modal when clicking backdrop
+    window.addEventListener('click', (e) => {
         const modal = document.getElementById('addMemberModal');
-        if (event.target === modal) {
-            closeAddMemberModal();
-        }
+        if (e.target === modal) closeAddMemberModal();
     });
-
-    // Load Chart.js if not already loaded
-    if (typeof Chart === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        document.head.appendChild(script);
-    }
 </script>
 
 <style>
