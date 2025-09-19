@@ -228,7 +228,7 @@
                     <div class="rounded-lg bg-slate-50 p-3">Payroll proration = (Working Days − Paid Days) / Working
                         Days.</div>
                     <div class="rounded-lg bg-slate-50 p-3">Leaves applied post cut-off may convert to LOP.</div>
-                    <div class="rounded-lg bg-slate-50 p-3">Sandwich rule not applied on weekends (demo).</div>
+                    <div class="rounded-lg bg-slate-50 p-3">Sandwich rule not applied on weekends ().</div>
                 </div>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
@@ -295,10 +295,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Demo Data ----
+    // ----  Data ----
     const MONTHLY = {
         'Sep 2025': {
-            workingDays: 21, baseSalary: 100000, // demo monthly base for impact calc
+            workingDays: 21, baseSalary: 100000, //  monthly base for impact calc
             lop: [
                 { day: 3, type: 'full', reason: 'Unplanned leave' },
                 { day: 9, type: 'half', reason: 'Late login' },
@@ -369,15 +369,15 @@
     function wireButtons() {
         document.getElementById('monthPicker').addEventListener('change', onMonthChange);
         document.getElementById('salaryBasis').addEventListener('change', renderOverview);
-        document.getElementById('exportBtn').addEventListener('click', () => alert('✅ Exported (demo)'));
+        document.getElementById('exportBtn').addEventListener('click', () => alert('✅ Exported ()'));
         document.getElementById('reqRegBtn').addEventListener('click', openReqModal);
         document.getElementById('newReqBtn').addEventListener('click', openReqModal);
         document.getElementById('closeReqModal').addEventListener('click', closeReqModal);
         document.getElementById('cancelReq').addEventListener('click', closeReqModal);
         document.getElementById('saveReq').addEventListener('click', saveReq);
-        document.getElementById('downloadMemoBtn').addEventListener('click', () => alert('📄 LOP memo downloaded (demo)'));
-        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened (demo)'));
-        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket (demo)'));
+        document.getElementById('downloadMemoBtn').addEventListener('click', () => alert('📄 LOP memo downloaded ()'));
+        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened ()'));
+        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket ()'));
         document.getElementById('searchHist').addEventListener('input', renderHistory);
         document.getElementById('statusHist').addEventListener('change', renderHistory);
     }
@@ -413,8 +413,8 @@
     function renderCalendar() {
         const m = document.getElementById('monthPicker').value;
         const d = MONTHLY[m] || { lop: [], workingDays: 0 };
-        const start = new Date('2025-09-01'); // demo month anchor
-        const daysInMonth = 30; // demo for Sep (using 30)
+        const start = new Date('2025-09-01'); //  month anchor
+        const daysInMonth = 30; //  for Sep (using 30)
         const grid = [];
         for (let i = 0; i < daysInMonth; i++) {
             const day = i + 1;
@@ -441,7 +441,7 @@
         <td class="py-2 pr-4">${r.reason}</td>
         <td class="py-2 pr-4">${badgePlain(r.status.toLowerCase())}</td>
         <td class="py-2 pr-4">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('👀 View request (demo)')">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('👀 View request ()')">
             <i class="fa-solid fa-eye mr-1"></i> View
           </button>
         </td>

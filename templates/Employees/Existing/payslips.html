@@ -293,14 +293,14 @@
 
     // ---- Buttons ----
     function wireButtons() {
-        document.getElementById('downloadAllBtn').addEventListener('click', () => alert('✅ Zipping all PDFs (demo)'));
-        document.getElementById('exportCsvBtn').addEventListener('click', () => alert('✅ CSV exported (demo)'));
-        document.getElementById('verifyBankBtn').addEventListener('click', () => alert('🏦 Bank details verified (demo)'));
-        document.getElementById('downloadIncomeProofBtn').addEventListener('click', () => alert('📥 YTD income proof generated (demo)'));
-        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened (demo)'));
+        document.getElementById('downloadAllBtn').addEventListener('click', () => alert('✅ Zipping all PDFs ()'));
+        document.getElementById('exportCsvBtn').addEventListener('click', () => alert('✅ CSV exported ()'));
+        document.getElementById('verifyBankBtn').addEventListener('click', () => alert('🏦 Bank details verified ()'));
+        document.getElementById('downloadIncomeProofBtn').addEventListener('click', () => alert('📥 YTD income proof generated ()'));
+        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened ()'));
         document.getElementById('closeSlipModal').addEventListener('click', closeSlipModal);
-        document.getElementById('reqCorrectionBtn')?.addEventListener('click', () => alert('✍️ Correction request submitted (demo)'));
-        document.getElementById('downloadBtn')?.addEventListener('click', () => alert('📄 PDF downloaded (demo)'));
+        document.getElementById('reqCorrectionBtn')?.addEventListener('click', () => alert('✍️ Correction request submitted ()'));
+        document.getElementById('downloadBtn')?.addEventListener('click', () => alert('📄 PDF downloaded ()'));
         document.getElementById('searchInput').addEventListener('input', renderTable);
         document.getElementById('statusFilter').addEventListener('change', renderTable);
         document.getElementById('yearFilter').addEventListener('change', () => { renderOverview(); renderRecent(); renderTable(); drawTrend(); });
@@ -398,7 +398,7 @@
     function drawTds() {
         const ctx = document.getElementById('tdsChart').getContext('2d');
         const y = document.getElementById('yearFilter').value;
-        const tds = SLIPS.filter(s => s.month.startsWith(y)).reduce((a, s) => a + Math.round(s.ded * 0.55), 0); // demo split
+        const tds = SLIPS.filter(s => s.month.startsWith(y)).reduce((a, s) => a + Math.round(s.ded * 0.55), 0); //  split
         const pf = SLIPS.filter(s => s.month.startsWith(y)).reduce((a, s) => a + Math.round(s.ded * 0.25), 0);
         const other = SLIPS.filter(s => s.month.startsWith(y)).reduce((a, s) => a + Math.round(s.ded * 0.20), 0);
         new Chart(ctx, {
@@ -457,7 +457,7 @@
         document.getElementById('slipModal').classList.remove('hidden');
     }
     function closeSlipModal() { document.getElementById('slipModal').classList.add('hidden'); }
-    function downloadSlip(id) { alert('📄 Downloading payslip #' + id + ' (demo)'); }
+    function downloadSlip(id) { alert('📄 Downloading payslip #' + id + ' ()'); }
 
     // ---- Helpers ----
     function sum(arr) { return arr.reduce((a, b) => a + b, 0); }

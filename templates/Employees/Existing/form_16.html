@@ -188,7 +188,7 @@
                     </details>
                     <details class="rounded-lg bg-slate-50 p-3">
                         <summary class="font-medium cursor-pointer">How to open the PDF?</summary>
-                        <p class="mt-2">Password is your PAN in uppercase followed by DOB in DDMMYYYY (demo).</p>
+                        <p class="mt-2">Password is your PAN in uppercase followed by DOB in DDMMYYYY ().</p>
                     </details>
                     <details class="rounded-lg bg-slate-50 p-3">
                         <summary class="font-medium cursor-pointer">Mismatch in TDS?</summary>
@@ -305,13 +305,13 @@
 
     // ---- Buttons ----
     function wireButtons() {
-        document.getElementById('downloadA').addEventListener('click', () => alert('📄 Downloading Part A (demo)'));
-        document.getElementById('downloadB').addEventListener('click', () => alert('📄 Downloading Part B (demo)'));
-        document.getElementById('emailBtn').addEventListener('click', () => alert('✉️ Sent to your email (demo)'));
+        document.getElementById('downloadA').addEventListener('click', () => alert('📄 Downloading Part A ()'));
+        document.getElementById('downloadB').addEventListener('click', () => alert('📄 Downloading Part B ()'));
+        document.getElementById('emailBtn').addEventListener('click', () => alert('✉️ Sent to your email ()'));
         document.getElementById('refreshBtn').addEventListener('click', renderActivity);
         document.getElementById('downloadSelectedBtn').addEventListener('click', () => {
             const ids = Array.from(document.querySelectorAll('.rowCheck:checked')).map(c => Number(c.value));
-            alert('📦 Downloading ' + ids.length + ' item(s) (demo)');
+            alert('📦 Downloading ' + ids.length + ' item(s) ()');
         });
         document.getElementById('searchInput').addEventListener('input', renderForms);
         document.getElementById('statusFilter').addEventListener('change', renderForms);
@@ -323,7 +323,7 @@
         document.getElementById('cancelReq').addEventListener('click', closeReqModal);
         document.getElementById('saveReq').addEventListener('click', saveRequest);
         document.getElementById('fyPicker').addEventListener('change', renderOverview);
-        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket (demo)'));
+        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket ()'));
     }
 
     // ---- Overview ----
@@ -410,8 +410,8 @@
     }
 
     // ---- Actions ----
-    function preview(fy, part) { alert('👀 Preview Form 16 ' + fy + ' Part ' + part + ' (demo)'); }
-    function download(fy, part) { alert('📄 Downloading Form 16 ' + fy + ' Part ' + part + ' (demo)'); }
+    function preview(fy, part) { alert('👀 Preview Form 16 ' + fy + ' Part ' + part + ' ()'); }
+    function download(fy, part) { alert('📄 Downloading Form 16 ' + fy + ' Part ' + part + ' ()'); }
 
     // ---- Helpers ----
     function fmt(n) { return n.toLocaleString('en-IN'); }

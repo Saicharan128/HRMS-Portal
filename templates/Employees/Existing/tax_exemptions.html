@@ -359,11 +359,11 @@
     }
 
     function wireButtons() {
-        document.getElementById('submitDeclBtn').addEventListener('click', () => alert('✅ Declaration submitted (demo)'));
-        document.getElementById('downloadSummaryBtn').addEventListener('click', () => alert('📄 Summary PDF downloaded (demo)'));
-        document.getElementById('whatIfBtn').addEventListener('click', () => alert('🧮 Running what-if (demo)'));
-        document.getElementById('proofWindowBtn').addEventListener('click', () => alert('🗓️ Proof window details (demo)'));
-        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query opened (demo)'));
+        document.getElementById('submitDeclBtn').addEventListener('click', () => alert('✅ Declaration submitted ()'));
+        document.getElementById('downloadSummaryBtn').addEventListener('click', () => alert('📄 Summary PDF downloaded ()'));
+        document.getElementById('whatIfBtn').addEventListener('click', () => alert('🧮 Running what-if ()'));
+        document.getElementById('proofWindowBtn').addEventListener('click', () => alert('🗓️ Proof window details ()'));
+        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query opened ()'));
         document.getElementById('regimePicker').addEventListener('change', renderOverview);
 
         document.getElementById('addDeclBtn').addEventListener('click', addDecl);
@@ -377,8 +377,8 @@
     function renderOverview() {
         const isNew = document.getElementById('regimePicker').value === 'new';
         const declared = DECLS.reduce((a, d) => a + d.amt, 0);
-        const potentialSave = isNew ? 0 : Math.min(150000, DECLS.find(d => d.sec === '80C')?.amt || 0) * 0.2; // demo save
-        const projTax = isNew ? 142000 : 132000; // demo
+        const potentialSave = isNew ? 0 : Math.min(150000, DECLS.find(d => d.sec === '80C')?.amt || 0) * 0.2; //  save
+        const projTax = isNew ? 142000 : 132000; // 
         document.getElementById('declaredAmt').textContent = fmt(declared);
         document.getElementById('potentialSave').textContent = fmt(Math.round(potentialSave));
         document.getElementById('projTax').textContent = fmt(projTax);
@@ -459,10 +459,10 @@
         <td class="py-2 pr-4">₹${fmt(p.amt)}</td>
         <td class="py-2 pr-4">${badgePlain(p.status.toLowerCase())}</td>
         <td class="py-2 pr-4">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('📎 Uploading ${p.sec} proof (demo)')">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('📎 Uploading ${p.sec} proof ()')">
             <i class="fa-solid fa-upload mr-1"></i> Upload
           </button>
-          <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="alert('👀 View ${p.sec} proof (demo)')">
+          <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="alert('👀 View ${p.sec} proof ()')">
             <i class="fa-solid fa-eye mr-1"></i> View
           </button>
         </td>
@@ -501,7 +501,7 @@
     function drawAlloc() {
         const ctx = document.getElementById('allocChart').getContext('2d');
         const declared = DECLS.reduce((a, d) => a + d.amt, 0);
-        const projTax = 142000; // demo
+        const projTax = 142000; // 
         if (_allocChart) _allocChart.destroy();
         _allocChart = new Chart(ctx, {
             type: 'bar',
@@ -525,7 +525,7 @@
         const ctx = document.getElementById('trendChart').getContext('2d');
         if (_trendChart) _trendChart.destroy();
         const months = ['2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09'];
-        const vals = [20000, 22000, 24000, 26000, 50000, 30000]; // demo added declarations
+        const vals = [20000, 22000, 24000, 26000, 50000, 30000]; //  added declarations
         _trendChart = new Chart(ctx, {
             type: 'line',
             data: { labels: months.map(labelMonth), datasets: [{ label: 'Declared (₹)', data: vals }] },

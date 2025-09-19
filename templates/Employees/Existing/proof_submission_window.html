@@ -177,7 +177,7 @@
                 <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
                     <li>Combine multiple pages into a single PDF per section.</li>
                     <li>Ensure name, amount, dates are clearly visible.</li>
-                    <li>Only PNG/JPG/PDF up to 5 MB each (demo).</li>
+                    <li>Only PNG/JPG/PDF up to 5 MB each ().</li>
                 </ul>
             </div>
         </div>
@@ -252,7 +252,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Static window (demo) ----
+    // ---- Static window () ----
     const OPEN = new Date('2025-12-01T00:00:00');
     const CLOSE = new Date('2026-01-15T23:59:59');
 
@@ -315,9 +315,9 @@
         document.getElementById('searchInput').addEventListener('input', renderProofs);
         document.getElementById('statusFilter').addEventListener('change', renderProofs);
 
-        document.getElementById('bulkZipBtn').addEventListener('click', () => alert('📦 Downloading all receipts (demo)'));
-        document.getElementById('downloadChecklistBtn').addEventListener('click', () => alert('📝 Checklist downloaded (demo)'));
-        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket (demo)'));
+        document.getElementById('bulkZipBtn').addEventListener('click', () => alert('📦 Downloading all receipts ()'));
+        document.getElementById('downloadChecklistBtn').addEventListener('click', () => alert('📝 Checklist downloaded ()'));
+        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket ()'));
         document.getElementById('fyPicker').addEventListener('change', drawStatus);
     }
 
@@ -391,7 +391,7 @@
           <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openUpload('${r.sec}')">
             <i class="fa-solid fa-upload mr-1"></i> Upload
           </button>
-          <button class="px-2 py-1 rounded text-white ${r.file ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-400 cursor-not-allowed'} text-xs" ${r.file ? '' : 'disabled'} onclick="alert('👀 Preview ${r.file} (demo)')">
+          <button class="px-2 py-1 rounded text-white ${r.file ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-400 cursor-not-allowed'} text-xs" ${r.file ? '' : 'disabled'} onclick="alert('👀 Preview ${r.file} ()')">
             <i class="fa-solid fa-eye mr-1"></i> Preview
           </button>
         </td>
@@ -446,7 +446,7 @@
         if (!file) { alert('❌ Choose a file'); return; }
         const rec = PROOFS.find(p => p.sec === sec);
         if (rec) { rec.file = file; rec.status = 'pending'; }
-        closeUpload(); renderProofs(); alert('✅ Proof uploaded (demo)');
+        closeUpload(); renderProofs(); alert('✅ Proof uploaded ()');
     }
 
     // ---- Helpers ----

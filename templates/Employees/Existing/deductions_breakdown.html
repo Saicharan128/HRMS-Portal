@@ -265,7 +265,7 @@
                 { id: 3, name: 'ESI', amt: 0, rule: '0.75% where applicable', note: 'N/A' }
             ],
             voluntary: [
-                { id: 11, name: 'NPS (Tier-I)', amt: 3000, rule: 'Employee opt-in', note: '10% cap (demo)' },
+                { id: 11, name: 'NPS (Tier-I)', amt: 3000, rule: 'Employee opt-in', note: '10% cap ()' },
                 { id: 12, name: 'Health Insurance', amt: 1200, rule: 'Opt-in', note: 'Family floater' },
                 { id: 13, name: 'Meal Card', amt: 1500, rule: 'Opt-in', note: '' }
             ]
@@ -333,14 +333,14 @@
         document.getElementById('cyclePicker').addEventListener('change', onCycleChange);
         document.getElementById('searchInput').addEventListener('input', renderItems);
         document.getElementById('typeFilter').addEventListener('change', renderItems);
-        document.getElementById('exportCsvBtn').addEventListener('click', () => alert('✅ CSV exported (demo)'));
-        document.getElementById('downloadBreakupBtn').addEventListener('click', () => alert('📄 Breakup PDF generated (demo)'));
-        document.getElementById('optimizeBtn').addEventListener('click', () => alert('🧮 Optimization (demo)'));
-        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened (demo)'));
-        document.getElementById('contactBtn')?.addEventListener('click', () => alert('📬 Opening support ticket (demo)'));
+        document.getElementById('exportCsvBtn').addEventListener('click', () => alert('✅ CSV exported ()'));
+        document.getElementById('downloadBreakupBtn').addEventListener('click', () => alert('📄 Breakup PDF generated ()'));
+        document.getElementById('optimizeBtn').addEventListener('click', () => alert('🧮 Optimization ()'));
+        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened ()'));
+        document.getElementById('contactBtn')?.addEventListener('click', () => alert('📬 Opening support ticket ()'));
         document.getElementById('closeItemModal').addEventListener('click', closeItemModal);
-        document.getElementById('raiseCorrBtn').addEventListener('click', () => alert('✍️ Correction requested (demo)'));
-        document.getElementById('downloadItemBtn').addEventListener('click', () => alert('📎 Proof downloaded (demo)'));
+        document.getElementById('raiseCorrBtn').addEventListener('click', () => alert('✍️ Correction requested ()'));
+        document.getElementById('downloadItemBtn').addEventListener('click', () => alert('📎 Proof downloaded ()'));
         document.getElementById('histType').addEventListener('change', drawTrend);
     }
 

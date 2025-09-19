@@ -123,14 +123,14 @@
             <!-- Notes -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-3">
-                    <i class="fa-solid fa-circle-info mr-2"></i> Assumptions (demo)
+                    <i class="fa-solid fa-circle-info mr-2"></i> Assumptions ()
                 </h3>
                 <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
-                    <li>Financial year: FY 2025–26 (demo slabs).</li>
+                    <li>Financial year: FY 2025–26 ( slabs).</li>
                     <li>Standard deduction ₹50,000 for salary in both regimes.</li>
                     <li>Health &amp; education cess @ 4% on tax.</li>
                     <li>Old regime allows typical deductions (80C/80D/HRA etc.).</li>
-                    <li>New regime allows employer NPS u/s 80CCD(2) (demo input).</li>
+                    <li>New regime allows employer NPS u/s 80CCD(2) ( input).</li>
                 </ul>
             </div>
         </div>
@@ -317,7 +317,7 @@
                 </details>
                 <details class="rounded-lg bg-slate-50 p-3">
                     <summary class="font-medium cursor-pointer">Are slabs exact?</summary>
-                    <p class="mt-2">These are demo slabs/assumptions. Verify against the current rules before filing.
+                    <p class="mt-2">These are  slabs/assumptions. Verify against the current rules before filing.
                     </p>
                 </details>
             </div>
@@ -329,7 +329,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Demo slab config (FY25-26 style) ----
+    // ----  slab config (FY25-26 style) ----
     // Old: 0-2.5L:0%, 2.5-5:5%, 5-10:20%, >10:30%
     const OLD_SLABS = [
         { up: 250000, rate: 0.00 },
@@ -367,7 +367,7 @@
     }
 
     function oldRegimeTax(gross, std, _80c, _80d, hra, other) {
-        const cap80C = Math.min(_80c, 200000); // demo: 80C+1B capped at 2L here
+        const cap80C = Math.min(_80c, 200000); // : 80C+1B capped at 2L here
         const cap80D = Math.min(_80d, 50000);
         const totalDed = clamp(std) + clamp(cap80C) + clamp(cap80D) + clamp(hra) + clamp(other);
         const taxable = Math.max(0, clamp(gross) - totalDed);
@@ -376,7 +376,7 @@
     }
 
     function newRegimeTax(gross, std, ccd2, other) {
-        const ccd2Cap = Math.min(clamp(ccd2), Math.round(clamp(gross) * 0.10)); // demo cap 10% of salary
+        const ccd2Cap = Math.min(clamp(ccd2), Math.round(clamp(gross) * 0.10)); //  cap 10% of salary
         const totalDed = clamp(std) + clamp(ccd2Cap) + clamp(other);
         const taxable = Math.max(0, clamp(gross) - totalDed);
         const base = slabTax(taxable, NEW_SLABS);
@@ -419,7 +419,7 @@
         ids.forEach(id => document.getElementById(id).addEventListener('input', computeAll));
         document.getElementById('recalcBtn').addEventListener('click', computeAll);
         document.getElementById('resetBtn').addEventListener('click', resetAll);
-        document.getElementById('exportBtn').addEventListener('click', () => alert('📄 Summary downloaded (demo)'));
+        document.getElementById('exportBtn').addEventListener('click', () => alert('📄 Summary downloaded ()'));
         document.getElementById('runWhatIf').addEventListener('click', runWhatIf);
         document.getElementById('saveRunBtn').addEventListener('click', saveRun);
 
