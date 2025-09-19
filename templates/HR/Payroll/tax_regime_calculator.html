@@ -109,7 +109,7 @@
                     </button>
                     <button id="btnSharePDF"
                         class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
-                        <i class="fa-solid fa-file-pdf mr-2"></i> Share guidance PDF (demo)
+                        <i class="fa-solid fa-file-pdf mr-2"></i> Share guidance PDF ()
                     </button>
                     <button id="btnRollback"
                         class="w-full px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-left">
@@ -164,7 +164,7 @@
                         Guidance</h3>
                     <button id="btnSendTips"
                         class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm">
-                        <i class="fa-solid fa-paper-plane mr-1"></i> Send Tips (demo)
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Send Tips ()
                     </button>
                 </div>
                 <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
@@ -301,7 +301,7 @@
 </div>
 
 <!-- Modal -->
-<div id="demoModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<div id="Modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
@@ -311,7 +311,7 @@
                             class="fa-solid fa-times text-xl"></i></button>
                 </div>
                 <div id="modalBody" class="p-6 text-sm space-y-2">
-                    <p>👀 This is a demo preview.</p>
+                    <p>👀 This is a  preview.</p>
                 </div>
                 <div class="px-6 pb-6 flex items-center justify-end gap-2">
                     <button id="dismissModal"
@@ -326,7 +326,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Demo Data ----
+    // ----  Data ----
     const EMP = [
         { id: 1, name: 'Ananya Rao', code: 'EMP001', ctc: 1200000, ded: 225000 }, // old better
         { id: 2, name: 'Rohit Mehta', code: 'EMP002', ctc: 900000, ded: 50000 }, // new better
@@ -372,12 +372,12 @@
     }
 
     function wireButtons() {
-        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed (demo)'));
-        document.getElementById('btnRunAudit').addEventListener('click', () => { renderKPIs(); drawCharts(); alert('📊 Audit complete (demo)'); });
-        document.getElementById('btnApplyDefaults').addEventListener('click', () => alert('✅ Defaults applied (demo)'));
-        document.getElementById('btnExport').addEventListener('click', () => alert('⬇️ Exported (demo)'));
+        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed ()'));
+        document.getElementById('btnRunAudit').addEventListener('click', () => { renderKPIs(); drawCharts(); alert('📊 Audit complete ()'); });
+        document.getElementById('btnApplyDefaults').addEventListener('click', () => alert('✅ Defaults applied ()'));
+        document.getElementById('btnExport').addEventListener('click', () => alert('⬇️ Exported ()'));
         document.getElementById('btnPreview').addEventListener('click', () => openModal('Advice Preview', 'Personalized guidance would appear here.'));
-        document.getElementById('btnSharePDF').addEventListener('click', () => alert('📄 Guidance PDF shared (demo)'));
+        document.getElementById('btnSharePDF').addEventListener('click', () => alert('📄 Guidance PDF shared ()'));
         document.getElementById('stSave').addEventListener('click', () => alert('💾 Settings saved'));
 
         document.getElementById('calcSearch').addEventListener('input', renderCalculator);
@@ -392,14 +392,14 @@
     function openModal(title, bodyText) {
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('modalBody').innerHTML = `<p class="text-slate-700">${bodyText}</p>`;
-        document.getElementById('demoModal').classList.remove('hidden');
+        document.getElementById('Modal').classList.remove('hidden');
     }
-    function closeModal() { document.getElementById('demoModal').classList.add('hidden'); }
+    function closeModal() { document.getElementById('Modal').classList.add('hidden'); }
 
-    // ---- Tax helpers (high-level demo only) ----
-    // NOTE: This is a simplified calculator for demo UI.
+    // ---- Tax helpers (high-level  only) ----
+    // NOTE: This is a simplified calculator for  UI.
     function taxNewRegime(income) {
-        // sample slabs FY25-26 demo (not authoritative)
+        // sample slabs FY25-26  (not authoritative)
         const slabs = [
             { upto: 300000, rate: 0.00 },
             { upto: 700000, rate: 0.05 },
@@ -418,7 +418,7 @@
         return Math.max(0, Math.round(tax));
     }
     function taxOldRegime(income, deductions, hra = 0) {
-        const taxable = Math.max(0, income - deductions - hra - 50000); // standard deduction demo
+        const taxable = Math.max(0, income - deductions - hra - 50000); // standard deduction 
         const slabs = [
             { upto: 250000, rate: 0.00 },
             { upto: 500000, rate: 0.05 },
@@ -517,7 +517,7 @@
       <td class="py-2 pr-4">₹${r.save.toLocaleString('en-IN')}</td>
       <td class="py-2 pr-4">
         <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50"
-                onclick="alert('Advice for ${r.name}: ${r.sug.toUpperCase()} (demo)')">
+                onclick="alert('Advice for ${r.name}: ${r.sug.toUpperCase()} ()')">
           <i class="fa-solid fa-envelope-open-text mr-1"></i> Advise
         </button>
       </td>

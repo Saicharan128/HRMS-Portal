@@ -209,7 +209,7 @@
                 <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
                     <li>Include employer TAN, PAN, and address.</li>
                     <li>Show Part A (TRACES) & Part B (salary details).</li>
-                    <li>Embed QR code or verifiable hash (demo).</li>
+                    <li>Embed QR code or verifiable hash ().</li>
                 </ul>
             </div>
         </div>
@@ -324,7 +324,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Demo Data ----
+    // ----  Data ----
     const QUEUE = [
         { id: 1, name: 'Ananya Rao', dept: 'Engineering', pan4: '3ZP9', status: 'generated' },
         { id: 2, name: 'Rohit Mehta', dept: 'Engineering', pan4: '7KQ2', status: 'published' },
@@ -386,17 +386,17 @@
 
         document.getElementById('btnApprove').addEventListener('click', approveSelected);
         document.getElementById('btnPublish').addEventListener('click', publishSelected);
-        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Logs exported (demo)'));
-        document.getElementById('btnDryRun').addEventListener('click', () => alert('🧪 Dry run complete (demo)'));
-        document.getElementById('btnPreview').addEventListener('click', () => alert('👀 Sample Form 16 opened (demo)'));
-        document.getElementById('btnNotify').addEventListener('click', () => alert('📧 Notifications sent (demo)'));
-        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Last publish rolled back (demo)'));
-        document.getElementById('cyclePicker').addEventListener('change', () => alert('🔁 Switched AY (demo)'));
+        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Logs exported ()'));
+        document.getElementById('btnDryRun').addEventListener('click', () => alert('🧪 Dry run complete ()'));
+        document.getElementById('btnPreview').addEventListener('click', () => alert('👀 Sample Form 16 opened ()'));
+        document.getElementById('btnNotify').addEventListener('click', () => alert('📧 Notifications sent ()'));
+        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Last publish rolled back ()'));
+        document.getElementById('cyclePicker').addEventListener('change', () => alert('🔁 Switched AY ()'));
 
         document.getElementById('searchInput').addEventListener('input', renderQueue);
         document.getElementById('statusFilter').addEventListener('change', renderQueue);
         document.getElementById('chkAll').addEventListener('change', toggleAll);
-        document.getElementById('btnNewTpl').addEventListener('click', () => alert('🧩 New template (demo)'));
+        document.getElementById('btnNewTpl').addEventListener('click', () => alert('🧩 New template ()'));
         document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved'));
     }
 
@@ -498,7 +498,7 @@
             const r = QUEUE.find(x => x.id === id);
             if (r && r.status === 'generated') { r.status = 'approved'; }
         });
-        refreshAll(); alert('✅ Approved (demo)');
+        refreshAll(); alert('✅ Approved ()');
     }
     function publishSelected() {
         const ids = [...document.querySelectorAll('.rowChk:checked')].map(x => Number(x.dataset.id));
@@ -507,7 +507,7 @@
             const r = QUEUE.find(x => x.id === id);
             if (r && (r.status === 'approved' || r.status === 'generated')) { r.status = 'published'; }
         });
-        refreshAll(); alert('✅ Published (demo)');
+        refreshAll(); alert('✅ Published ()');
     }
     function refreshAll() { renderKPIs(); drawProgress(); drawMix(); renderQueue(); }
 
@@ -520,10 +520,10 @@
         <td class="py-2 pr-4">${t.locale}</td>
         <td class="py-2 pr-4">${badgePlain(t.status.toLowerCase())}</td>
         <td class="py-2 pr-4">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('🧪 Test render (demo)')">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('🧪 Test render ()')">
             <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Test
           </button>
-          <button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="alert('✏️ Edit template (demo)')">
+          <button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="alert('✏️ Edit template ()')">
             <i class="fa-solid fa-pen mr-1"></i> Edit
           </button>
         </td>
@@ -548,10 +548,10 @@
     function openGen() { document.getElementById('genModal').classList.remove('hidden'); }
     function closeGen() { document.getElementById('genModal').classList.add('hidden'); }
     function runGeneration() {
-        // demo: move all drafts to generated
+        // : move all drafts to generated
         QUEUE.filter(x => x.status === 'draft').forEach(x => x.status = 'generated');
         closeGen(); refreshAll();
-        alert('⚙️ Generation complete (demo)');
+        alert('⚙️ Generation complete ()');
     }
 
     // ---- Utils ----

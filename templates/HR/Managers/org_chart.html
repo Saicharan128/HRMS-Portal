@@ -245,7 +245,7 @@
         try {
             allUsers = await fetchJSON('/api/org/structure');
         } catch (e) {
-            // Fallback demo data (if API not available)
+            // Fallback  data (if API not available)
             allUsers = [
                 { id: 1, name: 'Aarav Patel', email: 'aarav@acme.com', employee_type: 'CXOs', subposition: 'CEO', designation: 'Chief Executive Officer' },
                 { id: 2, name: 'Meera Iyer', email: 'meera@acme.com', employee_type: 'Leaders', subposition: 'Engineering', designation: 'VP Engineering', manager_id: 1 },

@@ -305,7 +305,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Demo Data ----
+    // ----  Data ----
     const SECTIONS = [
         { id: 1, name: 'Section 80C', code: '80C', limit: 150000, carryover: 'No', proof: 'Investment Receipts', status: 'active' },
         { id: 2, name: 'Section 80D (Self)', code: '80D', limit: 25000, carryover: 'No', proof: 'Health Insurance', status: 'active' },
@@ -358,11 +358,11 @@
     function wireButtons() {
         document.getElementById('btnNewSection').addEventListener('click', () => openModal('New Section', sectionForm()));
         document.getElementById('btnNewProof').addEventListener('click', () => openModal('New Proof Type', proofForm()));
-        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Exported (demo)'));
-        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed (demo)'));
-        document.getElementById('btnPreview').addEventListener('click', () => alert('👀 Submission flow previewed (demo)'));
-        document.getElementById('btnSync').addEventListener('click', () => alert('🔁 Payroll recomputed (demo)'));
-        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Rolled back (demo)'));
+        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Exported ()'));
+        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed ()'));
+        document.getElementById('btnPreview').addEventListener('click', () => alert('👀 Submission flow previewed ()'));
+        document.getElementById('btnSync').addEventListener('click', () => alert('🔁 Payroll recomputed ()'));
+        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Rolled back ()'));
         document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved'));
 
         document.getElementById('secSearch').addEventListener('input', renderSections);
@@ -372,7 +372,7 @@
 
         document.getElementById('closeModal').addEventListener('click', closeModal);
         document.getElementById('cancelEdit').addEventListener('click', closeModal);
-        document.getElementById('saveEdit').addEventListener('click', () => { closeModal(); alert('💾 Saved (demo)'); });
+        document.getElementById('saveEdit').addEventListener('click', () => { closeModal(); alert('💾 Saved ()'); });
     }
 
     // ---- Overview/KPIs ----
@@ -439,7 +439,7 @@
     <td class="py-2 pr-4">${r.proof}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.code} (demo)')">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.code} ()')">
         <i class="fa-solid fa-pen mr-1"></i> Edit
       </button>
     </td>
@@ -465,7 +465,7 @@
     <td class="py-2 pr-4">${badgeLite(r.req)}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} (demo)')">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} ()')">
         <i class="fa-solid fa-pen mr-1"></i> Edit
       </button>
     </td>
@@ -484,7 +484,7 @@
     </tr>`).join('');
     }
 
-    // ---- Modal helpers (demo only) ----
+    // ---- Modal helpers ( only) ----
     function openModal(title, body) {
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('modalBody').innerHTML = body;

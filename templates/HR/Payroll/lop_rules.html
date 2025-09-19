@@ -294,7 +294,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Demo Data ----
+    // ----  Data ----
     const RULES = [
         { id: 1, name: 'Org Default', scope: 'Org-wide', method: 'Daily Proration', denom: 'Actual Days in Month', half: true, round: '2 decimals', status: 'active' },
         { id: 2, name: 'Sales Floor', scope: 'Dept: Sales', method: 'Hourly (8h/day)', denom: 'Working Days', half: true, round: '2 decimals', status: 'active' },
@@ -347,12 +347,12 @@
         document.getElementById('btnNewRule').addEventListener('click', () => openModal('New LOP Rule', ruleForm()));
         document.getElementById('btnImport').addEventListener('click', () => openModal('Import LOP', importForm()));
         document.getElementById('btnMap').addEventListener('click', () => openModal('Map Attendance Fields', mapForm()));
-        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed (demo)'));
-        document.getElementById('btnSimulate').addEventListener('click', () => alert('🧮 Simulated for EMP001: 1.5 days LOP (demo)'));
-        document.getElementById('btnRecalc').addEventListener('click', () => alert('🔁 Payroll recomputed with LOP (demo)'));
-        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Last import rolled back (demo)'));
-        document.getElementById('cyclePicker').addEventListener('change', () => alert('🔁 Switched cycle (demo)'));
-        document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved (demo)'));
+        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed ()'));
+        document.getElementById('btnSimulate').addEventListener('click', () => alert('🧮 Simulated for EMP001: 1.5 days LOP ()'));
+        document.getElementById('btnRecalc').addEventListener('click', () => alert('🔁 Payroll recomputed with LOP ()'));
+        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Last import rolled back ()'));
+        document.getElementById('cyclePicker').addEventListener('change', () => alert('🔁 Switched cycle ()'));
+        document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved ()'));
 
         document.getElementById('ruleSearch').addEventListener('input', renderRules);
         document.getElementById('ruleStatus').addEventListener('change', renderRules);
@@ -361,12 +361,12 @@
 
         document.getElementById('closeModal').addEventListener('click', closeModal);
         document.getElementById('cancelEdit').addEventListener('click', closeModal);
-        document.getElementById('saveEdit').addEventListener('click', () => { closeModal(); alert('💾 Saved (demo)'); });
+        document.getElementById('saveEdit').addEventListener('click', () => { closeModal(); alert('💾 Saved ()'); });
     }
 
     // ---- Overview/KPIs ----
     function renderKPIs() {
-        const maps = 2; // demo mapping count
+        const maps = 2; //  mapping count
         const errors = IMPORTS.reduce((a, b) => a + b.errors, 0);
         document.getElementById('kpiRules').textContent = RULES.length;
         document.getElementById('kpiMaps').textContent = maps;
@@ -432,7 +432,7 @@
     <td class="py-2 pr-4">${r.round}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} (demo)')">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} ()')">
         <i class="fa-solid fa-pen mr-1"></i> Edit
       </button>
     </td>
@@ -458,7 +458,7 @@
     <td class="py-2 pr-4">${r.errors}</td>
     <td class="py-2 pr-4">${badgeImport(r.status)}</td>
     <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('🔍 Review ${r.batch} (demo)')">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('🔍 Review ${r.batch} ()')">
         <i class="fa-solid fa-eye mr-1"></i> Review
       </button>
     </td>

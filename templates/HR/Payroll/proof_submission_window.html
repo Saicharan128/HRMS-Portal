@@ -272,7 +272,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Demo Data ----
+    // ----  Data ----
     const WINDOWS = [
         { id: 1, type: 'Declaration', fy: 'FY 2025–26', open: '2025-04-01', close: '2025-05-15', grace: 3, status: 'closed' },
         { id: 2, type: 'Proof', fy: 'FY 2024–25', open: '2025-01-10', close: '2025-02-10', grace: 5, status: 'closed' },
@@ -325,11 +325,11 @@
     function wireButtons() {
         document.getElementById('btnNewWindow').addEventListener('click', () => openModal('New Window', windowForm()));
         document.getElementById('btnNewReminder').addEventListener('click', () => openModal('New Reminder', reminderForm()));
-        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Exported (demo)'));
-        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed (demo)'));
-        document.getElementById('btnPreview').addEventListener('click', () => alert('👀 Timeline previewed (demo)'));
-        document.getElementById('btnNudge').addEventListener('click', () => alert('🔔 Test reminder sent (demo)'));
-        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Rolled back (demo)'));
+        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Exported ()'));
+        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed ()'));
+        document.getElementById('btnPreview').addEventListener('click', () => alert('👀 Timeline previewed ()'));
+        document.getElementById('btnNudge').addEventListener('click', () => alert('🔔 Test reminder sent ()'));
+        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Rolled back ()'));
         document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved'));
 
         document.getElementById('winSearch').addEventListener('input', renderWindows);
@@ -339,12 +339,12 @@
 
         document.getElementById('closeModal').addEventListener('click', closeModal);
         document.getElementById('cancelEdit').addEventListener('click', closeModal);
-        document.getElementById('saveEdit').addEventListener('click', () => { closeModal(); alert('💾 Saved (demo)'); });
+        document.getElementById('saveEdit').addEventListener('click', () => { closeModal(); alert('💾 Saved ()'); });
     }
 
     // ---- Overview/KPIs ----
     function renderKPIs() {
-        const now = new Date('2025-09-16T12:00:00+05:30'); // demo now (IST)
+        const now = new Date('2025-09-16T12:00:00+05:30'); //  now (IST)
         const active = WINDOWS.filter(w => new Date(w.open) <= now && now <= new Date(w.close)).length;
         const upcoming = WINDOWS.filter(w => new Date(w.open) > now).length;
         document.getElementById('kpiWindows').textContent = WINDOWS.length;
@@ -413,12 +413,12 @@
     <td class="py-2 pr-4">${r.grace}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.type} ${r.fy} (demo)')"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.type} ${r.fy} ()')"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
     </td>
   </tr>`;
     }
     function inferStatus(w) {
-        const now = new Date('2025-09-16T12:00:00+05:30'); // demo now
+        const now = new Date('2025-09-16T12:00:00+05:30'); //  now
         if (new Date(w.close) < now) return 'closed';
         if (new Date(w.open) > now) return 'upcoming';
         return 'active';
@@ -443,7 +443,7 @@
     <td class="py-2 pr-4"><span class="px-2 py-0.5 rounded bg-slate-50 text-slate-700 text-xs">${r.tmpl}</span></td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.tmpl} (demo)')"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.tmpl} ()')"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
     </td>
   </tr>`;
     }

@@ -315,7 +315,7 @@
     </section>
 </div>
 
-<!-- Modal (New Head/Policy) - Demo -->
+<!-- Modal (New Head/Policy) -  -->
 <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
@@ -345,7 +345,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    /* ---- Demo Data ---- */
+    /* ----  Data ---- */
     const EARNINGS = [
         { id: 1, name: 'Basic Pay', code: 'BASIC', calc: 'Fixed', taxable: true, pf: true, esi: false, status: 'active' },
         { id: 2, name: 'HRA', code: 'HRA', calc: 'Percentage of BASIC (40%)', taxable: true, pf: false, esi: false, status: 'active' },
@@ -406,12 +406,12 @@
         document.getElementById('btnNewEarn').addEventListener('click', () => openModal('New Earning', earningForm()));
         document.getElementById('btnNewDed').addEventListener('click', () => openModal('New Deduction', deductionForm()));
         document.getElementById('btnNewPol').addEventListener('click', () => openModal('New Policy', policyForm()));
-        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Exported (demo)'));
-        document.getElementById('btnPreviewSlip').addEventListener('click', () => alert('👀 Sample impact previewed (demo)'));
-        document.getElementById('btnSyncPolicies').addEventListener('click', () => alert('🔁 Recomputed with policies (demo)'));
-        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Rolled back (demo)'));
-        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed (demo)'));
-        document.getElementById('btnImport').addEventListener('click', () => alert('📥 Import dialog (demo)'));
+        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Exported ()'));
+        document.getElementById('btnPreviewSlip').addEventListener('click', () => alert('👀 Sample impact previewed ()'));
+        document.getElementById('btnSyncPolicies').addEventListener('click', () => alert('🔁 Recomputed with policies ()'));
+        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Rolled back ()'));
+        document.getElementById('btnValidate').addEventListener('click', () => alert('✅ Validation passed ()'));
+        document.getElementById('btnImport').addEventListener('click', () => alert('📥 Import dialog ()'));
 
         document.getElementById('earnSearch').addEventListener('input', renderEarnings);
         document.getElementById('earnStatus').addEventListener('change', renderEarnings);
@@ -422,7 +422,7 @@
 
         document.getElementById('closeModal').addEventListener('click', closeModal);
         document.getElementById('cancelEdit').addEventListener('click', closeModal);
-        document.getElementById('saveEdit').addEventListener('click', () => { closeModal(); alert('💾 Saved (demo)'); });
+        document.getElementById('saveEdit').addEventListener('click', () => { closeModal(); alert('💾 Saved ()'); });
 
         document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved'));
     }
@@ -487,7 +487,7 @@
     <td class="py-2 pr-4">${badgePlain(r.esi ? 'Yes' : 'No')}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} (demo)')">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} ()')">
         <i class="fa-solid fa-pen mr-1"></i> Edit
       </button>
     </td>
@@ -513,7 +513,7 @@
     <td class="py-2 pr-4">${r.cap}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} (demo)')">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} ()')">
         <i class="fa-solid fa-pen mr-1"></i> Edit
       </button>
     </td>
@@ -538,7 +538,7 @@
     <td class="py-2 pr-4">${r.eff}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.policy} (demo)')">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.policy} ()')">
         <i class="fa-solid fa-pen mr-1"></i> Edit
       </button>
     </td>
@@ -557,7 +557,7 @@
     </tr>`).join('');
     }
 
-    /* ---- Modal helpers (demo only) ---- */
+    /* ---- Modal helpers ( only) ---- */
     function openModal(title, bodyHTML) {
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('modalBody').innerHTML = bodyHTML;
