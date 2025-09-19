@@ -19,6 +19,7 @@ import subprocess
 app = Flask(__name__)
 
 # === Config ===
+HOLIDAYS = []
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-me')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -41,7 +42,7 @@ app.config.update({
     "MAIL_USE_SSL": False,
     "MAIL_USERNAME": "saich5252@gmail.com",       # <-- set
     "MAIL_PASSWORD": "uxes gofe hanv euca",      # <-- set (Gmail App Password)
-    "MAIL_DEFAULT_SENDER": ("PeopleOps HR", "saich5252@gmail.com"),
+    "MAIL_DEFAULT_SENDER": (" HR", "saich5252@gmail.com"),
     "MAIL_SUPPRESS_SEND": False,
     "MAIL_DEBUG": True
 })
@@ -49,7 +50,7 @@ mail = Mail(app)
 
 # Optional logging
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger("peopleops")
+log = logging.getLogger("")
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads', 'resumes')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -379,7 +380,9 @@ ROLE_SUBPOSITION_FEATURES = {
         "New": [
             "fa-solid fa-clipboard-check|Onboarding – Automate new hire setup with seamless onboarding workflows",
             "fa-solid fa-book-open|Employee handbooks – Digitize and distribute employee policies and guidelines",
-            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents"
+            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents",
+            "fa-regular fa-calendar-days|Holiday calendar – View official holidays after HR upload",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "Existing": [
             "fa-solid fa-users|Team – View and manage employee details, roles, and responsibilities",
@@ -393,12 +396,37 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-headset|Support monitor – Track employee support tickets and resolve HR queries",
             "fa-solid fa-sack-dollar|Payroll – Automate salary calculations, compliance, and disbursements",
             "fa-solid fa-book-open|Employee handbooks – Digitize and distribute employee policies and guidelines",
-            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents"
+            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents",
+
+            # Added to cover missing modules (without removing anything):
+            "fa-solid fa-user-check|Attendance – Mark attendance and shifts",
+            "fa-regular fa-calendar-days|Holiday calendar – Auto-applied (HR-uploaded)",
+            "fa-solid fa-stopwatch|Time tracking – Track working hours and productivity",
+            "fa-regular fa-clock|Timesheets – Submit work logs for approval",
+            "fa-regular fa-file-lines|Expense reports – Download personal expense summaries",
+            "fa-solid fa-trophy|Incentives – View performance-based incentive payouts",
+            "fa-solid fa-chart-simple|Reports – Self-service attendance/leave/expense reports",
+            # "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access",
+
+            # Added (payslips, tax, LOP, deductions, proofs, regime calculator, Form 16):
+            "fa-solid fa-file-invoice-dollar|Payslips – View and download monthly payslips",
+            "fa-solid fa-scale-balanced|Form 16 – Download Form 16 for tax filing",
+            "fa-solid fa-receipt|Pay & deductions – Current cycle earnings, taxes, and deductions",
+            "fa-solid fa-scissors|Deductions breakdown – Statutory and voluntary deduction details",
+            "fa-solid fa-percent|Tax exemptions – Declare eligible investments/exemptions",
+            "fa-regular fa-calendar-days|Proof submission window – Submit deductible proofs within the window",
+            "fa-solid fa-calculator|Tax regime calculator – Compare Old vs New regimes and choose",
+            "fa-solid fa-calendar-xmark|LOP days – View loss-of-pay days and proration impact"
         ],
         "Exiting": [
             "fa-solid fa-door-open|Offboarding – Manage exits smoothly while ensuring compliance and knowledge transfer",
             "fa-solid fa-sack-dollar|Payroll – Automate salary calculations, compliance, and disbursements",
-            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents"
+            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents",
+
+            # Added:
+            "fa-solid fa-clipboard-list|Exit reviews – Capture feedback and final evaluations",
+            "fa-solid fa-chart-simple|Reports – Exit summary and handover status",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ]
     },
 
@@ -417,13 +445,24 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-money-bill-trend-up|Salary explorer – Compare salary benchmarks and analyze pay structures",
             "fa-solid fa-calculator|Cost calculator – Estimate workforce costs with advanced budgeting tools",
             "fa-solid fa-store|Marketplace – Access third-party HR services, tools, and integrations",
-            "fa-solid fa-shield-halved|Compliance watchtower – Stay compliant with labor laws and regulations"
+            "fa-solid fa-shield-halved|Compliance watchtower – Stay compliant with labor laws and regulations",
+
+            # Added:
+            "fa-regular fa-calendar-days|Holiday calendar (upload) – Upload official holiday list",
+            "fa-solid fa-user-check|Attendance – Admin corrections and approvals",
+            "fa-solid fa-stopwatch|Time tracking – Monitor hours/shifts/productivity",
+            "fa-regular fa-clock|Timesheets – Approvals and exceptions",
+            "fa-regular fa-file-lines|Expense reports – Department/BU summaries",
+            "fa-solid fa-gears|Workflows – Build workflows for approvals",
+            "fa-solid fa-code-branch|Dependencies – Visualize process/task dependencies",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "Recruiters": [
             "fa-solid fa-magnifying-glass|Sourcing – Streamline candidate sourcing from multiple channels in one place",
             "fa-solid fa-briefcase|Jobs – Post, manage, and track open roles across the organization",
             "fa-solid fa-layer-group|Job catalog – Maintain a standardized library of job roles and descriptions",
-            "fa-solid fa-clipboard-check|Onboarding – Automate new hire setup with seamless onboarding workflows"
+            "fa-solid fa-clipboard-check|Onboarding – Automate new hire setup with seamless onboarding workflows",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "Executives": [
             "fa-solid fa-users|Team – View and manage employee details, roles, and responsibilities",
@@ -431,21 +470,43 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-clipboard-check|Onboarding – Automate new hire setup with seamless onboarding workflows",
             "fa-solid fa-door-open|Offboarding – Manage exits smoothly while ensuring compliance and knowledge transfer",
             "fa-solid fa-gears|Workflows – Automate HR processes with customizable workflows",
-            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents"
+            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents",
+
+            # Added:
+            "fa-solid fa-code-branch|Dependencies – Cross-function dependency maps",
+            "fa-solid fa-chart-simple|Reports – Executive HR dashboards",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "Payroll": [
             "fa-solid fa-sack-dollar|Payroll – Automate salary calculations, compliance, and disbursements",
             "fa-solid fa-file-invoice-dollar|Contractor payments – Manage payments and contracts for freelance/contract staff",
             "fa-solid fa-file-invoice|Remote invoices – Process invoices for remote employees and contractors globally",
             "fa-solid fa-shield-halved|Compliance watchtower – Stay compliant with labor laws and regulations",
-            "fa-solid fa-chart-simple|All reports – Generate detailed reports across all HR and payroll modules"
+            "fa-solid fa-chart-simple|All reports – Generate detailed reports across all HR and payroll modules",
+
+            # Added:
+            "fa-regular fa-file-lines|Expense reports – Payroll-linked reimbursement summaries",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access",
+
+            # Added (ops for payslips, Form 16, exemptions, LOP, deductions, proof window, regime calculator):
+            "fa-solid fa-file-invoice-dollar|Payslip publishing – Generate and release employee payslips",
+            "fa-solid fa-scale-balanced|Form 16 publishing – Generate, approve, and publish Form 16",
+            "fa-solid fa-list-check|Pay components & deductions – Define earnings, deduction heads, and policies",
+            "fa-solid fa-percent|Tax exemptions config – Manage sections, limits, and proof types",
+            "fa-solid fa-calendar-days|Proof submission window – Configure declaration/proof windows with reminders",
+            "fa-solid fa-calendar-xmark|LOP rules – Configure proration and import LOP from attendance",
+            "fa-solid fa-calculator|Tax regime calculator – Org defaults, guidance, and what-if"
         ],
         "Expense/Accounts": [
             "fa-solid fa-file-invoice-dollar|Expenses – Submit, approve, and reimburse employee expenses easily",
             "fa-solid fa-file-invoice-dollar|Contractor payments – Manage payments and contracts for freelance/contract staff",
             "fa-solid fa-file-invoice|Remote invoices – Process invoices for remote employees and contractors globally",
             "fa-solid fa-calculator|Cost calculator – Estimate workforce costs with advanced budgeting tools",
-            "fa-solid fa-chart-simple|All reports – Generate detailed reports across all HR and payroll modules"
+            "fa-solid fa-chart-simple|All reports – Generate detailed reports across all HR and payroll modules",
+
+            # Added:
+            "fa-regular fa-file-lines|Expense reports – Multi-dimension expense analytics",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ]
     },
 
@@ -455,7 +516,16 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-diagram-project|Projects – Assign, monitor, and track projects and resource allocation",
             "fa-solid fa-plane-departure|Time off – Centralize leave requests, balances, and approvals",
             "fa-regular fa-user-clock|Team absences – Monitor team availability and absences in real time",
-            "fa-solid fa-chart-line|Performance – Drive continuous performance reviews and goal tracking"
+            "fa-solid fa-chart-line|Performance – Drive continuous performance reviews and goal tracking",
+
+            # Added:
+            "fa-solid fa-user-check|Attendance – Team attendance oversight",
+            "fa-regular fa-calendar-days|Holiday calendar – Team view",
+            "fa-solid fa-stopwatch|Time tracking – Monitor working hours",
+            "fa-regular fa-clock|Timesheets – Approvals",
+            "fa-solid fa-code-branch|Dependencies – View/manage task dependencies",
+            "fa-solid fa-chart-simple|Reports – Team-level exports",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "Department Managers": [
             "fa-solid fa-people-group|Team overview – Get a snapshot of team composition, capacity, and status",
@@ -465,7 +535,14 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-file-invoice-dollar|Expenses – Submit, approve, and reimburse employee expenses easily",
             "fa-solid fa-gift|Team's benefits – Manage employee perks, benefits, and eligibility",
             "fa-regular fa-chart-bar|Team performance – Measure and analyze performance across teams",
-            "fa-solid fa-chart-simple|All reports – Generate detailed reports across all HR and payroll modules"
+            "fa-solid fa-chart-simple|All reports – Generate detailed reports across all HR and payroll modules",
+
+            # Added:
+            "fa-solid fa-user-check|Attendance – Analytics and exceptions",
+            "fa-regular fa-calendar-days|Holiday calendar – Department calendar",
+            "fa-regular fa-file-lines|Expense reports – Department spend summaries",
+            "fa-solid fa-code-branch|Dependencies – Cross-team dependencies",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "Finance Managers": [
             "fa-solid fa-file-invoice-dollar|Expenses – Submit, approve, and reimburse employee expenses easily",
@@ -474,7 +551,12 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-file-invoice|Remote invoices – Process invoices for remote employees and contractors globally",
             "fa-solid fa-money-bill-trend-up|Salary explorer – Compare salary benchmarks and analyze pay structures",
             "fa-solid fa-calculator|Cost calculator – Estimate workforce costs with advanced budgeting tools",
-            "fa-solid fa-shield-halved|Compliance watchtower – Stay compliant with labor laws and regulations"
+            "fa-solid fa-shield-halved|Compliance watchtower – Stay compliant with labor laws and regulations",
+
+            # Added:
+            "fa-regular fa-file-lines|Expense reports – Financial reporting pack",
+            "fa-solid fa-chart-simple|Reports – Finance dashboards",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ]
     },
 
@@ -484,7 +566,10 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-sitemap|Org chart – Visualize reporting structures and organizational hierarchy",
             "fa-solid fa-earth-americas|World map – Track global workforce distribution and locations",
             "fa-solid fa-chart-simple|All reports – Generate detailed reports across all HR and payroll modules",
-            "fa-solid fa-store|Marketplace – Access third-party HR services, tools, and integrations"
+            "fa-solid fa-store|Marketplace – Access third-party HR services, tools, and integrations",
+
+            # Added:
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "CFO": [
             "fa-solid fa-scale-balanced|Equity – Administer and track employee equity and stock options",
@@ -492,21 +577,35 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-sack-dollar|Payroll – Automate salary calculations, compliance, and disbursements",
             "fa-solid fa-money-bill-trend-up|Salary explorer – Compare salary benchmarks and analyze pay structures",
             "fa-solid fa-calculator|Cost calculator – Estimate workforce costs with advanced budgeting tools",
-            "fa-solid fa-shield-halved|Compliance watchtower – Stay compliant with labor laws and regulations"
+            "fa-solid fa-shield-halved|Compliance watchtower – Stay compliant with labor laws and regulations",
+
+            # Added:
+            "fa-regular fa-file-lines|Expense reports – Org-level analysis",
+            "fa-solid fa-chart-simple|Reports – Board-ready financial dashboards",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "CHRO": [
             "fa-solid fa-chart-pie|Talent insights – Gain data-driven visibility into workforce trends and talent performance",
             "fa-solid fa-chart-line|Performance – Drive continuous performance reviews and goal tracking",
             "fa-regular fa-chart-bar|Team performance – Measure and analyze performance across teams",
             "fa-solid fa-comments|Company feedback – Capture employee sentiment with surveys and feedback tools",
-            "fa-solid fa-book-open|Employee handbooks – Digitize and distribute employee policies and guidelines"
+            "fa-solid fa-book-open|Employee handbooks – Digitize and distribute employee policies and guidelines",
+
+            # Added:
+            "fa-solid fa-chart-simple|Reports – People analytics dashboards",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "CTO/COO": [
             "fa-solid fa-diagram-project|Projects – Assign, monitor, and track projects and resource allocation",
             "fa-solid fa-gears|Workflows – Automate HR processes with customizable workflows",
             "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents",
             "fa-solid fa-shield-halved|Compliance watchtower – Stay compliant with labor laws and regulations",
-            "fa-solid fa-store|Marketplace – Access third-party HR services, tools, and integrations"
+            "fa-solid fa-store|Marketplace – Access third-party HR services, tools, and integrations",
+
+            # Added:
+            "fa-solid fa-code-branch|Dependencies – Delivery dependency maps",
+            "fa-solid fa-chart-simple|Reports – Ops dashboards",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ]
     },
 
@@ -518,7 +617,13 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-diagram-project|Projects – Assign, monitor, and track projects and resource allocation",
             "fa-solid fa-file-invoice-dollar|Expenses – Submit, approve, and reimburse employee expenses easily",
             "fa-solid fa-file-invoice-dollar|Contractor payments – Manage payments and contracts for freelance/contract staff",
-            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents"
+            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents",
+
+            # Added:
+            "fa-solid fa-stopwatch|Time tracking – Work hour logs",
+            "fa-regular fa-file-lines|Expense reports – Contractor expense summaries",
+            "fa-solid fa-code-branch|Dependencies – Task dependencies",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ],
         "Remote Staff": [
             "fa-solid fa-clipboard-check|Onboarding – Automate new hire setup with seamless onboarding workflows",
@@ -528,7 +633,13 @@ ROLE_SUBPOSITION_FEATURES = {
             "fa-solid fa-diagram-project|Projects – Assign, monitor, and track projects and resource allocation",
             "fa-solid fa-file-invoice|Remote invoices – Process invoices for remote employees and contractors globally",
             "fa-solid fa-headset|Support monitor – Track employee support tickets and resolve HR queries",
-            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents"
+            "fa-solid fa-folder-tree|Document management – Securely store, share, and manage HR documents",
+
+            # Added:
+            "fa-solid fa-user-check|Attendance – Remote attendance",
+            "fa-regular fa-calendar-days|Holiday calendar – Region-wise",
+            "fa-regular fa-file-lines|Expense reports – Remote expense summaries",
+            "fa-solid fa-user-shield|RBAC – Role-based access control for secure feature access"
         ]
     }
 }
@@ -604,7 +715,7 @@ def generate_offer_pdf(candidate, job_title: str, employee_id: str) -> str:
         "",
         f"Dear {candidate.name},",
         "",
-        "Congratulations! We are pleased to offer you employment at PeopleOps.",
+        "Congratulations! We are pleased to offer you employment at .",
         f"Role: {job_title}",
         f"Employee ID: {employee_id}",
         "",
@@ -615,7 +726,7 @@ def generate_offer_pdf(candidate, job_title: str, employee_id: str) -> str:
         "Welcome aboard!",
         "",
         "Regards,",
-        "PeopleOps HR Team"
+        " HR Team"
     ]
     for line in lines:
         c.drawString(72, y, line)
@@ -633,7 +744,7 @@ from datetime import date, timedelta, datetime
 from calendar import monthrange, SATURDAY, SUNDAY
 
 @app.route("/offers/<path:filename>")
-#@login_required
+@login_required
 def get_offer(filename):
     return send_from_directory(UPLOAD_OFFERS, filename, as_attachment=False)
 
@@ -727,7 +838,7 @@ def login():
     return render_template('login.html')
 
 @app.route('/dashboard')
-#@login_required
+@login_required
 def dashboard():
     employee_type = session.get('employee_type')
     subposition = session.get('subposition')
@@ -744,7 +855,7 @@ def dashboard():
     )
 
 @app.route("/feature/<role>/<sub>/<feature>")
-#@login_required
+@login_required
 def render_feature(role, sub, feature):
     print(role, sub, feature)
     """
@@ -761,7 +872,7 @@ def render_feature(role, sub, feature):
 
 # --- Candidates API ---
 @app.route("/api/candidates", methods=["GET"])
-#@login_required
+@login_required
 def api_candidates_list():
     username = session.get('username')
 
@@ -808,7 +919,7 @@ def api_candidates_list():
     } for c in rows])
 
 @app.route("/api/candidates", methods=["POST"])
-#@login_required
+@login_required
 def api_candidates_create():
     username = session.get('username')
     recruiter = User.query.filter_by(username=username).first()
@@ -878,7 +989,7 @@ def api_candidates_create():
     return jsonify({"id": candidate.id}), 201
 
 @app.route("/api/candidates/<int:candidate_id>/status", methods=["POST"])
-#@login_required
+@login_required
 def api_candidates_update_status(candidate_id):
     username = session.get('username')
     employee_type = session.get('employee_type')
@@ -906,14 +1017,14 @@ def api_candidates_update_status(candidate_id):
 
 # Serve resumes
 @app.route("/resumes/<path:filename>")
-#@login_required
+@login_required
 def get_resume(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=False)
 
 
 # List jobs (current user or all for HR Managers/Executives)
 @app.route("/api/jobs", methods=["GET"])
-#@login_required
+@login_required
 def api_jobs_list():
     username = session.get('username')
     employee_type = session.get('employee_type')
@@ -964,7 +1075,7 @@ def api_jobs_list():
 
 
 @app.route("/api/users/stats", methods=["GET"])
-#@login_required
+@login_required
 def api_users_stats():
     """
     Get user statistics for team overview dashboard
@@ -1011,7 +1122,7 @@ def api_users_stats():
     })
 
 @app.route("/api/projects/team", methods=["GET"])
-#@login_required
+@login_required
 def api_projects_team():
     """
     Get projects for team overview - shows all projects for capacity planning
@@ -1064,7 +1175,7 @@ def api_projects_team():
     return jsonify(result)
 
 @app.route("/api/leaves/current", methods=["GET"])
-#@login_required 
+@login_required 
 def api_leaves_current():
     """
     Get current team absences - extends your existing /api/leaves endpoint
@@ -1109,7 +1220,7 @@ def api_leaves_current():
     return jsonify(absences)
 
 @app.route("/api/team/activity", methods=["GET"])
-#@login_required
+@login_required
 def api_team_activity():
     """
     Get recent team activity for the overview dashboard
@@ -1172,7 +1283,7 @@ def api_team_activity():
     return jsonify(activities[:15])  # Return top 15 most recent
 
 @app.route("/api/dashboard/metrics", methods=["GET"])
-#@login_required
+@login_required
 def api_dashboard_metrics():
     """
     Get all metrics for team overview dashboard in one call
@@ -1233,7 +1344,7 @@ def api_dashboard_metrics():
 
 # Create job
 @app.route("/api/jobs", methods=["POST"])
-#@login_required
+@login_required
 def api_jobs_create():
     username = session.get('username')
 
@@ -1258,7 +1369,7 @@ def api_jobs_create():
 
 # Read single job (optional helper)
 @app.route("/api/jobs/<int:job_id>", methods=["GET"])
-#@login_required
+@login_required
 def api_jobs_read(job_id):
     username = session.get('username')
     j = Job.query.filter_by(id=job_id, created_by=username).first()
@@ -1278,7 +1389,7 @@ def api_jobs_read(job_id):
 
 # Update job (title/fields/status)
 @app.route("/api/jobs/<int:job_id>", methods=["POST", "PUT", "PATCH"])
-#@login_required
+@login_required
 def api_jobs_update(job_id):
     username = session.get('username')
     j = Job.query.filter_by(id=job_id, created_by=username).first()
@@ -1315,7 +1426,7 @@ def api_jobs_update(job_id):
 
 # Delete job
 @app.route("/api/jobs/<int:job_id>", methods=["DELETE"])
-#@login_required
+@login_required
 def api_jobs_delete(job_id):
     username = session.get('username')
     j = Job.query.filter_by(id=job_id, created_by=username).first()
@@ -1332,7 +1443,7 @@ def api_jobs_delete(job_id):
 # List catalog entries (owned by current user)
 # Filters: ?status=Active|Archived, ?q=term, plus department/location/level/employment_type/family
 @app.route("/api/job_catalog", methods=["GET"])
-#@login_required
+@login_required
 def api_job_catalog_list():
     username = session.get('username')
     q = JobCatalog.query.filter_by(created_by=username).order_by(JobCatalog.created_at.desc())
@@ -1390,7 +1501,7 @@ def api_job_catalog_list():
 
 # Create catalog entry
 @app.route("/api/job_catalog", methods=["POST"])
-#@login_required
+@login_required
 def api_job_catalog_create():
     username = session.get('username')
     data = (request.json or request.form)
@@ -1429,7 +1540,7 @@ def api_job_catalog_create():
 
 # Read one
 @app.route("/api/job_catalog/<int:catalog_id>", methods=["GET"])
-#@login_required
+@login_required
 def api_job_catalog_read(catalog_id):
     username = session.get('username')
     r = JobCatalog.query.filter_by(id=catalog_id, created_by=username).first()
@@ -1458,7 +1569,7 @@ def api_job_catalog_read(catalog_id):
 
 # Update (fields + status)
 @app.route("/api/job_catalog/<int:catalog_id>", methods=["POST", "PUT", "PATCH"])
-#@login_required
+@login_required
 def api_job_catalog_update(catalog_id):
     username = session.get('username')
     r = JobCatalog.query.filter_by(id=catalog_id, created_by=username).first()
@@ -1501,7 +1612,7 @@ def api_job_catalog_update(catalog_id):
 
 # Delete
 @app.route("/api/job_catalog/<int:catalog_id>", methods=["DELETE"])
-#@login_required
+@login_required
 def api_job_catalog_delete(catalog_id):
     username = session.get('username')
     r = JobCatalog.query.filter_by(id=catalog_id, created_by=username).first()
@@ -1512,7 +1623,7 @@ def api_job_catalog_delete(catalog_id):
     return jsonify({"ok": True})
 
 @app.route("/api/onboarding", methods=["GET"])
-#@login_required
+@login_required
 def api_onboarding_list():
     username = session.get('username')
     rows = Candidate.query.filter_by(created_by=username, stage="Onboarding") \
@@ -1531,7 +1642,7 @@ def api_onboarding_list():
     } for c in rows])
 
 @app.route("/api/onboarding/<int:candidate_id>/offer", methods=["POST"])
-#@login_required
+@login_required
 def api_onboarding_offer(candidate_id):
     username = session.get('username')
     c = Candidate.query.filter_by(id=candidate_id, created_by=username, stage="Onboarding").first()
@@ -1573,7 +1684,7 @@ def api_onboarding_offer(candidate_id):
 
     # Build & send email
     msg = Message(
-        subject="Congratulations! Your Offer Letter from PeopleOps",
+        subject="Congratulations! Your Offer Letter from ",
         recipients=[c.email],  # to candidate's real email
         sender=app.config["MAIL_DEFAULT_SENDER"],
         body=(
@@ -1583,7 +1694,7 @@ def api_onboarding_offer(candidate_id):
             f"  • Username: {uname}\n"
             f"  • Temporary password: {pwd}\n\n"
             "Please log in and change your password after first login.\n\n"
-            "Regards,\nPeopleOps HR"
+            "Regards,\n HR"
         ),
     )
     with open(offer_path, "rb") as f:
@@ -1657,21 +1768,21 @@ def api_onboarding_offer(candidate_id):
     })
 
 @app.route("/onboarding_docs/<path:filename>")
-#@login_required
+@login_required
 def get_onboarding_doc(filename):
     return send_from_directory(ONBOARDING_DOCS_DIR, filename, as_attachment=False)
 
 # ===== Self-Onboarding APIs (for Employees → New) =====
 
 @app.route("/api/self_onboarding", methods=["GET"])
-#@login_required
+@login_required
 def api_self_onboarding_get():
     username = session.get("username")
     data = load_onboarding(username)
     return jsonify(data)
 
 @app.route("/api/self_onboarding", methods=["POST"])
-#@login_required
+@login_required
 def api_self_onboarding_update():
     username = session.get("username")
     payload = request.json or request.form
@@ -1722,7 +1833,7 @@ def api_self_onboarding_update():
     return jsonify({"ok": True, "completed": data["completed"]})
 
 @app.route("/api/self_onboarding/upload", methods=["POST"])
-#@login_required
+@login_required
 def api_self_onboarding_upload():
     username = session.get("username")
     data = load_onboarding(username)
@@ -1770,12 +1881,12 @@ def api_self_onboarding_upload():
     })
 
 @app.route("/handbooks/<path:filename>")
-#@login_required
+@login_required
 def get_handbook_file(filename):
     return send_from_directory(HANDBOOKS_DIR, filename, as_attachment=False)
 
 @app.route("/docs/<path:filename>")
-#@login_required
+@login_required
 def get_managed_doc(filename):
     return send_from_directory(DOCS_FILES_DIR, filename, as_attachment=False)
 
@@ -1786,7 +1897,7 @@ def get_managed_doc(filename):
 # Leaders Team Leads +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # === Team Overview: lightweight users list ===
 @app.route("/api/users", methods=["GET"])
-#@login_required
+@login_required
 def api_users_list():
     """
     Returns users for snapshot views.
@@ -1841,7 +1952,7 @@ def _list_to_csv(lst):
 
 # ---- Projects: List ----
 @app.route("/api/projects", methods=["GET"])
-#@login_required
+@login_required
 def api_projects_list():
     """
     List projects created by current user (Team Lead).
@@ -1879,7 +1990,7 @@ def api_projects_list():
 
 # ---- Projects: Create ----
 @app.route("/api/projects", methods=["POST"])
-#@login_required
+@login_required
 def api_projects_create():
     username = session.get("username")
     data = request.json or request.form
@@ -1938,7 +2049,7 @@ def api_projects_create():
 
 # ---- Projects: Update ----
 @app.route("/api/projects/<int:project_id>", methods=["PUT", "PATCH", "POST"])
-#@login_required
+@login_required
 def api_projects_update(project_id):
     username = session.get("username")
     p = Project.query.filter_by(id=project_id, created_by=username).first()
@@ -1996,7 +2107,7 @@ def api_projects_update(project_id):
 
 # ---- Projects: Delete ----
 @app.route("/api/projects/<int:project_id>", methods=["DELETE"])
-#@login_required
+@login_required
 def api_projects_delete(project_id):
     username = session.get("username")
     p = Project.query.filter_by(id=project_id, created_by=username).first()
@@ -2008,7 +2119,7 @@ def api_projects_delete(project_id):
 
 # Get balances (current user; HR/Leaders can query ?user=<username>)
 @app.route("/api/leave/balances", methods=["GET"])
-#@login_required
+@login_required
 def api_leave_balances_get():
     target = request.args.get("user") or session.get("username")
     if target != session.get("username") and not is_approver():
@@ -2023,7 +2134,7 @@ def api_leave_balances_get():
 
 # Set balances (HR/Leaders only)
 @app.route("/api/leave/balances/set", methods=["POST"])
-#@login_required
+@login_required
 def api_leave_balances_set():
     if not is_approver():
         return jsonify({"error": "Not allowed"}), 403
@@ -2053,7 +2164,7 @@ def api_leave_balances_set():
 #  - normal users: their own
 #  - HR/Leaders: ?scope=all to see everyone; else own
 @app.route("/api/leaves", methods=["GET"])
-#@login_required
+@login_required
 def api_leaves_list():
     scope = (request.args.get("scope") or "").strip()
     status = (request.args.get("status") or "").strip()
@@ -2081,7 +2192,7 @@ def api_leaves_list():
 
 # Create request
 @app.route("/api/leaves", methods=["POST"])
-#@login_required
+@login_required
 def api_leaves_create():
     data = request.json or request.form
     username = session.get("username")
@@ -2119,7 +2230,7 @@ def api_leaves_create():
 
 # Cancel (by requester, while Pending)
 @app.route("/api/leaves/<int:leave_id>/cancel", methods=["POST"])
-#@login_required
+@login_required
 def api_leaves_cancel(leave_id):
     r = LeaveRequest.query.filter_by(id=leave_id).first()
     if not r or r.username != session.get("username"):
@@ -2132,7 +2243,7 @@ def api_leaves_cancel(leave_id):
 
 # Decision (Approve/Reject) — HR/Leaders only
 @app.route("/api/leaves/<int:leave_id>/decision", methods=["POST"])
-#@login_required
+@login_required
 def api_leaves_decision(leave_id):
     if not is_approver():
         return jsonify({"error": "Not allowed"}), 403
@@ -2174,7 +2285,7 @@ def _date_or_default(s, fallback):
         return fallback
 
 @app.route("/api/absences", methods=["GET"])
-#@login_required
+@login_required
 def api_absences():
     """
     Returns Approved leave requests.
@@ -2215,7 +2326,7 @@ def api_absences():
 
 # List cycles (all)
 @app.route("/api/perf/cycles", methods=["GET"])
-#@login_required
+@login_required
 def api_perf_cycles_list():
     rows = PerfCycle.query.order_by(PerfCycle.start_date.desc()).all()
     return jsonify([{
@@ -2225,7 +2336,7 @@ def api_perf_cycles_list():
 
 # Create/Update cycle (Leaders/HR)
 @app.route("/api/perf/cycles", methods=["POST"])
-#@login_required
+@login_required
 def api_perf_cycles_save():
     if not is_manager_or_hr():
         return jsonify({"error": "Not allowed"}), 403
@@ -2254,7 +2365,7 @@ def api_perf_cycles_save():
 
 # List my goals for a cycle (or all cycles if none). Managers/HR can pass ?user=<username>
 @app.route("/api/perf/goals", methods=["GET"])
-#@login_required
+@login_required
 def api_perf_goals_list():
     target = request.args.get("user") or session.get("username")
     if target != session.get("username") and not is_manager_or_hr():
@@ -2271,7 +2382,7 @@ def api_perf_goals_list():
 
 # Create / Update goal (owner or manager)
 @app.route("/api/perf/goals", methods=["POST"])
-#@login_required
+@login_required
 def api_perf_goals_save():
     data = request.json or request.form
     gid = data.get("id")
@@ -2299,7 +2410,7 @@ def api_perf_goals_save():
 
 # Add progress update (owner or manager)
 @app.route("/api/perf/goals/<int:goal_id>/update", methods=["POST"])
-#@login_required
+@login_required
 def api_perf_goal_update(goal_id):
     g = Goal.query.get(goal_id)
     if not g: return jsonify({"error":"Not found"}), 404
@@ -2319,7 +2430,7 @@ def api_perf_goal_update(goal_id):
 
 # List reviews (for me OR all if manager/hr)
 @app.route("/api/perf/reviews", methods=["GET"])
-#@login_required
+@login_required
 def api_perf_reviews_list():
     q = Review.query
     if is_manager_or_hr() and request.args.get("scope") == "all":
@@ -2339,7 +2450,7 @@ def api_perf_reviews_list():
 
 # Create/assign a review (Manager/HR)
 @app.route("/api/perf/reviews", methods=["POST"])
-#@login_required
+@login_required
 def api_perf_reviews_create():
     if not is_manager_or_hr():
         return jsonify({"error":"Not allowed"}), 403
@@ -2355,7 +2466,7 @@ def api_perf_reviews_create():
 
 # Submit/Finalize a review (reviewer)
 @app.route("/api/perf/reviews/<int:rid>", methods=["POST"])
-#@login_required
+@login_required
 def api_perf_reviews_submit(rid):
     d = request.json or request.form
     r = Review.query.get(rid)
@@ -2377,7 +2488,7 @@ def api_perf_reviews_submit(rid):
 
 
 @app.route("/api/org/structure", methods=["GET"])
-#@login_required
+@login_required
 def api_org_structure():
     """
     Get organizational structure data for the org chart
@@ -2435,7 +2546,7 @@ def api_org_structure():
 
 
 @app.route("/api/org/update-reporting", methods=["POST"])
-#@login_required
+@login_required
 def api_org_update_reporting():
     """
     Update reporting relationship between employees
@@ -2513,7 +2624,7 @@ def would_create_circular_reference(employee_id, manager_id):
 
 
 @app.route("/api/org/hierarchy", methods=["GET"])
-#@login_required
+@login_required
 def api_org_hierarchy():
     """
     Get hierarchical organization structure (tree format)
@@ -2553,7 +2664,7 @@ def api_org_hierarchy():
 
 
 @app.route("/api/org/departments", methods=["GET"])
-#@login_required
+@login_required
 def api_org_departments():
     """
     Get organization structure grouped by departments
@@ -2603,7 +2714,7 @@ def api_org_departments():
 
 
 @app.route("/api/org/stats", methods=["GET"])
-#@login_required
+@login_required
 def api_org_stats():
     """
     Get organizational statistics
@@ -2646,7 +2757,7 @@ def api_org_stats():
 
 
 @app.route("/api/org/setup-db", methods=["POST"])
-#@login_required
+@login_required
 def api_org_setup_db():
     """
     Helper route to add the manager_id field to User table
@@ -2679,7 +2790,7 @@ def api_org_setup_db():
     
 
 @app.route("/api/org/structure-mock", methods=["GET"])
-#@login_required
+@login_required
 def api_org_structure_mock():
     """
     Temporary endpoint that creates a mock org structure without requiring database changes
@@ -2799,7 +2910,7 @@ def get_user_location(user):
 
 
 @app.route("/api/workforce/locations", methods=["GET"])
-#@login_required
+@login_required
 def api_workforce_locations():
     """
     Get workforce location data for the world map
@@ -2852,7 +2963,7 @@ def run_duplicates():
 
 
 @app.route('/logout')
-#@login_required
+@login_required
 def logout():
     session.clear()
     flash("You have been logged out.", "info")
