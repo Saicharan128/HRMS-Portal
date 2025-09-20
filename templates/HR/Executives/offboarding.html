@@ -1,25 +1,26 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-person-walking-arrow-right mr-2"></i> Offboarding
             </h1>
             <p class="text-slate-600 text-sm">Manage exits smoothly while ensuring compliance and knowledge transfer.
             </p>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="newCaseBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+        <div class="flex flex-wrap items-center gap-2">
+            <button id="newCaseBtn"
+                class="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-plus mr-1"></i> New Case
             </button>
             <button id="exportBtn"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-file-export mr-1"></i> Export
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
@@ -27,16 +28,22 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="casesTab" class="obf-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+        <div
+            class="flex space-x-1 bg-slate-100 p-1 rounded-xl overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-slate-300">
+            <button id="casesTab"
+                class="obf-tab active px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-briefcase mr-1"></i> Cases</button>
-            <button id="checklistsTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="checklistsTab"
+                class="obf-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-list-check mr-1"></i> Checklists</button>
-            <button id="assetsTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="assetsTab"
+                class="obf-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-computer mr-1"></i> Assets</button>
-            <button id="complianceTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="complianceTab"
+                class="obf-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
-            <button id="reportsTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="reportsTab"
+                class="obf-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-chart-line mr-1"></i> Reports</button>
         </div>
     </div>
@@ -64,14 +71,16 @@
                 </div>
                 <div class="mt-5">
                     <div class="text-sm font-medium text-slate-700 mb-2">Filters</div>
-                    <div class="flex items-center gap-2">
-                        <select id="caseStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="caseStatus"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm w-full sm:w-auto">
                             <option value="all">All</option>
                             <option value="pending">Pending</option>
                             <option value="in_progress">In Progress</option>
                             <option value="done">Done</option>
                         </select>
-                        <select id="caseDept" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <select id="caseDept"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm w-full sm:w-auto">
                             <option value="all">All Depts</option>
                             <option value="engineering">Engineering</option>
                             <option value="sales">Sales</option>
@@ -86,7 +95,8 @@
 
             <!-- Right: Cases Table -->
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white">
-                <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                <div
+                    class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 border-b border-slate-200">
                     <div class="relative w-full md:w-96">
                         <i
                             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -100,21 +110,19 @@
                     <div class="text-sm text-slate-600"><span id="caseCount">0</span> cases</div>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
+                    <table class="min-w-full text-xs sm:text-sm">
                         <thead class="text-left text-slate-500 border-b">
                             <tr>
                                 <th class="py-2 px-4">Employee</th>
-                                <th class="py-2 px-4">Department</th>
-                                <th class="py-2 px-4">Manager</th>
+                                <th class="py-2 px-4 hidden sm:table-cell">Department</th>
+                                <th class="py-2 px-4 hidden md:table-cell">Manager</th>
                                 <th class="py-2 px-4">Last Day</th>
                                 <th class="py-2 px-4">Status</th>
-                                <th class="py-2 px-4 w-28">Progress</th>
-                                <th class="py-2 px-4 w-28"></th>
+                                <th class="py-2 px-4 w-24 sm:w-28">Progress</th>
+                                <th class="py-2 px-4 w-24 sm:w-28"></th>
                             </tr>
                         </thead>
-                        <tbody id="caseRows" class="text-slate-800">
-                            <!-- injected -->
-                        </tbody>
+                        <tbody id="caseRows" class="text-slate-800"><!-- injected --></tbody>
                     </table>
                 </div>
             </div>
@@ -217,15 +225,15 @@
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
+                <table class="min-w-full text-xs sm:text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
                             <th class="py-2 px-4">Employee</th>
                             <th class="py-2 px-4">Item</th>
-                            <th class="py-2 px-4">Serial</th>
+                            <th class="py-2 px-4 hidden md:table-cell">Serial</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4">Due</th>
-                            <th class="py-2 px-4 w-24"></th>
+                            <th class="py-2 px-4 hidden sm:table-cell">Due</th>
+                            <th class="py-2 px-4 w-20 sm:w-24"></th>
                         </tr>
                     </thead>
                     <tbody id="assetRows" class="text-slate-800"><!-- injected --></tbody>
@@ -289,7 +297,7 @@
                 <div class="p-6 space-y-4">
                     <input id="cName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="Employee name">
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <select id="cDept" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                             <option value="engineering">Engineering</option>
                             <option value="sales">Sales</option>
@@ -301,7 +309,7 @@
                         <input id="cManager" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Manager">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input id="cLastDay" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                         <select id="cReason" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                             <option>Resignation</option>
@@ -310,7 +318,7 @@
                             <option>Other</option>
                         </select>
                     </div>
-                    <div class="flex items-center justify-end gap-2 pt-2">
+                    <div class="flex flex-wrap items-center justify-end gap-2 pt-2">
                         <button id="cancelCase"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
                         <button id="saveCase" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
@@ -329,7 +337,7 @@
         { id: 2, name: 'Noah Kim', dept: 'finance', manager: 'Sana M', last: '2025-10-05', status: 'pending', reason: 'Contract End', progress: 10 },
         { id: 3, name: 'Aarav Mehta', dept: 'engineering', manager: 'Priya S', last: '2025-09-18', status: 'done', reason: 'Other', progress: 100 }
     ];
-    let CHECKLIST = []; // built steps
+    let CHECKLIST = [];
     let TEMPLATES = [
         { id: 11, name: 'Standard • Office', steps: ['revoke_access', 'collect_assets', 'handover_docs', 'exit_interview', 'final_payroll', 'notify_team'] },
         { id: 12, name: 'Standard • Remote', steps: ['revoke_access', 'handover_docs', 'final_payroll', 'notify_team'] }
@@ -416,19 +424,21 @@
         $('kSoon').textContent = soon;
 
         $('caseRows').innerHTML = data.map(c => {
-            const pill = c.status === 'done' ? 'bg-emerald-50 text-emerald-700' : c.status === 'in_progress' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700';
+            const pill = c.status === 'done' ? 'bg-emerald-50 text-emerald-700' :
+                c.status === 'in_progress' ? 'bg-amber-50 text-amber-700' :
+                    'bg-slate-100 text-slate-700';
             return `
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${c.name}</td>
-        <td class="py-2 px-4">${capitalize(c.dept)}</td>
-        <td class="py-2 px-4">${c.manager}</td>
-        <td class="py-2 px-4">${c.last} <span class="text-xs text-slate-500">(${daysFromNow(c.last)}d)</span></td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${labelStatus(c.status)}</span></td>
+        <td class="py-2 px-4 hidden sm:table-cell">${capitalize(c.dept)}</td>
+        <td class="py-2 px-4 hidden md:table-cell">${c.manager}</td>
+        <td class="py-2 px-4">${c.last} <span class="text-[10px] sm:text-xs text-slate-500">(${daysFromNow(c.last)}d)</span></td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-[10px] sm:text-xs ${pill}">${labelStatus(c.status)}</span></td>
         <td class="py-2 px-4">
-          <div class="w-28 h-2 bg-slate-200 rounded"><div class="h-2 rounded ${c.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}" style="width:${c.progress}%"></div></div>
+          <div class="w-24 sm:w-28 h-2 bg-slate-200 rounded"><div class="h-2 rounded ${c.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}" style="width:${c.progress}%"></div></div>
         </td>
         <td class="py-2 px-4 text-right">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="advanceCase(${c.id})"><i class="fa-solid fa-forward mr-1"></i> Advance</button>
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-[10px] sm:text-xs hover:bg-slate-50" onclick="advanceCase(${c.id})"><i class="fa-solid fa-forward mr-1"></i> Advance</button>
         </td>
       </tr>`;
         }).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No cases</td></tr>`;
@@ -463,7 +473,7 @@
     function addStep(s) { CHECKLIST.push(s); renderChecklist(); }
     function moveStep(i, d) { const j = i + d; if (j < 0 || j >= CHECKLIST.length) return;[CHECKLIST[i], CHECKLIST[j]] = [CHECKLIST[j], CHECKLIST[i]]; renderChecklist(); }
     function removeStep(i) { CHECKLIST.splice(i, 1); renderChecklist(); }
-    $('taskLibrary')?.addEventListener('click', (e) => { const b = e.target.closest('.ck-chip'); if (b) addStep(b.dataset.task); });
+    document.getElementById('taskLibrary')?.addEventListener('click', (e) => { const b = e.target.closest('.ck-chip'); if (b) addStep(b.dataset.task); });
 
     function renderTemplates() {
         $('templatesList').innerHTML = TEMPLATES.map(t => `
@@ -491,13 +501,13 @@
       <tr class="border-b last:border-0">
         <td class="py-2 px-4">${a.emp}</td>
         <td class="py-2 px-4">${a.item}</td>
-        <td class="py-2 px-4">${a.serial}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(a.status)}</span></td>
-        <td class="py-2 px-4">${a.due}</td>
+        <td class="py-2 px-4 hidden md:table-cell">${a.serial}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-[10px] sm:text-xs ${pill}">${capitalize(a.status)}</span></td>
+        <td class="py-2 px-4 hidden sm:table-cell">${a.due}</td>
         <td class="py-2 px-4 text-right">
           ${a.status === 'returned'
-                    ? '<span class="text-xs text-slate-500">Done</span>'
-                    : `<button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="markReturned(${a.id})"><i class='fa-solid fa-check mr-1'></i> Returned</button>`}
+                    ? '<span class="text-[10px] sm:text-xs text-slate-500">Done</span>'
+                    : `<button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-[10px] sm:text-xs" onclick="markReturned(${a.id})"><i class='fa-solid fa-check mr-1'></i> Returned</button>`}
         </td>
       </tr>`;
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No assets</td></tr>`;
@@ -555,7 +565,6 @@
         reasonsC && reasonsC.destroy(); slaC && slaC.destroy();
         const reasons = { Resignation: 6, Termination: 2, 'Contract End': 3, Other: 1 };
         reasonsC = new Chart(rctx, { type: 'pie', data: { labels: Object.keys(reasons), datasets: [{ data: Object.values(reasons), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
-        // SLA% within 3 days for Access Revoke, Asset Return, Final Pay
         slaC = new Chart(sctx, { type: 'bar', data: { labels: ['Access', 'Assets', 'Final Pay'], datasets: [{ label: 'Within 3 days', data: [96, 82, 88], backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } } });
     }
 
@@ -617,6 +626,16 @@
 
     .ck-chip:hover {
         background: #f8fafc;
+    }
+
+    /* Optional: nicer thin scrollbar for the tab row on mobile */
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

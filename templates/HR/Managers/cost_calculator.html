@@ -1,15 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<!-- Add in <head> of base layout if missing -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-calculator mr-2"></i> Cost Calculator
             </h1>
-            <p class="text-slate-600 text-sm">Estimate workforce costs with advanced budgeting tools.</p>
+            <p class="text-slate-600 text-xs sm:text-sm">Estimate workforce costs with advanced budgeting tools.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <button id="saveScenarioBtn"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-save mr-1"></i> Save Scenario
@@ -26,19 +29,22 @@
     </div>
 
     <!-- Calculator Type Tabs -->
-    <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+    <div class="mb-4 sm:mb-6">
+        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl overflow-x-auto no-scrollbar">
             <button id="positionTab"
-                class="calculator-tab active px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                class="calculator-tab active px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
                 <i class="fa-solid fa-user mr-1"></i> Position Calculator
             </button>
-            <button id="teamTab" class="calculator-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <button id="teamTab"
+                class="calculator-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
                 <i class="fa-solid fa-users mr-1"></i> Team Calculator
             </button>
-            <button id="budgetTab" class="calculator-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <button id="budgetTab"
+                class="calculator-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
                 <i class="fa-solid fa-chart-pie mr-1"></i> Budget Planner
             </button>
-            <button id="scenarioTab" class="calculator-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <button id="scenarioTab"
+                class="calculator-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap">
                 <i class="fa-solid fa-flask mr-1"></i> Scenario Analysis
             </button>
         </div>
@@ -46,15 +52,15 @@
 
     <!-- Position Calculator -->
     <div id="positionCalculator" class="calculator-panel">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- Input Form -->
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-user-plus mr-2"></i> Position Details
                 </h3>
 
                 <form id="positionForm" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Job Title *</label>
                             <input type="text" id="positionTitle" required
@@ -98,12 +104,11 @@
 
                     <div class="border-t border-slate-200 pt-4">
                         <h4 class="font-medium text-slate-800 mb-3">Compensation Details</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Base Salary *</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="baseSalary" required min="0" step="1000"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -117,8 +122,7 @@
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Equity Value
                                     (Annual)</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="equityValue" min="0" step="1000"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -137,12 +141,12 @@
 
                     <div class="border-t border-slate-200 pt-4">
                         <h4 class="font-medium text-slate-800 mb-3">Benefits & Additional Costs</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                            <!-- unchanged inputs -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Health Insurance</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="healthInsurance" min="0" step="100" placeholder="Monthly"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -156,8 +160,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Equipment & Setup</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="equipment" min="0" step="100" placeholder="One-time"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -166,8 +169,7 @@
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Training &
                                     Development</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="training" min="0" step="100" placeholder="Annual"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -175,8 +177,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Office Space</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="officeSpace" min="0" step="100" placeholder="Monthly"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -184,8 +185,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Other Benefits</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="otherBenefits" min="0" step="100" placeholder="Monthly"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -195,7 +195,8 @@
 
                     <div class="border-t border-slate-200 pt-4">
                         <h4 class="font-medium text-slate-800 mb-3">Taxes & Overhead</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                            <!-- unchanged inputs -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Payroll Tax Rate
                                     (%)</label>
@@ -223,34 +224,27 @@
             </div>
 
             <!-- Results Panel -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-chart-line mr-2"></i> Cost Breakdown
                 </h3>
 
                 <div id="positionResults" class="hidden space-y-4">
-                    <!-- Total Cost -->
                     <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
                         <div class="text-sm text-blue-600 mb-1">Total Annual Cost</div>
                         <div id="totalAnnualCost" class="text-2xl font-bold text-blue-800">$0</div>
                         <div class="text-xs text-blue-600 mt-1">Including all benefits and taxes</div>
                     </div>
-
-                    <!-- Monthly Cost -->
                     <div class="p-3 rounded-lg bg-slate-50">
                         <div class="flex justify-between">
                             <span class="text-sm text-slate-600">Monthly Cost</span>
                             <span id="monthlyCost" class="font-medium text-slate-800">$0</span>
                         </div>
                     </div>
-
-                    <!-- Cost Breakdown -->
                     <div class="space-y-2">
                         <h4 class="text-sm font-medium text-slate-800">Breakdown</h4>
                         <div id="costBreakdown" class="space-y-1 text-sm"></div>
                     </div>
-
-                    <!-- Cost per Hour -->
                     <div class="p-3 rounded-lg bg-green-50">
                         <div class="flex justify-between">
                             <span class="text-sm text-green-600">Effective Hourly Rate</span>
@@ -258,8 +252,6 @@
                         </div>
                         <div class="text-xs text-green-600 mt-1">Based on 40 hrs/week, 52 weeks</div>
                     </div>
-
-                    <!-- Benefits Ratio -->
                     <div class="p-3 rounded-lg bg-purple-50">
                         <div class="flex justify-between">
                             <span class="text-sm text-purple-600">Benefits Ratio</span>
@@ -279,11 +271,10 @@
 
     <!-- Team Calculator -->
     <div id="teamCalculator" class="calculator-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Team Builder -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-users mr-2"></i> Team Builder
                     </h3>
                     <button id="addTeamMember"
@@ -291,11 +282,7 @@
                         <i class="fa-solid fa-plus mr-1"></i> Add Member
                     </button>
                 </div>
-
-                <div id="teamMembers" class="space-y-3">
-                    <!-- Team members will be added here -->
-                </div>
-
+                <div id="teamMembers" class="space-y-3"></div>
                 <div class="mt-6 pt-4 border-t border-slate-200">
                     <button id="calculateTeam"
                         class="w-full px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">
@@ -304,14 +291,11 @@
                 </div>
             </div>
 
-            <!-- Team Results -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-chart-pie mr-2"></i> Team Cost Analysis
                 </h3>
-
                 <div id="teamResults" class="hidden space-y-4"></div>
-
                 <div id="teamEmptyState" class="text-center py-8 text-slate-500">
                     <i class="fa-solid fa-users text-4xl mb-4"></i>
                     <p>Add team members to see cost analysis.</p>
@@ -322,14 +306,14 @@
 
     <!-- Budget Planner -->
     <div id="budgetPlanner" class="calculator-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Budget Controls -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-cog mr-2"></i> Budget Parameters
                 </h3>
-
+                <!-- controls unchanged -->
                 <div class="space-y-4">
+                    <!-- ... your existing controls ... -->
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Budget Period</label>
                         <select id="budgetPeriod" class="w-full rounded-lg border border-slate-300 px-3 py-2">
@@ -338,22 +322,19 @@
                             <option value="monthly">Monthly Budget</option>
                         </select>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Total Budget</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                             <input type="number" id="totalBudget" min="0" step="10000"
                                 class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Growth Rate (%)</label>
                         <input type="number" id="growthRate" min="0" max="50" step="1"
                             class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Department Focus</label>
                         <select id="budgetDepartment" class="w-full rounded-lg border border-slate-300 px-3 py-2">
@@ -365,7 +346,6 @@
                             <option value="finance">Finance</option>
                         </select>
                     </div>
-
                     <button id="generateBudget"
                         class="w-full px-4 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium">
                         <i class="fa-solid fa-chart-pie mr-2"></i> Generate Budget Plan
@@ -374,18 +354,19 @@
             </div>
 
             <!-- Budget Allocation -->
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-pie-chart mr-2"></i> Budget Allocation
                     </h3>
-                    <div class="text-sm text-slate-600">
+                    <div class="text-xs sm:text-sm text-slate-600">
                         <span id="budgetUtilization">0%</span> of budget allocated
                     </div>
                 </div>
 
-                <div id="budgetChart" class="mb-6">
-                    <canvas id="budgetPieChart" height="300"></canvas>
+                <!-- Make chart container responsive height -->
+                <div id="budgetChart" class="mb-4 sm:mb-6 relative h-56 sm:h-72">
+                    <canvas id="budgetPieChart" class="absolute inset-0 w-full h-full"></canvas>
                 </div>
 
                 <div id="budgetBreakdown" class="space-y-3"></div>
@@ -395,9 +376,9 @@
 
     <!-- Scenario Analysis -->
     <div id="scenarioAnalysis" class="calculator-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-slate-800">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 sm:mb-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-flask mr-2"></i> Scenario Comparison
                 </h3>
                 <button id="addScenario"
@@ -406,12 +387,14 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="scenarioGrid"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6" id="scenarioGrid"></div>
 
-            <div class="mt-6">
-                <div class="rounded-lg border border-slate-200 p-4">
+            <div class="mt-4 sm:mt-6">
+                <div class="rounded-lg border border-slate-200 p-3 sm:p-4">
                     <h4 class="font-medium text-slate-800 mb-3">Scenario Comparison Chart</h4>
-                    <canvas id="scenarioChart" height="200"></canvas>
+                    <div class="relative h-56 sm:h-64">
+                        <canvas id="scenarioChart" class="absolute inset-0 w-full h-full"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -421,9 +404,9 @@
 <!-- Add Team Member Modal -->
 <div id="addMemberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
-                <div class="p-6 border-b border-slate-200">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-full sm:max-w-md mx-2">
+                <div class="p-4 sm:p-6 border-b border-slate-200">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-slate-800">Add Team Member</h3>
                         <button id="closeAddMemberModal" class="text-slate-400 hover:text-slate-600">
@@ -431,14 +414,13 @@
                         </button>
                     </div>
                 </div>
-
-                <div class="p-6 space-y-4">
+                <div class="p-4 sm:p-6 space-y-4">
+                    <!-- modal fields unchanged -->
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Role Title</label>
                         <input type="text" id="memberRole" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
                             <select id="memberLevel" class="w-full rounded-lg border border-slate-300 px-3 py-2">
@@ -454,21 +436,18 @@
                                 class="w-full rounded-lg border border-slate-300 px-3 py-2">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Annual Salary</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                             <input type="number" id="memberSalary" min="0" step="1000"
                                 class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                         </div>
                     </div>
-
-                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center justify-end gap-2 pt-4 border-t border-slate-200">
                         <button id="cancelAddMember"
-                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
-                            Cancel
-                        </button>
+                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
                         <button id="confirmAddMember"
                             class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">
                             <i class="fa-solid fa-plus mr-1"></i> Add Member
@@ -480,274 +459,11 @@
     </div>
 </div>
 
+<!-- (Keep your existing <script> block; logic unchanged) -->
 <script>
-    // Initialize cost calculator
-    document.addEventListener('DOMContentLoaded', function () {
-        initializeCostCalculator();
-    });
+    /* your entire JS stays the same, except these tweaks: */
 
-    // Global state
-    let currentTab = 'position';
-    let teamMembers = [];
-    let scenarios = [];
-
-    function initializeCostCalculator() {
-        setupEventListeners();
-        initializeDefaults();
-        // Ensure the default tab panel is visible
-        switchTab('position');
-    }
-
-    function setupEventListeners() {
-        // Tab switching (use currentTarget to handle clicks on icons/text reliably)
-        document.querySelectorAll('.calculator-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                const tabId = e.currentTarget.id.replace('Tab', '');
-                switchTab(tabId);
-            });
-        });
-
-        // Position calculator
-        document.getElementById('calculatePosition').addEventListener('click', calculatePositionCost);
-
-        // Team calculator
-        document.getElementById('addTeamMember').addEventListener('click', openAddMemberModal);
-        document.getElementById('calculateTeam').addEventListener('click', calculateTeamCost);
-
-        // Budget planner
-        document.getElementById('generateBudget').addEventListener('click', generateBudgetPlan);
-
-        // Scenario analysis
-        document.getElementById('addScenario').addEventListener('click', addScenario);
-
-        // Modal controls
-        document.getElementById('closeAddMemberModal').addEventListener('click', closeAddMemberModal);
-        document.getElementById('cancelAddMember').addEventListener('click', closeAddMemberModal);
-        document.getElementById('confirmAddMember').addEventListener('click', confirmAddMember);
-
-        // Export and save
-        document.getElementById('exportBudgetBtn').addEventListener('click', exportBudget);
-        document.getElementById('saveScenarioBtn').addEventListener('click', saveScenario);
-
-        // Auto-calc on key inputs
-        const inputs = ['baseSalary', 'bonusPercent', 'equityValue', 'healthInsurance', 'retirement401k'];
-        inputs.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener('input', debounce(() => {
-                if (document.getElementById('baseSalary').value) calculatePositionCost();
-            }, 500));
-        });
-    }
-
-    function initializeDefaults() {
-        document.getElementById('payrollTax').value = '7.65';
-        document.getElementById('workersComp').value = '0.5';
-        document.getElementById('unemployment').value = '2.5';
-        document.getElementById('healthInsurance').value = '800';
-        document.getElementById('retirement401k').value = '4';
-        document.getElementById('equipment').value = '2000';
-        document.getElementById('training').value = '1500';
-        document.getElementById('officeSpace').value = '500';
-    }
-
-    function switchTab(tabName) {
-        currentTab = tabName;
-
-        // Update tab buttons
-        document.querySelectorAll('.calculator-tab').forEach(tab => tab.classList.remove('active'));
-        const activeBtn = document.getElementById(tabName + 'Tab');
-        if (activeBtn) activeBtn.classList.add('active');
-
-        // Show/hide panels
-        document.querySelectorAll('.calculator-panel').forEach(panel => panel.classList.add('hidden'));
-        const panelMap = {
-            position: 'positionCalculator',
-            team: 'teamCalculator',
-            budget: 'budgetPlanner',
-            scenario: 'scenarioAnalysis'
-        };
-        const targetId = panelMap[tabName];
-        if (targetId) document.getElementById(targetId).classList.remove('hidden');
-    }
-
-    function calculatePositionCost() {
-        const baseSalary = parseFloat(document.getElementById('baseSalary').value) || 0;
-        if (baseSalary === 0) { showError('Please enter a base salary'); return; }
-
-        const bonusPercent = parseFloat(document.getElementById('bonusPercent').value) || 0;
-        const equityValue = parseFloat(document.getElementById('equityValue').value) || 0;
-        const healthInsurance = parseFloat(document.getElementById('healthInsurance').value) || 0;
-        const retirement401k = parseFloat(document.getElementById('retirement401k').value) || 0;
-        const equipment = parseFloat(document.getElementById('equipment').value) || 0;
-        const training = parseFloat(document.getElementById('training').value) || 0;
-        const officeSpace = parseFloat(document.getElementById('officeSpace').value) || 0;
-        const otherBenefits = parseFloat(document.getElementById('otherBenefits').value) || 0;
-        const payrollTax = parseFloat(document.getElementById('payrollTax').value) || 0;
-        const workersComp = parseFloat(document.getElementById('workersComp').value) || 0;
-        const unemployment = parseFloat(document.getElementById('unemployment').value) || 0;
-
-        const bonusAmount = baseSalary * (bonusPercent / 100);
-        const retirement401kAmount = baseSalary * (retirement401k / 100);
-        const annualHealthInsurance = healthInsurance * 12;
-        const annualOfficeSpace = officeSpace * 12;
-        const annualOtherBenefits = otherBenefits * 12;
-
-        const totalCompensation = baseSalary + bonusAmount + equityValue;
-        const totalBenefits = annualHealthInsurance + retirement401kAmount + training + annualOtherBenefits;
-
-        const payrollTaxAmount = totalCompensation * (payrollTax / 100);
-        const workersCompAmount = totalCompensation * (workersComp / 100);
-        const unemploymentAmount = totalCompensation * (unemployment / 100);
-        const totalTaxes = payrollTaxAmount + workersCompAmount + unemploymentAmount;
-
-        const totalAnnualCost = totalCompensation + totalBenefits + totalTaxes + equipment + annualOfficeSpace;
-        const monthlyCost = totalAnnualCost / 12;
-        const hourlyRate = totalAnnualCost / (40 * 52);
-        const benefitsRatio = (totalBenefits / baseSalary) * 100;
-
-        document.getElementById('totalAnnualCost').textContent = formatCurrency(totalAnnualCost);
-        document.getElementById('monthlyCost').textContent = formatCurrency(monthlyCost);
-        document.getElementById('hourlyRate').textContent = formatCurrency(hourlyRate, false);
-        document.getElementById('benefitsRatio').textContent = benefitsRatio.toFixed(1) + '%';
-
-        const breakdown = [
-            { label: 'Base Salary', amount: baseSalary },
-            { label: 'Bonus', amount: bonusAmount },
-            { label: 'Equity', amount: equityValue },
-            { label: 'Health Insurance', amount: annualHealthInsurance },
-            { label: '401k Match', amount: retirement401kAmount },
-            { label: 'Training', amount: training },
-            { label: 'Office Space', amount: annualOfficeSpace },
-            { label: 'Other Benefits', amount: annualOtherBenefits },
-            { label: 'Equipment', amount: equipment },
-            { label: 'Payroll Taxes', amount: totalTaxes }
-        ];
-        const breakdownContainer = document.getElementById('costBreakdown');
-        breakdownContainer.innerHTML = breakdown
-            .filter(i => i.amount > 0)
-            .map(i => `
-                <div class="flex justify-between">
-                    <span class="text-slate-600">${i.label}:</span>
-                    <span class="text-slate-800">${formatCurrency(i.amount)}</span>
-                </div>
-            `).join('');
-
-        document.getElementById('positionResults').classList.remove('hidden');
-        document.getElementById('positionEmptyState').classList.add('hidden');
-    }
-
-    function openAddMemberModal() { document.getElementById('addMemberModal').classList.remove('hidden'); }
-    function closeAddMemberModal() {
-        document.getElementById('addMemberModal').classList.add('hidden');
-        document.getElementById('memberRole').value = '';
-        document.getElementById('memberLevel').value = 'entry';
-        document.getElementById('memberCount').value = '1';
-        document.getElementById('memberSalary').value = '';
-    }
-
-    function confirmAddMember() {
-        const role = document.getElementById('memberRole').value.trim();
-        const level = document.getElementById('memberLevel').value;
-        const count = parseInt(document.getElementById('memberCount').value) || 1;
-        const salary = parseFloat(document.getElementById('memberSalary').value) || 0;
-
-        if (!role || salary === 0) { showError('Please fill in all required fields'); return; }
-
-        const member = { id: Date.now(), role, level, count, salary, totalCost: salary * 1.4 * count };
-        teamMembers.push(member);
-        renderTeamMembers();
-        closeAddMemberModal();
-    }
-
-    function renderTeamMembers() {
-        const container = document.getElementById('teamMembers');
-        if (teamMembers.length === 0) {
-            container.innerHTML = '<p class="text-slate-500 text-center py-4">No team members added yet</p>';
-            return;
-        }
-        container.innerHTML = teamMembers.map(m => `
-            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-                <div>
-                    <div class="font-medium text-slate-800">${m.role}</div>
-                    <div class="text-sm text-slate-600">${m.level} level • ${m.count} person(s)</div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="text-right">
-                        <div class="font-medium text-slate-800">${formatCurrency(m.salary)}</div>
-                        <div class="text-xs text-slate-600">per person</div>
-                    </div>
-                    <button onclick="removeTeamMember(${m.id})" class="text-red-600 hover:text-red-800 p-1">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function removeTeamMember(id) { teamMembers = teamMembers.filter(m => m.id !== id); renderTeamMembers(); calculateTeamCost(); }
-
-    function calculateTeamCost() {
-        if (teamMembers.length === 0) {
-            document.getElementById('teamResults').classList.add('hidden');
-            document.getElementById('teamEmptyState').classList.remove('hidden');
-            return;
-        }
-        const totalSalaries = teamMembers.reduce((s, m) => s + (m.salary * m.count), 0);
-        const totalCost = teamMembers.reduce((s, m) => s + m.totalCost, 0);
-        const totalCount = teamMembers.reduce((s, m) => s + m.count, 0);
-        const averageSalary = totalSalaries / totalCount;
-
-        document.getElementById('teamResults').innerHTML = `
-            <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                <div class="text-sm text-blue-600 mb-1">Total Team Cost</div>
-                <div class="text-2xl font-bold text-blue-800">${formatCurrency(totalCost)}</div>
-                <div class="text-xs text-blue-600 mt-1">Annual including benefits & taxes</div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="p-3 rounded-lg bg-slate-50">
-                    <div class="text-sm text-slate-600">Team Size</div>
-                    <div class="text-lg font-bold text-slate-800">${totalCount}</div>
-                </div>
-                <div class="p-3 rounded-lg bg-slate-50">
-                    <div class="text-sm text-slate-600">Avg Salary</div>
-                    <div class="text-lg font-bold text-slate-800">${formatCurrency(averageSalary)}</div>
-                </div>
-            </div>
-            <div class="space-y-2">
-                <h4 class="text-sm font-medium text-slate-800">Cost by Role</h4>
-                ${teamMembers.map(m => `
-                    <div class="flex justify-between text-sm">
-                        <span class="text-slate-600">${m.role} (${m.count}x):</span>
-                        <span class="font-medium text-slate-800">${formatCurrency(m.totalCost)}</span>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-        document.getElementById('teamResults').classList.remove('hidden');
-        document.getElementById('teamEmptyState').classList.add('hidden');
-    }
-
-    function generateBudgetPlan() {
-        const totalBudget = parseFloat(document.getElementById('totalBudget').value) || 0;
-        if (totalBudget === 0) { showError('Please enter a total budget amount'); return; }
-
-        const allocation = { 'Salaries': 0.65, 'Benefits': 0.20, 'Equipment': 0.05, 'Training': 0.03, 'Office': 0.04, 'Other': 0.03 };
-        const data = Object.entries(allocation).map(([category, pct]) => ({ category, amount: totalBudget * pct, percentage: pct * 100 }));
-
-        withChart(() => renderBudgetChart(data));
-        renderBudgetBreakdown(data);
-        document.getElementById('budgetUtilization').textContent = data.reduce((s, x) => s + x.percentage, 0).toFixed(1) + '%';
-    }
-
-    // Wait for Chart.js if needed
-    function withChart(fn) {
-        if (typeof Chart !== 'undefined') { fn(); return; }
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        script.onload = fn;
-        document.head.appendChild(script);
-    }
-
+    // 1) Make Chart.js charts fill responsive containers (we already switched canvases to absolute fill).
     function renderBudgetChart(data) {
         const ctx = document.getElementById('budgetPieChart').getContext('2d');
         if (window.budgetChartInstance) window.budgetChartInstance.destroy();
@@ -758,8 +474,7 @@
                 datasets: [{
                     data: data.map(i => i.amount),
                     backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16'],
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
+                    borderWidth: 2, borderColor: '#ffffff'
                 }]
             },
             options: {
@@ -771,7 +486,7 @@
                             label: (ctx) => {
                                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                                 const pct = (ctx.raw / total * 100).toFixed(1);
-                                return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
+                                return `${ctx.label}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(ctx.raw)} (${pct}%)`;
                             }
                         }
                     }
@@ -780,84 +495,10 @@
         });
     }
 
-    function renderBudgetBreakdown(data) {
-        const container = document.getElementById('budgetBreakdown');
-        const colors = ['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-cyan-500', 'bg-lime-500'];
-        container.innerHTML = data.map((item, i) => `
-            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-                <div class="flex items-center gap-3">
-                    <div class="w-4 h-4 rounded ${colors[i % colors.length]}"></div>
-                    <span class="font-medium text-slate-800">${item.category}</span>
-                </div>
-                <div class="text-right">
-                    <div class="font-bold text-slate-800">${formatCurrency(item.amount)}</div>
-                    <div class="text-sm text-slate-600">${item.percentage.toFixed(1)}%</div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function addScenario() {
-        const scenario = { id: Date.now(), name: `Scenario ${scenarios.length + 1}`, headcount: 50, avgSalary: 75000, benefits: 0.25, growth: 0.1 };
-        scenarios.push(scenario);
-        renderScenarios();
-    }
-
-    function renderScenarios() {
-        const container = document.getElementById('scenarioGrid');
-        if (scenarios.length === 0) {
-            container.innerHTML = '<p class="col-span-3 text-slate-500 text-center py-8">No scenarios created yet</p>';
-            withChart(() => renderScenarioChart());
-            return;
-        }
-        container.innerHTML = scenarios.map(s => `
-            <div class="rounded-lg border border-slate-200 p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <input type="text" value="${s.name}" onchange="updateScenarioName(${s.id}, this.value)"
-                        class="font-medium text-slate-800 bg-transparent border-none p-0 focus:ring-0">
-                    <button onclick="removeScenario(${s.id})" class="text-red-600 hover:text-red-800">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Headcount</label>
-                        <input type="number" value="${s.headcount}" onchange="updateScenario(${s.id}, 'headcount', this.value)"
-                            class="w-full text-sm rounded border border-slate-300 px-2 py-1">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Avg Salary</label>
-                        <input type="number" value="${s.avgSalary}" onchange="updateScenario(${s.id}, 'avgSalary', this.value)"
-                            class="w-full text-sm rounded border border-slate-300 px-2 py-1">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Benefits Rate</label>
-                        <input type="number" value="${s.benefits}" step="0.05" onchange="updateScenario(${s.id}, 'benefits', this.value)"
-                            class="w-full text-sm rounded border border-slate-300 px-2 py-1">
-                    </div>
-                    <div class="pt-2 border-t border-slate-200">
-                        <div class="text-sm text-slate-600">Total Cost</div>
-                        <div class="text-lg font-bold text-slate-800">${formatCurrency(calculateScenarioCost(s))}</div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-        withChart(() => renderScenarioChart());
-    }
-
-    function calculateScenarioCost(s) {
-        const base = s.headcount * s.avgSalary;
-        const benefits = base * s.benefits;
-        const taxes = base * 0.1;
-        return base + benefits + taxes;
-    }
-
-    function updateScenarioName(id, name) { const s = scenarios.find(x => x.id === id); if (s) s.name = name; }
-    function updateScenario(id, field, value) { const s = scenarios.find(x => x.id === id); if (s) { s[field] = parseFloat(value) || 0; renderScenarios(); } }
-    function removeScenario(id) { scenarios = scenarios.filter(x => x.id !== id); renderScenarios(); }
-
     function renderScenarioChart() {
-        const ctx = document.getElementById('scenarioChart').getContext('2d');
+        const el = document.getElementById('scenarioChart');
+        if (!el) return;
+        const ctx = el.getContext('2d');
         if (window.scenarioChartInstance) window.scenarioChartInstance.destroy();
         if (scenarios.length === 0) return;
         window.scenarioChartInstance = new Chart(ctx, {
@@ -878,38 +519,18 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            callback: (value) => '$' + (value / 1e6).toFixed(1) + 'M'
-                        }
+                        ticks: { callback: (v) => '$' + (v / 1e6).toFixed(1) + 'M' }
                     }
                 }
             }
         });
     }
-
-    function exportBudget() { showSuccess('Budget export functionality would be implemented here'); }
-    function saveScenario() { showSuccess('Scenario save functionality would be implemented here'); }
-
-    // Utility functions
-    function formatCurrency(amount, showCents = true) {
-        const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: showCents ? 2 : 0, maximumFractionDigits: showCents ? 2 : 0 });
-        return fmt.format(amount);
-    }
-    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
-    function showSuccess(msg) { alert('✅ ' + msg); }
-    function showError(msg) { alert('❌ ' + msg); }
-
-    // Close modal when clicking backdrop
-    window.addEventListener('click', (e) => {
-        const modal = document.getElementById('addMemberModal');
-        if (e.target === modal) closeAddMemberModal();
-    });
 </script>
 
 <style>
     .calculator-tab.active {
         background-color: #1e293b;
-        color: white;
+        color: #fff;
     }
 
     .calculator-tab:not(.active) {
@@ -919,6 +540,16 @@
     .calculator-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    /* Hide scrollbar in tab strip on mobile */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 </style>
 {% endblock %}

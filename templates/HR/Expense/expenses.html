@@ -10,6 +10,19 @@
             <p class="text-slate-600 text-sm">Submit, approve, and reimburse employee expenses easily.</p>
         </div>
         <div class="flex items-center gap-2">
+            <button id="resetSeed"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-seedling mr-1"></i> Reset Demo Data
+            </button>
+            <button id="exportCsv"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-csv mr-1"></i> Export (filtered)
+            </button>
+            <label
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-import mr-1"></i> Import (.json)
+                <input id="importJson" type="file" accept="application/json" class="hidden">
+            </label>
             <button id="newExpenseBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-circle-plus mr-1"></i> New Expense
             </button>
@@ -40,11 +53,11 @@
     <section id="minePanel" class="ex-panel">
         <div class="rounded-2xl border border-slate-200 bg-white">
             <div class="flex items-center justify-between p-4 border-b border-slate-200">
-                <div class="flex items-center gap-2">
-                    <div class="relative w-full md:w-80">
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="relative w-full md:w-72">
                         <i
                             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input id="mySearch" placeholder="Search category, merchant, or note"
+                        <input id="mySearch" placeholder="Search category, merchant, note"
                             class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
                         <button id="myClear"
                             class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -59,27 +72,61 @@
                         <option value="reimbursed">Reimbursed</option>
                         <option value="rejected">Rejected</option>
                     </select>
-                    <input id="myPeriod" type="month" class="px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                    <select id="myCat" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="">Any Category</option>
+                        <option>Meals</option>
+                        <option>Travel</option>
+                        <option>Lodging</option>
+                        <option>Supplies</option>
+                        <option>Other</option>
+                    </select>
+                    <input id="myFrom" type="date" class="px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                    <input id="myTo" type="date" class="px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                    <input id="myMin" type="number" placeholder="Min $"
+                        class="px-3 py-2 w-28 rounded-lg border border-slate-300 text-sm">
+                    <input id="myMax" type="number" placeholder="Max $"
+                        class="px-3 py-2 w-28 rounded-lg border border-slate-300 text-sm">
                 </div>
-                <div class="text-sm text-slate-600">
+                <div class="flex items-center gap-3 text-sm text-slate-600">
                     <span id="kpiPending">Pending: —</span> • <span id="kpiApproved">Approved: —</span>
                 </div>
             </div>
+
+            <div class="flex items-center justify-between px-4 py-2">
+                <div class="text-sm text-slate-600"><span id="selCount">0</span> selected</div>
+                <div class="flex items-center gap-2">
+                    <button id="bulkSubmit"
+                        class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm disabled:opacity-40" disabled>
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Submit
+                    </button>
+                    <button id="bulkApproveMine"
+                        class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm disabled:opacity-40" disabled>
+                        <i class="fa-solid fa-check mr-1"></i> Mark Approved
+                    </button>
+                    <button id="bulkDelete"
+                        class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm disabled:opacity-40" disabled>
+                        <i class="fa-solid fa-trash-can mr-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
+                            <th class="py-2 px-4 w-10"><input id="checkAll" type="checkbox" class="h-4 w-4"></th>
                             <th class="py-2 px-4">Date</th>
                             <th class="py-2 px-4">Category</th>
                             <th class="py-2 px-4">Merchant</th>
                             <th class="py-2 px-4">Amount</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 w-40">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="myRows" class="text-slate-800"><!-- injected --></tbody>
                 </table>
             </div>
+            <div id="mineMsg" class="p-3 text-sm text-slate-600"></div>
         </div>
     </section>
 
@@ -87,8 +134,9 @@
     <section id="approvalsPanel" class="ex-panel hidden">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-check-to-slot mr-2"></i> Pending
-                    Approvals</h3>
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-check-to-slot mr-2"></i> Pending Approvals
+                </h3>
                 <div class="flex items-center gap-2">
                     <select id="apFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
@@ -96,8 +144,9 @@
                         <option value="flagged">Flagged</option>
                     </select>
                     <button id="approveAll"
-                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
-                            class="fa-solid fa-check mr-1"></i> Approve All</button>
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                        <i class="fa-solid fa-check mr-1"></i> Approve All
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -109,7 +158,7 @@
                             <th class="py-2 px-4">Amount</th>
                             <th class="py-2 px-4">Policy</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 w-40">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="apRows" class="text-slate-800"><!-- injected --></tbody>
@@ -132,8 +181,9 @@
                             <option value="sent">Sent</option>
                         </select>
                         <button id="genRbFile"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
-                                class="fa-solid fa-file-arrow-down mr-1"></i> Generate File</button>
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                            <i class="fa-solid fa-file-arrow-down mr-1"></i> Generate File
+                        </button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -151,6 +201,7 @@
                     </table>
                 </div>
             </div>
+
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-wallet mr-2"></i> Next
                     Payout</h3>
@@ -213,7 +264,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <input id="eMerchant" placeholder="Merchant"
                             class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                        <input id="eAmount" type="number" placeholder="Amount"
+                        <input id="eAmount" type="number" step="0.01" placeholder="Amount"
                             class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
                     <input id="eNote" placeholder="Notes (optional)"
@@ -222,16 +273,18 @@
                         <label class="flex items-center gap-2 text-sm"><input id="ePolicy" type="checkbox" checked>
                             Within policy</label>
                         <button id="uploadReceipt"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm"><i
-                                class="fa-solid fa-upload mr-1"></i> Receipt</button>
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                            <i class="fa-solid fa-upload mr-1"></i> Receipt
+                        </button>
                     </div>
                     <div class="flex items-center justify-end gap-2 pt-2">
                         <button id="saveDraft"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Save
                             Draft</button>
                         <button id="submitExpense"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
-                                class="fa-solid fa-paper-plane mr-1"></i> Submit</button>
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                            <i class="fa-solid fa-paper-plane mr-1"></i> Submit
+                        </button>
                     </div>
                 </div>
             </div>
@@ -240,32 +293,70 @@
 </div>
 
 <script>
-    /* -------- Mock Data -------- */
-    let MY = [
+    /* -------- Persistence (localStorage) & Seed -------- */
+    const KEY_MY = 'demo_expenses_my';
+    const KEY_AP = 'demo_expenses_ap';
+    const KEY_RB = 'demo_expenses_rb';
+    const KEY_POL = 'demo_expenses_pol';
+
+    const SEED_MY = [
         { id: 1, date: '2025-09-10', cat: 'Meals', merch: 'Cafe Deli', amt: 18, st: 'submitted' },
         { id: 2, date: '2025-09-11', cat: 'Travel', merch: 'Uber', amt: 22, st: 'approved' },
         { id: 3, date: '2025-09-12', cat: 'Supplies', merch: 'OfficeMart', amt: 45, st: 'draft' },
         { id: 4, date: '2025-09-08', cat: 'Lodging', merch: 'Hotel Z', amt: 180, st: 'reimbursed' },
         { id: 5, date: '2025-09-09', cat: 'Travel', merch: 'IndiGo', amt: 120, st: 'rejected' }
     ];
-    let AP = [
+    const SEED_AP = [
         { id: 'R-101', emp: 'Aarav Mehta', cat: 'Travel', amt: 120, policy: 'OK', st: 'submitted' },
         { id: 'R-102', emp: 'Riya Patel', cat: 'Meals', amt: 38, policy: 'Flag', st: 'flagged' },
         { id: 'R-103', emp: 'Noah Kim', cat: 'Supplies', amt: 65, policy: 'OK', st: 'submitted' }
     ];
-    let RB = [
+    const SEED_RB = [
         { id: 'RB-2301', count: 7, amount: 563, st: 'sent' },
         { id: 'RB-2302', count: 4, amount: 241, st: 'queued' }
     ];
-    let POL = [
+    const SEED_POL = [
         { name: 'Meals — ₹800/day or $10/day cap', ver: 'v2.0', eff: '2025-07-01' },
         { name: 'Travel — economy, >300km needs approval', ver: 'v1.8', eff: '2025-06-15' }
     ];
 
+    let MY = JSON.parse(localStorage.getItem(KEY_MY) || 'null') || SEED_MY.slice();
+    let AP = JSON.parse(localStorage.getItem(KEY_AP) || 'null') || SEED_AP.slice();
+    let RB = JSON.parse(localStorage.getItem(KEY_RB) || 'null') || SEED_RB.slice();
+    let POL = JSON.parse(localStorage.getItem(KEY_POL) || 'null') || SEED_POL.slice();
+
+    function persist() {
+        localStorage.setItem(KEY_MY, JSON.stringify(MY));
+        localStorage.setItem(KEY_AP, JSON.stringify(AP));
+        localStorage.setItem(KEY_RB, JSON.stringify(RB));
+        localStorage.setItem(KEY_POL, JSON.stringify(POL));
+    }
+
     /* -------- Helpers -------- */
     const $ = (id) => document.getElementById(id);
     function money(n) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n || 0)); }
-    function badge(s) { return s === 'approved' ? 'bg-emerald-50 text-emerald-700' : s === 'submitted' ? 'bg-amber-50 text-amber-700' : s === 'reimbursed' ? 'bg-blue-50 text-blue-700' : s === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-700'; }
+    function badge(s) {
+        return s === 'approved' ? 'bg-emerald-50 text-emerald-700'
+            : s === 'submitted' ? 'bg-amber-50 text-amber-700'
+                : s === 'reimbursed' ? 'bg-blue-50 text-blue-700'
+                    : s === 'rejected' ? 'bg-red-50 text-red-700'
+                        : 'bg-slate-100 text-slate-700';
+    }
+    function between(date, from, to) {
+        const v = new Date(date).setHours(0, 0, 0, 0);
+        const f1 = from ? new Date(from).setHours(0, 0, 0, 0) : null;
+        const f2 = to ? new Date(to).setHours(23, 59, 59, 999) : null;
+        if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true;
+    }
+    function dl(name, text) {
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = name; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 200);
+    }
+
+    /* -------- State (My tab) -------- */
+    let selectedIds = new Set();
 
     /* -------- Init -------- */
     document.addEventListener('DOMContentLoaded', () => {
@@ -276,26 +367,37 @@
                 e.currentTarget.classList.add('active');
                 const name = e.currentTarget.id.replace('Tab', '');
                 document.querySelectorAll('.ex-panel').forEach(p => p.classList.add('hidden'));
-                document.getElementById(name + 'Panel').classList.remove('hidden');
+                $(name + 'Panel').classList.remove('hidden');
                 if (name === 'reports') { ensureCharts(); drawCharts(); }
             });
         });
 
-        // My expenses filters
-        $('myPeriod').value = new Date().toISOString().slice(0, 7);
-        $('myStatus').addEventListener('change', renderMine);
-        const s = $('mySearch'), c = $('myClear');
-        s.addEventListener('input', () => { c.classList.toggle('hidden', !s.value.trim()); renderMine(); });
+        // Filters
+        ['myStatus', 'myCat', 'myFrom', 'myTo', 'myMin', 'myMax'].forEach(id => $(id).addEventListener('input', renderMine));
+        const s = $('mySearch'), c = $('myClear'); s.addEventListener('input', () => { c.classList.toggle('hidden', !s.value.trim()); renderMine(); });
         c.addEventListener('click', () => { s.value = ''; c.classList.add('hidden'); renderMine(); });
-        $('myPeriod').addEventListener('change', renderMine);
+
+        // Bulk
+        $('checkAll').addEventListener('change', () => {
+            const data = filteredMine();
+            if ($('checkAll').checked) selectedIds = new Set(data.map(x => x.id)); else selectedIds.clear();
+            renderMine();
+        });
+        $('bulkSubmit').addEventListener('click', () => bulkSet('submitted'));
+        $('bulkApproveMine').addEventListener('click', () => bulkSet('approved'));
+        $('bulkDelete').addEventListener('click', () => {
+            if (!selectedIds.size) return;
+            if (!confirm(`Delete ${selectedIds.size} expense(s)?`)) return;
+            MY = MY.filter(x => !selectedIds.has(x.id)); selectedIds.clear(); persist(); renderMine(); renderNextPayout();
+        });
 
         // Approvals
         $('apFilter').addEventListener('change', renderApprovals);
-        $('approveAll').addEventListener('click', () => { AP = AP.map(x => ({ ...x, st: 'approved' })); renderApprovals(); });
+        $('approveAll').addEventListener('click', () => { AP = AP.map(x => ({ ...x, st: 'approved' })); persist(); renderApprovals(); });
 
         // Reimbursements
         $('rbFilter').addEventListener('change', renderBatches);
-        $('genRbFile').addEventListener('click', () => alert('✅ Reimbursement file generated'));
+        $('genRbFile').addEventListener('click', generateRbFile);
 
         // Policies
         $('newPolicy').addEventListener('click', () => alert('📝 New policy form would open'));
@@ -303,77 +405,176 @@
         // Modal
         $('newExpenseBtn').addEventListener('click', openExpModal);
         $('closeExpModal').addEventListener('click', closeExpModal);
-        $('saveDraft').addEventListener('click', saveDraft);
-        $('submitExpense').addEventListener('click', submitExpense);
+        $('saveDraft').addEventListener('click', () => saveFromModal('draft'));
+        $('submitExpense').addEventListener('click', () => saveFromModal('submitted'));
         $('uploadReceipt').addEventListener('click', () => alert('📎 Upload receipt (mock)'));
 
-        // Paint
-        renderMine(); renderApprovals(); renderBatches(); renderNextPayout(); renderPolicies();
+        // Toolbar
+        $('resetSeed').addEventListener('click', () => {
+            if (!confirm('Reset demo data?')) return;
+            MY = SEED_MY.slice(); AP = SEED_AP.slice(); RB = SEED_RB.slice(); POL = SEED_POL.slice();
+            selectedIds.clear(); persist(); paintAll();
+        });
+        $('exportCsv').addEventListener('click', () => {
+            const data = filteredMine();
+            const header = ['ID', 'Date', 'Category', 'Merchant', 'Amount', 'Status'];
+            const rows = data.map(x => [x.id, x.date, x.cat, x.merch, x.amt, x.st]);
+            const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            dl('expenses_filtered.csv', csv);
+        });
+        $('importJson').addEventListener('change', (e) => {
+            const f = e.target.files?.[0]; if (!f) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const arr = JSON.parse(reader.result);
+                    if (!Array.isArray(arr)) throw new Error();
+                    // Minimal shape
+                    MY = arr.map((r, i) => ({
+                        id: Number(r.id ?? Date.now() + i), date: String(r.date || new Date().toISOString().slice(0, 10)),
+                        cat: String(r.cat || r.category || 'Other'), merch: String(r.merch || r.merchant || '—'),
+                        amt: Number(r.amt || r.amount || 0), st: String(r.st || r.status || 'draft').toLowerCase()
+                    }));
+                    persist(); paintAll();
+                } catch { alert('❌ Invalid JSON'); }
+            };
+            reader.readAsText(f); e.target.value = '';
+        });
+
+        // First paint
+        paintAll();
     });
 
-    /* -------- My Expenses -------- */
-    function renderMine() {
-        const q = ($('mySearch').value || '').toLowerCase();
+    /* -------- Rendering: My -------- */
+    function filteredMine() {
+        const q = ($('mySearch').value || '').toLowerCase().trim();
         const st = $('myStatus').value;
-        const data = MY.filter(x => (st === 'all' || x.st === st) && (!q || [x.cat, x.merch].some(v => v.toLowerCase().includes(q))));
-        $('myRows').innerHTML = data.map(x => `
-    <tr class="border-b last:border-0">
-      <td class="py-2 px-4">${x.date}</td>
-      <td class="py-2 px-4">${x.cat}</td>
-      <td class="py-2 px-4">${x.merch}</td>
-      <td class="py-2 px-4">${money(x.amt)}</td>
-      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${badge(x.st)} capitalize">${x.st}</span></td>
-      <td class="py-2 px-4 text-right">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="editExp(${x.id})">Edit</button>
-      </td>
-    </tr>`).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No expenses</td></tr>`;
-        const pSum = MY.filter(x => x.st === 'submitted').reduce((s, i) => s + i.amt, 0);
-        const aSum = MY.filter(x => x.st === 'approved' || x.st === 'reimbursed').reduce((s, i) => s + i.amt, 0);
+        const cat = $('myCat').value;
+        const from = $('myFrom').value, to = $('myTo').value;
+        const min = Number($('myMin').value || 0);
+        const max = Number($('myMax').value || Number.MAX_SAFE_INTEGER);
+        return MY.filter(x => {
+            if (st !== 'all' && x.st !== st) return false;
+            if (cat && x.cat !== cat) return false;
+            if (q && !(`${x.cat} ${x.merch} ${x.st}`.toLowerCase().includes(q))) return false;
+            if (!between(x.date, from, to)) return false;
+            if (x.amt < min || x.amt > max) return false;
+            return true;
+        });
+    }
+    function renderMine() {
+        const data = filteredMine();
+        const tbody = $('myRows'); tbody.innerHTML = '';
+        data.forEach(x => {
+            const tr = document.createElement('tr'); tr.className = 'border-b last:border-0';
+
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'h-4 w-4';
+            cb.checked = selectedIds.has(x.id);
+            cb.addEventListener('change', () => { cb.checked ? selectedIds.add(x.id) : selectedIds.delete(x.id); updateBulkState(data); });
+            tr.appendChild(td(cb));
+
+            tr.append(tdText(x.date));
+            tr.append(tdText(x.cat));
+            tr.append(tdText(x.merch));
+            tr.append(tdText(money(x.amt)));
+
+            const st = document.createElement('span');
+            st.className = `px-2 py-0.5 rounded-full text-xs capitalize ${badge(x.st)}`;
+            st.textContent = x.st;
+            tr.appendChild(td(st));
+
+            const actions = document.createElement('div');
+            actions.className = 'flex items-center gap-2';
+            actions.append(btn('Edit', 'border', () => editExp(x.id)));
+            actions.append(btn('Approve', 'emerald', () => { x.st = 'approved'; persist(); paintMySide(); }));
+            actions.append(btn('Delete', 'ghost', () => { if (!confirm('Delete?')) return; MY = MY.filter(i => i.id !== x.id); selectedIds.delete(x.id); persist(); paintMySide(); }));
+            tr.appendChild(td(actions));
+
+            tbody.appendChild(tr);
+        });
+
+        // KPIs
+        const pSum = MY.filter(i => i.st === 'submitted').reduce((s, i) => s + i.amt, 0);
+        const aSum = MY.filter(i => i.st === 'approved' || i.st === 'reimbursed').reduce((s, i) => s + i.amt, 0);
         $('kpiPending').textContent = 'Pending: ' + money(pSum);
         $('kpiApproved').textContent = 'Approved: ' + money(aSum);
+
+        $('mineMsg').textContent = data.length ? '' : 'No expenses.';
+        $('checkAll').checked = data.length > 0 && data.every(i => selectedIds.has(i.id));
+        updateBulkState(data);
+    }
+    function td(node) { const c = document.createElement('td'); c.className = 'py-2 px-4'; c.appendChild(node); return c; }
+    function tdText(text) { const s = document.createElement('span'); s.textContent = text; return td(s); }
+    function btn(txt, tone, on) {
+        const b = document.createElement('button');
+        const tones = {
+            border: 'px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50',
+            emerald: 'px-2 py-1 rounded bg-emerald-600 text-white text-xs hover:bg-emerald-700',
+            ghost: 'px-2 py-1 rounded border border-slate-300 text-xs hover:bg-slate-50'
+        };
+        b.className = tones[tone] || tones.border; b.textContent = txt; b.addEventListener('click', on); return b;
+    }
+    function updateBulkState(current) {
+        const on = selectedIds.size > 0;
+        $('selCount').textContent = String(selectedIds.size);
+        $('bulkSubmit').disabled = !on;
+        $('bulkApproveMine').disabled = !on;
+        $('bulkDelete').disabled = !on;
+    }
+    function bulkSet(status) {
+        if (!selectedIds.size) return;
+        MY.forEach(i => { if (selectedIds.has(i.id)) i.st = status; });
+        persist(); renderMine(); renderNextPayout();
     }
     function editExp(id) {
         const e = MY.find(x => x.id === id); if (!e) return;
         $('eDate').value = e.date; $('eCategory').value = e.cat; $('eMerchant').value = e.merch; $('eAmount').value = e.amt; $('eNote').value = '';
         openExpModal();
     }
+    function paintMySide() { renderMine(); renderNextPayout(); if (document.querySelector('#reportsPanel:not(.hidden)')) drawCharts(); }
 
     /* -------- Approvals -------- */
     function renderApprovals() {
         const f = $('apFilter').value;
         const data = f === 'all' ? AP : AP.filter(x => x.st === f);
-        $('apRows').innerHTML = data.map(x => {
-            const tone = x.st === 'flagged' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700';
-            return `
-    <tr class="border-b last:border-0">
-      <td class="py-2 px-4 font-medium">${x.emp}</td>
-      <td class="py-2 px-4">${x.cat}</td>
-      <td class="py-2 px-4">${money(x.amt)}</td>
-      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${x.policy === 'OK' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${x.policy}</span></td>
-      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${tone} capitalize">${x.st}</span></td>
-      <td class="py-2 px-4 text-right">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${x.id}')">Approve</button>
-      </td>
-    </tr>`;
-        }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No items</td></tr>`;
+        const tbody = $('apRows'); tbody.innerHTML = '';
+        data.forEach(x => {
+            const tr = document.createElement('tr'); tr.className = 'border-b last:border-0';
+            tr.append(tdText(x.emp));
+            tr.append(tdText(x.cat));
+            tr.append(tdText(money(x.amt)));
+
+            const pol = document.createElement('span');
+            pol.className = `px-2 py-0.5 rounded-full text-xs ${x.policy === 'OK' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`;
+            pol.textContent = x.policy; tr.append(td(pol));
+
+            const tone = x.st === 'flagged' ? 'bg-amber-50 text-amber-700' : 'bg-amber-50 text-amber-700';
+            const st = document.createElement('span'); st.className = `px-2 py-0.5 rounded-full text-xs ${tone} capitalize`; st.textContent = x.st; tr.append(td(st));
+
+            const act = document.createElement('div'); act.className = 'flex items-center gap-2';
+            act.append(btn('Approve', 'emerald', () => { x.st = 'approved'; persist(); renderApprovals(); }));
+            act.append(btn('Reject', 'ghost', () => { x.st = 'rejected'; persist(); renderApprovals(); }));
+            tr.append(td(act));
+            tbody.appendChild(tr);
+        });
     }
-    function approve(id) { const t = AP.find(x => x.id === id); if (!t) return; t.st = 'approved'; renderApprovals(); }
 
     /* -------- Reimbursements -------- */
     function renderBatches() {
         const f = $('rbFilter').value;
         const data = f === 'all' ? RB : RB.filter(b => b.st === f);
-        $('rbRows').innerHTML = data.map(b => {
-            const pill = b.st === 'sent' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
-            return `
-    <tr class="border-b last:border-0">
-      <td class="py-2 px-4 font-medium">${b.id}</td>
-      <td class="py-2 px-4">${b.count}</td>
-      <td class="py-2 px-4">${money(b.amount)}</td>
-      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${b.st}</span></td>
-      <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button></td>
-    </tr>`;
-        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No batches</td></tr>`;
+        const tbody = $('rbRows'); tbody.innerHTML = '';
+        data.forEach(b => {
+            const tr = document.createElement('tr'); tr.className = 'border-b last:border-0';
+            tr.append(tdText(b.id));
+            tr.append(tdText(b.count));
+            tr.append(tdText(money(b.amount)));
+            const pill = document.createElement('span');
+            pill.className = `px-2 py-0.5 rounded-full text-xs ${b.st === 'sent' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`;
+            pill.textContent = b.st; tr.append(td(pill));
+            const act = btn('Details', 'border', () => alert('Batch details coming soon')); tr.append(td(act));
+            tbody.appendChild(tr);
+        });
     }
     function renderNextPayout() {
         const due = MY.filter(x => x.st === 'approved').slice(0, 3);
@@ -383,12 +584,26 @@
       <div class="text-sm font-semibold">${money(x.amt)}</div>
     </li>`).join('') || `<li class="text-slate-500">No approved items</li>`;
     }
+    function generateRbFile() {
+        // Create a batch from currently approved but not reimbursed
+        const items = MY.filter(x => x.st === 'approved');
+        if (!items.length) { alert('No approved items to disburse'); return; }
+        const amount = items.reduce((s, i) => s + i.amt, 0);
+        const id = 'RB-' + (Math.max(0, ...RB.map(b => Number(String(b.id).replace(/\D/g, '')) || 0)) + 1).toString().padStart(4, '0');
+        RB.unshift({ id, count: items.length, amount, st: 'queued' });
+        // Mark as reimbursed (mock)
+        items.forEach(i => i.st = 'reimbursed');
+        persist(); renderBatches(); renderNextPayout(); renderMine(); alert('✅ Reimbursement file generated');
+    }
 
     /* -------- Policies -------- */
     function renderPolicies() {
         $('policyList').innerHTML = POL.map(p => `
     <li class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-      <div><div class="font-medium text-slate-800">${p.name}</div><div class="text-xs text-slate-600">${p.ver} • Effective ${p.eff}</div></div>
+      <div>
+        <div class="font-medium text-slate-800">${p.name}</div>
+        <div class="text-xs text-slate-600">${p.ver} • Effective ${p.eff}</div>
+      </div>
       <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Open policy')">Open</button>
     </li>`).join('');
     }
@@ -396,54 +611,54 @@
     /* -------- Modal -------- */
     function openExpModal() { $('expModal').classList.remove('hidden'); }
     function closeExpModal() { $('expModal').classList.add('hidden'); }
-    function saveDraft() {
+    function saveFromModal(mode) {
         const item = readModal(); if (!item) return;
-        item.st = 'draft'; MY.push(item); closeExpModal(); renderMine();
-    }
-    function submitExpense() {
-        const item = readModal(); if (!item) return;
-        item.st = 'submitted'; MY.push(item); closeExpModal(); renderMine();
+        item.st = mode; MY.push(item); persist(); closeExpModal(); paintMySide();
     }
     function readModal() {
         const date = $('eDate').value || new Date().toISOString().slice(0, 10);
         const cat = $('eCategory').value || 'Other';
         const merch = $('eMerchant').value.trim() || '—';
-        const amt = Number($('eAmount').value || 0); if (!amt) { alert('Amount required'); return null; }
+        const amt = Number($('eAmount').value || 0);
+        if (!amt) { alert('Amount required'); return null; }
         return { id: Date.now(), date, cat, merch, amt, st: 'draft' };
     }
 
-    /* -------- Reports -------- */
+    /* -------- Reports (Chart.js) -------- */
     let chartsReady = false, catC, travelC;
     function ensureCharts() {
         if (typeof Chart !== 'undefined') { chartsReady = true; return; }
         if (chartsReady) return;
         const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        s.onload = () => { chartsReady = true; drawCharts(); };
-        document.head.appendChild(s);
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
     }
     function drawCharts() {
-        const c1 = document.getElementById('catChart'); const c2 = document.getElementById('travelChart');
-        if (!chartsReady || !c1 || !c2) return;
+        const c1 = $('catChart'); const c2 = $('travelChart'); if (!chartsReady || !c1 || !c2) return;
         catC && catC.destroy(); travelC && travelC.destroy();
 
-        const byCat = aggregateByCategory(MY);
+        const byCat = MY.reduce((m, i) => (m[i.cat] = (m[i.cat] || 0) + i.amt, m), {});
         catC = new Chart(c1, {
             type: 'pie',
-            data: { labels: Object.keys(byCat), datasets: [{ data: Object.values(byCat), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }] },
+            data: {
+                labels: Object.keys(byCat), datasets: [{
+                    data: Object.values(byCat), borderWidth: 2, borderColor: '#fff',
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+                }]
+            },
             options: { plugins: { legend: { position: 'bottom' } } }
         });
 
-        const travel = MY.filter(x => x.cat === 'Travel' || x.cat === 'Lodging').reduce((s, i) => s + i.amt, 0);
+        const travel = MY.filter(i => i.cat === 'Travel' || i.cat === 'Lodging').reduce((s, i) => s + i.amt, 0);
         const non = MY.reduce((s, i) => s + i.amt, 0) - travel;
         travelC = new Chart(c2, {
             type: 'bar',
-            data: { labels: ['Travel', 'Non-Travel'], datasets: [{ data: [travel, non], backgroundColor: '#06b6d4' }] },
+            data: { labels: ['Travel', 'Non-Travel'], datasets: [{ data: [travel, non], backgroundColor: '#06b6d4', borderColor: '#0891b2', borderWidth: 2 }] },
             options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
         });
     }
-    function aggregateByCategory(items) {
-        return items.reduce((m, i) => { m[i.cat] = (m[i.cat] || 0) + i.amt; return m; }, {});
-    }
+
+    /* -------- Paint All -------- */
+    function paintAll() { renderMine(); renderApprovals(); renderBatches(); renderNextPayout(); renderPolicies(); if (!$('reportsPanel').classList.contains('hidden')) { ensureCharts(); drawCharts(); } }
 </script>
 
 <style>

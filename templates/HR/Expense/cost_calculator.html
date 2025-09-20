@@ -18,6 +18,11 @@
                 class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-download mr-1"></i> Export Budget
             </button>
+            <label
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-import mr-1"></i> Import (JSON)
+                <input id="importJSON" type="file" accept="application/json" class="hidden">
+            </label>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
@@ -25,7 +30,7 @@
         </div>
     </div>
 
-    <!-- Calculator Type Tabs -->
+    <!-- Tabs -->
     <div class="mb-6">
         <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
             <button id="positionTab"
@@ -47,11 +52,23 @@
     <!-- Position Calculator -->
     <div id="positionCalculator" class="calculator-panel">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Input Form -->
+            <!-- Inputs -->
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
-                    <i class="fa-solid fa-user-plus mr-2"></i> Position Details
-                </h3>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-user-plus mr-2"></i> Position Details
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <button id="resetPosition"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                            <i class="fa-solid fa-rotate mr-1"></i> Reset
+                        </button>
+                        <button id="exportPosition"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                            <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+                        </button>
+                    </div>
+                </div>
 
                 <form id="positionForm" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -76,9 +93,9 @@
                             <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
                             <select id="positionLevel" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                                 <option value="">Select Level</option>
-                                <option value="entry">Entry Level</option>
-                                <option value="mid">Mid Level</option>
-                                <option value="senior">Senior Level</option>
+                                <option value="entry">Entry</option>
+                                <option value="mid">Mid</option>
+                                <option value="senior">Senior</option>
                                 <option value="lead">Lead/Manager</option>
                                 <option value="director">Director</option>
                                 <option value="executive">Executive</option>
@@ -102,23 +119,21 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Base Salary *</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="baseSalary" required min="0" step="1000"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Bonus Target (%)</label>
-                                <input type="number" id="bonusPercent" min="0" max="100" step="5"
+                                <input type="number" id="bonusPercent" min="0" max="100" step="1"
                                     class="w-full rounded-lg border border-slate-300 px-3 py-2">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Equity Value
                                     (Annual)</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="equityValue" min="0" step="1000"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -126,11 +141,18 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Employment Type</label>
                                 <select id="employmentType" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                                    <option value="full-time">Full-Time</option>
+                                    <option value="full-time" selected>Full-Time</option>
                                     <option value="part-time">Part-Time</option>
                                     <option value="contractor">Contractor</option>
                                     <option value="intern">Intern</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">FTE % (proration)</label>
+                                <input type="number" id="ftePercent" min="10" max="100" step="5" value="100"
+                                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <p class="text-xs text-slate-500 mt-1">Used for part-time & interns (100 = full-time)
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -139,11 +161,11 @@
                         <h4 class="font-medium text-slate-800 mb-3">Benefits & Additional Costs</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Health Insurance</label>
-                                <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
-                                    <input type="number" id="healthInsurance" min="0" step="100" placeholder="Monthly"
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Health Insurance
+                                    (Monthly)</label>
+                                <div class="relative"><span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                    <input type="number" id="healthInsurance" min="0" step="50"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
                             </div>
@@ -154,39 +176,38 @@
                                     class="w-full rounded-lg border border-slate-300 px-3 py-2">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Equipment & Setup</label>
-                                <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
-                                    <input type="number" id="equipment" min="0" step="100" placeholder="One-time"
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Equipment & Setup
+                                    (One-time)</label>
+                                <div class="relative"><span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                    <input type="number" id="equipment" min="0" step="100"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Training &
-                                    Development</label>
-                                <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
-                                    <input type="number" id="training" min="0" step="100" placeholder="Annual"
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Training & Development
+                                    (Annual)</label>
+                                <div class="relative"><span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                    <input type="number" id="training" min="0" step="100"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Office Space</label>
-                                <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
-                                    <input type="number" id="officeSpace" min="0" step="100" placeholder="Monthly"
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Office Space
+                                    (Monthly)</label>
+                                <div class="relative"><span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                    <input type="number" id="officeSpace" min="0" step="50"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Other Benefits</label>
-                                <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
-                                    <input type="number" id="otherBenefits" min="0" step="100" placeholder="Monthly"
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Other Benefits
+                                    (Monthly)</label>
+                                <div class="relative"><span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                    <input type="number" id="otherBenefits" min="0" step="50"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
                             </div>
@@ -215,57 +236,51 @@
                         </div>
                     </div>
 
-                    <button type="button" id="calculatePosition"
-                        class="w-full px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">
-                        <i class="fa-solid fa-calculator mr-2"></i> Calculate Total Cost
-                    </button>
+                    <div class="flex items-center justify-between pt-2">
+                        <label class="flex items-center gap-2 text-sm text-slate-700">
+                            <input id="includeEquityInTaxes" type="checkbox" class="rounded border-slate-300" checked>
+                            Include equity in tax base
+                        </label>
+                        <button type="button" id="calculatePosition"
+                            class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">
+                            <i class="fa-solid fa-calculator mr-2"></i> Calculate Total Cost
+                        </button>
+                    </div>
                 </form>
             </div>
 
-            <!-- Results Panel -->
+            <!-- Results -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4">
                     <i class="fa-solid fa-chart-line mr-2"></i> Cost Breakdown
                 </h3>
 
                 <div id="positionResults" class="hidden space-y-4">
-                    <!-- Total Cost -->
                     <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
                         <div class="text-sm text-blue-600 mb-1">Total Annual Cost</div>
                         <div id="totalAnnualCost" class="text-2xl font-bold text-blue-800">$0</div>
                         <div class="text-xs text-blue-600 mt-1">Including all benefits and taxes</div>
                     </div>
 
-                    <!-- Monthly Cost -->
-                    <div class="p-3 rounded-lg bg-slate-50">
-                        <div class="flex justify-between">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 rounded-lg bg-slate-50 flex items-center justify-between">
                             <span class="text-sm text-slate-600">Monthly Cost</span>
                             <span id="monthlyCost" class="font-medium text-slate-800">$0</span>
                         </div>
+                        <div class="p-3 rounded-lg bg-slate-50 flex items-center justify-between">
+                            <span class="text-sm text-slate-600">Effective Hourly Rate</span>
+                            <span id="hourlyRate" class="font-medium text-slate-800">$0</span>
+                        </div>
                     </div>
 
-                    <!-- Cost Breakdown -->
                     <div class="space-y-2">
                         <h4 class="text-sm font-medium text-slate-800">Breakdown</h4>
                         <div id="costBreakdown" class="space-y-1 text-sm"></div>
                     </div>
 
-                    <!-- Cost per Hour -->
-                    <div class="p-3 rounded-lg bg-green-50">
-                        <div class="flex justify-between">
-                            <span class="text-sm text-green-600">Effective Hourly Rate</span>
-                            <span id="hourlyRate" class="font-medium text-green-800">$0</span>
-                        </div>
-                        <div class="text-xs text-green-600 mt-1">Based on 40 hrs/week, 52 weeks</div>
-                    </div>
-
-                    <!-- Benefits Ratio -->
-                    <div class="p-3 rounded-lg bg-purple-50">
-                        <div class="flex justify-between">
-                            <span class="text-sm text-purple-600">Benefits Ratio</span>
-                            <span id="benefitsRatio" class="font-medium text-purple-800">0%</span>
-                        </div>
-                        <div class="text-xs text-purple-600 mt-1">Benefits as % of base salary</div>
+                    <div class="p-3 rounded-lg bg-purple-50 flex items-center justify-between">
+                        <span class="text-sm text-purple-600">Benefits Ratio</span>
+                        <span id="benefitsRatio" class="font-medium text-purple-800">0%</span>
                     </div>
                 </div>
 
@@ -280,21 +295,24 @@
     <!-- Team Calculator -->
     <div id="teamCalculator" class="calculator-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Team Builder -->
+            <!-- Builder -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800">
-                        <i class="fa-solid fa-users mr-2"></i> Team Builder
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-users mr-2"></i> Team Builder
                     </h3>
-                    <button id="addTeamMember"
-                        class="px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm">
-                        <i class="fa-solid fa-plus mr-1"></i> Add Member
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button id="addTeamMember"
+                            class="px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm">
+                            <i class="fa-solid fa-plus mr-1"></i> Add Member
+                        </button>
+                        <button id="exportTeam"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                            <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                        </button>
+                    </div>
                 </div>
 
-                <div id="teamMembers" class="space-y-3">
-                    <!-- Team members will be added here -->
-                </div>
+                <div id="teamMembers" class="space-y-3"></div>
 
                 <div class="mt-6 pt-4 border-t border-slate-200">
                     <button id="calculateTeam"
@@ -304,14 +322,11 @@
                 </div>
             </div>
 
-            <!-- Team Results -->
+            <!-- Results -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
-                    <i class="fa-solid fa-chart-pie mr-2"></i> Team Cost Analysis
-                </h3>
-
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Team
+                    Cost Analysis</h3>
                 <div id="teamResults" class="hidden space-y-4"></div>
-
                 <div id="teamEmptyState" class="text-center py-8 text-slate-500">
                     <i class="fa-solid fa-users text-4xl mb-4"></i>
                     <p>Add team members to see cost analysis.</p>
@@ -323,12 +338,9 @@
     <!-- Budget Planner -->
     <div id="budgetPlanner" class="calculator-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Budget Controls -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
-                    <i class="fa-solid fa-cog mr-2"></i> Budget Parameters
-                </h3>
-
+                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-cog mr-2"></i> Budget
+                    Parameters</h3>
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Budget Period</label>
@@ -338,22 +350,19 @@
                             <option value="monthly">Monthly Budget</option>
                         </select>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Total Budget</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                             <input type="number" id="totalBudget" min="0" step="10000"
                                 class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Growth Rate (%)</label>
                         <input type="number" id="growthRate" min="0" max="50" step="1"
                             class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Department Focus</label>
                         <select id="budgetDepartment" class="w-full rounded-lg border border-slate-300 px-3 py-2">
@@ -365,7 +374,6 @@
                             <option value="finance">Finance</option>
                         </select>
                     </div>
-
                     <button id="generateBudget"
                         class="w-full px-4 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium">
                         <i class="fa-solid fa-chart-pie mr-2"></i> Generate Budget Plan
@@ -373,21 +381,15 @@
                 </div>
             </div>
 
-            <!-- Budget Allocation -->
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800">
-                        <i class="fa-solid fa-pie-chart mr-2"></i> Budget Allocation
-                    </h3>
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-pie-chart mr-2"></i> Budget
+                        Allocation</h3>
                     <div class="text-sm text-slate-600">
                         <span id="budgetUtilization">0%</span> of budget allocated
                     </div>
                 </div>
-
-                <div id="budgetChart" class="mb-6">
-                    <canvas id="budgetPieChart" height="300"></canvas>
-                </div>
-
+                <div id="budgetChart" class="mb-6"><canvas id="budgetPieChart" height="300"></canvas></div>
                 <div id="budgetBreakdown" class="space-y-3"></div>
             </div>
         </div>
@@ -397,13 +399,18 @@
     <div id="scenarioAnalysis" class="calculator-panel hidden">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-slate-800">
-                    <i class="fa-solid fa-flask mr-2"></i> Scenario Comparison
-                </h3>
-                <button id="addScenario"
-                    class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm">
-                    <i class="fa-solid fa-plus mr-1"></i> Add Scenario
-                </button>
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-flask mr-2"></i> Scenario
+                    Comparison</h3>
+                <div class="flex items-center gap-2">
+                    <button id="addScenario"
+                        class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Scenario
+                    </button>
+                    <button id="exportScenarios"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-file-export mr-1"></i> Export JSON
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="scenarioGrid"></div>
@@ -426,18 +433,15 @@
                 <div class="p-6 border-b border-slate-200">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-slate-800">Add Team Member</h3>
-                        <button id="closeAddMemberModal" class="text-slate-400 hover:text-slate-600">
-                            <i class="fa-solid fa-times text-xl"></i>
-                        </button>
+                        <button id="closeAddMemberModal" class="text-slate-400 hover:text-slate-600"><i
+                                class="fa-solid fa-times text-xl"></i></button>
                     </div>
                 </div>
-
                 <div class="p-6 space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Role Title</label>
                         <input type="text" id="memberRole" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
@@ -454,21 +458,17 @@
                                 class="w-full rounded-lg border border-slate-300 px-3 py-2">
                         </div>
                     </div>
-
-                    <div>
+                    <div class="">
                         <label class="block text-sm font-medium text-slate-700 mb-1">Annual Salary</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                             <input type="number" id="memberSalary" min="0" step="1000"
                                 class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                         </div>
                     </div>
-
                     <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
                         <button id="cancelAddMember"
-                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
-                            Cancel
-                        </button>
+                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
                         <button id="confirmAddMember"
                             class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">
                             <i class="fa-solid fa-plus mr-1"></i> Add Member
@@ -480,430 +480,484 @@
     </div>
 </div>
 
-<script>
-    // Initialize cost calculator
-    document.addEventListener('DOMContentLoaded', function () {
-        initializeCostCalculator();
-    });
+<!-- Toast -->
+<div id="toast"
+    class="fixed top-4 right-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity">
+</div>
 
-    // Global state
+<script>
+    /* -------------------- State & Persistence -------------------- */
+    const LS_KEY = 'cost_calc_state_v1';
     let currentTab = 'position';
     let teamMembers = [];
     let scenarios = [];
 
-    function initializeCostCalculator() {
+    /* -------------------- Init -------------------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        loadState();
         setupEventListeners();
         initializeDefaults();
-        // Ensure the default tab panel is visible
         switchTab('position');
-    }
+        renderTeamMembers();
+        renderScenarios();
+    });
 
+    /* -------------------- Event Listeners -------------------- */
     function setupEventListeners() {
-        // Tab switching (use currentTarget to handle clicks on icons/text reliably)
-        document.querySelectorAll('.calculator-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                const tabId = e.currentTarget.id.replace('Tab', '');
-                switchTab(tabId);
-            });
+        document.querySelectorAll('.calculator-tab').forEach(t => {
+            t.addEventListener('click', (e) => switchTab(e.currentTarget.id.replace('Tab', '')));
+        });
+        // Position
+        $('calculatePosition').addEventListener('click', calculatePositionCost);
+        $('exportPosition').addEventListener('click', exportPositionCSV);
+        $('resetPosition').addEventListener('click', () => { $('positionForm').reset(); initializeDefaults(); toggleResults(false); });
+        $('employmentType').addEventListener('change', onEmploymentTypeChange);
+        // Live auto-calc
+        ['baseSalary', 'bonusPercent', 'equityValue', 'healthInsurance', 'retirement401k', 'equipment', 'training', 'officeSpace', 'otherBenefits', 'payrollTax', 'workersComp', 'unemployment', 'ftePercent', 'includeEquityInTaxes'].forEach(id => {
+            const el = $(id); if (el) el.addEventListener('input', debounce(() => { if ($('baseSalary').value) calculatePositionCost(); }, 400));
         });
 
-        // Position calculator
-        document.getElementById('calculatePosition').addEventListener('click', calculatePositionCost);
+        // Team
+        $('addTeamMember').addEventListener('click', openAddMemberModal);
+        $('calculateTeam').addEventListener('click', calculateTeamCost);
+        $('exportTeam').addEventListener('click', exportTeamCSV);
+        $('closeAddMemberModal').addEventListener('click', closeAddMemberModal);
+        $('cancelAddMember').addEventListener('click', closeAddMemberModal);
+        $('confirmAddMember').addEventListener('click', confirmAddMember);
+        window.addEventListener('click', (e) => { if (e.target === $('addMemberModal')) closeAddMemberModal(); });
 
-        // Team calculator
-        document.getElementById('addTeamMember').addEventListener('click', openAddMemberModal);
-        document.getElementById('calculateTeam').addEventListener('click', calculateTeamCost);
+        // Budget
+        $('generateBudget').addEventListener('click', generateBudgetPlan);
+        $('exportBudgetBtn').addEventListener('click', exportBudgetJSON);
 
-        // Budget planner
-        document.getElementById('generateBudget').addEventListener('click', generateBudgetPlan);
+        // Scenarios
+        $('addScenario').addEventListener('click', addScenario);
+        $('saveScenarioBtn').addEventListener('click', saveStateToast);
+        $('exportScenarios').addEventListener('click', exportScenariosJSON);
 
-        // Scenario analysis
-        document.getElementById('addScenario').addEventListener('click', addScenario);
-
-        // Modal controls
-        document.getElementById('closeAddMemberModal').addEventListener('click', closeAddMemberModal);
-        document.getElementById('cancelAddMember').addEventListener('click', closeAddMemberModal);
-        document.getElementById('confirmAddMember').addEventListener('click', confirmAddMember);
-
-        // Export and save
-        document.getElementById('exportBudgetBtn').addEventListener('click', exportBudget);
-        document.getElementById('saveScenarioBtn').addEventListener('click', saveScenario);
-
-        // Auto-calc on key inputs
-        const inputs = ['baseSalary', 'bonusPercent', 'equityValue', 'healthInsurance', 'retirement401k'];
-        inputs.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener('input', debounce(() => {
-                if (document.getElementById('baseSalary').value) calculatePositionCost();
-            }, 500));
-        });
+        // Import
+        $('importJSON').addEventListener('change', importJSON);
     }
 
+    /* -------------------- Tabs -------------------- */
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.calculator-tab').forEach(b => b.classList.remove('active'));
+        $(tab + 'Tab').classList.add('active');
+        document.querySelectorAll('.calculator-panel').forEach(p => p.classList.add('hidden'));
+        const map = { position: 'positionCalculator', team: 'teamCalculator', budget: 'budgetPlanner', scenario: 'scenarioAnalysis' };
+        $(map[tab]).classList.remove('hidden');
+    }
+
+    /* -------------------- Defaults -------------------- */
     function initializeDefaults() {
-        document.getElementById('payrollTax').value = '7.65';
-        document.getElementById('workersComp').value = '0.5';
-        document.getElementById('unemployment').value = '2.5';
-        document.getElementById('healthInsurance').value = '800';
-        document.getElementById('retirement401k').value = '4';
-        document.getElementById('equipment').value = '2000';
-        document.getElementById('training').value = '1500';
-        document.getElementById('officeSpace').value = '500';
+        $('payrollTax').value = '7.65';
+        $('workersComp').value = '0.5';
+        $('unemployment').value = '2.5';
+        $('healthInsurance').value = '800';
+        $('retirement401k').value = '4';
+        $('equipment').value = '2000';
+        $('training').value = '1500';
+        $('officeSpace').value = '500';
+        $('ftePercent').value = '100';
+        $('includeEquityInTaxes').checked = true;
     }
 
-    function switchTab(tabName) {
-        currentTab = tabName;
-
-        // Update tab buttons
-        document.querySelectorAll('.calculator-tab').forEach(tab => tab.classList.remove('active'));
-        const activeBtn = document.getElementById(tabName + 'Tab');
-        if (activeBtn) activeBtn.classList.add('active');
-
-        // Show/hide panels
-        document.querySelectorAll('.calculator-panel').forEach(panel => panel.classList.add('hidden'));
-        const panelMap = {
-            position: 'positionCalculator',
-            team: 'teamCalculator',
-            budget: 'budgetPlanner',
-            scenario: 'scenarioAnalysis'
-        };
-        const targetId = panelMap[tabName];
-        if (targetId) document.getElementById(targetId).classList.remove('hidden');
+    /* -------------------- Position Calculator -------------------- */
+    function onEmploymentTypeChange() {
+        const type = $('employmentType').value;
+        // Sensible defaults per type
+        if (type === 'contractor') {
+            $('payrollTax').value = '0'; $('workersComp').value = '0'; $('unemployment').value = '0';
+            $('healthInsurance').value = '0'; $('retirement401k').value = '0';
+            $('ftePercent').value = $('ftePercent').value || '100';
+        } else if (type === 'intern') {
+            $('ftePercent').value = '50';
+        } else if (type === 'part-time') {
+            $('ftePercent').value = '60';
+        } else {
+            initializeDefaults();
+        }
+        calculatePositionCost();
     }
 
     function calculatePositionCost() {
-        const baseSalary = parseFloat(document.getElementById('baseSalary').value) || 0;
-        if (baseSalary === 0) { showError('Please enter a base salary'); return; }
+        const baseSalary = num('baseSalary');
+        if (!baseSalary) { toast('Please enter a base salary', 'error'); return; }
 
-        const bonusPercent = parseFloat(document.getElementById('bonusPercent').value) || 0;
-        const equityValue = parseFloat(document.getElementById('equityValue').value) || 0;
-        const healthInsurance = parseFloat(document.getElementById('healthInsurance').value) || 0;
-        const retirement401k = parseFloat(document.getElementById('retirement401k').value) || 0;
-        const equipment = parseFloat(document.getElementById('equipment').value) || 0;
-        const training = parseFloat(document.getElementById('training').value) || 0;
-        const officeSpace = parseFloat(document.getElementById('officeSpace').value) || 0;
-        const otherBenefits = parseFloat(document.getElementById('otherBenefits').value) || 0;
-        const payrollTax = parseFloat(document.getElementById('payrollTax').value) || 0;
-        const workersComp = parseFloat(document.getElementById('workersComp').value) || 0;
-        const unemployment = parseFloat(document.getElementById('unemployment').value) || 0;
+        const fte = clamp(num('ftePercent', 100) / 100, 0.1, 1);
+        const type = $('employmentType').value;
 
-        const bonusAmount = baseSalary * (bonusPercent / 100);
-        const retirement401kAmount = baseSalary * (retirement401k / 100);
-        const annualHealthInsurance = healthInsurance * 12;
-        const annualOfficeSpace = officeSpace * 12;
-        const annualOtherBenefits = otherBenefits * 12;
+        const bonusPct = num('bonusPercent');
+        const equity = num('equityValue');
+        const healthMonthly = num('healthInsurance');
+        const k401 = num('retirement401k');
+        const equip = num('equipment');
+        const training = num('training');
+        const officeMonthly = num('officeSpace');
+        const otherMonthly = num('otherBenefits');
+        const taxPayroll = num('payrollTax');
+        const taxWC = num('workersComp');
+        const taxUnemp = num('unemployment');
+        const includeEquity = $('includeEquityInTaxes').checked;
 
-        const totalCompensation = baseSalary + bonusAmount + equityValue;
-        const totalBenefits = annualHealthInsurance + retirement401kAmount + training + annualOtherBenefits;
+        // Prorate salary/bonus/equity for FTE% (contractors typically use base as hourly annualized; still allow FTE)
+        const proratedBase = baseSalary * fte;
+        const bonusAmt = proratedBase * (bonusPct / 100);
+        const equityProrated = equity * fte;
 
-        const payrollTaxAmount = totalCompensation * (payrollTax / 100);
-        const workersCompAmount = totalCompensation * (workersComp / 100);
-        const unemploymentAmount = totalCompensation * (unemployment / 100);
-        const totalTaxes = payrollTaxAmount + workersCompAmount + unemploymentAmount;
+        // Benefits (monthly → annual) and proration for FTE (optional: scale partially – here we scale)
+        const annualHealth = healthMonthly * 12 * fte;
+        const annualOffice = officeMonthly * 12 * fte;
+        const annualOther = otherMonthly * 12 * fte;
+        const k401Amt = proratedBase * (k401 / 100);
 
-        const totalAnnualCost = totalCompensation + totalBenefits + totalTaxes + equipment + annualOfficeSpace;
-        const monthlyCost = totalAnnualCost / 12;
-        const hourlyRate = totalAnnualCost / (40 * 52);
-        const benefitsRatio = (totalBenefits / baseSalary) * 100;
+        // Compensation for tax base
+        const compForTax = proratedBase + bonusAmt + (includeEquity ? equityProrated : 0);
 
-        document.getElementById('totalAnnualCost').textContent = formatCurrency(totalAnnualCost);
-        document.getElementById('monthlyCost').textContent = formatCurrency(monthlyCost);
-        document.getElementById('hourlyRate').textContent = formatCurrency(hourlyRate, false);
-        document.getElementById('benefitsRatio').textContent = benefitsRatio.toFixed(1) + '%';
+        // Contractor taxes/benefits often zeroed already by type switch
+        const taxes = compForTax * (taxPayroll / 100) + compForTax * (taxWC / 100) + compForTax * (taxUnemp / 100);
+
+        const totalComp = proratedBase + bonusAmt + equityProrated;
+        const totalBenefits = annualHealth + k401Amt + training + annualOther;
+        const totalAnnual = totalComp + totalBenefits + taxes + equip + annualOffice;
+
+        const monthly = totalAnnual / 12;
+        const hours = 40 * 52 * fte; // FTE-adjusted hours
+        const hourly = hours > 0 ? totalAnnual / hours : 0;
+        const benefitsRatio = baseSalary ? (totalBenefits / (proratedBase || 1)) * 100 : 0;
+
+        html('totalAnnualCost', money(totalAnnual));
+        html('monthlyCost', money(monthly));
+        html('hourlyRate', money(hourly, false));
+        html('benefitsRatio', benefitsRatio.toFixed(1) + '%');
 
         const breakdown = [
-            { label: 'Base Salary', amount: baseSalary },
-            { label: 'Bonus', amount: bonusAmount },
-            { label: 'Equity', amount: equityValue },
-            { label: 'Health Insurance', amount: annualHealthInsurance },
-            { label: '401k Match', amount: retirement401kAmount },
-            { label: 'Training', amount: training },
-            { label: 'Office Space', amount: annualOfficeSpace },
-            { label: 'Other Benefits', amount: annualOtherBenefits },
-            { label: 'Equipment', amount: equipment },
-            { label: 'Payroll Taxes', amount: totalTaxes }
-        ];
-        const breakdownContainer = document.getElementById('costBreakdown');
-        breakdownContainer.innerHTML = breakdown
-            .filter(i => i.amount > 0)
-            .map(i => `
-                <div class="flex justify-between">
-                    <span class="text-slate-600">${i.label}:</span>
-                    <span class="text-slate-800">${formatCurrency(i.amount)}</span>
-                </div>
-            `).join('');
+            ['Base Salary', proratedBase],
+            ['Bonus', bonusAmt],
+            ['Equity', equityProrated],
+            ['Health Insurance', annualHealth],
+            ['401k Match', k401Amt],
+            ['Training', training],
+            ['Office Space', annualOffice],
+            ['Other Benefits', annualOther],
+            ['Equipment', equip],
+            ['Taxes (Payroll + WC + Unemp)', taxes]
+        ].filter(([, v]) => v > 0);
 
-        document.getElementById('positionResults').classList.remove('hidden');
-        document.getElementById('positionEmptyState').classList.add('hidden');
+        $('costBreakdown').innerHTML = breakdown.map(([k, v]) =>
+            `<div class="flex justify-between">
+      <span class="text-slate-600">${k}:</span>
+      <span class="text-slate-800">${money(v)}</span>
+    </div>`).join('');
+
+        toggleResults(true);
+        saveState();
     }
 
-    function openAddMemberModal() { document.getElementById('addMemberModal').classList.remove('hidden'); }
-    function closeAddMemberModal() {
-        document.getElementById('addMemberModal').classList.add('hidden');
-        document.getElementById('memberRole').value = '';
-        document.getElementById('memberLevel').value = 'entry';
-        document.getElementById('memberCount').value = '1';
-        document.getElementById('memberSalary').value = '';
+    function toggleResults(show) {
+        $('positionResults').classList.toggle('hidden', !show);
+        $('positionEmptyState').classList.toggle('hidden', show);
     }
+
+    /* -------------------- Team Calculator -------------------- */
+    function openAddMemberModal() { $('addMemberModal').classList.remove('hidden'); }
+    function closeAddMemberModal() { $('addMemberModal').classList.add('hidden'); clearAddMemberForm(); }
+    function clearAddMemberForm() { $('memberRole').value = ''; $('memberLevel').value = 'entry'; $('memberCount').value = '1'; $('memberSalary').value = ''; }
 
     function confirmAddMember() {
-        const role = document.getElementById('memberRole').value.trim();
-        const level = document.getElementById('memberLevel').value;
-        const count = parseInt(document.getElementById('memberCount').value) || 1;
-        const salary = parseFloat(document.getElementById('memberSalary').value) || 0;
-
-        if (!role || salary === 0) { showError('Please fill in all required fields'); return; }
-
-        const member = { id: Date.now(), role, level, count, salary, totalCost: salary * 1.4 * count };
-        teamMembers.push(member);
-        renderTeamMembers();
-        closeAddMemberModal();
+        const role = $('memberRole').value.trim();
+        const level = $('memberLevel').value;
+        const count = parseInt($('memberCount').value || '1', 10);
+        const salary = parseFloat($('memberSalary').value || '0');
+        if (!role || !salary || salary < 0 || count < 1) { toast('Please fill all fields', 'error'); return; }
+        // Assume ~40% loaded cost factor; could make configurable
+        const totalCost = salary * 1.4 * count;
+        teamMembers.push({ id: Date.now(), role, level, count, salary, totalCost });
+        saveState(); renderTeamMembers(); closeAddMemberModal();
     }
 
     function renderTeamMembers() {
-        const container = document.getElementById('teamMembers');
-        if (teamMembers.length === 0) {
-            container.innerHTML = '<p class="text-slate-500 text-center py-4">No team members added yet</p>';
-            return;
-        }
-        container.innerHTML = teamMembers.map(m => `
-            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-                <div>
-                    <div class="font-medium text-slate-800">${m.role}</div>
-                    <div class="text-sm text-slate-600">${m.level} level • ${m.count} person(s)</div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="text-right">
-                        <div class="font-medium text-slate-800">${formatCurrency(m.salary)}</div>
-                        <div class="text-xs text-slate-600">per person</div>
-                    </div>
-                    <button onclick="removeTeamMember(${m.id})" class="text-red-600 hover:text-red-800 p-1">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        const c = $('teamMembers');
+        if (!teamMembers.length) { c.innerHTML = '<p class="text-slate-500 text-center py-4">No team members added yet</p>'; return; }
+        c.innerHTML = teamMembers.map(m => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div>
+        <div class="font-medium text-slate-800">${escapeHtml(m.role)}</div>
+        <div class="text-sm text-slate-600">${m.level} level • ${m.count} person(s)</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <div class="font-medium text-slate-800">${money(m.salary)}</div>
+          <div class="text-xs text-slate-600">per person</div>
+        </div>
+        <button onclick="removeTeamMember(${m.id})" class="text-red-600 hover:text-red-800 p-1">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>`).join('');
     }
 
-    function removeTeamMember(id) { teamMembers = teamMembers.filter(m => m.id !== id); renderTeamMembers(); calculateTeamCost(); }
+    function removeTeamMember(id) {
+        teamMembers = teamMembers.filter(x => x.id !== id);
+        saveState(); renderTeamMembers(); calculateTeamCost();
+    }
 
     function calculateTeamCost() {
-        if (teamMembers.length === 0) {
-            document.getElementById('teamResults').classList.add('hidden');
-            document.getElementById('teamEmptyState').classList.remove('hidden');
-            return;
+        if (!teamMembers.length) {
+            $('teamResults').classList.add('hidden'); $('teamEmptyState').classList.remove('hidden'); return;
         }
         const totalSalaries = teamMembers.reduce((s, m) => s + (m.salary * m.count), 0);
         const totalCost = teamMembers.reduce((s, m) => s + m.totalCost, 0);
         const totalCount = teamMembers.reduce((s, m) => s + m.count, 0);
-        const averageSalary = totalSalaries / totalCount;
+        const avgSalary = totalSalaries / Math.max(1, totalCount);
 
-        document.getElementById('teamResults').innerHTML = `
-            <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                <div class="text-sm text-blue-600 mb-1">Total Team Cost</div>
-                <div class="text-2xl font-bold text-blue-800">${formatCurrency(totalCost)}</div>
-                <div class="text-xs text-blue-600 mt-1">Annual including benefits & taxes</div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="p-3 rounded-lg bg-slate-50">
-                    <div class="text-sm text-slate-600">Team Size</div>
-                    <div class="text-lg font-bold text-slate-800">${totalCount}</div>
-                </div>
-                <div class="p-3 rounded-lg bg-slate-50">
-                    <div class="text-sm text-slate-600">Avg Salary</div>
-                    <div class="text-lg font-bold text-slate-800">${formatCurrency(averageSalary)}</div>
-                </div>
-            </div>
-            <div class="space-y-2">
-                <h4 class="text-sm font-medium text-slate-800">Cost by Role</h4>
-                ${teamMembers.map(m => `
-                    <div class="flex justify-between text-sm">
-                        <span class="text-slate-600">${m.role} (${m.count}x):</span>
-                        <span class="font-medium text-slate-800">${formatCurrency(m.totalCost)}</span>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-        document.getElementById('teamResults').classList.remove('hidden');
-        document.getElementById('teamEmptyState').classList.add('hidden');
+        $('teamResults').innerHTML = `
+    <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
+      <div class="text-sm text-blue-600 mb-1">Total Team Cost</div>
+      <div class="text-2xl font-bold text-blue-800">${money(totalCost)}</div>
+      <div class="text-xs text-blue-600 mt-1">Annual including benefits & taxes</div>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="p-3 rounded-lg bg-slate-50">
+        <div class="text-sm text-slate-600">Team Size</div>
+        <div class="text-lg font-bold text-slate-800">${totalCount}</div>
+      </div>
+      <div class="p-3 rounded-lg bg-slate-50">
+        <div class="text-sm text-slate-600">Avg Salary</div>
+        <div class="text-lg font-bold text-slate-800">${money(avgSalary)}</div>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <h4 class="text-sm font-medium text-slate-800">Cost by Role</h4>
+      ${teamMembers.map(m => `
+        <div class="flex justify-between text-sm">
+          <span class="text-slate-600">${escapeHtml(m.role)} (${m.count}x):</span>
+          <span class="font-medium text-slate-800">${money(m.totalCost)}</span>
+        </div>`).join('')}
+    </div>`;
+        $('teamResults').classList.remove('hidden');
+        $('teamEmptyState').classList.add('hidden');
+    }
+
+    /* -------------------- Budget Planner -------------------- */
+    function withChart(fn) {
+        if (typeof Chart !== 'undefined') return fn();
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = fn; document.head.appendChild(s);
     }
 
     function generateBudgetPlan() {
-        const totalBudget = parseFloat(document.getElementById('totalBudget').value) || 0;
-        if (totalBudget === 0) { showError('Please enter a total budget amount'); return; }
-
+        const total = num('totalBudget');
+        if (!total) { toast('Please enter a total budget amount', 'error'); return; }
         const allocation = { 'Salaries': 0.65, 'Benefits': 0.20, 'Equipment': 0.05, 'Training': 0.03, 'Office': 0.04, 'Other': 0.03 };
-        const data = Object.entries(allocation).map(([category, pct]) => ({ category, amount: totalBudget * pct, percentage: pct * 100 }));
-
+        const data = Object.entries(allocation).map(([k, p]) => ({ category: k, amount: total * p, pct: p * 100 }));
         withChart(() => renderBudgetChart(data));
         renderBudgetBreakdown(data);
-        document.getElementById('budgetUtilization').textContent = data.reduce((s, x) => s + x.percentage, 0).toFixed(1) + '%';
+        $('budgetUtilization').textContent = data.reduce((s, x) => s + x.pct, 0).toFixed(1) + '%';
+        saveState();
     }
 
-    // Wait for Chart.js if needed
-    function withChart(fn) {
-        if (typeof Chart !== 'undefined') { fn(); return; }
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        script.onload = fn;
-        document.head.appendChild(script);
-    }
-
+    let budgetChart;
     function renderBudgetChart(data) {
-        const ctx = document.getElementById('budgetPieChart').getContext('2d');
-        if (window.budgetChartInstance) window.budgetChartInstance.destroy();
-        window.budgetChartInstance = new Chart(ctx, {
+        const ctx = $('budgetPieChart').getContext('2d');
+        if (budgetChart) budgetChart.destroy();
+        budgetChart = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: data.map(i => i.category),
-                datasets: [{
-                    data: data.map(i => i.amount),
-                    backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16'],
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
+                labels: data.map(x => x.category), datasets: [{
+                    data: data.map(x => x.amount),
+                    backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'],
+                    borderWidth: 2, borderColor: '#fff'
                 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'right' },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => {
-                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                const pct = (ctx.raw / total * 100).toFixed(1);
-                                return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
-                            }
-                        }
-                    }
+                    tooltip: { callbacks: { label: (c) => `${c.label}: ${money(c.raw)} (${(c.raw / c.dataset.data.reduce((a, b) => a + b, 0) * 100).toFixed(1)}%)` } }
                 }
             }
         });
     }
 
     function renderBudgetBreakdown(data) {
-        const container = document.getElementById('budgetBreakdown');
-        const colors = ['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-cyan-500', 'bg-lime-500'];
-        container.innerHTML = data.map((item, i) => `
-            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-                <div class="flex items-center gap-3">
-                    <div class="w-4 h-4 rounded ${colors[i % colors.length]}"></div>
-                    <span class="font-medium text-slate-800">${item.category}</span>
-                </div>
-                <div class="text-right">
-                    <div class="font-bold text-slate-800">${formatCurrency(item.amount)}</div>
-                    <div class="text-sm text-slate-600">${item.percentage.toFixed(1)}%</div>
-                </div>
-            </div>
-        `).join('');
+        const colors = ['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-cyan-500'];
+        $('budgetBreakdown').innerHTML = data.map((x, i) => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="flex items-center gap-3">
+        <div class="w-4 h-4 rounded ${colors[i % colors.length]}"></div>
+        <span class="font-medium text-slate-800">${x.category}</span>
+      </div>
+      <div class="text-right">
+        <div class="font-bold text-slate-800">${money(x.amount)}</div>
+        <div class="text-sm text-slate-600">${x.pct.toFixed(1)}%</div>
+      </div>
+    </div>`).join('');
     }
 
+    /* -------------------- Scenarios -------------------- */
     function addScenario() {
-        const scenario = { id: Date.now(), name: `Scenario ${scenarios.length + 1}`, headcount: 50, avgSalary: 75000, benefits: 0.25, growth: 0.1 };
-        scenarios.push(scenario);
-        renderScenarios();
+        const s = { id: Date.now(), name: `Scenario ${scenarios.length + 1}`, headcount: 50, avgSalary: 75000, benefits: 0.25, growth: 0.10 };
+        scenarios.push(s); saveState(); renderScenarios();
     }
 
     function renderScenarios() {
-        const container = document.getElementById('scenarioGrid');
-        if (scenarios.length === 0) {
-            container.innerHTML = '<p class="col-span-3 text-slate-500 text-center py-8">No scenarios created yet</p>';
-            withChart(() => renderScenarioChart());
-            return;
-        }
-        container.innerHTML = scenarios.map(s => `
-            <div class="rounded-lg border border-slate-200 p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <input type="text" value="${s.name}" onchange="updateScenarioName(${s.id}, this.value)"
-                        class="font-medium text-slate-800 bg-transparent border-none p-0 focus:ring-0">
-                    <button onclick="removeScenario(${s.id})" class="text-red-600 hover:text-red-800">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Headcount</label>
-                        <input type="number" value="${s.headcount}" onchange="updateScenario(${s.id}, 'headcount', this.value)"
-                            class="w-full text-sm rounded border border-slate-300 px-2 py-1">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Avg Salary</label>
-                        <input type="number" value="${s.avgSalary}" onchange="updateScenario(${s.id}, 'avgSalary', this.value)"
-                            class="w-full text-sm rounded border border-slate-300 px-2 py-1">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Benefits Rate</label>
-                        <input type="number" value="${s.benefits}" step="0.05" onchange="updateScenario(${s.id}, 'benefits', this.value)"
-                            class="w-full text-sm rounded border border-slate-300 px-2 py-1">
-                    </div>
-                    <div class="pt-2 border-t border-slate-200">
-                        <div class="text-sm text-slate-600">Total Cost</div>
-                        <div class="text-lg font-bold text-slate-800">${formatCurrency(calculateScenarioCost(s))}</div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+        const c = $('scenarioGrid');
+        if (!scenarios.length) { c.innerHTML = '<p class="col-span-3 text-slate-500 text-center py-8">No scenarios created yet</p>'; withChart(() => renderScenarioChart()); return; }
+        c.innerHTML = scenarios.map(s => `
+    <div class="rounded-lg border border-slate-200 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <input type="text" value="${escapeHtml(s.name)}" onchange="updateScenarioName(${s.id}, this.value)"
+               class="font-medium text-slate-800 bg-transparent border-none p-0 focus:ring-0 w-4/5">
+        <button onclick="removeScenario(${s.id})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Headcount</label>
+          <input type="number" value="${s.headcount}" onchange="updateScenario(${s.id}, 'headcount', this.value)"
+                 class="w-full text-sm rounded border border-slate-300 px-2 py-1">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Avg Salary</label>
+          <input type="number" value="${s.avgSalary}" onchange="updateScenario(${s.id}, 'avgSalary', this.value)"
+                 class="w-full text-sm rounded border border-slate-300 px-2 py-1">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Benefits Rate</label>
+          <input type="number" value="${s.benefits}" step="0.05" onchange="updateScenario(${s.id}, 'benefits', this.value)"
+                 class="w-full text-sm rounded border border-slate-300 px-2 py-1">
+        </div>
+        <div class="pt-2 border-t border-slate-200">
+          <div class="text-sm text-slate-600">Total Cost</div>
+          <div class="text-lg font-bold text-slate-800">${money(calcScenarioCost(s))}</div>
+        </div>
+      </div>
+    </div>`).join('');
         withChart(() => renderScenarioChart());
     }
 
-    function calculateScenarioCost(s) {
+    function calcScenarioCost(s) {
         const base = s.headcount * s.avgSalary;
         const benefits = base * s.benefits;
-        const taxes = base * 0.1;
-        return base + benefits + taxes;
+        const taxes = base * 0.10;
+        return (base + benefits + taxes) * (1 + s.growth);
     }
 
-    function updateScenarioName(id, name) { const s = scenarios.find(x => x.id === id); if (s) s.name = name; }
-    function updateScenario(id, field, value) { const s = scenarios.find(x => x.id === id); if (s) { s[field] = parseFloat(value) || 0; renderScenarios(); } }
-    function removeScenario(id) { scenarios = scenarios.filter(x => x.id !== id); renderScenarios(); }
+    function updateScenarioName(id, name) { const s = scenarios.find(x => x.id === id); if (s) { s.name = name; saveState(); } }
+    function updateScenario(id, field, value) { const s = scenarios.find(x => x.id === id); if (s) { s[field] = parseFloat(value) || 0; saveState(); renderScenarios(); } }
+    function removeScenario(id) { scenarios = scenarios.filter(x => x.id !== id); saveState(); renderScenarios(); }
 
+    let scenarioChart;
     function renderScenarioChart() {
-        const ctx = document.getElementById('scenarioChart').getContext('2d');
-        if (window.scenarioChartInstance) window.scenarioChartInstance.destroy();
-        if (scenarios.length === 0) return;
-        window.scenarioChartInstance = new Chart(ctx, {
+        const ctx = $('scenarioChart').getContext('2d');
+        if (scenarioChart) scenarioChart.destroy();
+        if (!scenarios.length) return;
+        scenarioChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: scenarios.map(s => s.name),
                 datasets: [{
-                    label: 'Total Cost',
-                    data: scenarios.map(s => calculateScenarioCost(s)),
-                    backgroundColor: 'rgba(139, 92, 246, 0.6)',
-                    borderColor: 'rgba(139, 92, 246, 1)',
-                    borderWidth: 2
+                    label: 'Total Cost', data: scenarios.map(s => calcScenarioCost(s)),
+                    backgroundColor: 'rgba(139,92,246,0.6)', borderColor: 'rgba(139,92,246,1)', borderWidth: 2
                 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (value) => '$' + (value / 1e6).toFixed(1) + 'M'
-                        }
-                    }
-                }
+                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { callback: (v) => '$' + (v / 1e6).toFixed(1) + 'M' } } }
             }
         });
     }
 
-    function exportBudget() { showSuccess('Budget export functionality would be implemented here'); }
-    function saveScenario() { showSuccess('Scenario save functionality would be implemented here'); }
-
-    // Utility functions
-    function formatCurrency(amount, showCents = true) {
-        const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: showCents ? 2 : 0, maximumFractionDigits: showCents ? 2 : 0 });
-        return fmt.format(amount);
+    /* -------------------- Export / Import -------------------- */
+    function exportPositionCSV() {
+        const fields = ['Title', 'Dept', 'Level', 'Location', 'Employment Type', 'FTE %', 'Base Salary', 'Bonus %', 'Equity', 'Health (mo)', '401k %', 'Equip', 'Training', 'Office (mo)', 'Other (mo)', 'PayrollTax %', 'WC %', 'Unemp %', 'Include Equity', 'Total Annual'];
+        const vals = [
+            $('positionTitle').value, $('positionDepartment').value, $('positionLevel').value, $('positionLocation').value,
+            $('employmentType').value, $('ftePercent').value, $('baseSalary').value, $('bonusPercent').value, $('equityValue').value,
+            $('healthInsurance').value, $('retirement401k').value, $('equipment').value, $('training').value, $('officeSpace').value, $('otherBenefits').value,
+            $('payrollTax').value, $('workersComp').value, $('unemployment').value, $('includeEquityInTaxes').checked,
+            textContent('totalAnnualCost')
+        ];
+        downloadCSV([fields, vals], 'position_cost.csv');
     }
-    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
-    function showSuccess(msg) { alert('✅ ' + msg); }
-    function showError(msg) { alert('❌ ' + msg); }
 
-    // Close modal when clicking backdrop
-    window.addEventListener('click', (e) => {
-        const modal = document.getElementById('addMemberModal');
-        if (e.target === modal) closeAddMemberModal();
-    });
+    function exportTeamCSV() {
+        const rows = [['Role', 'Level', 'Count', 'Salary', 'TotalCost']];
+        teamMembers.forEach(m => rows.push([m.role, m.level, m.count, m.salary, m.totalCost]));
+        downloadCSV(rows, 'team_costs.csv');
+    }
+
+    function exportBudgetJSON() {
+        const out = { period: $('budgetPeriod').value, totalBudget: num('totalBudget'), growthRate: num('growthRate'), breakdown: $('budgetBreakdown').innerText };
+        downloadJSON(out, 'budget_plan.json');
+    }
+
+    function exportScenariosJSON() {
+        downloadJSON({ scenarios }, 'scenarios.json');
+    }
+
+    function importJSON(e) {
+        const f = e.target.files?.[0]; if (!f) return;
+        const r = new FileReader();
+        r.onload = () => {
+            try {
+                const obj = JSON.parse(r.result);
+                if (obj.scenarios) scenarios = obj.scenarios;
+                if (obj.teamMembers) teamMembers = obj.teamMembers;
+                if (obj.position) restorePosition(obj.position);
+                saveState(); renderScenarios(); renderTeamMembers(); toast('Imported', 'success');
+            } catch { toast('Invalid JSON', 'error'); }
+        };
+        r.readAsText(f); e.target.value = '';
+    }
+
+    /* -------------------- Save / Load -------------------- */
+    function saveState() {
+        const state = {
+            position: serializePosition(),
+            teamMembers,
+            scenarios
+        };
+        localStorage.setItem(LS_KEY, JSON.stringify(state));
+    }
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(LS_KEY); if (!raw) return;
+            const state = JSON.parse(raw);
+            if (state.position) restorePosition(state.position);
+            teamMembers = Array.isArray(state.teamMembers) ? state.teamMembers : [];
+            scenarios = Array.isArray(state.scenarios) ? state.scenarios : [];
+        } catch { }
+    }
+    function saveStateToast() { saveState(); toast('Scenario saved', 'success'); }
+
+    function serializePosition() {
+        const ids = ['positionTitle', 'positionDepartment', 'positionLevel', 'positionLocation', 'employmentType', 'ftePercent', 'baseSalary', 'bonusPercent', 'equityValue', 'healthInsurance', 'retirement401k', 'equipment', 'training', 'officeSpace', 'otherBenefits', 'payrollTax', 'workersComp', 'unemployment', 'includeEquityInTaxes'];
+        const o = {}; ids.forEach(id => o[id] = (id === 'includeEquityInTaxes') ? $(id).checked : $(id).value);
+        return o;
+    }
+    function restorePosition(o) { Object.entries(o).forEach(([k, v]) => { if ($(k)) { if (k === 'includeEquityInTaxes') $(k).checked = !!v; else $(k).value = v; } }); }
+
+    /* -------------------- Utils -------------------- */
+    const $ = (id) => document.getElementById(id);
+    const num = (id) => parseFloat($(id).value || '0');
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const money = (n, cents = true) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0 }).format(n || 0);
+    const html = (id, val) => { $(id).textContent = val; };
+    const textContent = (id) => $(id).textContent || '';
+    const escapeHtml = (s = '') => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]));
+    const debounce = (fn, wait) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; };
+    function toast(msg, tone = 'info') { const el = $('toast'); el.textContent = msg; el.style.backgroundColor = tone === 'success' ? '#16a34a' : tone === 'error' ? '#dc2626' : '#334155'; el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 2200); }
+    function downloadCSV(rows, filename) {
+        const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 200);
+    }
+    function downloadJSON(obj, filename) {
+        const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }); const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 200);
+    }
 </script>
 
 <style>

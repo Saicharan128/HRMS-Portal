@@ -30,22 +30,22 @@
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-dollar-sign mr-1"></i> Avg Salary</div>
             <div id="avgSalary" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
-            <div class="text-xs text-green-600 mt-1">↑ 5.2% vs market</div>
+            <div class="text-xs text-green-600 mt-1" id="avgDelta">—</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-chart-line mr-1"></i> Median Salary</div>
             <div id="medianSalary" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
-            <div class="text-xs text-blue-600 mt-1">Market aligned</div>
+            <div class="text-xs text-blue-600 mt-1" id="medianDelta">—</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-balance-scale mr-1"></i> Pay Equity Score</div>
             <div id="equityScore" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
-            <div class="text-xs text-green-600 mt-1">Within range</div>
+            <div class="text-xs text-green-600 mt-1" id="equityNote">—</div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-trophy mr-1"></i> Top Quartile</div>
             <div id="topQuartile" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
-            <div class="text-xs text-slate-600 mt-1">High performers</div>
+            <div class="text-xs text-slate-600 mt-1" id="topQuartileNote">—</div>
         </div>
     </div>
 
@@ -111,11 +111,17 @@
                 </h3>
                 <div class="flex items-center gap-2">
                     <button id="chartTypeBtn"
-                        class="px-2 py-1 rounded text-xs border border-slate-300 hover:bg-slate-50">
+                        class="px-2 py-1 rounded text-xs border border-slate-300 hover:bg-slate-50"
+                        title="Toggle bar/line">
                         <i class="fa-solid fa-chart-column"></i>
                     </button>
+                    <button id="downloadChartBtn"
+                        class="px-2 py-1 rounded text-xs border border-slate-300 hover:bg-slate-50"
+                        title="Download PNG">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
                     <button id="fullscreenChart"
-                        class="px-2 py-1 rounded text-xs border border-slate-300 hover:bg-slate-50">
+                        class="px-2 py-1 rounded text-xs border border-slate-300 hover:bg-slate-50" title="Fullscreen">
                         <i class="fa-solid fa-expand"></i>
                     </button>
                 </div>
@@ -170,9 +176,7 @@
             <h3 class="text-lg font-semibold text-slate-800 mb-4">
                 <i class="fa-solid fa-building mr-2"></i> Department Analysis
             </h3>
-            <div class="space-y-3" id="departmentAnalysis">
-                <!-- Department data will be populated here -->
-            </div>
+            <div class="space-y-3" id="departmentAnalysis"></div>
         </div>
 
         <!-- Pay Equity Analysis -->
@@ -184,274 +188,272 @@
                 <div class="p-3 rounded-lg bg-green-50">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm font-medium text-slate-800">Gender Pay Gap</span>
-                        <span class="text-sm font-bold text-green-600">2.3%</span>
+                        <span id="equityGender" class="text-sm font-bold text-green-600">2.3%</span>
                     </div>
                     <div class="w-full bg-green-200 rounded-full h-2">
-                        <div class="bg-green-500 h-2 rounded-full" style="width: 97.7%"></div>
+                        <div id="equityGenderBar" class="bg-green-500 h-2 rounded-full" style="width: 97.7%"></div>
                     </div>
-                    <div class="text-xs text-slate-600 mt-1">Within acceptable range (< 5%)</div>
-                    </div>
-
-                    <div class="p-3 rounded-lg bg-yellow-50">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-slate-800">Experience Gap</span>
-                            <span class="text-sm font-bold text-yellow-600">7.1%</span>
-                        </div>
-                        <div class="w-full bg-yellow-200 rounded-full h-2">
-                            <div class="bg-yellow-500 h-2 rounded-full" style="width: 92.9%"></div>
-                        </div>
-                        <div class="text-xs text-slate-600 mt-1">Review recommended</div>
-                    </div>
-
-                    <div class="p-3 rounded-lg bg-blue-50">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-slate-800">Department Variance</span>
-                            <span class="text-sm font-bold text-blue-600">4.8%</span>
-                        </div>
-                        <div class="w-full bg-blue-200 rounded-full h-2">
-                            <div class="bg-blue-500 h-2 rounded-full" style="width: 95.2%"></div>
-                        </div>
-                        <div class="text-xs text-slate-600 mt-1">Good alignment across teams</div>
-                    </div>
+                    <div class="text-xs text-slate-600 mt-1">Within acceptable range (&lt; 5%)</div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Salary Benchmarking Table -->
-        <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="p-6 border-b border-slate-200">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        <i class="fa-solid fa-table mr-2"></i> Position Benchmarks
-                    </h2>
-                    <div class="flex items-center gap-2">
-                        <input id="searchPositions" type="text" placeholder="Search positions..."
-                            class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-                        <select id="benchmarkView" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                            <option value="all">All Positions</option>
-                            <option value="outdated">Need Review</option>
-                            <option value="competitive">Competitive</option>
-                            <option value="below-market">Below Market</option>
-                        </select>
+                <div class="p-3 rounded-lg bg-yellow-50">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-slate-800">Experience Gap</span>
+                        <span id="equityExp" class="text-sm font-bold text-yellow-600">7.1%</span>
                     </div>
+                    <div class="w-full bg-yellow-200 rounded-full h-2">
+                        <div id="equityExpBar" class="bg-yellow-500 h-2 rounded-full" style="width: 92.9%"></div>
+                    </div>
+                    <div class="text-xs text-slate-600 mt-1">Review recommended</div>
                 </div>
-            </div>
 
-            <!-- Loading State -->
-            <div id="benchmarkLoadingState" class="p-8 text-center">
-                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
-                <p class="mt-2 text-sm text-slate-600">Loading benchmark data...</p>
-            </div>
-
-            <!-- Benchmarks Table -->
-            <div id="benchmarksTable" class="hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-slate-50 border-b border-slate-200">
-                            <tr>
-                                <th class="px-6 py-3 text-left font-medium text-slate-700">Position</th>
-                                <th class="px-6 py-3 text-left font-medium text-slate-700">Level</th>
-                                <th class="px-6 py-3 text-left font-medium text-slate-700">Our Range</th>
-                                <th class="px-6 py-3 text-left font-medium text-slate-700">Market Range</th>
-                                <th class="px-6 py-3 text-left font-medium text-slate-700">Variance</th>
-                                <th class="px-6 py-3 text-left font-medium text-slate-700">Employees</th>
-                                <th class="px-6 py-3 text-left font-medium text-slate-700">Last Updated</th>
-                                <th class="px-6 py-3 text-left font-medium text-slate-700">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="benchmarksTableBody" class="divide-y divide-slate-200">
-                            <!-- Rows will be populated here -->
-                        </tbody>
-                    </table>
+                <div class="p-3 rounded-lg bg-blue-50">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-slate-800">Department Variance</span>
+                        <span id="equityDept" class="text-sm font-bold text-blue-600">4.8%</span>
+                    </div>
+                    <div class="w-full bg-blue-200 rounded-full h-2">
+                        <div id="equityDeptBar" class="bg-blue-500 h-2 rounded-full" style="width: 95.2%"></div>
+                    </div>
+                    <div class="text-xs text-slate-600 mt-1">Good alignment across teams</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Benchmark Tool Modal -->
-    <div id="benchmarkToolModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-        <div class="fixed inset-0 overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4">
-                <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <div class="p-6 border-b border-slate-200">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-slate-800">
-                                <i class="fa-solid fa-chart-line mr-2"></i> Salary Benchmark Tool
-                            </h3>
-                            <button id="closeBenchmarkModal" class="text-slate-400 hover:text-slate-600">
-                                <i class="fa-solid fa-times text-xl"></i>
-                            </button>
-                        </div>
+    <!-- Salary Benchmarking Table -->
+    <div class="rounded-2xl border border-slate-200 bg-white">
+        <div class="p-6 border-b border-slate-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-table mr-2"></i> Position Benchmarks
+                </h2>
+                <div class="flex items-center gap-2">
+                    <input id="searchPositions" type="text" placeholder="Search positions..."
+                        class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                    <select id="benchmarkView" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <option value="all">All Positions</option>
+                        <option value="outdated">Need Review</option>
+                        <option value="competitive">Competitive</option>
+                        <option value="below-market">Below Market</option>
+                    </select>
+                    <button id="exportBenchmarksBtn"
+                        class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="benchmarkLoadingState" class="p-8 text-center">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
+            <p class="mt-2 text-sm text-slate-600">Loading benchmark data...</p>
+        </div>
+
+        <!-- Benchmarks Table -->
+        <div id="benchmarksTable" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700 sortable" data-key="position">
+                                Position <i class="fa-solid fa-sort text-slate-400 ml-1"></i></th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700 sortable" data-key="level">Level
+                                <i class="fa-solid fa-sort text-slate-400 ml-1"></i>
+                            </th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Our Range</th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Market Range</th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700 sortable" data-key="variance">
+                                Variance <i class="fa-solid fa-sort text-slate-400 ml-1"></i></th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700 sortable" data-key="employees">
+                                Employees <i class="fa-solid fa-sort text-slate-400 ml-1"></i></th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700 sortable" data-key="lastUpdated">
+                                Last Updated <i class="fa-solid fa-sort text-slate-400 ml-1"></i></th>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="benchmarksTableBody" class="divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Benchmark Tool Modal -->
+<div id="benchmarkToolModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-slate-800">
+                            <i class="fa-solid fa-chart-line mr-2"></i> Salary Benchmark Tool
+                        </h3>
+                        <button id="closeBenchmarkModal" class="text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-times text-xl"></i>
+                        </button>
                     </div>
+                </div>
 
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Position Details -->
-                            <div class="space-y-4">
-                                <h4 class="font-medium text-slate-800">Position Details</h4>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Position Details -->
+                        <div class="space-y-4">
+                            <h4 class="font-medium text-slate-800">Position Details</h4>
 
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Job Title *</label>
-                                    <input type="text" id="benchmarkJobTitle" required
-                                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Department</label>
-                                        <select id="benchmarkDepartment"
-                                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                                            <option value="">Select Department</option>
-                                            <option value="engineering">Engineering</option>
-                                            <option value="sales">Sales</option>
-                                            <option value="marketing">Marketing</option>
-                                            <option value="hr">Human Resources</option>
-                                            <option value="finance">Finance</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
-                                        <select id="benchmarkLevel"
-                                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                                            <option value="">Select Level</option>
-                                            <option value="entry">Entry Level</option>
-                                            <option value="mid">Mid Level</option>
-                                            <option value="senior">Senior Level</option>
-                                            <option value="lead">Lead/Manager</option>
-                                            <option value="director">Director</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
-                                        <select id="benchmarkLocation"
-                                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                                            <option value="">Select Location</option>
-                                            <option value="san-francisco">San Francisco</option>
-                                            <option value="new-york">New York</option>
-                                            <option value="austin">Austin</option>
-                                            <option value="remote">Remote</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Experience
-                                            (Years)</label>
-                                        <input type="number" id="benchmarkExperience" min="0" max="30"
-                                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Skills
-                                        (comma-separated)</label>
-                                    <textarea id="benchmarkSkills" rows="3"
-                                        placeholder="e.g., JavaScript, React, Node.js, Python"
-                                        class="w-full rounded-lg border border-slate-300 px-3 py-2"></textarea>
-                                </div>
-
-                                <button id="runBenchmarkBtn"
-                                    class="w-full px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">
-                                    <i class="fa-solid fa-search mr-2"></i> Run Benchmark Analysis
-                                </button>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Job Title *</label>
+                                <input type="text" id="benchmarkJobTitle" required
+                                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
                             </div>
 
-                            <!-- Results -->
-                            <div class="space-y-4">
-                                <h4 class="font-medium text-slate-800">Market Analysis Results</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Department</label>
+                                    <select id="benchmarkDepartment"
+                                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                        <option value="">Select Department</option>
+                                        <option value="engineering">Engineering</option>
+                                        <option value="sales">Sales</option>
+                                        <option value="marketing">Marketing</option>
+                                        <option value="hr">Human Resources</option>
+                                        <option value="finance">Finance</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
+                                    <select id="benchmarkLevel"
+                                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                        <option value="">Select Level</option>
+                                        <option value="entry">Entry Level</option>
+                                        <option value="mid">Mid Level</option>
+                                        <option value="senior">Senior Level</option>
+                                        <option value="lead">Lead/Manager</option>
+                                        <option value="director">Director</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                                <div id="benchmarkResults" class="hidden">
-                                    <!-- Salary Range Card -->
-                                    <div class="p-4 rounded-lg border border-slate-200 bg-slate-50">
-                                        <h5 class="font-medium text-slate-800 mb-3">Recommended Salary Range</h5>
-                                        <div class="grid grid-cols-2 gap-4 text-center">
-                                            <div class="p-3 rounded bg-white">
-                                                <div class="text-xs text-slate-500 mb-1">Minimum</div>
-                                                <div id="benchmarkMin" class="text-lg font-bold text-slate-800">$75,000
-                                                </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                                    <select id="benchmarkLocation"
+                                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                        <option value="">Select Location</option>
+                                        <option value="san-francisco">San Francisco</option>
+                                        <option value="new-york">New York</option>
+                                        <option value="austin">Austin</option>
+                                        <option value="remote">Remote</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Experience
+                                        (Years)</label>
+                                    <input type="number" id="benchmarkExperience" min="0" max="30"
+                                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Skills
+                                    (comma-separated)</label>
+                                <textarea id="benchmarkSkills" rows="3"
+                                    placeholder="e.g., JavaScript, React, Node.js, Python"
+                                    class="w-full rounded-lg border border-slate-300 px-3 py-2"></textarea>
+                            </div>
+
+                            <button id="runBenchmarkBtn"
+                                class="w-full px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">
+                                <i class="fa-solid fa-search mr-2"></i> Run Benchmark Analysis
+                            </button>
+                        </div>
+
+                        <!-- Results -->
+                        <div class="space-y-4">
+                            <h4 class="font-medium text-slate-800">Market Analysis Results</h4>
+
+                            <div id="benchmarkResults" class="hidden">
+                                <!-- Salary Range Card -->
+                                <div class="p-4 rounded-lg border border-slate-200 bg-slate-50">
+                                    <h5 class="font-medium text-slate-800 mb-3">Recommended Salary Range</h5>
+                                    <div class="grid grid-cols-2 gap-4 text-center">
+                                        <div class="p-3 rounded bg-white">
+                                            <div class="text-xs text-slate-500 mb-1">Minimum</div>
+                                            <div id="benchmarkMin" class="text-lg font-bold text-slate-800">$75,000
                                             </div>
-                                            <div class="p-3 rounded bg-white">
-                                                <div class="text-xs text-slate-500 mb-1">Maximum</div>
-                                                <div id="benchmarkMax" class="text-lg font-bold text-slate-800">$95,000
-                                                </div>
+                                        </div>
+                                        <div class="p-3 rounded bg-white">
+                                            <div class="text-xs text-slate-500 mb-1">Maximum</div>
+                                            <div id="benchmarkMax" class="text-lg font-bold text-slate-800">$95,000
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <!-- Market Percentiles -->
-                                    <div class="p-4 rounded-lg border border-slate-200">
-                                        <h5 class="font-medium text-slate-800 mb-3">Market Percentiles</h5>
-                                        <div class="space-y-2">
-                                            <div class="flex justify-between">
-                                                <span class="text-sm">25th Percentile:</span>
-                                                <span class="font-medium">$68,000</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-sm">50th Percentile:</span>
-                                                <span class="font-medium">$82,000</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-sm">75th Percentile:</span>
-                                                <span class="font-medium">$98,000</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-sm">90th Percentile:</span>
-                                                <span class="font-medium">$115,000</span>
-                                            </div>
+                                <!-- Market Percentiles -->
+                                <div class="p-4 rounded-lg border border-slate-200">
+                                    <h5 class="font-medium text-slate-800 mb-3">Market Percentiles</h5>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between"><span class="text-sm">25th
+                                                Percentile:</span><span id="bmP25" class="font-medium">$68,000</span>
+                                        </div>
+                                        <div class="flex justify-between"><span class="text-sm">50th
+                                                Percentile:</span><span id="bmP50" class="font-medium">$82,000</span>
+                                        </div>
+                                        <div class="flex justify-between"><span class="text-sm">75th
+                                                Percentile:</span><span id="bmP75" class="font-medium">$98,000</span>
+                                        </div>
+                                        <div class="flex justify-between"><span class="text-sm">90th
+                                                Percentile:</span><span id="bmP90" class="font-medium">$115,000</span>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <!-- Data Sources -->
-                                    <div class="p-4 rounded-lg border border-slate-200">
-                                        <h5 class="font-medium text-slate-800 mb-3">Data Sources</h5>
-                                        <div class="space-y-2 text-sm">
-                                            <div class="flex items-center gap-2">
-                                                <i class="fa-solid fa-check text-green-500"></i>
-                                                <span>Glassdoor (1,247 data points)</span>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <i class="fa-solid fa-check text-green-500"></i>
-                                                <span>PayScale (892 data points)</span>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <i class="fa-solid fa-check text-green-500"></i>
-                                                <span>Indeed (543 data points)</span>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <i class="fa-solid fa-check text-green-500"></i>
-                                                <span>LinkedIn (376 data points)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Action Buttons -->
-                                    <div class="flex gap-3">
-                                        <button id="saveBenchmarkBtn"
-                                            class="flex-1 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">
-                                            <i class="fa-solid fa-save mr-1"></i> Save Analysis
-                                        </button>
-                                        <button id="exportBenchmarkBtn"
-                                            class="flex-1 px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50">
-                                            <i class="fa-solid fa-download mr-1"></i> Export
-                                        </button>
+                                <!-- Data Sources -->
+                                <div class="p-4 rounded-lg border border-slate-200">
+                                    <h5 class="font-medium text-slate-800 mb-3">Data Sources</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-center gap-2"><i
+                                                class="fa-solid fa-check text-green-500"></i><span>Glassdoor (1,247 data
+                                                points)</span></div>
+                                        <div class="flex items-center gap-2"><i
+                                                class="fa-solid fa-check text-green-500"></i><span>PayScale (892 data
+                                                points)</span></div>
+                                        <div class="flex items-center gap-2"><i
+                                                class="fa-solid fa-check text-green-500"></i><span>Indeed (543 data
+                                                points)</span></div>
+                                        <div class="flex items-center gap-2"><i
+                                                class="fa-solid fa-check text-green-500"></i><span>LinkedIn (376 data
+                                                points)</span></div>
                                     </div>
                                 </div>
 
-                                <!-- Loading State -->
-                                <div id="benchmarkAnalysisLoading" class="hidden text-center py-8">
-                                    <div
-                                        class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600">
-                                    </div>
-                                    <p class="mt-2 text-sm text-slate-600">Analyzing market data...</p>
+                                <!-- Action Buttons -->
+                                <div class="flex gap-3">
+                                    <button id="saveBenchmarkBtn"
+                                        class="flex-1 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">
+                                        <i class="fa-solid fa-save mr-1"></i> Save Analysis
+                                    </button>
+                                    <button id="exportBenchmarkBtn"
+                                        class="flex-1 px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50">
+                                        <i class="fa-solid fa-download mr-1"></i> Export
+                                    </button>
                                 </div>
+                            </div>
 
-                                <!-- Empty State -->
-                                <div id="benchmarkEmptyState" class="text-center py-8 text-slate-500">
-                                    <i class="fa-solid fa-chart-line text-4xl mb-4"></i>
-                                    <p>Fill out the position details and click "Run Benchmark Analysis" to see market
-                                        data.</p>
+                            <!-- Loading State -->
+                            <div id="benchmarkAnalysisLoading" class="hidden text-center py-8">
+                                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600">
                                 </div>
+                                <p class="mt-2 text-sm text-slate-600">Analyzing market data...</p>
+                            </div>
+
+                            <!-- Empty State -->
+                            <div id="benchmarkEmptyState" class="text-center py-8 text-slate-500">
+                                <i class="fa-solid fa-chart-line text-4xl mb-4"></i>
+                                <p>Fill out the position details and click "Run Benchmark Analysis" to see market data.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -461,35 +463,71 @@
     </div>
 
     <script>
-        // Initialize salary explorer
-        document.addEventListener('DOMContentLoaded', function () {
-            initializeSalaryExplorer();
-        });
+        /* ---------------- Boot (safe, no double init) ---------------- */
+        if (!window.__salaryExplorerBooted) {
+            window.__salaryExplorerBooted = true;
 
-        // Global state
+            document.addEventListener('DOMContentLoaded', () => {
+                ensureChartJS().then(initializeSalaryExplorer);
+            });
+        }
+
+        /* ---------------- Chart.js loader ---------------- */
+        function ensureChartJS() {
+            return new Promise((resolve) => {
+                if (typeof Chart !== 'undefined') return resolve();
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+                s.onload = resolve;
+                document.head.appendChild(s);
+            });
+        }
+
+        /* ---------------- State & storage ---------------- */
+        const LS_KEY = 'salary_explorer_state_v1';
         let salaryData = [];
-        let benchmarkData = [];
         let currentAnalysis = 'internal';
+        let filters = { department: '', level: '', location: '' };
+        let sortBench = { key: 'position', dir: 'asc' };
+        let searchTerm = '';
+        let salaryChartInstance = null;
 
+        function loadState() {
+            try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null') || {}; } catch { return {}; }
+        }
+        function saveState() {
+            localStorage.setItem(LS_KEY, JSON.stringify({ currentAnalysis, filters, sortBench, searchTerm }));
+        }
+
+        /* ---------------- Init ---------------- */
         async function initializeSalaryExplorer() {
-            await loadSalaryData();
+            const st = loadState();
+            if (st.currentAnalysis) currentAnalysis = st.currentAnalysis;
+            if (st.filters) filters = st.filters;
+            if (st.sortBench) sortBench = st.sortBench;
+            if (st.searchTerm) searchTerm = st.searchTerm;
+
+            // wire controls
             setupEventListeners();
+
+            // set control values from state
+            document.getElementById('analysisType').value = currentAnalysis;
+            document.getElementById('departmentFilter').value = filters.department || '';
+            document.getElementById('levelFilter').value = filters.level || '';
+            document.getElementById('locationFilter').value = filters.location || '';
+            document.getElementById('searchPositions').value = searchTerm;
+
+            await loadSalaryData();
             renderAnalysis();
         }
 
+        /* ---------------- Mock data load ---------------- */
         async function loadSalaryData() {
             try {
                 // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                // Mock salary data
+                await new Promise(r => setTimeout(r, 500));
                 const mockData = {
-                    summary: {
-                        avgSalary: 87500,
-                        medianSalary: 82000,
-                        equityScore: 94,
-                        topQuartile: 105000
-                    },
+                    summary: { avgSalary: 87500, medianSalary: 82000, equityScore: 94, topQuartile: 105000 },
                     distribution: [
                         { range: '40K-60K', count: 12, percentage: 8.5 },
                         { range: '60K-80K', count: 45, percentage: 32.1 },
@@ -505,87 +543,85 @@
                         { name: 'Finance', avgSalary: 83000, count: 18, variance: 1.7 }
                     ],
                     benchmarks: [
-                        {
-                            id: 1,
-                            position: 'Software Engineer',
-                            level: 'Senior',
-                            ourRange: { min: 85000, max: 110000 },
-                            marketRange: { min: 90000, max: 115000 },
-                            variance: -5.2,
-                            employees: 12,
-                            lastUpdated: '2024-01-10'
-                        },
-                        {
-                            id: 2,
-                            position: 'Product Manager',
-                            level: 'Mid',
-                            ourRange: { min: 75000, max: 95000 },
-                            marketRange: { min: 80000, max: 100000 },
-                            variance: -6.7,
-                            employees: 8,
-                            lastUpdated: '2024-01-08'
-                        },
-                        {
-                            id: 3,
-                            position: 'Sales Representative',
-                            level: 'Entry',
-                            ourRange: { min: 45000, max: 65000 },
-                            marketRange: { min: 42000, max: 62000 },
-                            variance: 4.8,
-                            employees: 15,
-                            lastUpdated: '2024-01-12'
-                        }
+                        { id: 1, position: 'Software Engineer', level: 'Senior', ourRange: { min: 85000, max: 110000 }, marketRange: { min: 90000, max: 115000 }, variance: -5.2, employees: 12, lastUpdated: '2024-01-10' },
+                        { id: 2, position: 'Product Manager', level: 'Mid', ourRange: { min: 75000, max: 95000 }, marketRange: { min: 80000, max: 100000 }, variance: -6.7, employees: 8, lastUpdated: '2024-01-08' },
+                        { id: 3, position: 'Sales Representative', level: 'Entry', ourRange: { min: 45000, max: 65000 }, marketRange: { min: 42000, max: 62000 }, variance: 4.8, employees: 15, lastUpdated: '2024-01-12' },
+                        { id: 4, position: 'Data Analyst', level: 'Mid', ourRange: { min: 68000, max: 88000 }, marketRange: { min: 70000, max: 90000 }, variance: -2.3, employees: 10, lastUpdated: '2024-01-14' }
                     ]
                 };
-
                 salaryData = mockData;
                 updateSummaryCards();
-
-            } catch (error) {
-                console.error('Error loading salary data:', error);
-                showError('Failed to load salary data');
+            } catch (e) {
+                console.error(e); showError('Failed to load salary data');
             }
         }
 
+        /* ---------------- Cards ---------------- */
         function updateSummaryCards() {
-            const { summary } = salaryData;
+            const s = salaryData.summary;
+            byId('avgSalary').textContent = `${(s.avgSalary / 1000).toFixed(0)}K`;
+            byId('medianSalary').textContent = `${(s.medianSalary / 1000).toFixed(0)}K`;
+            byId('equityScore').textContent = `${s.equityScore}%`;
+            byId('topQuartile').textContent = `${(s.topQuartile / 1000).toFixed(0)}K`;
 
-            document.getElementById('avgSalary').textContent = `${(summary.avgSalary / 1000).toFixed(0)}K`;
-            document.getElementById('medianSalary').textContent = `${(summary.medianSalary / 1000).toFixed(0)}K`;
-            document.getElementById('equityScore').textContent = `${summary.equityScore}%`;
-            document.getElementById('topQuartile').textContent = `${(summary.topQuartile / 1000).toFixed(0)}K`;
+            // friendly notes
+            byId('avgDelta').textContent = '↑ 5.2% vs market';
+            byId('medianDelta').textContent = 'Market aligned';
+            byId('equityNote').textContent = 'Within range';
+            byId('topQuartileNote').textContent = 'High performers';
         }
 
+        /* ---------------- Events ---------------- */
         function setupEventListeners() {
-            // Analysis type change
-            document.getElementById('analysisType').addEventListener('change', (e) => {
-                currentAnalysis = e.target.value;
-                renderAnalysis();
-            });
-
-            // Filter changes
+            // Analysis & filters
+            byId('analysisType').addEventListener('change', (e) => { currentAnalysis = e.target.value; saveState(); renderAnalysis(); });
             ['departmentFilter', 'levelFilter', 'locationFilter'].forEach(id => {
-                document.getElementById(id).addEventListener('change', renderAnalysis);
+                byId(id).addEventListener('change', () => {
+                    filters.department = byId('departmentFilter').value;
+                    filters.level = byId('levelFilter').value;
+                    filters.location = byId('locationFilter').value;
+                    saveState(); renderAnalysis();
+                });
             });
-
-            // Modal controls
-            document.getElementById('benchmarkToolBtn').addEventListener('click', openBenchmarkModal);
-            document.getElementById('closeBenchmarkModal').addEventListener('click', closeBenchmarkModal);
-            document.getElementById('runBenchmarkBtn').addEventListener('click', runBenchmarkAnalysis);
-            document.getElementById('saveBenchmarkBtn').addEventListener('click', saveBenchmarkAnalysis);
-            document.getElementById('exportBenchmarkBtn').addEventListener('click', exportBenchmarkAnalysis);
-
-            // Other controls
-            document.getElementById('refreshAnalysis').addEventListener('click', loadSalaryData);
-            document.getElementById('exportAnalysisBtn').addEventListener('click', exportAnalysis);
-            document.getElementById('searchPositions').addEventListener('input', debounce(filterBenchmarks, 300));
-            document.getElementById('benchmarkView').addEventListener('change', filterBenchmarks);
+            byId('refreshAnalysis').addEventListener('click', async () => { await loadSalaryData(); renderAnalysis(); });
 
             // Chart controls
-            document.getElementById('chartTypeBtn').addEventListener('click', toggleChartType);
-            document.getElementById('fullscreenChart').addEventListener('click', fullscreenChart);
+            byId('chartTypeBtn').addEventListener('click', toggleChartType);
+            byId('fullscreenChart').addEventListener('click', fullscreenChart);
+            byId('downloadChartBtn').addEventListener('click', downloadChartPng);
+
+            // Export analysis
+            byId('exportAnalysisBtn').addEventListener('click', exportAnalysis);
+
+            // Benchmark modal / actions
+            byId('benchmarkToolBtn').addEventListener('click', openBenchmarkModal);
+            byId('closeBenchmarkModal').addEventListener('click', closeBenchmarkModal);
+            byId('runBenchmarkBtn').addEventListener('click', runBenchmarkAnalysis);
+            byId('saveBenchmarkBtn').addEventListener('click', saveBenchmarkAnalysis);
+            byId('exportBenchmarkBtn').addEventListener('click', exportBenchmarkAnalysis);
+
+            // Benchmarks search/filter/sort/export
+            byId('searchPositions').addEventListener('input', debounce((e) => { searchTerm = e.target.value.toLowerCase(); saveState(); renderBenchmarksTable(); }, 250));
+            byId('benchmarkView').addEventListener('change', () => renderBenchmarksTable());
+            byId('exportBenchmarksBtn').addEventListener('click', exportBenchmarksCsv);
+
+            // Sort headers
+            document.querySelectorAll('thead .sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.dataset.key;
+                    sortBench.dir = (sortBench.key === key && sortBench.dir === 'asc') ? 'desc' : 'asc';
+                    sortBench.key = key; saveState(); renderBenchmarksTable();
+                });
+            });
+
+            // Close modal outside
+            window.addEventListener('click', (e) => { const m = byId('benchmarkToolModal'); if (e.target === m) closeBenchmarkModal(); });
+
+            // Auto refresh (5 min)
+            setInterval(loadSalaryData, 5 * 60 * 1000);
         }
 
+        /* ---------------- Render ---------------- */
         function renderAnalysis() {
             renderSalaryChart();
             renderDepartmentAnalysis();
@@ -593,346 +629,271 @@
             updateMarketComparison();
         }
 
+        /* Chart */
         function renderSalaryChart() {
-            const ctx = document.getElementById('salaryChart').getContext('2d');
+            const ctx = byId('salaryChart').getContext('2d');
+            if (salaryChartInstance) salaryChartInstance.destroy();
 
-            // Destroy existing chart
-            if (window.salaryChartInstance) {
-                window.salaryChartInstance.destroy();
-            }
+            const labels = salaryData.distribution.map(d => d.range);
+            const data = salaryData.distribution.map(d => d.count);
 
-            const chartData = {
-                labels: salaryData.distribution.map(d => d.range),
-                datasets: [{
-                    label: 'Number of Employees',
-                    data: salaryData.distribution.map(d => d.count),
-                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 2,
-                    borderRadius: 4
-                }]
-            };
-
-            window.salaryChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: chartData,
+            const type = (salaryChartInstance && salaryChartInstance.config.type) || 'bar';
+            salaryChartInstance = new Chart(ctx, {
+                type,
+                data: { labels, datasets: [{ label: 'Number of Employees', data, borderWidth: 2, borderRadius: 4, fill: type === 'line', tension: type === 'line' ? 0.4 : 0 }] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                afterLabel: function (context) {
-                                    const percentage = salaryData.distribution[context.dataIndex].percentage;
-                                    return `${percentage}% of workforce`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(148, 163, 184, 0.1)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: (ctx) => salaryData.distribution[ctx.dataIndex].percentage + '% of workforce' } } },
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.1)' } }, x: { grid: { display: false } } }
                 }
             });
         }
+        function toggleChartType() {
+            if (!salaryChartInstance) return;
+            const cur = salaryChartInstance.config.type;
+            const next = cur === 'bar' ? 'line' : 'bar';
+            salaryChartInstance.config.type = next;
+            salaryChartInstance.data.datasets[0].fill = next === 'line';
+            salaryChartInstance.data.datasets[0].tension = next === 'line' ? 0.4 : 0;
+            salaryChartInstance.update();
+            byId('chartTypeBtn').querySelector('i').className = next === 'bar' ? 'fa-solid fa-chart-column' : 'fa-solid fa-chart-line';
+        }
+        function fullscreenChart() {
+            const canvas = byId('salaryChart');
+            if (canvas.requestFullscreen) { canvas.requestFullscreen(); }
+            else showInfo('Fullscreen not supported in this browser');
+        }
+        function downloadChartPng() {
+            if (!salaryChartInstance) return;
+            const a = document.createElement('a');
+            a.href = salaryChartInstance.toBase64Image();
+            a.download = 'salary_distribution.png';
+            a.click();
+        }
 
+        /* Department */
         function renderDepartmentAnalysis() {
-            const container = document.getElementById('departmentAnalysis');
-            container.innerHTML = '';
-
+            const container = byId('departmentAnalysis'); container.innerHTML = '';
             salaryData.departments.forEach(dept => {
-                const isPositive = dept.variance > 0;
-                const varianceClass = isPositive ? 'text-green-600' : 'text-red-600';
-                const varianceIcon = isPositive ? 'fa-arrow-up' : 'fa-arrow-down';
-
-                const deptCard = document.createElement('div');
-                deptCard.className = 'flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors';
-
-                deptCard.innerHTML = `
-            <div>
-                <div class="font-medium text-slate-800">${dept.name}</div>
-                <div class="text-sm text-slate-600">${dept.count} employees</div>
-            </div>
-            <div class="text-right">
-                <div class="font-bold text-slate-800">${(dept.avgSalary / 1000).toFixed(0)}K</div>
-                <div class="text-xs ${varianceClass} flex items-center gap-1">
-                    <i class="fa-solid ${varianceIcon}"></i>
-                    ${Math.abs(dept.variance)}% vs market
-                </div>
-            </div>
-        `;
-
-                container.appendChild(deptCard);
+                // basic filter simulation (dept only)
+                if (filters.department && dept.name.toLowerCase() !== filters.department.replace('-', ' ')) return;
+                const pos = dept.variance > 0; const vCls = pos ? 'text-green-600' : 'text-red-600'; const icon = pos ? 'fa-arrow-up' : 'fa-arrow-down';
+                const n = el('div', 'flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors');
+                n.innerHTML = `
+      <div>
+        <div class="font-medium text-slate-800">${dept.name}</div>
+        <div class="text-sm text-slate-600">${dept.count} employees</div>
+      </div>
+      <div class="text-right">
+        <div class="font-bold text-slate-800">${(dept.avgSalary / 1000).toFixed(0)}K</div>
+        <div class="text-xs ${vCls} flex items-center gap-1"><i class="fa-solid ${icon}"></i>${Math.abs(dept.variance)}% vs market</div>
+      </div>`;
+                container.appendChild(n);
             });
         }
 
+        /* Benchmarks */
+        function filteredBenchmarks() {
+            const view = byId('benchmarkView').value;
+            const term = (searchTerm || '').trim();
+            let arr = salaryData.benchmarks.slice();
+
+            if (term) {
+                arr = arr.filter(b => `${b.position} ${b.level}`.toLowerCase().includes(term));
+            }
+            if (view === 'outdated') {
+                // mark “outdated” if lastUpdated older than 90 days (mock)
+                const cutoff = Date.now() - 90 * 86400000;
+                arr = arr.filter(b => new Date(b.lastUpdated).getTime() < cutoff);
+            } else if (view === 'competitive') {
+                arr = arr.filter(b => Math.abs(b.variance) <= 5);
+            } else if (view === 'below-market') {
+                arr = arr.filter(b => b.variance < -5);
+            }
+
+            // sort
+            const mult = sortBench.dir === 'asc' ? 1 : -1;
+            arr.sort((a, b) => {
+                const key = sortBench.key;
+                let va = a[key], vb = b[key];
+                if (key === 'lastUpdated') { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
+                if (va < vb) return -1 * mult;
+                if (va > vb) return 1 * mult;
+                return 0;
+            });
+            return arr;
+        }
         function renderBenchmarksTable() {
-            const tbody = document.getElementById('benchmarksTableBody');
-            tbody.innerHTML = '';
+            const tbody = byId('benchmarksTableBody'); tbody.innerHTML = '';
+            byId('benchmarkLoadingState').classList.add('hidden');
+            byId('benchmarksTable').classList.remove('hidden');
 
-            document.getElementById('benchmarkLoadingState').classList.add('hidden');
-            document.getElementById('benchmarksTable').classList.remove('hidden');
-
-            salaryData.benchmarks.forEach(benchmark => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-slate-50';
-
+            const rows = filteredBenchmarks();
+            rows.forEach(benchmark => {
                 const isBelow = benchmark.variance < -5;
                 const isAbove = benchmark.variance > 5;
-                let varianceClass = 'text-slate-600';
-                let statusBadge = 'bg-green-100 text-green-700';
-                let statusText = 'Competitive';
+                let varianceClass = 'text-slate-600', badge = 'bg-green-100 text-green-700', status = 'Competitive';
+                if (isBelow) { varianceClass = 'text-red-600'; badge = 'bg-red-100 text-red-700'; status = 'Below Market'; }
+                else if (isAbove) { varianceClass = 'text-blue-600'; badge = 'bg-blue-100 text-blue-700'; status = 'Above Market'; }
 
-                if (isBelow) {
-                    varianceClass = 'text-red-600';
-                    statusBadge = 'bg-red-100 text-red-700';
-                    statusText = 'Below Market';
-                } else if (isAbove) {
-                    varianceClass = 'text-blue-600';
-                    statusBadge = 'bg-blue-100 text-blue-700';
-                    statusText = 'Above Market';
-                }
-
-                row.innerHTML = `
-            <td class="px-6 py-4">
-                <div class="font-medium text-slate-800">${benchmark.position}</div>
-                <div class="text-sm text-slate-600">ID: ${benchmark.id}</div>
-            </td>
-            <td class="px-6 py-4">
-                <span class="px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700">
-                    ${benchmark.level}
-                </span>
-            </td>
-            <td class="px-6 py-4 text-slate-800">
-                ${(benchmark.ourRange.min / 1000).toFixed(0)}K - ${(benchmark.ourRange.max / 1000).toFixed(0)}K
-            </td>
-            <td class="px-6 py-4 text-slate-800">
-                ${(benchmark.marketRange.min / 1000).toFixed(0)}K - ${(benchmark.marketRange.max / 1000).toFixed(0)}K
-            </td>
-            <td class="px-6 py-4">
-                <span class="font-medium ${varianceClass}">
-                    ${benchmark.variance > 0 ? '+' : ''}${benchmark.variance.toFixed(1)}%
-                </span>
-            </td>
-            <td class="px-6 py-4 text-slate-800">${benchmark.employees}</td>
-            <td class="px-6 py-4 text-slate-600">${formatDate(benchmark.lastUpdated)}</td>
-            <td class="px-6 py-4">
-                <div class="flex items-center gap-2">
-                    <button onclick="editBenchmark(${benchmark.id})" 
-                        class="text-blue-600 hover:text-blue-800" title="Edit">
-                        <i class="fa-solid fa-edit"></i>
-                    </button>
-                    <button onclick="refreshBenchmark(${benchmark.id})" 
-                        class="text-green-600 hover:text-green-800" title="Refresh Data">
-                        <i class="fa-solid fa-rotate"></i>
-                    </button>
-                    <button onclick="viewBenchmarkDetails(${benchmark.id})" 
-                        class="text-purple-600 hover:text-purple-800" title="View Details">
-                        <i class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-
-                tbody.appendChild(row);
+                const tr = el('tr', 'hover:bg-slate-50');
+                tr.innerHTML = `
+      <td class="px-6 py-4"><div class="font-medium text-slate-800">${benchmark.position}</div><div class="text-sm text-slate-600">ID: ${benchmark.id}</div></td>
+      <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700">${benchmark.level}</span></td>
+      <td class="px-6 py-4 text-slate-800">${(benchmark.ourRange.min / 1000).toFixed(0)}K - ${(benchmark.ourRange.max / 1000).toFixed(0)}K</td>
+      <td class="px-6 py-4 text-slate-800">${(benchmark.marketRange.min / 1000).toFixed(0)}K - ${(benchmark.marketRange.max / 1000).toFixed(0)}K</td>
+      <td class="px-6 py-4"><span class="font-medium ${varianceClass}">${benchmark.variance > 0 ? '+' : ''}${benchmark.variance.toFixed(1)}%</span> <span class="ml-2 px-2 py-0.5 rounded text-xs ${badge}">${status}</span></td>
+      <td class="px-6 py-4 text-slate-800">${benchmark.employees}</td>
+      <td class="px-6 py-4 text-slate-600">${formatDate(benchmark.lastUpdated)}</td>
+      <td class="px-6 py-4">
+        <div class="flex items-center gap-2">
+          <button onclick="editBenchmark(${benchmark.id})" class="text-blue-600 hover:text-blue-800" title="Edit"><i class="fa-solid fa-edit"></i></button>
+          <button onclick="refreshBenchmark(${benchmark.id})" class="text-green-600 hover:text-green-800" title="Refresh"><i class="fa-solid fa-rotate"></i></button>
+          <button onclick="viewBenchmarkDetails(${benchmark.id})" class="text-purple-600 hover:text-purple-800" title="View"><i class="fa-solid fa-eye"></i></button>
+        </div>
+      </td>`;
+                tbody.appendChild(tr);
             });
         }
 
+        /* Market comparison (simple placeholder, could be dynamic by filters) */
         function updateMarketComparison() {
-            // Update percentile values based on current filters
-            document.getElementById('percentile25').textContent = '$65K';
-            document.getElementById('percentile50').textContent = '$82K';
-            document.getElementById('percentile75').textContent = '$105K';
-            document.getElementById('percentile90').textContent = '$130K';
+            byId('percentile25').textContent = '$65K';
+            byId('percentile50').textContent = '$82K';
+            byId('percentile75').textContent = '$105K';
+            byId('percentile90').textContent = '$130K';
         }
 
+        /* ---------------- Benchmark Modal ---------------- */
         function openBenchmarkModal() {
-            document.getElementById('benchmarkToolModal').classList.remove('hidden');
-            document.getElementById('benchmarkEmptyState').classList.remove('hidden');
-            document.getElementById('benchmarkResults').classList.add('hidden');
-            document.getElementById('benchmarkAnalysisLoading').classList.add('hidden');
+            byId('benchmarkToolModal').classList.remove('hidden');
+            byId('benchmarkEmptyState').classList.remove('hidden');
+            byId('benchmarkResults').classList.add('hidden');
+            byId('benchmarkAnalysisLoading').classList.add('hidden');
         }
-
         function closeBenchmarkModal() {
-            document.getElementById('benchmarkToolModal').classList.add('hidden');
-            // Reset form
-            document.getElementById('benchmarkJobTitle').value = '';
-            document.getElementById('benchmarkDepartment').value = '';
-            document.getElementById('benchmarkLevel').value = '';
-            document.getElementById('benchmarkLocation').value = '';
-            document.getElementById('benchmarkExperience').value = '';
-            document.getElementById('benchmarkSkills').value = '';
+            byId('benchmarkToolModal').classList.add('hidden');
+            // reset fields
+            ['benchmarkJobTitle', 'benchmarkExperience', 'benchmarkSkills'].forEach(id => byId(id).value = '');
+            ['benchmarkDepartment', 'benchmarkLevel', 'benchmarkLocation'].forEach(id => byId(id).value = '');
         }
-
         async function runBenchmarkAnalysis() {
-            const jobTitle = document.getElementById('benchmarkJobTitle').value.trim();
+            const jobTitle = byId('benchmarkJobTitle').value.trim();
+            if (!jobTitle) return showError('Please enter a job title');
 
-            if (!jobTitle) {
-                showError('Please enter a job title');
-                return;
-            }
+            byId('benchmarkEmptyState').classList.add('hidden');
+            byId('benchmarkResults').classList.add('hidden');
+            byId('benchmarkAnalysisLoading').classList.remove('hidden');
 
-            try {
-                // Show loading state
-                document.getElementById('benchmarkEmptyState').classList.add('hidden');
-                document.getElementById('benchmarkResults').classList.add('hidden');
-                document.getElementById('benchmarkAnalysisLoading').classList.remove('hidden');
+            await new Promise(r => setTimeout(r, 1000));
 
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 2000));
+            // mock result tweak by level/exp
+            const lvl = byId('benchmarkLevel').value || 'mid';
+            const exp = Number(byId('benchmarkExperience').value || 0);
+            const baseMin = 70000 + (lvl === 'senior' ? 15000 : lvl === 'entry' ? -10000 : 5000) + exp * 500;
+            const baseMax = baseMin + 18000 + exp * 400;
 
-                // Show results
-                document.getElementById('benchmarkAnalysisLoading').classList.add('hidden');
-                document.getElementById('benchmarkResults').classList.remove('hidden');
+            byId('benchmarkMin').textContent = `$${numFmt(baseMin)}`;
+            byId('benchmarkMax').textContent = `$${numFmt(baseMax)}`;
+            byId('bmP25').textContent = `$${numFmt(Math.round(baseMin * 0.95))}`;
+            byId('bmP50').textContent = `$${numFmt(Math.round((baseMin + baseMax) / 2))}`;
+            byId('bmP75').textContent = `$${numFmt(Math.round(baseMax * 0.95))}`;
+            byId('bmP90').textContent = `$${numFmt(Math.round(baseMax * 1.1))}`;
 
-                // Update results with mock data
-                document.getElementById('benchmarkMin').textContent = '$75,000';
-                document.getElementById('benchmarkMax').textContent = '$95,000';
-
-                showSuccess('Benchmark analysis completed successfully!');
-
-            } catch (error) {
-                console.error('Error running benchmark:', error);
-                document.getElementById('benchmarkAnalysisLoading').classList.add('hidden');
-                document.getElementById('benchmarkEmptyState').classList.remove('hidden');
-                showError('Failed to run benchmark analysis');
-            }
+            byId('benchmarkAnalysisLoading').classList.add('hidden');
+            byId('benchmarkResults').classList.remove('hidden');
+            showSuccess('Benchmark analysis completed successfully!');
         }
-
         function saveBenchmarkAnalysis() {
-            showSuccess('Benchmark analysis saved successfully!');
+            const payload = {
+                savedAt: new Date().toISOString(),
+                jobTitle: byId('benchmarkJobTitle').value.trim(),
+                department: byId('benchmarkDepartment').value,
+                level: byId('benchmarkLevel').value,
+                location: byId('benchmarkLocation').value,
+                experience: byId('benchmarkExperience').value,
+                skills: byId('benchmarkSkills').value,
+                min: byId('benchmarkMin').textContent,
+                max: byId('benchmarkMax').textContent
+            };
+            const key = 'salary_explorer_saved_benchmarks_v1';
+            const prior = JSON.parse(localStorage.getItem(key) || '[]');
+            prior.unshift(payload);
+            localStorage.setItem(key, JSON.stringify(prior));
+            showSuccess('Benchmark analysis saved');
         }
-
         function exportBenchmarkAnalysis() {
-            showInfo('Exporting benchmark analysis...');
-        }
-
-        function exportAnalysis() {
-            showInfo('Exporting salary analysis...');
-        }
-
-        function toggleChartType() {
-            // Toggle between bar chart and line chart
-            if (window.salaryChartInstance) {
-                const currentType = window.salaryChartInstance.config.type;
-                const newType = currentType === 'bar' ? 'line' : 'bar';
-
-                window.salaryChartInstance.config.type = newType;
-
-                if (newType === 'line') {
-                    window.salaryChartInstance.data.datasets[0].fill = true;
-                    window.salaryChartInstance.data.datasets[0].tension = 0.4;
-                } else {
-                    window.salaryChartInstance.data.datasets[0].fill = false;
-                    window.salaryChartInstance.data.datasets[0].tension = 0;
+            const obj = {
+                report: 'Benchmark Analysis',
+                generated: new Date().toISOString(),
+                fields: {
+                    jobTitle: byId('benchmarkJobTitle').value.trim(),
+                    department: byId('benchmarkDepartment').value,
+                    level: byId('benchmarkLevel').value,
+                    location: byId('benchmarkLocation').value,
+                    experience: byId('benchmarkExperience').value,
+                    skills: byId('benchmarkSkills').value
+                },
+                results: {
+                    min: byId('benchmarkMin').textContent,
+                    max: byId('benchmarkMax').textContent,
+                    p25: byId('bmP25').textContent,
+                    p50: byId('bmP50').textContent,
+                    p75: byId('bmP75').textContent,
+                    p90: byId('bmP90').textContent
                 }
-
-                window.salaryChartInstance.update();
-
-                // Update button icon
-                const icon = document.getElementById('chartTypeBtn').querySelector('i');
-                icon.className = newType === 'bar' ? 'fa-solid fa-chart-line' : 'fa-solid fa-chart-column';
-            }
-        }
-
-        function fullscreenChart() {
-            showInfo('Fullscreen chart functionality would be implemented here');
-        }
-
-        function filterBenchmarks() {
-            const searchTerm = document.getElementById('searchPositions').value.toLowerCase();
-            const viewFilter = document.getElementById('benchmarkView').value;
-
-            // In a real implementation, this would filter the table rows
-            console.log('Filtering benchmarks:', { searchTerm, viewFilter });
-        }
-
-        function editBenchmark(benchmarkId) {
-            showInfo(`Edit benchmark ${benchmarkId} functionality would be implemented here`);
-        }
-
-        function refreshBenchmark(benchmarkId) {
-            showInfo(`Refreshing benchmark data for ${benchmarkId}...`);
-            // In a real implementation, this would fetch updated market data
-        }
-
-        function viewBenchmarkDetails(benchmarkId) {
-            const benchmark = salaryData.benchmarks.find(b => b.id === benchmarkId);
-            if (benchmark) {
-                showInfo(`Viewing details for ${benchmark.position} (${benchmark.level})`);
-            }
-        }
-
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
             };
+            const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `benchmark_${(obj.fields.jobTitle || 'role').replace(/\s+/g, '_')}.json`;
+            a.click(); URL.revokeObjectURL(a.href);
         }
 
-        // Utility functions
-        function showSuccess(message) {
-            console.log('Success:', message);
-            alert('✅ ' + message);
+        /* ---------------- Exports ---------------- */
+        function exportAnalysis() {
+            // CSV with distribution + summary in header
+            const lines = [];
+            const s = salaryData.summary;
+            lines.push(`Summary,Avg,${s.avgSalary},Median,${s.medianSalary},EquityScore,${s.equityScore},TopQuartile,${s.topQuartile}`);
+            lines.push('');
+            lines.push('Range,Count,Percentage');
+            salaryData.distribution.forEach(d => lines.push(`${d.range},${d.count},${d.percentage}`));
+            const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'salary_analysis.csv'; a.click(); URL.revokeObjectURL(a.href);
+            showSuccess('Analysis exported');
+        }
+        function exportBenchmarksCsv() {
+            const rows = filteredBenchmarks();
+            if (!rows.length) return showInfo('No rows to export');
+            const header = ['id', 'position', 'level', 'our_min', 'our_max', 'market_min', 'market_max', 'variance', 'employees', 'last_updated'];
+            const out = [header.join(',')].concat(rows.map(b => [
+                b.id, csv(b.position), b.level, b.ourRange.min, b.ourRange.max, b.marketRange.min, b.marketRange.max, b.variance, b.employees, b.lastUpdated
+            ].join(',')));
+            const blob = new Blob([out.join('\n')], { type: 'text/csv' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'position_benchmarks.csv'; a.click(); URL.revokeObjectURL(a.href);
         }
 
-        function showError(message) {
-            console.log('Error:', message);
-            alert('❌ ' + message);
+        /* ---------------- Misc handlers ---------------- */
+        function editBenchmark(id) { showInfo(`Edit benchmark ${id} (UI omitted here)`); }
+        function refreshBenchmark(id) { showInfo(`Refreshing benchmark ${id}…`); }
+        function viewBenchmarkDetails(id) {
+            const b = salaryData.benchmarks.find(x => x.id === id);
+            if (b) showInfo(`Viewing details: ${b.position} (${b.level})`);
         }
 
-        function showInfo(message) {
-            console.log('Info:', message);
-            alert('ℹ️ ' + message);
-        }
+        /* ---------------- Helpers ---------------- */
+        function formatDate(d) { return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); }
+        function byId(id) { return document.getElementById(id); }
+        function el(tag, cls) { const n = document.createElement(tag); if (cls) n.className = cls; return n; }
+        function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+        function numFmt(n) { return n.toLocaleString('en-US'); }
+        function csv(s) { return `"${String(s).replace(/"/g, '""')}"`; }
 
-        // Close modal when clicking outside
-        window.addEventListener('click', function (event) {
-            const modal = document.getElementById('benchmarkToolModal');
-            if (event.target === modal) {
-                closeBenchmarkModal();
-            }
-        });
+        /* ---------------- Simple toasts (uses alert fallback) ---------------- */
+        function showSuccess(m) { console.log('Success:', m); alert('✅ ' + m); }
+        function showError(m) { console.log('Error:', m); alert('❌ ' + m); }
+        function showInfo(m) { console.log('Info:', m); alert('ℹ️ ' + m); }
 
-        // Auto-refresh data every 5 minutes
-        setInterval(() => {
-            loadSalaryData();
-        }, 5 * 60 * 1000);
-
-        // Load Chart.js if not already loaded
-        if (typeof Chart === 'undefined') {
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-            script.onload = () => {
-                initializeSalaryExplorer();
-            };
-            document.head.appendChild(script);
-        }
     </script>
     {% endblock %}

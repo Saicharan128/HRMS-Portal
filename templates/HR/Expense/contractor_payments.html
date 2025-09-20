@@ -13,6 +13,15 @@
             <button id="newVendorBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-user-plus mr-1"></i> New Vendor
             </button>
+            <button id="exportBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export (CSV)
+            </button>
+            <label
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-import mr-1"></i> Import JSON
+                <input id="importInput" type="file" accept="application/json" class="hidden">
+            </label>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
@@ -22,7 +31,7 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+        <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl">
             <button id="vendorsTab" class="cp-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
                     class="fa-solid fa-people-line mr-1"></i> Vendors</button>
             <button id="contractsTab" class="cp-tab px-4 py-2 rounded-lg text-sm font-medium"><i
@@ -41,7 +50,8 @@
     <!-- Vendors -->
     <section id="vendorsPanel" class="cp-panel">
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+            <div
+                class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 border-b border-slate-200">
                 <div class="relative w-full md:w-96">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input id="vendorSearch" placeholder="Search vendor, skill, or location"
@@ -57,12 +67,23 @@
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
+                    <select id="vendorSort" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="name_asc">Sort: Name (A–Z)</option>
+                        <option value="rate_desc">Sort: Rate (high → low)</option>
+                        <option value="rate_asc">Sort: Rate (low → high)</option>
+                    </select>
+                    <select id="vendorPageSize" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="10" selected>10 / page</option>
+                        <option value="25">25 / page</option>
+                        <option value="50">50 / page</option>
+                    </select>
                     <button id="inviteVendor"
                         class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
                         <i class="fa-solid fa-paper-plane mr-1"></i> Invite
                     </button>
                 </div>
             </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="text-left text-slate-500 border-b">
@@ -77,6 +98,17 @@
                     </thead>
                     <tbody id="vendorRows" class="text-slate-800"><!-- injected --></tbody>
                 </table>
+            </div>
+
+            <div class="p-4 border-t border-slate-200 flex items-center justify-between">
+                <div class="text-sm text-slate-600">Showing <span id="vendorPageInfo">0–0 of 0</span></div>
+                <div class="flex items-center gap-2">
+                    <button id="vendorPrev" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
+                        disabled>Previous</button>
+                    <div id="vendorPages" class="flex items-center gap-1"></div>
+                    <button id="vendorNext" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
+                        disabled>Next</button>
+                </div>
             </div>
         </div>
     </section>
@@ -97,6 +129,7 @@
                             <option value="all">All</option>
                             <option value="active">Active</option>
                             <option value="expiring_30">Expiring ≤30d</option>
+                            <option value="over_cap">Over Cap</option>
                         </select>
                     </div>
                 </div>
@@ -122,6 +155,11 @@
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i
                         class="fa-solid fa-triangle-exclamation mr-2"></i> Contract Health</h3>
                 <ul id="contractHealth" class="space-y-2 text-sm"><!-- injected --></ul>
+                <div class="mt-4 p-3 rounded-lg bg-slate-50 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span>Average daily burn</span><span id="avgBurn" class="font-medium">—</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -129,22 +167,44 @@
     <!-- Invoices -->
     <section id="invoicesPanel" class="cp-panel hidden">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
                 <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-invoice mr-2"></i> Invoices
                 </h3>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <select id="invoiceFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
+                    <select id="invoiceSort" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="date_desc">Newest</option>
+                        <option value="date_asc">Oldest</option>
+                        <option value="amt_desc">Amount (high → low)</option>
+                        <option value="amt_asc">Amount (low → high)</option>
+                    </select>
                     <button id="uploadInvoice"
                         class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
                         <i class="fa-solid fa-upload mr-1"></i> Upload
                     </button>
+                    <button id="approveAll"
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                        <i class="fa-solid fa-check-double mr-1"></i> Approve All Pending
+                    </button>
                 </div>
             </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div class="p-3 rounded-lg bg-slate-50 text-sm flex items-center justify-between">
+                    <span>Pending</span><span id="kpiPend" class="font-semibold">-</span></div>
+                <div class="p-3 rounded-lg bg-slate-50 text-sm flex items-center justify-between">
+                    <span>Approved</span><span id="kpiAppr" class="font-semibold">-</span></div>
+                <div class="p-3 rounded-lg bg-slate-50 text-sm flex items-center justify-between"><span>Total
+                        Amount</span><span id="kpiTotal" class="font-semibold">-</span></div>
+                <div class="p-3 rounded-lg bg-slate-50 text-sm flex items-center justify-between"><span>Ready to
+                        Pay</span><span id="kpiReady" class="font-semibold">-</span></div>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="text-left text-slate-500 border-b">
@@ -177,8 +237,13 @@
                             <option value="sent">Sent</option>
                         </select>
                         <button id="genFile"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
-                                class="fa-solid fa-file-arrow-down mr-1"></i> Generate File</button>
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                            <i class="fa-solid fa-file-arrow-down mr-1"></i> Generate File
+                        </button>
+                        <button id="createBatch"
+                            class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                            <i class="fa-solid fa-layer-group mr-1"></i> Create Batch from Approved
+                        </button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -189,7 +254,7 @@
                                 <th class="py-2 px-4">Count</th>
                                 <th class="py-2 px-4">Amount</th>
                                 <th class="py-2 px-4">Status</th>
-                                <th class="py-2 px-4 w-24"></th>
+                                <th class="py-2 px-4 w-28"></th>
                             </tr>
                         </thead>
                         <tbody id="payRows" class="text-slate-800"><!-- injected --></tbody>
@@ -209,12 +274,19 @@
     <section id="compliancePanel" class="cp-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-shield mr-2"></i>
-                    Compliance Checklist</h3>
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-shield mr-2"></i>
+                        Compliance Checklist</h3>
+                    <span id="compProgress" class="text-xs px-2 py-1 rounded bg-slate-100 text-slate-700">—</span>
+                </div>
                 <div id="compList" class="space-y-3"><!-- injected --></div>
-                <button id="compAll"
-                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
-                        class="fa-solid fa-check mr-1"></i> Mark All Complete</button>
+                <div class="flex items-center gap-2 mt-2">
+                    <button id="compAll"
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
+                            class="fa-solid fa-check mr-1"></i> Mark All Complete</button>
+                    <button id="compReset"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">Reset</button>
+                </div>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>
@@ -250,7 +322,7 @@
 <div id="vendorModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w/full max-w-lg">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-800">Create Vendor</h3>
                     <button id="closeVendorModal" class="text-slate-400 hover:text-slate-600"><i
@@ -285,8 +357,20 @@
     </div>
 </div>
 
+<!-- Toaster -->
+<div id="toast"
+    class="fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg text-white bg-slate-800 opacity-0 pointer-events-none transition-opacity">
+</div>
+
 <script>
-    /* ------ Mock Data ------ */
+    /* ---------- Persistence Keys ---------- */
+    const LS_VENDORS = 'cp_vendors';
+    const LS_CONTRACTS = 'cp_contracts';
+    const LS_INVOICES = 'cp_invoices';
+    const LS_BATCHES = 'cp_batches';
+    const LS_COMPLIANCE = 'cp_compliance';
+
+    /* ---------- Mock Data (seeded once) ---------- */
     let VENDORS = [
         { id: 1, name: 'PixelCraft Studio', skill: 'UI/UX', rate: 55, loc: 'Remote (IN)', status: 'active' },
         { id: 2, name: 'CloudForge LLC', skill: 'DevOps', rate: 80, loc: 'Remote (US)', status: 'active' },
@@ -297,13 +381,13 @@
         { id: 102, vendor: 2, type: 'Retainer', start: '2025-08-01', end: '2025-12-31', cap: 40000, used: 18000 }
     ];
     let INVOICES = [
-        { id: 'INV-2301', vendor: 1, period: '2025-08', amt: 4200, status: 'approved' },
-        { id: 'INV-2302', vendor: 2, period: '2025-08', amt: 9600, status: 'pending' },
-        { id: 'INV-2303', vendor: 3, period: '2025-07', amt: 2100, status: 'rejected' }
+        { id: 'INV-2301', vendor: 1, period: '2025-08', amt: 4200, status: 'approved', created: '2025-09-10' },
+        { id: 'INV-2302', vendor: 2, period: '2025-08', amt: 9600, status: 'pending', created: '2025-09-11' },
+        { id: 'INV-2303', vendor: 3, period: '2025-07', amt: 2100, status: 'rejected', created: '2025-08-15' }
     ];
     let BATCHES = [
-        { id: 'CP-0007', count: 5, amount: 13800, status: 'sent' },
-        { id: 'CP-0008', count: 3, amount: 9600, status: 'queued' }
+        { id: 'CP-0007', count: 5, amount: 13800, status: 'sent', created: '2025-09-01' },
+        { id: 'CP-0008', count: 3, amount: 9600, status: 'queued', created: '2025-09-12' }
     ];
     let COMPLIANCE = [
         { id: 301, text: 'Contract signed & stored', done: true },
@@ -312,8 +396,36 @@
         { id: 304, text: 'Rate & SOW approved', done: false }
     ];
 
-    /* ------ Elements & Init ------ */
+    /* ---------- State ---------- */
+    let vendorPage = 1, vendorTotalPages = 1;
+
+    /* ---------- Helpers ---------- */
     const $ = (id) => document.getElementById(id);
+    const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n || 0));
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const daysFromNow = (d) => { const x = new Date(d), n = new Date(); return Math.max(0, Math.ceil((x - n) / (1000 * 60 * 60 * 24))); };
+    const toast = (msg, tone = 'info') => {
+        const el = $('toast'); el.textContent = msg;
+        el.style.backgroundColor = tone === 'success' ? '#16a34a' : tone === 'error' ? '#dc2626' : '#334155';
+        el.style.opacity = '1'; setTimeout(() => { el.style.opacity = '0'; }, 2200);
+    };
+    const persist = () => {
+        localStorage.setItem(LS_VENDORS, JSON.stringify(VENDORS));
+        localStorage.setItem(LS_CONTRACTS, JSON.stringify(CONTRACTS));
+        localStorage.setItem(LS_INVOICES, JSON.stringify(INVOICES));
+        localStorage.setItem(LS_BATCHES, JSON.stringify(BATCHES));
+        localStorage.setItem(LS_COMPLIANCE, JSON.stringify(COMPLIANCE));
+    };
+    const loadPersist = () => {
+        VENDORS = JSON.parse(localStorage.getItem(LS_VENDORS) || JSON.stringify(VENDORS));
+        CONTRACTS = JSON.parse(localStorage.getItem(LS_CONTRACTS) || JSON.stringify(CONTRACTS));
+        INVOICES = JSON.parse(localStorage.getItem(LS_INVOICES) || JSON.stringify(INVOICES));
+        BATCHES = JSON.parse(localStorage.getItem(LS_BATCHES) || JSON.stringify(BATCHES));
+        COMPLIANCE = JSON.parse(localStorage.getItem(LS_COMPLIANCE) || JSON.stringify(COMPLIANCE));
+    };
+    const debounce = (fn, wait) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; };
+
+    /* ---------- Init ---------- */
     document.addEventListener('DOMContentLoaded', () => {
         // Tabs
         document.querySelectorAll('.cp-tab').forEach(b => {
@@ -322,40 +434,71 @@
                 e.currentTarget.classList.add('active');
                 const name = e.currentTarget.id.replace('Tab', '');
                 document.querySelectorAll('.cp-panel').forEach(p => p.classList.add('hidden'));
-                document.getElementById(name + 'Panel').classList.remove('hidden');
+                $(name + 'Panel').classList.remove('hidden');
                 if (name === 'reports') { ensureCharts(); drawCharts(); }
             });
         });
 
-        // Vendors
+        // Load persisted
+        loadPersist();
+
+        // Vendors events
         $('newVendorBtn').addEventListener('click', openVendorModal);
         $('closeVendorModal').addEventListener('click', closeVendorModal);
         $('cancelVendor').addEventListener('click', closeVendorModal);
         $('saveVendor').addEventListener('click', saveVendor);
-        $('inviteVendor').addEventListener('click', () => alert('✉️ Invite sent'));
+        $('inviteVendor').addEventListener('click', () => toast('Invite sent', 'success'));
         $('vendorStatus').addEventListener('change', renderVendors);
+        $('vendorSort').addEventListener('change', renderVendors);
+        $('vendorPageSize').addEventListener('change', () => { vendorPage = 1; renderVendors(); });
         const vs = $('vendorSearch'), vc = $('vendorClear');
-        vs.addEventListener('input', () => { vc.classList.toggle('hidden', !vs.value.trim()); renderVendors(); });
-        vc.addEventListener('click', () => { vs.value = ''; vc.classList.add('hidden'); renderVendors(); });
+        vs.addEventListener('input', debounce(() => { vc.classList.toggle('hidden', !vs.value.trim()); vendorPage = 1; renderVendors(); }, 200));
+        vc.addEventListener('click', () => { vs.value = ''; vc.classList.add('hidden'); vendorPage = 1; renderVendors(); });
+        $('vendorPrev').addEventListener('click', () => { if (vendorPage > 1) { vendorPage--; renderVendors(); } });
+        $('vendorNext').addEventListener('click', () => { if (vendorPage < vendorTotalPages) { vendorPage++; renderVendors(); } });
 
         // Contracts / Invoices / Payments / Compliance
-        $('contractFilter').addEventListener('change', renderContracts);
-        $('invoiceFilter').addEventListener('change', renderInvoices);
+        $('contractFilter').addEventListener('change', () => { renderContracts(); renderHealth(); });
+        $('newContract').addEventListener('click', () => toast('Contract creation flow TBD'));
+        $('invoiceFilter').addEventListener('change', () => { renderInvoices(); renderInvoiceKpis(); renderNextDisb(); renderWithhold(); });
+        $('invoiceSort').addEventListener('change', () => { renderInvoices(); });
+        $('uploadInvoice').addEventListener('click', mockUploadInvoice);
+        $('approveAll').addEventListener('click', approveAllPending);
         $('payFilter').addEventListener('change', renderPayments);
-        $('genFile').addEventListener('click', () => alert('✅ Bank file generated'));
-        $('compAll').addEventListener('click', () => { COMPLIANCE = COMPLIANCE.map(c => ({ ...c, done: true })); renderCompliance(); });
+        $('genFile').addEventListener('click', () => toast('Bank file generated', 'success'));
+        $('createBatch').addEventListener('click', createBatchFromApproved);
+        $('compAll').addEventListener('click', () => { COMPLIANCE = COMPLIANCE.map(c => ({ ...c, done: true })); persist(); renderCompliance(); });
+        $('compReset').addEventListener('click', () => { COMPLIANCE = COMPLIANCE.map(c => ({ ...c, done: false })); persist(); renderCompliance(); });
 
-        // Initial renders
-        renderVendors(); renderContracts(); renderHealth(); renderInvoices(); renderPayments(); renderNextDisb();
+        // Export/Import
+        $('exportBtn').addEventListener('click', exportCSV);
+        $('importInput').addEventListener('change', importJSON);
+
+        // First renders
+        renderVendors(); renderContracts(); renderHealth();
+        renderInvoices(); renderInvoiceKpis();
+        renderPayments(); renderNextDisb();
         renderCompliance(); renderWithhold(); renderClassRisk();
     });
 
-    /* ------ Vendors ------ */
+    /* ---------- Vendors ---------- */
+    function vendorFilteredSorted() {
+        const f = $('vendorStatus').value, q = ($('vendorSearch').value || '').toLowerCase(), sort = $('vendorSort').value;
+        let data = VENDORS.filter(v => (f === 'all' || v.status === f) && (!q || [v.name, v.skill, v.loc].some(x => x.toLowerCase().includes(q))));
+        if (sort === 'name_asc') data.sort((a, b) => a.name.localeCompare(b.name));
+        if (sort === 'rate_desc') data.sort((a, b) => b.rate - a.rate);
+        if (sort === 'rate_asc') data.sort((a, b) => a.rate - b.rate);
+        return data;
+    }
     function renderVendors() {
-        const f = $('vendorStatus').value;
-        const q = ($('vendorSearch').value || '').toLowerCase();
-        const data = VENDORS.filter(v => (f === 'all' || v.status === f) && (!q || [v.name, v.skill, v.loc].some(x => x.toLowerCase().includes(q))));
-        $('vendorRows').innerHTML = data.map(v => {
+        const itemsPerPage = parseInt($('vendorPageSize').value, 10);
+        const list = vendorFilteredSorted();
+        vendorTotalPages = Math.max(1, Math.ceil(list.length / itemsPerPage));
+        vendorPage = Math.min(vendorPage, vendorTotalPages);
+        const start = (vendorPage - 1) * itemsPerPage;
+        const pageItems = list.slice(start, start + itemsPerPage);
+
+        $('vendorRows').innerHTML = pageItems.map(v => {
             const pill = v.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700';
             return `
       <tr class="border-b last:border-0">
@@ -363,32 +506,61 @@
         <td class="py-2 px-4">${v.skill}</td>
         <td class="py-2 px-4">${fmt(v.rate)}/hr</td>
         <td class="py-2 px-4">${v.loc}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(v.status)}</span></td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${cap(v.status)}</span></td>
         <td class="py-2 px-4 text-right">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Open ${v.name}')">Open</button>
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openVendor(${v.id})">Open</button>
         </td>
       </tr>`;
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No vendors</td></tr>`;
+
+        // Pager
+        const end = Math.min(start + itemsPerPage, list.length);
+        $('vendorPageInfo').textContent = `${list.length ? start + 1 : 0}–${end} of ${list.length}`;
+        $('vendorPrev').disabled = vendorPage === 1;
+        $('vendorNext').disabled = vendorPage === vendorTotalPages;
+        const container = $('vendorPages'); container.innerHTML = '';
+        for (let i = 1; i <= vendorTotalPages; i++) {
+            if (i === 1 || i === vendorTotalPages || Math.abs(i - vendorPage) <= 2) {
+                const b = document.createElement('button');
+                b.textContent = i;
+                b.className = i === vendorPage ? 'px-3 py-1 rounded bg-slate-800 text-white text-sm' : 'px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50';
+                b.onclick = () => { vendorPage = i; renderVendors(); };
+                container.appendChild(b);
+            } else if (Math.abs(i - vendorPage) === 3) {
+                const dots = document.createElement('span'); dots.textContent = '...'; dots.className = 'px-2 text-slate-400';
+                container.appendChild(dots);
+            }
+        }
     }
+    function openVendor(id) { const v = VENDORS.find(x => x.id === id); if (!v) return; alert(`Open ${v.name}`); }
     function openVendorModal() { $('vendorModal').classList.remove('hidden'); }
     function closeVendorModal() { $('vendorModal').classList.add('hidden'); }
     function saveVendor() {
-        const name = val('vName'); if (!name) return alert('Name required');
-        VENDORS.push({ id: Date.now(), name, skill: val('vSkill') || 'General', rate: Number(val('vRate') || 0), loc: val('vLoc') || 'Remote', status: val('vStatus') || 'active' });
-        closeVendorModal(); renderVendors();
+        const name = $('vName').value.trim();
+        if (!name) { toast('Name required', 'error'); return; }
+        VENDORS.push({
+            id: Date.now(),
+            name,
+            skill: $('vSkill').value.trim() || 'General',
+            rate: Number($('vRate').value || 0),
+            loc: $('vLoc').value.trim() || 'Remote',
+            status: $('vStatus').value || 'active'
+        });
+        persist(); closeVendorModal(); renderVendors(); toast('Vendor created', 'success');
     }
 
-    /* ------ Contracts ------ */
+    /* ---------- Contracts ---------- */
     function renderContracts() {
-        const f = $('contractFilter').value;
-        const now = new Date();
+        const f = $('contractFilter').value, now = new Date();
         const data = CONTRACTS.filter(c => {
             if (f === 'active') return new Date(c.end) >= now;
-            if (f === 'expiring_30') return (new Date(c.end) - now) / (1000 * 60 * 60 * 24) <= 30 && (new Date(c.end) - now) >= 0;
+            if (f === 'expiring_30') { const d = (new Date(c.end) - now) / (1000 * 60 * 60 * 24); return d <= 30 && d >= 0; }
+            if (f === 'over_cap') return (c.used >= c.cap);
             return true;
         });
         $('contractRows').innerHTML = data.map(c => {
             const v = VENDORS.find(v => v.id === c.vendor);
+            const badge = c.used >= c.cap ? '<span class="ml-2 text-xs px-2 py-0.5 rounded bg-red-50 text-red-700">Over</span>' : '';
             return `
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${v?.name || '—'}</td>
@@ -396,10 +568,8 @@
         <td class="py-2 px-4">${c.start}</td>
         <td class="py-2 px-4">${c.end} <span class="text-xs text-slate-500">(${daysFromNow(c.end)}d)</span></td>
         <td class="py-2 px-4">${fmt(c.cap)}</td>
-        <td class="py-2 px-4">${fmt(c.used)}</td>
-        <td class="py-2 px-4 text-right">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Contract details')">Details</button>
-        </td>
+        <td class="py-2 px-4">${fmt(c.used)} ${badge}</td>
+        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Contract details')">Details</button></td>
       </tr>`;
         }).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No contracts</td></tr>`;
     }
@@ -409,16 +579,28 @@
         $('contractHealth').innerHTML = `
     <li class="flex items-center justify-between"><span>Contracts expiring ≤30d</span><span class="font-medium">${soon.length}</span></li>
     <li class="flex items-center justify-between"><span>Contracts over cap</span><span class="font-medium">${over.length}</span></li>
-    <li class="flex items-center justify-between"><span>Total committed</span><span class="font-medium">${fmt(CONTRACTS.reduce((s, c) => s + c.cap, 0))}</span></li>
-  `;
+    <li class="flex items-center justify-between"><span>Total committed</span><span class="font-medium">${fmt(CONTRACTS.reduce((s, c) => s + c.cap, 0))}</span></li>`;
+        // Avg daily burn (used / days elapsed)
+        const burns = CONTRACTS.map(c => {
+            const start = new Date(c.start); const now = new Date();
+            const elapsed = Math.max(1, (now - start) / (1000 * 60 * 60 * 24));
+            return c.used / elapsed;
+        });
+        const avg = Math.round(burns.reduce((s, x) => s + x, 0) / Math.max(1, burns.length));
+        $('avgBurn').textContent = fmt(avg);
     }
 
-    /* ------ Invoices ------ */
+    /* ---------- Invoices ---------- */
     function renderInvoices() {
-        const f = $('invoiceFilter').value;
-        const data = f === 'all' ? INVOICES : INVOICES.filter(i => i.status === f);
+        const f = $('invoiceFilter').value, sort = $('invoiceSort').value;
+        let data = (f === 'all' ? INVOICES : INVOICES.filter(i => i.status === f)).slice();
+        if (sort === 'date_desc') data.sort((a, b) => new Date(b.created) - new Date(a.created));
+        if (sort === 'date_asc') data.sort((a, b) => new Date(a.created) - new Date(b.created));
+        if (sort === 'amt_desc') data.sort((a, b) => b.amt - a.amt);
+        if (sort === 'amt_asc') data.sort((a, b) => a.amt - b.amt);
+
         $('invoiceRows').innerHTML = data.map(i => {
-            const v = VENDORS.find(v => v.id === i.vendor);
+            const v = VENDORS.find(x => x.id === i.vendor);
             const pill = i.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : i.status === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700';
             return `
       <tr class="border-b last:border-0">
@@ -426,16 +608,42 @@
         <td class="py-2 px-4">${v?.name || '—'}</td>
         <td class="py-2 px-4">${i.period}</td>
         <td class="py-2 px-4">${fmt(i.amt)}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${labelStatus(i.status)}</span></td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${cap(i.status)}</span></td>
         <td class="py-2 px-4 text-right">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${i.id}')">Approve</button>
+          ${i.status !== 'approved'
+                    ? `<button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${i.id}')">Approve</button>`
+                    : `<button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="revoke('${i.id}')">Revoke</button>`}
         </td>
       </tr>`;
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No invoices</td></tr>`;
     }
-    function approve(id) { const inv = INVOICES.find(x => x.id === id); if (!inv) return; inv.status = 'approved'; renderInvoices(); }
+    function renderInvoiceKpis() {
+        const pend = INVOICES.filter(i => i.status === 'pending').length;
+        const appr = INVOICES.filter(i => i.status === 'approved').length;
+        const total = INVOICES.reduce((s, i) => s + i.amt, 0);
+        const ready = INVOICES.filter(i => i.status === 'approved').reduce((s, i) => s + i.amt, 0);
+        $('kpiPend').textContent = pend;
+        $('kpiAppr').textContent = appr;
+        $('kpiTotal').textContent = fmt(total);
+        $('kpiReady').textContent = fmt(ready);
+    }
+    function approve(id) { const inv = INVOICES.find(x => x.id === id); if (!inv) return; inv.status = 'approved'; persist(); renderInvoices(); renderInvoiceKpis(); renderNextDisb(); renderWithhold(); toast('Invoice approved', 'success'); }
+    function revoke(id) { const inv = INVOICES.find(x => x.id === id); if (!inv) return; inv.status = 'pending'; persist(); renderInvoices(); renderInvoiceKpis(); renderNextDisb(); renderWithhold(); toast('Approval revoked'); }
+    function approveAllPending() {
+        const list = INVOICES.filter(i => i.status === 'pending');
+        if (!list.length) { toast('No pending invoices'); return; }
+        list.forEach(i => i.status = 'approved');
+        persist(); renderInvoices(); renderInvoiceKpis(); renderNextDisb(); renderWithhold();
+        toast(`Approved ${list.length} invoice(s)`, 'success');
+    }
+    function mockUploadInvoice() {
+        // Simple mock: add a pending invoice for vendor 1
+        const id = 'INV-' + Math.floor(1000 + Math.random() * 9000);
+        INVOICES.unshift({ id, vendor: 1, period: '2025-09', amt: Math.round(Math.random() * 5000 + 1500), status: 'pending', created: new Date().toISOString() });
+        persist(); renderInvoices(); renderInvoiceKpis(); toast('Invoice uploaded', 'success');
+    }
 
-    /* ------ Payments ------ */
+    /* ---------- Payments ---------- */
     function renderPayments() {
         const f = $('payFilter').value;
         const data = f === 'all' ? BATCHES : BATCHES.filter(b => b.status === f);
@@ -446,8 +654,10 @@
         <td class="py-2 px-4 font-medium">${b.id}</td>
         <td class="py-2 px-4">${b.count}</td>
         <td class="py-2 px-4">${fmt(b.amount)}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(b.status)}</span></td>
-        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button></td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${cap(b.status)}</span></td>
+        <td class="py-2 px-4 text-right">
+          ${b.status === 'queued' ? `<button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="markSent('${b.id}')">Mark Sent</button>` : ''}
+        </td>
       </tr>`;
         }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No batches</td></tr>`;
     }
@@ -461,23 +671,41 @@
     </li>`;
         }).join('') || `<li class="text-slate-500">No approved invoices</li>`;
     }
+    function createBatchFromApproved() {
+        const items = INVOICES.filter(i => i.status === 'approved');
+        if (!items.length) { toast('No approved invoices'); return; }
+        const total = items.reduce((s, i) => s + i.amt, 0);
+        const id = 'CP-' + String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+        BATCHES.unshift({ id, count: items.length, amount: total, status: 'queued', created: new Date().toISOString() });
+        // Optionally set invoices to "batched" state in real app; we keep as approved for simplicity
+        persist(); renderPayments(); toast(`Batch ${id} created`, 'success');
+    }
+    function markSent(id) {
+        const b = BATCHES.find(x => x.id === id); if (!b) return;
+        b.status = 'sent'; persist(); renderPayments(); toast(`Batch ${id} marked sent`, 'success');
+    }
 
-    /* ------ Compliance ------ */
+    /* ---------- Compliance ---------- */
     function renderCompliance() {
+        const total = COMPLIANCE.length, done = COMPLIANCE.filter(c => c.done).length;
+        const pct = Math.round(100 * done / Math.max(1, total));
+        $('compProgress').textContent = `${done}/${total} • ${pct}%`;
         $('compList').innerHTML = COMPLIANCE.map(c => `
     <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
       <label class="flex items-center gap-2 text-sm"><input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleComp(${c.id}, this.checked)"> ${c.text}</label>
       ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
     </div>`).join('');
     }
-    function toggleComp(id, on) { const x = COMPLIANCE.find(c => c.id === id); if (x) { x.done = on; renderCompliance(); } }
+    function toggleComp(id, on) { const x = COMPLIANCE.find(c => c.id === id); if (!x) return; x.done = on; persist(); renderCompliance(); }
     function renderWithhold() {
-        const sums = [
-            { k: 'Tax withheld (if applicable)', v: Math.round(INVOICES.reduce((s, i) => s + (i.status === 'approved' ? i.amt * 0.05 : 0), 0)) },
-            { k: 'Platform fees', v: 0 },
-            { k: 'FX fees (est.)', v: 120 }
-        ];
-        $('withholdList').innerHTML = sums.map(s => `<li class="flex items-center justify-between"><span>${s.k}</span><span class="font-medium">${fmt(s.v)}</span></li>`).join('');
+        const tax = Math.round(INVOICES.reduce((s, i) => s + (i.status === 'approved' ? i.amt * 0.05 : 0), 0));
+        const fx = 120;
+        const fees = 0;
+        $('withholdList').innerHTML = [
+            { k: 'Tax withheld (if applicable)', v: tax },
+            { k: 'Platform fees', v: fees },
+            { k: 'FX fees (est.)', v: fx }
+        ].map(s => `<li class="flex items-center justify-between"><span>${s.k}</span><span class="font-medium">${fmt(s.v)}</span></li>`).join('');
     }
     function renderClassRisk() {
         const items = [
@@ -491,15 +719,13 @@
         }).join('');
     }
 
-    /* ------ Reports (Charts) ------ */
+    /* ---------- Reports (Charts) ---------- */
     let chartsReady = false, spendC, slaC;
     function ensureCharts() {
         if (typeof Chart !== 'undefined') { chartsReady = true; return; }
         if (chartsReady) return;
-        const s = document.createElement('script');
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        s.onload = () => { chartsReady = true; drawCharts(); };
-        document.head.appendChild(s);
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
     }
     function drawCharts() {
         const c1 = document.getElementById('spendChart').getContext('2d');
@@ -510,12 +736,39 @@
         slaC = new Chart(c2, { type: 'bar', data: { labels: ['Submit', 'Approve', 'Pay'], datasets: [{ label: 'Median Hours', data: [6, 18, 10], backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
     }
 
-    /* ------ Utils ------ */
-    function fmt(n) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n || 0)); }
-    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-    function val(id) { return $(id).value; }
-    function daysFromNow(d) { const x = new Date(d), n = new Date(); return Math.max(0, Math.ceil((x - n) / (1000 * 60 * 60 * 24))); }
-    function labelStatus(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    /* ---------- Export / Import ---------- */
+    function exportCSV() {
+        const sections = {
+            vendors: VENDORS,
+            contracts: CONTRACTS,
+            invoices: INVOICES,
+            batches: BATCHES
+        };
+        const header = 'section,data\n';
+        const rows = Object.entries(sections).map(([name, arr]) => `${name},"${String(JSON.stringify(arr)).replace(/"/g, '""')}"`).join('\n');
+        const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'contractor-payments.csv'; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 250);
+        toast('Exported CSV', 'success');
+    }
+    function importJSON(evt) {
+        const f = evt.target.files?.[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const obj = JSON.parse(reader.result);
+                if (obj.vendors) VENDORS = obj.vendors;
+                if (obj.contracts) CONTRACTS = obj.contracts;
+                if (obj.invoices) INVOICES = obj.invoices;
+                if (obj.batches) BATCHES = obj.batches;
+                persist();
+                renderVendors(); renderContracts(); renderHealth();
+                renderInvoices(); renderInvoiceKpis(); renderPayments(); renderNextDisb(); renderWithhold();
+                toast('Imported data', 'success');
+            } catch (e) { toast('Invalid JSON', 'error'); }
+        };
+        reader.readAsText(f); evt.target.value = '';
+    }
 </script>
 
 <style>

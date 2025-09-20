@@ -1,253 +1,244 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-6xl">
-    <h1 class="text-2xl font-semibold text-slate-800 mb-6">Candidate Sourcing</h1>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Add Candidate Form -->
-    <form id="candidateForm" class="bg-white rounded-2xl border border-slate-200 p-6 grid md:grid-cols-2 gap-4">
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Name</label>
-            <input name="name" required class="w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Role of Employment</label>
-            <input name="role_of_employment" required class="w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Qualification</label>
-            <input name="qualification" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Job</label>
-            <select name="job_id" id="jobSelect" required class="w-full rounded-xl border px-3 py-2"></select>
-        </div>
-
-        <!-- Contact -->
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-            <input name="email" type="email" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-            <input name="phone" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
-            <input name="location" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-
-        <!-- Experience / CTC -->
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Years of Experience</label>
-            <input type="number" min="0" name="years_experience" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Current CTC</label>
-            <input type="number" min="0" name="current_ctc" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Expected CTC</label>
-            <input type="number" min="0" name="expected_ctc" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Notice Period (days)</label>
-            <input type="number" min="0" name="notice_period_days" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-
-        <!-- Source / Notes -->
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Source</label>
-            <input name="source" placeholder="LinkedIn / Referral" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-        <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
-            <textarea name="notes" rows="2" class="w-full rounded-xl border px-3 py-2"></textarea>
-        </div>
-
-        <!-- Resume -->
-        <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Resume Upload</label>
-            <input type="file" name="resume" accept=".pdf,.doc,.docx" class="w-full rounded-xl border px-3 py-2" />
-        </div>
-
-        <div class="md:col-span-2 flex justify-end">
-            <button type="submit" class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900">
-                Add Candidate
-            </button>
-        </div>
-    </form>
-
-    <!-- Filters -->
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Search</label>
-            <input id="searchInput" placeholder="Search name, role, email, phone, job…"
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Stage</label>
-            <select id="stageFilter" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
-                <option value="">All</option>
-            </select>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 flex items-end">
-            <button id="clearFilters"
-                class="w-full px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">
-                Clear filters
-            </button>
-        </div>
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+        <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
+            <i class="fa-solid fa-magnifying-glass mr-2"></i>Sourcing
+        </h1>
+        <a href="{{ url_for('dashboard') }}"
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm text-center">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
     </div>
 
-    <!-- Candidate List -->
-    <div class="mt-6 bg-white rounded-2xl border border-slate-200 p-6">
-        <h2 class="text-xl font-semibold text-slate-800 mb-4">Candidates</h2>
-        <table class="w-full text-sm">
-            <thead class="text-left border-b">
-                <tr>
-                    <th class="py-2 pr-3">Name</th>
-                    <th class="py-2 pr-3">Role</th>
-                    <th class="py-2 pr-3">Job</th>
-                    <th class="py-2 pr-3">Email / Phone</th>
-                    <th class="py-2 pr-3">Exp / CTC</th>
-                    <th class="py-2 pr-3">Stage</th>
-                    <th class="py-2 pr-3">Resume</th>
-                    <th class="py-2 pr-3">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="candidatesTbody" class="align-top"></tbody>
-        </table>
-        <div id="listMsg" class="mt-3 text-sm"></div>
+    <!-- Add Candidate -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 mb-6 sm:mb-8">
+        <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">Add Candidate</h2>
+        <form id="addForm" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4" enctype="multipart/form-data">
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Name *</label>
+                <input name="name" class="w-full rounded-lg border border-slate-300 px-3 py-2" required>
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Role of Employment *</label>
+                <input name="role_of_employment" class="w-full rounded-lg border border-slate-300 px-3 py-2" required>
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Qualification</label>
+                <input name="qualification" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Job *</label>
+                <select name="job_id" id="jobSelect" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    required></select>
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Email</label>
+                <input name="email" type="email" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Phone</label>
+                <input name="phone" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Location</label>
+                <input name="location" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Source</label>
+                <input name="source" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="LinkedIn / Referral / ...">
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Years Experience</label>
+                <input name="years_experience" type="number" min="0"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Current CTC (annual)</label>
+                <input name="current_ctc" type="number" min="0"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Expected CTC (annual)</label>
+                <input name="expected_ctc" type="number" min="0"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Notice Period (days)</label>
+                <input name="notice_period_days" type="number" min="0"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block text-sm text-slate-600 mb-1">Resume (PDF/DOC/DOCX)</label>
+                <input name="resume" type="file" accept=".pdf,.doc,.docx" class="w-full">
+            </div>
+            <div class="md:col-span-2 flex flex-col sm:flex-row sm:items-center gap-3">
+                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 w-full sm:w-auto"
+                    type="submit">
+                    <i class="fa-solid fa-user-plus mr-1"></i> Add Candidate
+                </button>
+                <span id="addMsg" class="text-sm text-slate-600"></span>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <input id="search" placeholder="Search name / role / recruiter"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <button id="reload" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            <i class="fa-solid fa-rotate mr-1"></i> Reload
+        </button>
+    </div>
+
+    <!-- Candidates table -->
+    <div class="rounded-2xl border border-slate-200 bg-white">
+        <!-- Desktop/tablet table -->
+        <div class="overflow-x-auto hidden sm:block">
+            <table class="min-w-full text-sm text-left text-slate-700">
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="px-4 py-2">Name</th>
+                        <th class="px-4 py-2">Role</th>
+                        <th class="px-4 py-2">Qualification</th>
+                        <th class="px-4 py-2">Stage</th>
+                        <th class="px-4 py-2">Job</th>
+                        <th class="px-4 py-2">Recruiter</th>
+                        <th class="px-4 py-2">Added On</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatesTable" class="divide-y divide-slate-200"></tbody>
+            </table>
+        </div>
+
+        <!-- Mobile card list -->
+        <div id="candidatesCards" class="sm:hidden divide-y divide-slate-200"></div>
     </div>
 </div>
 
-<script>
-    // ✅ Align with backend stages (fixes Interview update issue).
-    const STAGES = ["Screening", "Shortlisted", "Interview 1", "Interview 2", "Offer", "Onboarding"];
+<style>
+    /* Subtle tap target improvements on mobile */
+    @media (max-width: 640px) {
 
-    let ALL_ROWS = []; // cache for client-side filtering
-
-    function stageOptionsHtml(current) {
-        return STAGES.map(s => `<option ${s === current ? "selected" : ""}>${s}</option>`).join("");
-    }
-
-    async function loadJobs() {
-        const res = await fetch("/api/jobs");
-        const jobs = await res.json();
-        const sel = document.getElementById("jobSelect");
-        sel.innerHTML = "";
-        for (const j of jobs) {
-            const opt = document.createElement("option");
-            opt.value = j.id;
-            opt.textContent = j.title;
-            sel.appendChild(opt);
+        input,
+        select {
+            min-height: 42px;
         }
     }
 
+    /* Optional: nicer inertial scrolling for the table on iOS */
+    @supports (-webkit-overflow-scrolling: touch) {
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+</style>
+
+<script>
+    async function fetchJSON(url) {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+    }
+    function includes(hay, needle) {
+        return (hay || "").toLowerCase().includes((needle || "").toLowerCase());
+    }
+
+    async function loadJobs() {
+        const jobs = await fetchJSON("/api/jobs?status=Open");
+        const sel = document.getElementById("jobSelect");
+        sel.innerHTML = jobs.map(j => `<option value="${j.id}">${j.title} — ${j.location || ''}</option>`).join("");
+    }
+
+    let allCandidates = [];
     async function loadCandidates() {
-        const res = await fetch("/api/candidates");
-        ALL_ROWS = await res.json();
+        allCandidates = await fetchJSON("/api/candidates");
         renderTable();
+    }
+
+    function rowToCardHTML(c) {
+        const rec = c.recruiter_name ? c.recruiter_name : (c.recruiter_username || "-");
+        const when = c.created_at ? new Date(c.created_at).toLocaleDateString() : "-";
+        return `
+        <div class="p-4">
+            <div class="flex items-start justify-between">
+                <div>
+                    <div class="font-semibold text-slate-800">${c.name || "-"}</div>
+                    <div class="text-sm text-slate-600">${c.role_of_employment || "-"}</div>
+                </div>
+                <span class="text-xs px-2 py-1 rounded bg-slate-100 text-slate-700">${c.stage || "-"}</span>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div class="text-slate-500">Qualification</div><div class="text-slate-800 text-right">${c.qualification || "-"}</div>
+                <div class="text-slate-500">Job</div><div class="text-slate-800 text-right">${c.job_title || "-"}</div>
+                <div class="text-slate-500">Recruiter</div><div class="text-slate-800 text-right">${rec}</div>
+                <div class="text-slate-500">Added</div><div class="text-slate-800 text-right">${when}</div>
+            </div>
+        </div>`;
     }
 
     function renderTable() {
-        const tbody = document.getElementById("candidatesTbody");
-        const q = (document.getElementById("searchInput").value || "").toLowerCase().trim();
-        const stageFilter = document.getElementById("stageFilter").value;
+        const q = document.getElementById("search").value.trim().toLowerCase();
+        const rows = allCandidates.filter(c =>
+            !q ||
+            includes(c.name, q) ||
+            includes(c.role_of_employment, q) ||
+            includes(c.recruiter_name, q) ||
+            includes(c.recruiter_username, q)
+        );
 
-        const filtered = ALL_ROWS.filter(row => {
-            const hay = [
-                row.name, row.role_of_employment, row.job_title,
-                row.email, row.phone, row.location, row.notes, row.stage
-            ].map(x => (x || "").toLowerCase()).join(" ");
-            const okQ = !q || hay.includes(q);
-            const okStage = !stageFilter || row.stage === stageFilter;
-            return okQ && okStage;
-        });
+        // Desktop/tablet table
+        const tbody = document.getElementById("candidatesTable");
+        if (tbody) {
+            tbody.innerHTML = rows.map(c => `
+                <tr>
+                  <td class="px-4 py-2 font-medium">${c.name || "-"}</td>
+                  <td class="px-4 py-2">${c.role_of_employment || "-"}</td>
+                  <td class="px-4 py-2">${c.qualification || "-"}</td>
+                  <td class="px-4 py-2">${c.stage || "-"}</td>
+                  <td class="px-4 py-2">${c.job_title || "-"}</td>
+                  <td class="px-4 py-2">${c.recruiter_name ? c.recruiter_name : (c.recruiter_username || "-")}</td>
+                  <td class="px-4 py-2">${c.created_at ? new Date(c.created_at).toLocaleDateString() : "-"}</td>
+                </tr>
+            `).join("");
+        }
 
-        tbody.innerHTML = "";
-        filtered.forEach(row => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-        <td class="py-2 pr-3 font-medium">${row.name}</td>
-        <td class="py-2 pr-3">${row.role_of_employment}</td>
-        <td class="py-2 pr-3">${row.job_title || "-"}</td>
-        <td class="py-2 pr-3">${row.email || "-"}<br><span class="text-slate-500">${row.phone || "-"}</span></td>
-        <td class="py-2 pr-3">${row.years_experience ?? "-"} yrs<br>
-          <span class="text-slate-500">
-            ${row.current_ctc ? "Cur ₹" + row.current_ctc : "-"}${row.expected_ctc ? " • Exp ₹" + row.expected_ctc : ""}
-          </span>
-        </td>
-        <td class="py-2 pr-3">
-          <select data-id="${row.id}" class="stageSel rounded border px-2 py-1">
-            ${stageOptionsHtml(row.stage)}
-          </select>
-        </td>
-        <td class="py-2 pr-3">${row.resume_url ? `<a class="text-indigo-700 underline" href="${row.resume_url}" target="_blank">Open</a>` : "-"}</td>
-        <td class="py-2 pr-3">
-          <button data-id="${row.id}" class="updBtn px-2 py-1 rounded bg-slate-800 text-white text-xs">Update</button>
-        </td>
-      `;
-            tbody.appendChild(tr);
-        });
-
-        document.getElementById("listMsg").textContent = filtered.length ? "" : "No candidates found.";
-
-        // Bind update buttons
-        document.querySelectorAll(".updBtn").forEach(btn => {
-            btn.addEventListener("click", async e => {
-                const id = e.currentTarget.dataset.id;
-                const sel = document.querySelector(`.stageSel[data-id="${id}"]`);
-                let stage = sel.value;
-                if (stage === "Interview") stage = "Interview 1"; // safety shim
-                try {
-                    const r = await fetch(`/api/candidates/${id}/status`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ stage })
-                    });
-                    if (!r.ok) throw new Error(await r.text());
-                    await loadCandidates(); // refresh from server canonical state
-                } catch (err) {
-                    alert("Failed to update stage.");
-                    console.error(err);
-                }
-            });
-        });
+        // Mobile cards
+        const cards = document.getElementById("candidatesCards");
+        if (cards) {
+            cards.innerHTML = rows.map(rowToCardHTML).join("");
+        }
     }
 
-    // Populate stage filter options
-    (function fillStageFilter() {
-        const s = document.getElementById("stageFilter");
-        STAGES.forEach(v => {
-            const o = document.createElement("option");
-            o.value = v; o.textContent = v;
-            s.appendChild(o);
-        });
-    })();
+    document.getElementById("reload").addEventListener("click", loadCandidates);
+    document.getElementById("search").addEventListener("input", renderTable);
 
-    // Debounced search
-    let __t;
-    document.getElementById("searchInput").addEventListener("input", () => {
-        clearTimeout(__t);
-        __t = setTimeout(renderTable, 200);
-    });
-    document.getElementById("stageFilter").addEventListener("change", renderTable);
-    document.getElementById("clearFilters").addEventListener("click", (e) => {
+    document.getElementById("addForm").addEventListener("submit", async (e) => {
         e.preventDefault();
-        document.getElementById("searchInput").value = "";
-        document.getElementById("stageFilter").value = "";
-        renderTable();
-    });
-
-    document.getElementById("candidateForm").addEventListener("submit", async e => {
-        e.preventDefault();
+        const msg = document.getElementById("addMsg");
+        msg.textContent = "Saving…";
         const fd = new FormData(e.target);
-        await fetch("/api/candidates", { method: "POST", body: fd });
-        e.target.reset();
-        loadCandidates();
+        try {
+            const r = await fetch("/api/candidates", { method: "POST", body: fd });
+            if (!r.ok) throw new Error(await r.text());
+            msg.textContent = "Candidate added ✓";
+            e.target.reset();
+            await loadCandidates();
+            setTimeout(() => msg.textContent = "", 2000);
+        } catch (err) {
+            console.error(err);
+            msg.textContent = "Failed to add candidate";
+            setTimeout(() => msg.textContent = "", 2500);
+        }
     });
 
-    loadJobs();
-    loadCandidates();
+    Promise.all([loadJobs(), loadCandidates()]).catch(console.error);
 </script>
 {% endblock %}

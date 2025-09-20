@@ -1,48 +1,52 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
-                <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Payslip Publishing
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                <span class="truncate">Payslip Publishing</span>
             </h1>
-            <p class="text-slate-600 text-sm">Generate and release employee payslips.</p>
+            <p class="text-slate-600 text-xs sm:text-sm">Generate and release employee payslips.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="btnGenerate" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+            <button id="btnGenerate"
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-gears mr-1"></i> Generate Now
             </button>
-            <button id="btnPublish" class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+            <button id="btnPublish"
+                class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-paper-plane mr-1"></i> Publish Selected
             </button>
             <button id="btnExport"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-file-arrow-down mr-1"></i> Export Logs
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
     </div>
 
     <!-- Tabs -->
-    <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="overviewTab" class="pp-tab active px-4 py-2 rounded-lg text-sm font-medium">
+    <div class="mb-4 sm:mb-6">
+        <div class="flex overflow-x-auto no-scrollbar space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab"
+                class="pp-tab active px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-gauge-high mr-1"></i> Overview
             </button>
-            <button id="queueTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="queueTab" class="pp-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-list-check mr-1"></i> Queue
             </button>
-            <button id="templatesTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="templatesTab" class="pp-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-file-code mr-1"></i> Templates
             </button>
-            <button id="historyTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="historyTab" class="pp-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
             </button>
-            <button id="settingsTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="settingsTab" class="pp-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-gear mr-1"></i> Settings
             </button>
         </div>
@@ -50,16 +54,16 @@
 
     <!-- Overview -->
     <section id="overviewPanel" class="pp-panel">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- KPIs -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-slate-800">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-calendar-day mr-2"></i> Current Cycle
                     </h3>
                     <span id="cycleBadge" class="px-2 py-1 text-xs rounded bg-amber-50 text-amber-700">Draft</span>
                 </div>
-                <div class="grid grid-cols-4 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Employees</div>
                         <div id="kpiTotal" class="text-xl font-semibold text-slate-800">0</div>
@@ -80,23 +84,24 @@
                 <div class="relative h-40 mt-4">
                     <canvas id="progressChart" class="absolute inset-0 w-full h-full"></canvas>
                 </div>
-                <div class="mt-4 flex items-center gap-2">
-                    <select id="cyclePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                <div class="mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
+                    <select id="cyclePicker"
+                        class="px-2 py-1 rounded-lg border border-slate-300 text-sm w-full sm:w-auto">
                         <option>Sep 2025</option>
                         <option>Aug 2025</option>
                         <option>Jul 2025</option>
                     </select>
                     <button id="btnDryRun"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50 w-full sm:w-auto">
                         <i class="fa-solid fa-vial mr-1"></i> Dry Run
                     </button>
                 </div>
             </div>
 
             <!-- Mix -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-slate-800">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-chart-pie mr-2"></i> Status Mix
                     </h3>
                 </div>
@@ -107,8 +112,8 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-3">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3">
                     <i class="fa-solid fa-bolt mr-2"></i> Quick Actions
                 </h3>
                 <div class="space-y-3">
@@ -131,15 +136,16 @@
 
     <!-- Queue -->
     <section id="queuePanel" class="pp-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-list-check mr-2"></i> Generation Queue — Sep 2025
                 </h3>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                     <input id="searchInput" type="text" placeholder="Search name or status..."
-                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
-                    <select id="statusFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-64">
+                    <select id="statusFilter"
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-auto">
                         <option value="all">All</option>
                         <option value="draft">Draft</option>
                         <option value="generated">Generated</option>
@@ -148,16 +154,16 @@
                     </select>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="text-left text-slate-500 border-b sticky top-0 bg-white">
                         <tr>
-                            <th class="py-2 pr-4"><input type="checkbox" id="chkAll"></th>
+                            <th class="py-2 pr-4 pl-4"><input type="checkbox" id="chkAll"></th>
                             <th class="py-2 pr-4">Employee</th>
-                            <th class="py-2 pr-4">Dept</th>
+                            <th class="py-2 pr-4 hidden sm:table-cell">Dept</th>
                             <th class="py-2 pr-4">Net (₹)</th>
                             <th class="py-2 pr-4">Status</th>
-                            <th class="py-2 pr-4">Actions</th>
+                            <th class="py-2 pr-4 w-36"></th>
                         </tr>
                     </thead>
                     <tbody id="queueRows" class="text-slate-800"></tbody>
@@ -168,10 +174,10 @@
 
     <!-- Templates -->
     <section id="templatesPanel" class="pp-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-file-code mr-2"></i> Templates
                     </h3>
                     <button id="btnNewTpl"
@@ -179,26 +185,26 @@
                         <i class="fa-solid fa-plus mr-1"></i> New
                     </button>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto -mx-3 sm:mx-0">
                     <table class="min-w-full text-sm">
-                        <thead class="text-left text-slate-500 border-b">
+                        <thead class="text-left text-slate-500 border-b sticky top-0 bg-white">
                             <tr>
-                                <th class="py-2 pr-4">Name</th>
+                                <th class="py-2 pr-4 pl-4">Name</th>
                                 <th class="py-2 pr-4">Paper</th>
-                                <th class="py-2 pr-4">Locale</th>
+                                <th class="py-2 pr-4 hidden md:table-cell">Locale</th>
                                 <th class="py-2 pr-4">Status</th>
-                                <th class="py-2 pr-4">Actions</th>
+                                <th class="py-2 pr-4 w-32"></th>
                             </tr>
                         </thead>
                         <tbody id="tplRows" class="text-slate-800"></tbody>
                     </table>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-circle-info mr-2"></i> Tips
                 </h3>
-                <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
+                <ul class="list-disc pl-5 text-xs sm:text-sm text-slate-700 space-y-2">
                     <li>Include company logo and address header.</li>
                     <li>Show earnings, deductions, and year-to-date figures.</li>
                     <li>Embed QR code for verification ().</li>
@@ -209,18 +215,18 @@
 
     <!-- History -->
     <section id="historyPanel" class="pp-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-table mr-2"></i> Publish History
                 </h3>
-                <div class="text-sm text-slate-600">Last 10 runs</div>
+                <div class="text-xs sm:text-sm text-slate-600">Last 10 runs</div>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="text-left text-slate-500 border-b sticky top-0 bg-white">
                         <tr>
-                            <th class="py-2 pr-4">Time</th>
+                            <th class="py-2 pr-4 pl-4">Time</th>
                             <th class="py-2 pr-4">Cycle</th>
                             <th class="py-2 pr-4">Generated</th>
                             <th class="py-2 pr-4">Published</th>
@@ -236,33 +242,33 @@
 
     <!-- Settings -->
     <section id="settingsPanel" class="pp-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-envelope mr-2"></i> Delivery
                 </h3>
                 <div class="space-y-2 text-sm">
-                    <label class="flex items-center gap-2"><input id="stEmail" type="checkbox" checked> Email PDF to
-                        employee</label>
-                    <label class="flex items-center gap-2"><input id="stPortal" type="checkbox" checked> Publish to
-                        self-service portal</label>
-                    <label class="flex items-center gap-2"><input id="stLock" type="checkbox"> Lock after
-                        publish</label>
+                    <label class="flex items-center gap-2"><input id="stEmail" type="checkbox" checked class="h-4 w-4">
+                        Email PDF to employee</label>
+                    <label class="flex items-center gap-2"><input id="stPortal" type="checkbox" checked class="h-4 w-4">
+                        Publish to self-service portal</label>
+                    <label class="flex items-center gap-2"><input id="stLock" type="checkbox" class="h-4 w-4"> Lock
+                        after publish</label>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-shield-halved mr-2"></i> Security
                 </h3>
                 <div class="space-y-2 text-sm">
-                    <label class="flex items-center gap-2"><input id="stPwd" type="checkbox" checked> PDF password
-                        protect (DOB+Last4)</label>
-                    <label class="flex items-center gap-2"><input id="stWater" type="checkbox"> Watermark
-                        “Confidential”</label>
+                    <label class="flex items-center gap-2"><input id="stPwd" type="checkbox" checked class="h-4 w-4">
+                        PDF password protect (DOB+Last4)</label>
+                    <label class="flex items-center gap-2"><input id="stWater" type="checkbox" class="h-4 w-4">
+                        Watermark “Confidential”</label>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-clock mr-2"></i> Scheduling
                 </h3>
                 <div class="space-y-2 text-sm">
@@ -271,7 +277,7 @@
                             class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
                     </label>
                     <button id="stSave"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm mt-2">
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm mt-2 w-full sm:w-auto">
                         <i class="fa-solid fa-floppy-disk mr-1"></i> Save
                     </button>
                 </div>
@@ -281,27 +287,28 @@
 </div>
 
 <!-- Generate Modal -->
-<div id="genModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<div id="genModal" class="fixed inset-0 bg-black/50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-slate-800">Generate Payslips</h3>
-                    <button id="closeGenModal" class="text-slate-400 hover:text-slate-600">
-                        <i class="fa-solid fa-times text-xl"></i>
+        <div class="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
+            <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-w-none">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">Generate Payslips</h3>
+                    <button id="closeGenModal" class="text-slate-400 hover:text-slate-600 p-2 -mr-2 sm:mr-0">
+                        <i class="fa-solid fa-times text-lg sm:text-xl"></i>
                     </button>
                 </div>
-                <div class="p-6 space-y-4 text-sm">
-                    <label class="flex items-center gap-2"><input id="optRecalc" type="checkbox" checked> Recalculate
-                        payroll totals</label>
-                    <label class="flex items-center gap-2"><input id="optSkipPub" type="checkbox"> Generate only (don’t
-                        publish)</label>
-                    <label class="flex items-center gap-2"><input id="optNotify" type="checkbox" checked> Prepare
-                        notification emails</label>
-                    <div class="flex items-center justify-end gap-2 pt-2">
+                <div class="p-4 sm:p-6 space-y-4 text-sm">
+                    <label class="flex items-center gap-2"><input id="optRecalc" type="checkbox" checked
+                            class="h-4 w-4"> Recalculate payroll totals</label>
+                    <label class="flex items-center gap-2"><input id="optSkipPub" type="checkbox" class="h-4 w-4">
+                        Generate only (don’t publish)</label>
+                    <label class="flex items-center gap-2"><input id="optNotify" type="checkbox" checked
+                            class="h-4 w-4"> Prepare notification emails</label>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-2 pt-2">
                         <button id="cancelGen"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="runGen" class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 w-full sm:w-auto">Cancel</button>
+                        <button id="runGen"
+                            class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 w-full sm:w-auto">
                             <i class="fa-solid fa-play mr-1"></i> Run
                         </button>
                     </div>
@@ -349,12 +356,12 @@
     document.addEventListener('DOMContentLoaded', () => {
         setupTabs();
         wireButtons();
-        renderKPIs();
-        drawProgress();
-        drawMix();
-        renderQueue();
-        renderTemplates();
-        renderHistory();
+        safeRender(renderKPIs);
+        safeRender(drawProgress);
+        safeRender(drawMix);
+        safeRender(renderQueue);
+        safeRender(renderTemplates);
+        safeRender(renderHistory);
     });
 
     function setupTabs() {
@@ -364,30 +371,30 @@
                 e.currentTarget.classList.add('active');
                 const name = e.currentTarget.id.replace('Tab', '');
                 Object.values(panels).forEach(p => p.classList.add('hidden'));
-                panels[name].classList.remove('hidden');
+                panels[name]?.classList.remove('hidden');
             });
         });
     }
 
     function wireButtons() {
-        document.getElementById('btnGenerate').addEventListener('click', openGen);
-        document.getElementById('closeGenModal').addEventListener('click', closeGen);
-        document.getElementById('cancelGen').addEventListener('click', closeGen);
-        document.getElementById('runGen').addEventListener('click', runGeneration);
+        get('btnGenerate')?.addEventListener('click', openGen);
+        get('closeGenModal')?.addEventListener('click', closeGen);
+        get('cancelGen')?.addEventListener('click', closeGen);
+        get('runGen')?.addEventListener('click', runGeneration);
 
-        document.getElementById('btnPublish').addEventListener('click', publishSelected);
-        document.getElementById('btnExport').addEventListener('click', () => alert('✅ Logs exported ()'));
-        document.getElementById('btnDryRun').addEventListener('click', () => alert('🧪 Dry run complete ()'));
-        document.getElementById('btnPreview').addEventListener('click', () => alert('👀 Sample PDF opened ()'));
-        document.getElementById('btnNotify').addEventListener('click', () => alert('📧 Notifications sent ()'));
-        document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Last publish rolled back ()'));
-        document.getElementById('cyclePicker').addEventListener('change', () => alert('🔁 Switched cycle ()'));
+        get('btnPublish')?.addEventListener('click', publishSelected);
+        get('btnExport')?.addEventListener('click', () => alert('✅ Logs exported ()'));
+        get('btnDryRun')?.addEventListener('click', () => alert('🧪 Dry run complete ()'));
+        get('btnPreview')?.addEventListener('click', () => alert('👀 Sample PDF opened ()'));
+        get('btnNotify')?.addEventListener('click', () => alert('📧 Notifications sent ()'));
+        get('btnRollback')?.addEventListener('click', () => alert('↩️ Last publish rolled back ()'));
+        get('cyclePicker')?.addEventListener('change', () => alert('🔁 Switched cycle ()'));
 
-        document.getElementById('searchInput').addEventListener('input', renderQueue);
-        document.getElementById('statusFilter').addEventListener('change', renderQueue);
-        document.getElementById('chkAll').addEventListener('change', toggleAll);
-        document.getElementById('btnNewTpl').addEventListener('click', () => alert('🧩 New template ()'));
-        document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved'));
+        get('searchInput')?.addEventListener('input', renderQueue);
+        get('statusFilter')?.addEventListener('change', renderQueue);
+        get('chkAll')?.addEventListener('change', toggleAll);
+        get('btnNewTpl')?.addEventListener('click', () => alert('🧩 New template ()'));
+        get('stSave')?.addEventListener('click', () => alert('✅ Settings saved'));
     }
 
     // ---- Overview/KPIs ----
@@ -396,22 +403,25 @@
         const gen = QUEUE.filter(q => q.status === 'generated').length;
         const pub = QUEUE.filter(q => q.status === 'published').length;
         const fail = QUEUE.filter(q => q.status === 'failed').length;
-        document.getElementById('kpiTotal').textContent = total;
-        document.getElementById('kpiGen').textContent = gen;
-        document.getElementById('kpiPub').textContent = pub;
-        document.getElementById('kpiFail').textContent = fail;
-        const badge = document.getElementById('cycleBadge');
+        text('kpiTotal', total);
+        text('kpiGen', gen);
+        text('kpiPub', pub);
+        text('kpiFail', fail);
+        const badge = get('cycleBadge');
         const allDone = pub === total && total > 0;
-        badge.textContent = allDone ? 'Published' : (gen + pub > 0 ? 'In Progress' : 'Draft');
-        badge.className = 'px-2 py-1 text-xs rounded ' + (allDone ? 'bg-emerald-50 text-emerald-700' : (gen + pub > 0 ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700'));
+        if (badge) {
+            badge.textContent = allDone ? 'Published' : (gen + pub > 0 ? 'In Progress' : 'Draft');
+            badge.className = 'px-2 py-1 text-xs rounded ' + (allDone ? 'bg-emerald-50 text-emerald-700' : (gen + pub > 0 ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700'));
+        }
     }
 
     function drawProgress() {
-        const total = QUEUE.length || 1;
         const gen = QUEUE.filter(q => q.status === 'generated').length;
         const pub = QUEUE.filter(q => q.status === 'published').length;
         const fail = QUEUE.filter(q => q.status === 'failed').length;
-        const ctx = document.getElementById('progressChart').getContext('2d');
+        const el = get('progressChart');
+        if (!el || !window.Chart) return;
+        const ctx = el.getContext('2d');
         if (_progressChart) _progressChart.destroy();
         _progressChart = new Chart(ctx, {
             type: 'bar',
@@ -427,85 +437,94 @@
             published: QUEUE.filter(q => q.status === 'published').length,
             failed: QUEUE.filter(q => q.status === 'failed').length
         };
-        const ctx = document.getElementById('mixChart').getContext('2d');
+        const el = get('mixChart');
+        if (!el || !window.Chart) return;
+        const ctx = el.getContext('2d');
         if (_mixChart) _mixChart.destroy();
         _mixChart = new Chart(ctx, {
             type: 'doughnut',
             data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts) }] },
             options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } }, animation: false }
         });
-        document.getElementById('mixLegend').innerHTML =
-            Object.entries(counts).map(([k, v]) => `<div class="flex items-center justify-between text-sm"><span class="capitalize">${k}</span><span>${v}</span></div>`).join('');
+        const legend = get('mixLegend');
+        if (legend) {
+            legend.innerHTML = Object.entries(counts)
+                .map(([k, v]) => `<div class="flex items-center justify-between text-sm"><span class="capitalize">${k}</span><span>${v}</span></div>`)
+                .join('');
+        }
     }
 
     // ---- Queue ----
     function renderQueue() {
-        const q = (document.getElementById('searchInput').value || '').toLowerCase();
-        const st = document.getElementById('statusFilter').value;
+        const q = (get('searchInput')?.value || '').toLowerCase();
+        const st = get('statusFilter')?.value || 'all';
         const rows = QUEUE
             .filter(r => (st === 'all' ? true : r.status === st))
-            .filter(r => r.name.toLowerCase().includes(q) || r.status.toLowerCase().includes(q))
+            .filter(r => r.name.toLowerCase().includes(q) || r.status.toLowerCase().includes(q) || (r.dept || '').toLowerCase().includes(q))
             .slice().sort((a, b) => a.name.localeCompare(b.name));
-        document.getElementById('queueRows').innerHTML = rows.map(rowQueue).join('') ||
+        const tbody = get('queueRows');
+        if (!tbody) return;
+        tbody.innerHTML = rows.map(rowQueue).join('') ||
             `<tr><td colspan="6" class="py-6 text-center text-slate-500">No records.</td></tr>`;
     }
     function rowQueue(r) {
         return `<tr class="border-b last:border-0">
-      <td class="py-2 pr-4"><input type="checkbox" class="rowChk" data-id="${r.id}" ${r.status === 'published' ? 'disabled' : ''}></td>
-      <td class="py-2 pr-4">${r.name}</td>
-      <td class="py-2 pr-4">${r.dept}</td>
+      <td class="py-2 pr-4 pl-4"><input type="checkbox" class="rowChk" data-id="${r.id}" ${r.status === 'published' ? 'disabled' : ''}></td>
+      <td class="py-2 pr-4">
+        <div class="font-medium">${r.name}</div>
+        <div class="text-xs text-slate-500 sm:hidden">${r.dept} • ₹${fmt(r.net)}</div>
+      </td>
+      <td class="py-2 pr-4 hidden sm:table-cell">${r.dept}</td>
       <td class="py-2 pr-4">₹${fmt(r.net)}</td>
       <td class="py-2 pr-4">${badgePlain(r.status)}</td>
       <td class="py-2 pr-4">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="preview(${r.id})">
-          <i class="fa-solid fa-eye mr-1"></i> Preview
-        </button>
-        ${r.status !== 'published' ? `<button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="markGenerated(${r.id})"><i class="fa-solid fa-hammer mr-1"></i> Generate</button>` : ''}
+        <div class="flex flex-wrap gap-2">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="preview(${r.id})">
+            <i class="fa-solid fa-eye mr-1"></i> Preview
+          </button>
+          ${r.status !== 'published' ? `<button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="markGenerated(${r.id})"><i class="fa-solid fa-hammer mr-1"></i> Generate</button>` : ''}
+        </div>
       </td>
     </tr>`;
     }
-    function toggleAll(e) {
-        document.querySelectorAll('.rowChk').forEach(c => { if (!c.disabled) c.checked = e.target.checked; });
-    }
-    function preview(id) { const rec = QUEUE.find(x => x.id === id); alert(`👀 Preview: ${rec?.name} (${rec?.dept}) — ₹${fmt(rec?.net)}`); }
-    function markGenerated(id) {
-        const r = QUEUE.find(x => x.id === id); if (!r) return;
-        r.status = 'generated'; renderKPIs(); drawProgress(); drawMix(); renderQueue();
-    }
+    function toggleAll(e) { document.querySelectorAll('.rowChk').forEach(c => { if (!c.disabled) c.checked = e.target.checked; }); }
+    function preview(id) { const rec = QUEUE.find(x => x.id === id); if (!rec) return; alert(`👀 Preview: ${rec.name} (${rec.dept}) — ₹${fmt(rec.net)}`); }
+    function markGenerated(id) { const r = QUEUE.find(x => x.id === id); if (!r) return; r.status = 'generated'; safeRender(renderKPIs); safeRender(drawProgress); safeRender(drawMix); safeRender(renderQueue); }
     function publishSelected() {
         const ids = [...document.querySelectorAll('.rowChk:checked')].map(x => Number(x.dataset.id));
         if (ids.length === 0) { alert('🔎 Select at least one row'); return; }
-        ids.forEach(id => {
-            const r = QUEUE.find(x => x.id === id);
-            if (r && r.status !== 'published') { r.status = 'published'; }
-        });
-        renderKPIs(); drawProgress(); drawMix(); renderQueue(); alert('✅ Published ()');
+        ids.forEach(id => { const r = QUEUE.find(x => x.id === id); if (r && r.status !== 'published') r.status = 'published'; });
+        safeRender(renderKPIs); safeRender(drawProgress); safeRender(drawMix); safeRender(renderQueue); alert('✅ Published ()');
     }
 
     // ---- Templates ----
     function renderTemplates() {
-        document.getElementById('tplRows').innerHTML = TEMPLATES.map(t => `
+        const tbody = get('tplRows'); if (!tbody) return;
+        tbody.innerHTML = TEMPLATES.map(t => `
       <tr class="border-b last:border-0">
-        <td class="py-2 pr-4">${t.name}</td>
+        <td class="py-2 pr-4 pl-4">${t.name}</td>
         <td class="py-2 pr-4">${t.paper}</td>
-        <td class="py-2 pr-4">${t.locale}</td>
+        <td class="py-2 pr-4 hidden md:table-cell">${t.locale}</td>
         <td class="py-2 pr-4">${badgePlain(t.status.toLowerCase())}</td>
         <td class="py-2 pr-4">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('🧪 Test render ()')">
-            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Test
-          </button>
-          <button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="alert('✏️ Edit template ()')">
-            <i class="fa-solid fa-pen mr-1"></i> Edit
-          </button>
+          <div class="flex flex-wrap gap-2">
+            <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('🧪 Test render ()')">
+              <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Test
+            </button>
+            <button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="alert('✏️ Edit template ()')">
+              <i class="fa-solid fa-pen mr-1"></i> Edit
+            </button>
+          </div>
         </td>
       </tr>`).join('');
     }
 
     // ---- History ----
     function renderHistory() {
-        document.getElementById('histRows').innerHTML = HISTORY.map(h => `
+        const tbody = get('histRows'); if (!tbody) return;
+        tbody.innerHTML = HISTORY.map(h => `
       <tr class="border-b last:border-0">
-        <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+        <td class="py-2 pr-4 pl-4 text-slate-600">${h.ts}</td>
         <td class="py-2 pr-4">${h.cycle}</td>
         <td class="py-2 pr-4">${h.gen}</td>
         <td class="py-2 pr-4">${h.pub}</td>
@@ -515,23 +534,25 @@
     }
 
     // ---- Generate Modal ----
-    function openGen() { document.getElementById('genModal').classList.remove('hidden'); }
-    function closeGen() { document.getElementById('genModal').classList.add('hidden'); }
+    function openGen() { get('genModal')?.classList.remove('hidden'); document.body.classList.add('overflow-hidden'); }
+    function closeGen() { get('genModal')?.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }
     function runGeneration() {
-        // : move all drafts to generated
         QUEUE.filter(x => x.status === 'draft').forEach(x => x.status = 'generated');
-        closeGen(); renderKPIs(); drawProgress(); drawMix(); renderQueue();
+        closeGen(); safeRender(renderKPIs); safeRender(drawProgress); safeRender(drawMix); safeRender(renderQueue);
         alert('⚙️ Generation complete ()');
     }
 
     // ---- Utils ----
-    function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
+    function fmt(n) { return (Number(n) || 0).toLocaleString('en-IN'); }
     function badgePlain(s) {
         const m = { draft: 'bg-slate-100 text-slate-700', generated: 'bg-blue-50 text-blue-700', published: 'bg-emerald-50 text-emerald-700', failed: 'bg-red-50 text-red-700', active: 'bg-emerald-50 text-emerald-700', inactive: 'bg-slate-100 text-slate-700' };
         const k = (s || '').toLowerCase();
         const label = k.charAt(0).toUpperCase() + k.slice(1);
         return `<span class="px-2 py-0.5 rounded-full ${m[k] || m['draft']} text-xs">${label}</span>`;
     }
+    function get(id) { return document.getElementById(id); }
+    function text(id, v) { const el = get(id); if (el) el.textContent = v; }
+    function safeRender(fn) { try { fn(); } catch (e) { /* no-op to keep UI stable */ } }
 </script>
 
 <style>
@@ -547,6 +568,15 @@
     .pp-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 </style>
 {% endblock %}

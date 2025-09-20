@@ -1,24 +1,27 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<!-- Add in <head> of base layout if missing -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-diagram-next mr-2"></i> Dependencies
             </h1>
-            <p class="text-slate-600 text-sm">Visualize process/task dependencies.</p>
+            <p class="text-slate-600 text-xs sm:text-sm">Visualize process/task dependencies.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto text-center">
             <i class="fa-solid fa-arrow-left mr-1"></i> Back
         </a>
     </div>
 
     <!-- Add Task / Link (Dummy) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                 <i class="fa-solid fa-plus mr-2"></i> Add Task (Dummy)
             </h2>
             <form id="taskForm" class="grid grid-cols-1 md:grid-cols-6 gap-3">
@@ -56,7 +59,7 @@
                     <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="Optional">
                 </div>
-                <div class="md:col-span-6 flex items-center gap-3">
+                <div class="md:col-span-6 flex flex-wrap items-center gap-3">
                     <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
                         <i class="fa-solid fa-plus mr-1"></i> Add
                     </button>
@@ -65,8 +68,8 @@
             </form>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                 <i class="fa-solid fa-link mr-2"></i> Add Dependency (A → B)
             </h2>
             <form id="depForm" class="grid grid-cols-1 md:grid-cols-6 gap-3">
@@ -80,7 +83,7 @@
                     <input name="to" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="T-102">
                 </div>
-                <div class="md:col-span-6 flex items-center gap-3">
+                <div class="md:col-span-6 flex flex-wrap items-center gap-2">
                     <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
                         <i class="fa-solid fa-link mr-1"></i> Link
                     </button>
@@ -138,23 +141,28 @@
     </div>
 
     <!-- Graph + List -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <!-- Graph -->
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+            <div class="flex items-center justify-between p-3 sm:p-4 border-b border-slate-200">
                 <div class="text-slate-800 font-semibold"><i class="fa-solid fa-project-diagram mr-2"></i> Graph</div>
-                <div class="text-xs text-slate-500">Drag nodes • Zoom: Ctrl + wheel</div>
+                <div class="text-[11px] sm:text-xs text-slate-500">Drag nodes • Zoom: Ctrl + wheel</div>
             </div>
             <div class="p-2">
-                <svg id="graph" class="w-full h-[460px] bg-slate-50 rounded-xl border border-slate-200"></svg>
+                <!-- Responsive height container; SVG fills it -->
+                <div class="relative h-64 sm:h-80 md:h-[460px] bg-slate-50 rounded-xl border border-slate-200">
+                    <svg id="graph" class="absolute inset-0 w-full h-full"></svg>
+                </div>
             </div>
         </div>
 
-        <!-- Table -->
+        <!-- Table / Cards -->
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
-                    class="fa-solid fa-list mr-2"></i> Tasks</div>
-            <div class="overflow-x-auto">
+            <div class="p-3 sm:p-4 border-b border-slate-200 text-slate-800 font-semibold">
+                <i class="fa-solid fa-list mr-2"></i> Tasks
+            </div>
+            <!-- Table for ≥sm -->
+            <div class="overflow-x-auto hidden sm:block">
                 <table class="min-w-full text-sm text-left text-slate-700">
                     <thead class="bg-slate-50 text-slate-600">
                         <tr>
@@ -170,6 +178,9 @@
                     <tbody id="rows" class="divide-y divide-slate-200"></tbody>
                 </table>
             </div>
+            <!-- Cards for mobile -->
+            <div id="cards" class="sm:hidden p-3 space-y-3"></div>
+
             <div id="listMsg" class="p-3 text-sm text-slate-600"></div>
         </div>
     </div>
@@ -199,6 +210,7 @@
     const taskMsg = document.getElementById("taskMsg");
     const depMsg = document.getElementById("depMsg");
     const rows = document.getElementById("rows");
+    const cards = document.getElementById("cards");
     const listMsg = document.getElementById("listMsg");
     const q = document.getElementById("q");
     const fStatus = document.getElementById("fStatus");
@@ -218,64 +230,36 @@
     function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
     function td(el) { const x = document.createElement("td"); x.className = "px-4 py-2"; x.appendChild(el); return x; }
     function input(v, cls = "w-36") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
-    function select(opts, cur) {
-        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm";
-        opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s;
-    }
+    function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
 
     /* ---------------- Graph Utilities ---------------- */
-    // Basic layered DAG layout (Kahn topological levels). If cycles exist, layout still runs by ignoring cycle edges.
     function buildGraphData() {
-        const tasks = STORE.tasks;
-        const links = STORE.links;
+        const tasks = STORE.tasks, links = STORE.links;
         const keyToTask = Object.fromEntries(tasks.map(t => [t.key, t]));
-        // adjacency + indegree
-        const adj = {}; const indeg = {};
-        tasks.forEach(t => { adj[t.key] = []; indeg[t.key] = 0; });
+        const adj = {}, indeg = {}; tasks.forEach(t => { adj[t.key] = []; indeg[t.key] = 0; });
         links.forEach(e => { if (adj[e.from]) { adj[e.from].push(e.to); if (e.to in indeg) indeg[e.to]++; } });
-        // Kahn layering
-        const levels = {}; let lvl = 0;
-        let q = [...Object.keys(indeg).filter(k => indeg[k] === 0)];
-        const seen = new Set();
-        while (q.length) {
-            const next = [];
-            q.forEach(k => { levels[k] = lvl; seen.add(k); (adj[k] || []).forEach(v => { if (--indeg[v] === 0) next.push(v); }); });
-            lvl++; q = next;
-        }
-        // Any remaining nodes (in cycles) get last level
+        const levels = {}, seen = new Set(); let lvl = 0;
+        let qq = [...Object.keys(indeg).filter(k => indeg[k] === 0)];
+        while (qq.length) { const next = []; qq.forEach(k => { levels[k] = lvl; seen.add(k); (adj[k] || []).forEach(v => { if (--indeg[v] === 0) next.push(v); }); }); lvl++; qq = next; }
         Object.keys(keyToTask).forEach(k => { if (!(k in levels)) levels[k] = lvl; });
-
-        // Compute positions
         const margin = 40, colW = 220, rowH = 120;
-        const cols = Math.max(...Object.values(levels)) + 1;
-        const rowsPerCol = {}; Object.entries(levels).forEach(([k, c]) => { rowsPerCol[c] = (rowsPerCol[c] || 0) + 1; });
-        const coords = {}; const rowIndex = {};
-        Object.entries(levels).forEach(([k, c]) => {
-            const idx = (rowIndex[c] = (rowIndex[c] || 0) + 1) - 1;
-            const x = margin + c * colW;
-            const y = margin + idx * rowH;
-            coords[k] = { x, y };
-        });
+        const coords = {}, rowIndex = {};
+        Object.entries(levels).forEach(([k, c]) => { const idx = (rowIndex[c] = (rowIndex[c] || 0) + 1) - 1; const x = margin + c * colW; const y = margin + idx * rowH; coords[k] = { x, y }; });
         return { tasks, links, coords, levels };
     }
     function draw() {
-        // clear
         while (svg.firstChild) svg.removeChild(svg.firstChild);
         const { tasks, links, coords } = buildGraphData();
-
-        // autosize
         const w = Math.max(...Object.values(coords).map(p => p.x)) + 260;
         const h = Math.max(...Object.values(coords).map(p => p.y)) + 140;
         svg.setAttribute("viewBox", `0 0 ${Math.max(w, 600)} ${Math.max(h, 400)}`);
 
-        // defs
         const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         const m = document.createElementNS("http://www.w3.org/2000/svg", "marker");
         m.setAttribute("id", "arrow"); m.setAttribute("markerWidth", "10"); m.setAttribute("markerHeight", "8"); m.setAttribute("refX", "8"); m.setAttribute("refY", "4"); m.setAttribute("orient", "auto");
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path"); path.setAttribute("d", "M0,0 L10,4 L0,8 Z"); path.setAttribute("fill", "#475569");
-        m.appendChild(path); defs.appendChild(m); svg.appendChild(defs);
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M0,0 L10,4 L0,8 Z"); path.setAttribute("fill", "#475569"); m.appendChild(path); defs.appendChild(m); svg.appendChild(defs);
 
-        // edges
         links.forEach(e => {
             const a = coords[e.from], b = coords[e.to]; if (!a || !b) return;
             const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -287,25 +271,19 @@
             svg.appendChild(line);
         });
 
-        // nodes
         tasks.forEach(t => {
             const p = coords[t.key]; if (!p) return;
             const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            g.setAttribute("transform", `translate(${p.x},${p.y})`);
-            g.style.cursor = "grab";
+            g.setAttribute("transform", `translate(${p.x},${p.y})`); g.style.cursor = "grab";
             const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
             rect.setAttribute("rx", "12"); rect.setAttribute("ry", "12"); rect.setAttribute("width", "160"); rect.setAttribute("height", "80");
-            rect.setAttribute("fill", "#ffffff"); rect.setAttribute("stroke", "#cbd5e1");
-            rect.setAttribute("filter", "drop-shadow(0 1px 1px rgba(0,0,0,0.05))");
+            rect.setAttribute("fill", "#ffffff"); rect.setAttribute("stroke", "#cbd5e1"); rect.setAttribute("filter", "drop-shadow(0 1px 1px rgba(0,0,0,0.05))");
             const tit = document.createElementNS("http://www.w3.org/2000/svg", "text");
             tit.setAttribute("x", "12"); tit.setAttribute("y", "24"); tit.setAttribute("font-size", "12"); tit.setAttribute("fill", "#0f172a"); tit.textContent = `${t.key} · ${t.title}`;
             const sub = document.createElementNS("http://www.w3.org/2000/svg", "text");
             sub.setAttribute("x", "12"); sub.setAttribute("y", "46"); sub.setAttribute("font-size", "11"); sub.setAttribute("fill", "#475569");
             sub.textContent = `${t.owner || "—"} • ${t.dur || 0}d • ${t.status}`;
-            g.appendChild(rect); g.appendChild(tit); g.appendChild(sub);
-            svg.appendChild(g);
-
-            // drag
+            g.appendChild(rect); g.appendChild(tit); g.appendChild(sub); svg.appendChild(g);
             let ox = 0, oy = 0, dragging = false;
             g.addEventListener("pointerdown", (e) => { dragging = true; g.style.cursor = "grabbing"; ox = e.clientX; oy = e.clientY; g.setPointerCapture(e.pointerId); });
             g.addEventListener("pointermove", (e) => {
@@ -319,24 +297,19 @@
     /* ---------------- Analytics ---------------- */
     function buildIndex() { const byKey = {}; STORE.tasks.forEach(t => byKey[t.key] = t); return byKey; }
     function topoSort() {
-        const tasks = STORE.tasks.map(t => t.key); const indeg = {}; const adj = {};
+        const tasks = STORE.tasks.map(t => t.key); const indeg = {}, adj = {};
         tasks.forEach(k => { indeg[k] = 0; adj[k] = []; });
         STORE.links.forEach(e => { if (indeg[e.to] != null) { indeg[e.to]++; adj[e.from].push(e.to); } });
-        const q = []; Object.keys(indeg).forEach(k => { if (indeg[k] === 0) q.push(k); });
-        const order = []; while (q.length) { const k = q.shift(); order.push(k); adj[k].forEach(v => { if (--indeg[v] === 0) q.push(v); }); }
-        const hasCycle = order.length !== tasks.length;
-        return { order, hasCycle };
+        const qq = []; Object.keys(indeg).forEach(k => { if (indeg[k] === 0) qq.push(k); });
+        const order = []; while (qq.length) { const k = qq.shift(); order.push(k); adj[k].forEach(v => { if (--indeg[v] === 0) qq.push(v); }); }
+        const hasCycle = order.length !== tasks.length; return { order, hasCycle };
     }
     function criticalPathDays() {
-        // Longest path (sum of durations) in DAG using topo order; if cycle, ignore it and return best effort.
         const { order } = topoSort(); const byKey = buildIndex();
         const dur = {}; STORE.tasks.forEach(t => dur[t.key] = Number(t.dur || 0));
         const dist = {}; STORE.tasks.forEach(t => dist[t.key] = dur[t.key]);
         const preds = {}; STORE.links.forEach(e => { preds[e.to] = preds[e.to] || []; preds[e.to].push(e.from); });
-
-        (order.length ? order : STORE.tasks.map(t => t.key)).forEach(k => {
-            (preds[k] || []).forEach(p => { dist[k] = Math.max(dist[k], (dist[p] || dur[p]) + dur[k]); });
-        });
+        (order.length ? order : STORE.tasks.map(t => t.key)).forEach(k => { (preds[k] || []).forEach(p => { dist[k] = Math.max(dist[k], (dist[p] || dur[p]) + dur[k]); }); });
         return Math.max(0, ...Object.values(dist));
     }
     function depsOf(key) { return STORE.links.filter(e => e.to === key).map(e => e.from); }
@@ -355,36 +328,31 @@
     function updateKPIs() {
         kpiTasks.textContent = String(STORE.tasks.length);
         kpiLinks.textContent = String(STORE.links.length);
-        const cyc = topoSort().hasCycle ? 1 : 0;
-        kpiCycles.textContent = String(cyc);
+        const cyc = topoSort().hasCycle ? 1 : 0; kpiCycles.textContent = String(cyc);
         kpiCP.textContent = String(criticalPathDays());
     }
     function loadList() {
-        rows.innerHTML = "";
-        const data = filtered();
-        const byKey = buildIndex();
+        rows.innerHTML = ""; cards.innerHTML = "";
+        const data = filtered(); const byKey = buildIndex();
+
+        // Table rows (≥sm)
         data.forEach(t => {
             const tr = document.createElement("tr");
-            const keyI = input(t.key, "w-28");
-            const titleI = input(t.title, "w-56");
+            const keyI = input(t.key, "w-28"); const titleI = input(t.title, "w-56");
             const ownerI = input(t.owner || "", "w-32");
             const durI = input(t.dur || 0, "w-20"); durI.type = "number"; durI.min = 0;
             const statusS = select(["Planned", "In Progress", "Blocked", "Done"], t.status || "Planned");
             const depsSpan = document.createElement("span"); depsSpan.textContent = depsOf(t.key).join(", ") || "—";
-
             const actions = document.createElement("div");
             const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
             const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
             actions.append(saveBtn, delBtn);
-
             tr.append(td(keyI), td(titleI), td(ownerI), td(durI), td(statusS), td(depsSpan), td(actions));
             rows.appendChild(tr);
 
             function save() {
-                // Update key safely
                 const newKey = keyI.value.trim();
                 if (newKey !== t.key && byKey[newKey]) { listMsg.className = "p-3 text-sm text-rose-700"; listMsg.textContent = "Key already exists."; return; }
-                // rewrite links if key changed
                 STORE.links.forEach(e => { if (e.from === t.key) e.from = newKey; if (e.to === t.key) e.to = newKey; });
                 t.key = newKey; t.title = titleI.value.trim(); t.owner = ownerI.value.trim(); t.dur = Number(durI.value || 0); t.status = statusS.value;
                 persist(); draw(); updateKPIs(); loadList();
@@ -398,6 +366,27 @@
                 STORE.links = STORE.links.filter(e => e.from !== t.key && e.to !== t.key);
                 persist(); draw(); updateKPIs(); loadList();
             });
+
+            // Mobile card (xs)
+            const card = document.createElement("div");
+            card.className = "rounded-xl border border-slate-200 p-3";
+            card.innerHTML = `
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <div class="font-medium text-slate-800 text-sm">${t.key} · ${t.title}</div>
+                    <div class="text-xs text-slate-600 mt-0.5">${t.owner || "—"} • ${t.dur || 0}d • ${t.status}</div>
+                    <div class="text-xs text-slate-500 mt-1">Depends on: ${depsOf(t.key).join(", ") || "—"}</div>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <button class="text-xs px-2 py-1 rounded bg-slate-800 text-white hover:bg-slate-900" data-act="save">Save</button>
+                    <button class="text-xs px-2 py-1 rounded border border-slate-300 hover:bg-slate-50" data-act="del">Delete</button>
+                </div>
+            </div>
+        `;
+            // simple handlers reuse table inputs by syncing values before save/delete
+            card.querySelector('[data-act="save"]').addEventListener("click", save);
+            card.querySelector('[data-act="del"]').addEventListener("click", () => delBtn.click());
+            cards.appendChild(card);
         });
 
         listMsg.textContent = data.length ? "" : "No tasks.";
@@ -432,15 +421,10 @@
     });
 
     btnLayout.addEventListener("click", () => { draw(); });
-    btnDetect.addEventListener("click", () => {
-        const cyc = topoSort().hasCycle;
-        kpiCycles.textContent = cyc ? "1" : "0";
-        flash(depMsg, cyc ? "Cycle detected" : "No cycles");
-    });
+    btnDetect.addEventListener("click", () => { const cyc = topoSort().hasCycle; kpiCycles.textContent = cyc ? "1" : "0"; flash(depMsg, cyc ? "Cycle detected" : "No cycles"); });
     btnExport.addEventListener("click", () => {
         const blob = new Blob([JSON.stringify(STORE, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); a.href = url; a.download = "dependencies.json"; a.click(); URL.revokeObjectURL(url);
+        const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "dependencies.json"; a.click(); URL.revokeObjectURL(url);
     });
     [q, fStatus, fOwner].forEach(el => el.addEventListener("input", () => loadList()));
     btnClear.addEventListener("click", () => { q.value = ""; fStatus.value = ""; fOwner.value = ""; loadList(); });
@@ -450,14 +434,11 @@
 
     /* ---------------- Zoom (Ctrl + wheel) ---------------- */
     svg.addEventListener("wheel", (e) => {
-        if (!e.ctrlKey) return;
-        e.preventDefault();
-        const vb = svg.viewBox.baseVal;
-        const k = (e.deltaY < 0) ? 0.9 : 1.1;
+        if (!e.ctrlKey) return; e.preventDefault();
+        const vb = svg.viewBox.baseVal; const k = (e.deltaY < 0) ? 0.9 : 1.1;
         const cx = e.offsetX / svg.clientWidth * vb.width + vb.x;
         const cy = e.offsetY / svg.clientHeight * vb.height + vb.y;
-        vb.x = cx - (cx - vb.x) * k; vb.y = cy - (cy - vb.y) * k;
-        vb.width *= k; vb.height *= k;
+        vb.x = cx - (cx - vb.x) * k; vb.y = cy - (cy - vb.y) * k; vb.width *= k; vb.height *= k;
     }, { passive: false });
 </script>
 {% endblock %}

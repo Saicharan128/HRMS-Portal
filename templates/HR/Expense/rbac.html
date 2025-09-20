@@ -9,10 +9,25 @@
             </h1>
             <p class="text-slate-600 text-sm">Role-based access control for secure feature access.</p>
         </div>
-        <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-            <i class="fa-solid fa-arrow-left mr-1"></i> Back
-        </a>
+        <div class="flex items-center gap-2">
+            <button id="resetSeed"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-seedling mr-1"></i> Reset Demo
+            </button>
+            <button id="exportJson"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export
+            </button>
+            <label
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-import mr-1"></i> Import
+                <input id="importJson" type="file" accept="application/json" class="hidden">
+            </label>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
     </div>
 
     <!-- Create (Dummy) -->
@@ -35,11 +50,19 @@
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Attach Permissions (comma)</label>
                     <input name="perms" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                        placeholder="expense.read, expense.approve">
+                        placeholder="expense.read, expense.approve, expense.* or !expense.approve">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-600 mb-1">Parent Roles (optional, comma)</label>
+                    <input name="parents" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        placeholder="Employee">
+                    <div class="text-xs text-slate-500 mt-1">Inherits parents' permissions. Denies (<span
+                            class="font-mono">!key</span>) override allows.</div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit"><i
-                            class="fa-solid fa-plus mr-1"></i>Add</button>
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-plus mr-1"></i>Add
+                    </button>
                     <span id="roleMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
@@ -61,8 +84,9 @@
                         placeholder="Approve expense reports">
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit"><i
-                            class="fa-solid fa-plus mr-1"></i>Add</button>
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-plus mr-1"></i>Add
+                    </button>
                     <span id="permMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
@@ -84,8 +108,9 @@
                         placeholder="Manager">
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit"><i
-                            class="fa-solid fa-plus mr-1"></i>Assign</button>
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-plus mr-1"></i>Assign
+                    </button>
                     <span id="assignMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
@@ -140,7 +165,8 @@
                         <tr>
                             <th class="px-4 py-2">Role</th>
                             <th class="px-4 py-2">Description</th>
-                            <th class="px-4 py-2">Perms</th>
+                            <th class="px-4 py-2">Perm Rules</th>
+                            <th class="px-4 py-2">Parents</th>
                             <th class="px-4 py-2">Status</th>
                             <th class="px-4 py-2 w-56">Actions</th>
                         </tr>
@@ -206,95 +232,215 @@
                     <option>edit</option>
                 </select>
                 <div class="md:col-span-5 flex items-center gap-3">
-                    <button id="simBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900"><i
-                            class="fa-solid fa-play mr-1"></i>Simulate</button>
+                    <button id="simBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                        <i class="fa-solid fa-play mr-1"></i>Simulate
+                    </button>
                     <span id="simMsg" class="text-sm text-slate-600"></span>
                 </div>
             </div>
-            <div class="px-4 pb-4 text-xs text-slate-500">Simulator checks permission key =
-                &lt;resource&gt;.&lt;action&gt; (e.g., <span class="font-mono">expense.approve</span>).</div>
+            <div class="px-4 pb-4 text-xs text-slate-500">
+                Simulator checks permission key <span class="font-mono">&lt;resource&gt;.&lt;action&gt;</span>.
+                Supports wildcards (<span class="font-mono">expense.*</span>) and denies (<span
+                    class="font-mono">!expense.approve</span>).
+            </div>
+        </div>
+    </div>
+
+    <!-- Matrix + Reports + Audit -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <!-- Access Matrix -->
+        <div class="rounded-2xl border border-slate-200 bg-white">
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold">
+                <i class="fa-solid fa-table-list mr-2"></i> Access Matrix (Roles × Permissions)
+            </div>
+            <div class="overflow-x-auto p-4">
+                <table class="min-w-full text-xs text-left text-slate-700">
+                    <thead class="bg-slate-50 text-slate-600" id="matrixHead"></thead>
+                    <tbody id="matrixBody" class="divide-y divide-slate-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> RBAC
+                Reports</h3>
+            <div class="grid grid-cols-1 gap-6">
+                <canvas id="coverageChart" height="160"></canvas>
+                <canvas id="roleChart" height="160"></canvas>
+            </div>
+        </div>
+
+        <!-- Audit Log -->
+        <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white">
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold">
+                <i class="fa-solid fa-clipboard-list mr-2"></i> Audit Log
+            </div>
+            <div class="p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <input id="logSearch" placeholder="Search audit…"
+                        class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <select id="logType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <option value="">All Types</option>
+                        <option>role</option>
+                        <option>perm</option>
+                        <option>user</option>
+                        <option>assign</option>
+                    </select>
+                    <button id="clearLog"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-broom mr-1"></i> Clear Log
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-left text-slate-700">
+                        <thead class="bg-slate-50 text-slate-600">
+                            <tr>
+                                <th class="px-4 py-2 w-40">Time</th>
+                                <th class="px-4 py-2 w-24">Type</th>
+                                <th class="px-4 py-2">Event</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logRows" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    /* ---------- Dummy store (localStorage) ---------- */
-    const KEY = "dummy_rbac";
-    let STORE = JSON.parse(localStorage.getItem(KEY) || "null") || {
+    /* ---------- Demo store (localStorage) ---------- */
+    const KEY = 'demo_rbac_v2';
+    const KEY_LOG = 'demo_rbac_v2_audit';
+
+    const SEED = {
         roles: [
-            { name: "Admin", desc: "Full access", perms: ["*"], status: "Active" },
-            { name: "Manager", desc: "Approve finance/time", perms: ["expense.read", "expense.approve", "timesheet.read", "timesheet.approve"], status: "Active" },
-            { name: "Employee", desc: "Basic usage", perms: ["expense.read", "timesheet.read", "attendance.correct"], status: "Active" }
+            { name: 'Admin', desc: 'Full access', perms: ['*'], status: 'Active', parents: [] },
+            { name: 'Manager', desc: 'Approve finance/time', perms: ['expense.read', 'expense.approve', 'timesheet.read', 'timesheet.approve'], status: 'Active', parents: [] },
+            { name: 'Employee', desc: 'Basic usage', perms: ['expense.read', 'timesheet.read', 'attendance.correct'], status: 'Active', parents: [] },
+            { name: 'Viewer', desc: 'Read-only for expense & timesheet', perms: ['expense.*', 'timesheet.read', '!expense.create', '!expense.edit', '!expense.approve'], status: 'Paused', parents: [] }
         ],
         perms: [
-            { key: "expense.read", desc: "View expenses" },
-            { key: "expense.approve", desc: "Approve expenses" },
-            { key: "timesheet.read", desc: "View timesheets" },
-            { key: "timesheet.approve", desc: "Approve timesheets" },
-            { key: "workflow.manage", desc: "Manage workflows" },
-            { key: "attendance.correct", desc: "Make admin corrections" },
-            { key: "dependencies.view", desc: "View dependency graph" }
+            { key: 'expense.read', desc: 'View expenses' },
+            { key: 'expense.create', desc: 'Create expenses' },
+            { key: 'expense.edit', desc: 'Edit own expenses' },
+            { key: 'expense.approve', desc: 'Approve expenses' },
+            { key: 'timesheet.read', desc: 'View timesheets' },
+            { key: 'timesheet.approve', desc: 'Approve timesheets' },
+            { key: 'workflow.manage', desc: 'Manage workflows' },
+            { key: 'attendance.correct', desc: 'Make admin corrections' },
+            { key: 'dependencies.view', desc: 'View dependency graph' }
         ],
         users: [
-            { user: "U001 - Charan", roles: ["Admin"] },
-            { user: "U014 - Priya", roles: ["Manager"] },
-            { user: "U009 - Arjun", roles: ["Employee"] }
+            { user: 'U001 - Charan', roles: ['Admin'] },
+            { user: 'U014 - Priya', roles: ['Manager'] },
+            { user: 'U009 - Arjun', roles: ['Employee'] }
         ]
     };
-    function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); }
+    let STORE = JSON.parse(localStorage.getItem(KEY) || 'null') || JSON.parse(JSON.stringify(SEED));
+    let AUDIT = JSON.parse(localStorage.getItem(KEY_LOG) || 'null') || [];
+
+    function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); localStorage.setItem(KEY_LOG, JSON.stringify(AUDIT)); }
+    function resetDemo() { STORE = JSON.parse(JSON.stringify(SEED)); AUDIT = []; persist(); paintAll(); }
 
     /* ---------- Elements ---------- */
-    const q = document.getElementById("q"), fRole = document.getElementById("fRole"), fPerm = document.getElementById("fPerm"), fUser = document.getElementById("fUser"), fStatus = document.getElementById("fStatus"), clearFilters = document.getElementById("clearFilters");
-    const roleRows = document.getElementById("roleRows"), roleListMsg = document.getElementById("roleListMsg"), roleForm = document.getElementById("roleForm"), roleMsg = document.getElementById("roleMsg");
-    const permRows = document.getElementById("permRows"), permListMsg = document.getElementById("permListMsg"), permForm = document.getElementById("permForm"), permMsg = document.getElementById("permMsg");
-    const userRows = document.getElementById("userRows"), userListMsg = document.getElementById("userListMsg"), assignForm = document.getElementById("assignForm"), assignMsg = document.getElementById("assignMsg");
-    const kpiUsers = document.getElementById("kpiUsers"), kpiRoles = document.getElementById("kpiRoles"), kpiPerms = document.getElementById("kpiPerms"), kpiPolicies = document.getElementById("kpiPolicies");
-    const simUser = document.getElementById("simUser"), simResource = document.getElementById("simResource"), simAction = document.getElementById("simAction"), simBtn = document.getElementById("simBtn"), simMsg = document.getElementById("simMsg");
+    const q = $('#q'), fRole = $('#fRole'), fPerm = $('#fPerm'), fUser = $('#fUser'), fStatus = $('#fStatus'), clearFilters = $('#clearFilters');
 
-    /* ---------- Helpers ---------- */
-    function td(el) { const x = document.createElement("td"); x.className = "px-4 py-2 align-top"; x.appendChild(el); return x; }
-    function input(v, cls = "w-40") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
-    function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
-    function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
+    const roleRows = $('#roleRows'), roleListMsg = $('#roleListMsg'), roleForm = $('#roleForm'), roleMsg = $('#roleMsg');
+    const permRows = $('#permRows'), permListMsg = $('#permListMsg'), permForm = $('#permForm'), permMsg = $('#permMsg');
+    const userRows = $('#userRows'), userListMsg = $('#userListMsg'), assignForm = $('#assignForm'), assignMsg = $('#assignMsg');
+
+    const kpiUsers = $('#kpiUsers'), kpiRoles = $('#kpiRoles'), kpiPerms = $('#kpiPerms'), kpiPolicies = $('#kpiPolicies');
+
+    const simUser = $('#simUser'), simResource = $('#simResource'), simAction = $('#simAction'), simBtn = $('#simBtn'), simMsg = $('#simMsg');
+
+    const matrixHead = $('#matrixHead'), matrixBody = $('#matrixBody');
+
+    const coverageCanvasId = 'coverageChart', roleCanvasId = 'roleChart';
+
+    const logSearch = $('#logSearch'), logType = $('#logType'), logRows = $('#logRows'), clearLog = $('#clearLog');
+
+    function $(id) { return document.getElementById(id); }
+    function flash(el, msg, ok = true) { el.textContent = msg; el.className = 'text-sm ' + (ok ? 'text-emerald-700' : 'text-rose-700'); setTimeout(() => { el.textContent = ''; el.className = 'text-sm text-slate-600'; }, 1500); }
     const uniq = a => Array.from(new Set(a));
 
     /* ---------- Filters ---------- */
     function passRoleFilter(r) {
-        const term = (q.value || "").toLowerCase().trim(), ro = (fRole.value || "").toLowerCase().trim(), st = fStatus.value;
-        if (term && !(`${r.name} ${r.desc}`.toLowerCase().includes(term))) return false;
-        if (ro && r.name.toLowerCase().indexOf(ro) === -1) return false;
+        const term = (q.value || '').toLowerCase().trim(), ro = (fRole.value || '').toLowerCase().trim(), st = fStatus.value;
+        if (term && !(`${r.name} ${r.desc} ${r.perms.join(',')}`.toLowerCase().includes(term))) return false;
+        if (ro && !r.name.toLowerCase().includes(ro)) return false;
         if (st && r.status !== st) return false;
         return true;
     }
     function passPermFilter(p) {
-        const term = (q.value || "").toLowerCase().trim(), pe = (fPerm.value || "").toLowerCase().trim();
+        const term = (q.value || '').toLowerCase().trim(), pe = (fPerm.value || '').toLowerCase().trim();
         if (term && !(`${p.key} ${p.desc}`.toLowerCase().includes(term))) return false;
-        if (pe && p.key.toLowerCase().indexOf(pe) === -1) return false;
-        return true;
+        if (pe && !p.key.toLowerCase().includes(pe)) return false; return true;
     }
     function passUserFilter(u) {
-        const term = (q.value || "").toLowerCase().trim(), us = (fUser.value || "").toLowerCase().trim(), ro = (fRole.value || "").toLowerCase().trim();
-        if (term && !(`${u.user} ${u.roles.join(",")}`.toLowerCase().includes(term))) return false;
-        if (us && u.user.toLowerCase().indexOf(us) === -1) return false;
+        const term = (q.value || '').toLowerCase().trim(), us = (fUser.value || '').toLowerCase().trim(), ro = (fRole.value || '').toLowerCase().trim();
+        if (term && !(`${u.user} ${u.roles.join(',')}`.toLowerCase().includes(term))) return false;
+        if (us && !u.user.toLowerCase().includes(us)) return false;
         if (ro && !u.roles.some(r => r.toLowerCase().includes(ro))) return false;
         return true;
     }
 
-    /* ---------- Effective Permissions ---------- */
-    function rolePerms(roleName) {
-        const r = STORE.roles.find(x => x.name === roleName); if (!r) return [];
-        return r.perms.includes("*") ? ["*"] : uniq(r.perms);
+    /* ---------- Wildcards / Denies / Inheritance ---------- */
+    // A "rule" is a string: '*' or 'thing.action' or 'thing.*' or '!thing.action' or '!thing.*'
+    function isDeny(rule) { return rule.startsWith('!'); }
+    function stripBang(rule) { return rule.startsWith('!') ? rule.slice(1) : rule; }
+    function matchRule(rule, key) {
+        const r = stripBang(rule);
+        if (r === '*') return true;
+        if (r.endsWith('.*')) return key.startsWith(r.slice(0, -2) + '.');
+        return r === key;
     }
-    function userEffectivePerms(userName) {
-        const u = STORE.users.find(x => x.user === userName); if (!u) return [];
-        const sets = u.roles.flatMap(rolePerms);
-        return sets.includes("*") ? ["*"] : uniq(sets);
+    function collectRoleRules(roleName, seen = new Set()) {
+        // guard cycles
+        if (seen.has(roleName)) return { allow: [], deny: [] };
+        seen.add(roleName);
+        const r = STORE.roles.find(x => x.name === roleName); if (!r) return { allow: [], deny: [] };
+        const here = r.perms || [];
+        const parents = (r.parents || []).flatMap(p => {
+            const x = collectRoleRules(p, seen);
+            return ['__ALLOW__', ...x.allow, '__DENY__', ...x.deny];
+        });
+        const allow = [];
+        const deny = [];
+        parents.forEach(token => {
+            if (token === '__ALLOW__' || token === '__DENY__') return;
+            // parents already split above
+            // we add later
+        });
+        // Combine: parent rules first, then current role (current overrides by evaluation order but denies always take precedence)
+        const parentRules = (r.parents || []).map(p => collectRoleRules(p, seen));
+        parentRules.forEach(pr => { allow.push(...pr.allow); deny.push(...pr.deny); });
+        here.forEach(rule => { (isDeny(rule) ? deny : allow).push(rule); });
+        return { allow: uniq(allow), deny: uniq(deny) };
+    }
+    function collectUserRules(userName) {
+        const u = STORE.users.find(x => x.user === userName); if (!u) return { allow: [], deny: [] };
+        const all = u.roles.map(r => collectRoleRules(r));
+        const allow = uniq(all.flatMap(x => x.allow));
+        const deny = uniq(all.flatMap(x => x.deny));
+        return { allow, deny };
     }
     function isAllowed(userName, resource, action) {
-        const key = resource.trim() + "." + action.trim();
-        const perms = userEffectivePerms(userName);
-        if (perms.includes("*")) return true;
-        return perms.includes(key);
+        const key = resource.trim() + '.' + action.trim();
+        const { allow, deny } = collectUserRules(userName);
+        // Deny precedence
+        if (deny.some(r => matchRule(r, key))) return false;
+        // Allow via * or explicit/wildcard
+        if (allow.some(r => matchRule(r, key))) return true;
+        return false;
+    }
+    function effectivePermKeysForDisplay(userName) {
+        // Using declared permissions list for display; simulator still supports wildcards beyond catalog.
+        return STORE.perms.map(p => p.key).filter(k => {
+            const [res, act] = k.split('.');
+            return isAllowed(userName, res, act);
+        });
     }
 
     /* ---------- KPIs ---------- */
@@ -302,175 +448,288 @@
         kpiUsers.textContent = String(STORE.users.length);
         kpiRoles.textContent = String(STORE.roles.length);
         kpiPerms.textContent = String(STORE.perms.length);
-        const policies = STORE.roles.reduce((a, r) => a + (r.perms.includes("*") ? 1 : r.perms.length), 0);
+        // count total allow rules (excluding denies) across active roles (rough indicator)
+        const policies = STORE.roles.reduce((a, r) => a + (r.status === 'Active' ? r.perms.filter(x => !isDeny(x)).length : 0), 0);
         kpiPolicies.textContent = String(policies);
     }
 
-    /* ---------- RENDER: Roles ---------- */
+    /* ---------- Audit ---------- */
+    function audit(type, text) {
+        AUDIT.unshift({ id: Date.now(), ts: new Date().toISOString(), type, text });
+        AUDIT = AUDIT.slice(0, 500); // keep last 500
+        persist(); renderAudit();
+    }
+    function renderAudit() {
+        const q = (logSearch.value || '').toLowerCase().trim();
+        const t = logType.value;
+        const data = AUDIT.filter(x => (!t || x.type === t) && (!q || x.text.toLowerCase().includes(q)));
+        logRows.innerHTML = data.map(x => `
+    <tr>
+      <td class="px-4 py-2 align-top">${new Date(x.ts).toLocaleString()}</td>
+      <td class="px-4 py-2 align-top">${x.type}</td>
+      <td class="px-4 py-2">${x.text}</td>
+    </tr>`).join('') || `<tr><td colspan="3" class="px-4 py-3 text-slate-500">No audit events</td></tr>`;
+    }
+
+    /* ---------- Render: Roles ---------- */
+    function td(node) { const c = document.createElement('td'); c.className = 'px-4 py-2 align-top'; c.appendChild(node); return c; }
+    function input(v, cls = 'w-40') { const i = document.createElement('input'); i.value = v ?? ''; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
+    function select(opts, cur) { const s = document.createElement('select'); s.className = 'rounded-lg border border-slate-300 px-2 py-1 text-sm'; opts.forEach(o => { const op = document.createElement('option'); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
+    function btn(label, tone, on) {
+        const b = document.createElement('button'); const styles = {
+            primary: 'px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900',
+            ghost: 'px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50'
+        }; b.className = styles[tone] || styles.primary; b.textContent = label; b.addEventListener('click', on); return b;
+    }
+
     function loadRoles() {
-        roleRows.innerHTML = "";
+        roleRows.innerHTML = '';
         const data = STORE.roles.filter(passRoleFilter);
         data.forEach(r => {
-            const tr = document.createElement("tr");
-            const nameI = input(r.name, "w-40");
-            const descI = input(r.desc || "", "w-48");
-            const permsI = input(r.perms.join(", "), "w-64");
-            const statusS = select(["Active", "Paused"], r.status || "Active");
+            const tr = document.createElement('tr');
+            const nameI = input(r.name, 'w-40');
+            const descI = input(r.desc || '', 'w-48');
+            const permsI = input(r.perms.join(', '), 'w-72');
+            const parentsI = input((r.parents || []).join(', '), 'w-48');
+            const statusS = select(['Active', 'Paused'], r.status || 'Active');
 
-            const actions = document.createElement("div");
-            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
-            const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
-            actions.append(saveBtn, delBtn);
-
-            tr.append(td(nameI), td(descI), td(permsI), td(statusS), td(actions));
-            roleRows.appendChild(tr);
-
-            saveBtn.addEventListener("click", () => {
+            const actions = document.createElement('div');
+            const save = btn('Save', 'primary', () => {
                 const newName = nameI.value.trim();
-                if (!newName) { flash(roleListMsg, "Role name required", true); return; }
-                if (newName !== r.name && STORE.roles.some(x => x.name === newName)) { flash(roleListMsg, "Role exists", true); return; }
-                // update user role refs if renamed
+                if (!newName) return flash(roleListMsg, 'Role name required', false);
+                if (newName !== r.name && STORE.roles.some(x => x.name === newName)) return flash(roleListMsg, 'Role exists', false);
+                // rename refs
                 STORE.users.forEach(u => { u.roles = u.roles.map(x => x === r.name ? newName : x); });
+                const old = r.name;
                 r.name = newName; r.desc = descI.value.trim();
-                r.perms = uniq(permsI.value.split(",").map(s => s.trim()).filter(Boolean));
+                r.perms = uniq(permsI.value.split(',').map(s => s.trim()).filter(Boolean));
+                r.parents = uniq(parentsI.value.split(',').map(s => s.trim()).filter(Boolean));
                 r.status = statusS.value;
-                persist(); updateKPIs(); loadUsers(); flash(roleListMsg, "Saved ✓");
+                persist(); updateKPIs(); loadUsers(); buildMatrix(); drawCharts();
+                flash(roleListMsg, 'Saved ✓'); audit('role', `Updated role "${old}" → "${newName}"`);
             });
-            delBtn.addEventListener("click", () => {
-                if (!confirm("Delete role?")) return;
+            const del = btn('Delete', 'ghost', () => {
+                if (!confirm('Delete role?')) return;
                 STORE.roles = STORE.roles.filter(x => x !== r);
                 STORE.users.forEach(u => { u.roles = u.roles.filter(x => x !== r.name); });
-                persist(); updateKPIs(); loadRoles(); loadUsers();
+                persist(); updateKPIs(); loadRoles(); loadUsers(); buildMatrix(); drawCharts();
+                audit('role', `Deleted role "${r.name}"`);
             });
+            actions.append(save, del);
+
+            tr.append(td(nameI), td(descI), td(permsI), td(parentsI), td(statusS), td(actions));
+            roleRows.appendChild(tr);
         });
-        roleListMsg.textContent = data.length ? "" : "No roles.";
+        roleListMsg.textContent = data.length ? '' : 'No roles.';
     }
 
-    /* ---------- RENDER: Permissions ---------- */
+    /* ---------- Render: Permissions ---------- */
     function loadPerms() {
-        permRows.innerHTML = "";
+        permRows.innerHTML = '';
         const data = STORE.perms.filter(passPermFilter);
         data.forEach(p => {
-            const tr = document.createElement("tr");
-            const keyI = input(p.key, "w-56");
-            const descI = input(p.desc || "", "w-64");
-
-            const actions = document.createElement("div");
-            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
-            const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
-            actions.append(saveBtn, delBtn);
-
-            tr.append(td(keyI), td(descI), td(actions));
-            permRows.appendChild(tr);
-
-            saveBtn.addEventListener("click", () => {
+            const tr = document.createElement('tr');
+            const keyI = input(p.key, 'w-56');
+            const descI = input(p.desc || '', 'w-64');
+            const actions = document.createElement('div');
+            const save = btn('Save', 'primary', () => {
                 const newKey = keyI.value.trim();
-                if (!newKey) { flash(permListMsg, "Key required", true); return; }
-                if (newKey !== p.key && STORE.perms.some(x => x.key === newKey)) { flash(permListMsg, "Permission exists", true); return; }
-                // rewrite role permissions if key changed
-                STORE.roles.forEach(r => { r.perms = r.perms.map(k => k === p.key ? newKey : k); });
+                if (!newKey) return flash(permListMsg, 'Key required', false);
+                if (newKey !== p.key && STORE.perms.some(x => x.key === newKey)) return flash(permListMsg, 'Permission exists', false);
+                // rewrite role rules if exact key entry exists
+                STORE.roles.forEach(r => { r.perms = r.perms.map(k => stripBang(k) === p.key ? (isDeny(k) ? '!' + newKey : newKey) : k); });
+                audit('perm', `Updated permission "${p.key}" → "${newKey}"`);
                 p.key = newKey; p.desc = descI.value.trim();
-                persist(); updateKPIs(); loadRoles(); flash(permListMsg, "Saved ✓");
+                persist(); updateKPIs(); loadRoles(); buildMatrix(); drawCharts(); flash(permListMsg, 'Saved ✓');
             });
-            delBtn.addEventListener("click", () => {
-                if (!confirm("Delete permission?")) return;
-                STORE.roles.forEach(r => { r.perms = r.perms.filter(k => k !== p.key); });
+            const del = btn('Delete', 'ghost', () => {
+                if (!confirm('Delete permission?')) return;
+                // keep role rules as-is; simulator still works with wildcards; but remove exact matches to avoid dangling
+                STORE.roles.forEach(r => { r.perms = r.perms.filter(k => stripBang(k) !== p.key); });
                 STORE.perms = STORE.perms.filter(x => x !== p);
-                persist(); updateKPIs(); loadPerms(); loadRoles();
+                persist(); updateKPIs(); loadPerms(); loadRoles(); buildMatrix(); drawCharts();
+                audit('perm', `Deleted permission "${p.key}"`);
             });
+            actions.append(save, del);
+            tr.append(td(keyI), td(descI), td(actions)); permRows.appendChild(tr);
         });
-        permListMsg.textContent = data.length ? "" : "No permissions.";
+        permListMsg.textContent = data.length ? '' : 'No permissions.';
     }
 
-    /* ---------- RENDER: Users ---------- */
+    /* ---------- Render: Users ---------- */
     function loadUsers() {
-        userRows.innerHTML = "";
+        userRows.innerHTML = '';
         const data = STORE.users.filter(passUserFilter);
         data.forEach(u => {
-            const tr = document.createElement("tr");
-            const userI = input(u.user, "w-48");
-            const rolesI = input(u.roles.join(", "), "w-48");
-            const eff = document.createElement("div"); eff.className = "text-xs text-slate-700";
-            eff.textContent = userEffectivePerms(u.user).join(", ") || "—";
+            const tr = document.createElement('tr');
+            const userI = input(u.user, 'w-48');
+            const rolesI = input(u.roles.join(', '), 'w-56');
+            const eff = document.createElement('div'); eff.className = 'text-xs text-slate-700 break-words';
+            eff.textContent = effectivePermKeysForDisplay(u.user).join(', ') || '—';
 
-            const actions = document.createElement("div");
-            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
-            const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
-            actions.append(saveBtn, delBtn);
+            function refreshEff() { eff.textContent = effectivePermKeysForDisplay(userI.value.trim()).join(', ') || '—'; }
+
+            const actions = document.createElement('div');
+            const save = btn('Save', 'primary', () => {
+                const newUser = userI.value.trim();
+                if (!newUser) return flash(userListMsg, 'User required', false);
+                if (newUser !== u.user && STORE.users.some(x => x.user === newUser)) return flash(userListMsg, 'User exists', false);
+                const old = u.user; u.user = newUser;
+                u.roles = uniq(rolesI.value.split(',').map(s => s.trim()).filter(Boolean));
+                persist(); updateKPIs(); refreshEff(); buildMatrix(); drawCharts();
+                flash(userListMsg, 'Saved ✓'); audit('user', `Updated user "${old}" → "${newUser}"`);
+            });
+            const del = btn('Delete', 'ghost', () => {
+                if (!confirm('Delete user mapping?')) return;
+                STORE.users = STORE.users.filter(x => x !== u);
+                persist(); updateKPIs(); loadUsers(); buildMatrix(); drawCharts();
+                audit('user', `Deleted user "${u.user}"`);
+            });
+            actions.append(save, del);
 
             tr.append(td(userI), td(rolesI), td(eff), td(actions));
             userRows.appendChild(tr);
-
-            function refreshEff() { eff.textContent = userEffectivePerms(userI.value.trim()).join(", ") || "—"; }
-
-            saveBtn.addEventListener("click", () => {
-                const newUser = userI.value.trim();
-                if (!newUser) { flash(userListMsg, "User required", true); return; }
-                if (newUser !== u.user && STORE.users.some(x => x.user === newUser)) { flash(userListMsg, "User exists", true); return; }
-                u.user = newUser;
-                u.roles = uniq(rolesI.value.split(",").map(s => s.trim()).filter(Boolean));
-                persist(); updateKPIs(); refreshEff(); flash(userListMsg, "Saved ✓");
-            });
-            delBtn.addEventListener("click", () => {
-                if (!confirm("Delete user mapping?")) return;
-                STORE.users = STORE.users.filter(x => x !== u); persist(); updateKPIs(); loadUsers();
-            });
         });
-        userListMsg.textContent = data.length ? "" : "No users.";
+        userListMsg.textContent = data.length ? '' : 'No users.';
     }
 
-    /* ---------- Create handlers (dummy) ---------- */
-    roleForm.addEventListener("submit", (e) => {
+    /* ---------- Create handlers ---------- */
+    roleForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(roleForm);
-        const name = (fd.get("name") || "").toString().trim();
-        if (!name) { flash(roleMsg, "Name required", true); return; }
-        if (STORE.roles.some(r => r.name === name)) { flash(roleMsg, "Role exists", true); return; }
-        const desc = (fd.get("desc") || "").toString().trim();
-        const perms = uniq((fd.get("perms") || "").toString().split(",").map(s => s.trim()).filter(Boolean));
-        STORE.roles.unshift({ name, desc, perms, status: "Active" }); persist();
-        roleForm.reset(); flash(roleMsg, "Role added ✓"); updateKPIs(); loadRoles();
+        const name = (fd.get('name') || '').toString().trim();
+        if (!name) return flash(roleMsg, 'Name required', false);
+        if (STORE.roles.some(r => r.name === name)) return flash(roleMsg, 'Role exists', false);
+        const desc = (fd.get('desc') || '').toString().trim();
+        const perms = uniq((fd.get('perms') || '').toString().split(',').map(s => s.trim()).filter(Boolean));
+        const parents = uniq((fd.get('parents') || '').toString().split(',').map(s => s.trim()).filter(Boolean));
+        STORE.roles.unshift({ name, desc, perms, parents, status: 'Active' });
+        persist(); roleForm.reset(); updateKPIs(); loadRoles(); buildMatrix(); drawCharts();
+        flash(roleMsg, 'Role added ✓'); audit('role', `Created role "${name}"`);
     });
 
-    permForm.addEventListener("submit", (e) => {
+    permForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(permForm);
-        const key = (fd.get("key") || "").toString().trim();
-        if (!key) { flash(permMsg, "Key required", true); return; }
-        if (STORE.perms.some(p => p.key === key)) { flash(permMsg, "Permission exists", true); return; }
-        const desc = (fd.get("desc") || "").toString().trim();
+        const key = (fd.get('key') || '').toString().trim();
+        if (!key) return flash(permMsg, 'Key required', false);
+        if (STORE.perms.some(p => p.key === key)) return flash(permMsg, 'Permission exists', false);
+        const desc = (fd.get('desc') || '').toString().trim();
         STORE.perms.unshift({ key, desc }); persist();
-        permForm.reset(); flash(permMsg, "Permission added ✓"); updateKPIs(); loadPerms();
+        permForm.reset(); updateKPIs(); loadPerms(); buildMatrix(); drawCharts();
+        flash(permMsg, 'Permission added ✓'); audit('perm', `Created permission "${key}"`);
     });
 
-    assignForm.addEventListener("submit", (e) => {
+    assignForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(assignForm);
-        const user = (fd.get("user") || "").toString().trim();
-        const role = (fd.get("role") || "").toString().trim();
-        if (!user || !role) { flash(assignMsg, "User & Role required", true); return; }
-        if (!STORE.roles.some(r => r.name === role)) { flash(assignMsg, "Role not found", true); return; }
+        const user = (fd.get('user') || '').toString().trim();
+        const role = (fd.get('role') || '').toString().trim();
+        if (!user || !role) return flash(assignMsg, 'User & Role required', false);
+        if (!STORE.roles.some(r => r.name === role)) return flash(assignMsg, 'Role not found', false);
         let u = STORE.users.find(x => x.user === user);
         if (!u) { u = { user, roles: [] }; STORE.users.unshift(u); }
         if (!u.roles.includes(role)) u.roles.push(role);
-        persist(); assignForm.reset(); flash(assignMsg, "Assigned ✓"); updateKPIs(); loadUsers();
+        persist(); assignForm.reset(); updateKPIs(); loadUsers(); buildMatrix(); drawCharts();
+        flash(assignMsg, 'Assigned ✓'); audit('assign', `Assigned "${role}" to "${user}"`);
     });
 
+    /* ---------- Matrix ---------- */
+    function buildMatrix() {
+        const perms = STORE.perms.map(p => p.key);
+        matrixHead.innerHTML = `
+    <tr>
+      <th class="px-4 py-2">Role</th>
+      ${perms.map(k => `<th class="px-2 py-2 text-xs">${k}</th>`).join('')}
+    </tr>`;
+        matrixBody.innerHTML = STORE.roles.map(r => {
+            const cells = perms.map(k => {
+                const [res, act] = k.split('.');
+                const allow = STORE.users.some(u => u.roles.includes(r.name) && isAllowed(u.user, res, act)); // "has effect" for at least one user with role
+                const denySymbol = r.perms.some(rule => isDeny(rule) && matchRule(rule, k));
+                const badge = denySymbol ? '⛔' : (allow ? '✅' : '—');
+                return `<td class="px-2 py-2 text-center">${badge}</td>`;
+            }).join('');
+            return `<tr><td class="px-4 py-2 font-medium">${r.name}</td>${cells}</tr>`;
+        }).join('') || `<tr><td class="px-4 py-3 text-slate-500">No roles</td></tr>`;
+    }
+
+    /* ---------- Reports (Chart.js) ---------- */
+    let chartsReady = false, coverageC, roleC;
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartsReady = true; return; }
+        if (chartsReady) return;
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
+    }
+    function drawCharts() {
+        if (!chartsReady) return;
+        const permKeys = STORE.perms.map(p => p.key);
+        const users = STORE.users.map(u => u.user);
+        const coverage = permKeys.map(k => {
+            const [res, act] = k.split('.');
+            return users.filter(u => isAllowed(u, res, act)).length;
+        });
+
+        const c1 = document.getElementById(coverageCanvasId).getContext('2d');
+        coverageC && coverageC.destroy();
+        coverageC = new Chart(c1, {
+            type: 'bar',
+            data: { labels: permKeys, datasets: [{ label: '# Users Allowed', data: coverage, backgroundColor: '#06b6d4', borderColor: '#0891b2', borderWidth: 2 }] },
+            options: { scales: { y: { beginAtZero: true, precision: 0 } }, plugins: { legend: { display: false } } }
+        });
+
+        const roleDist = STORE.roles.map(r => ({ name: r.name, count: STORE.users.filter(u => u.roles.includes(r.name)).length }));
+        const c2 = document.getElementById(roleCanvasId).getContext('2d');
+        roleC && roleC.destroy();
+        roleC = new Chart(c2, {
+            type: 'pie',
+            data: {
+                labels: roleDist.map(r => r.name), datasets: [{
+                    data: roleDist.map(r => r.count), borderWidth: 2, borderColor: '#fff',
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16']
+                }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+
+    /* ---------- Export / Import / Reset ---------- */
+    function dl(name, text) { const blob = new Blob([text], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 200); }
+    $('#exportJson').addEventListener('click', () => dl('rbac_export.json', JSON.stringify({ STORE, AUDIT }, null, 2)));
+    $('#importJson').addEventListener('change', (e) => {
+        const f = e.target.files?.[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const obj = JSON.parse(reader.result);
+                if (!obj || typeof obj !== 'object') throw new Error();
+                if (obj.STORE) STORE = obj.STORE;
+                if (obj.AUDIT) AUDIT = obj.AUDIT;
+                persist(); paintAll();
+            } catch { alert('❌ Invalid JSON'); }
+        };
+        reader.readAsText(f); e.target.value = '';
+    });
+    $('#resetSeed').addEventListener('click', () => { if (confirm('Reset demo data?')) resetDemo(); });
+
     /* ---------- Simulator ---------- */
-    simBtn.addEventListener("click", () => {
-        const user = simUser.value.trim(), res = simResource.value.trim(), act = simAction.value.trim();
-        if (!user || !res || !act) { flash(simMsg, "Fill all fields", true); return; }
-        const ok = isAllowed(user, res, act);
-        flash(simMsg, ok ? "✅ Allowed" : "⛔ Not allowed", ok);
+    simBtn.addEventListener('click', () => {
+        const u = simUser.value.trim(), r = simResource.value.trim(), a = simAction.value.trim();
+        if (!u || !r || !a) return flash(simMsg, 'Fill all fields', false);
+        const ok = isAllowed(u, r, a);
+        flash(simMsg, ok ? '✅ Allowed' : '⛔ Not allowed', ok);
     });
 
     /* ---------- Live filters ---------- */
-    [q, fRole, fPerm, fUser, fStatus].forEach(el => el.addEventListener("input", () => { loadRoles(); loadPerms(); loadUsers(); }));
-
-    clearFilters.addEventListener("click", () => { q.value = ""; fRole.value = ""; fPerm.value = ""; fUser.value = ""; fStatus.value = ""; loadRoles(); loadPerms(); loadUsers(); });
+    [q, fRole, fPerm, fUser, fStatus].forEach(el => el.addEventListener('input', () => { loadRoles(); loadPerms(); loadUsers(); buildMatrix(); }));
+    logSearch.addEventListener('input', renderAudit);
+    logType.addEventListener('input', renderAudit);
+    clearFilters.addEventListener('click', () => { q.value = ''; fRole.value = ''; fPerm.value = ''; fUser.value = ''; fStatus.value = ''; loadRoles(); loadPerms(); loadUsers(); buildMatrix(); });
+    clearLog.addEventListener('click', () => { if (!AUDIT.length) return; if (!confirm('Clear audit log?')) return; AUDIT = []; persist(); renderAudit(); });
 
     /* ---------- Init ---------- */
-    function init() { updateKPIs(); loadRoles(); loadPerms(); loadUsers(); }
-    init();
+    function paintAll() { updateKPIs(); loadRoles(); loadPerms(); loadUsers(); buildMatrix(); ensureCharts(); drawCharts(); renderAudit(); }
+    document.addEventListener('DOMContentLoaded', paintAll);
 </script>
 {% endblock %}

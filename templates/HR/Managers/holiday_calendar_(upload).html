@@ -1,26 +1,29 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<!-- Add in <head> of base layout if missing -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-calendar-days mr-2"></i> Holiday calendar (upload)
             </h1>
-            <p class="text-slate-600 text-sm">Upload official holiday list.</p>
+            <p class="text-slate-600 text-xs sm:text-sm">Upload official holiday list.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto text-center">
             <i class="fa-solid fa-arrow-left mr-1"></i> Back
         </a>
     </div>
 
     <!-- Upload (Dummy) -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 mb-6 sm:mb-8">
+        <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
             <i class="fa-solid fa-file-arrow-up mr-2"></i> Upload Holiday List (PDF)
         </h2>
-        <form id="uploadForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form id="uploadForm" class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Title *</label>
                 <input name="title" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
@@ -47,7 +50,7 @@
                     class="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white">
             </div>
 
-            <div class="md:col-span-3 flex items-center gap-3">
+            <div class="md:col-span-3 flex flex-wrap items-center gap-3">
                 <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
                     <i class="fa-solid fa-upload mr-1"></i> Upload (Dummy)
                 </button>
@@ -69,13 +72,11 @@
             <option value="Archived">Archived</option>
         </select>
         <button id="clearFilters"
-            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">
-            Clear
-        </button>
+            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+    <!-- Table (≥sm) -->
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white hidden sm:block">
         <table class="min-w-full text-sm text-left text-slate-700">
             <thead class="bg-slate-50 text-slate-600">
                 <tr>
@@ -91,6 +92,9 @@
             <tbody id="rows" class="divide-y divide-slate-200"></tbody>
         </table>
     </div>
+    <!-- Cards (mobile) -->
+    <div id="cards" class="sm:hidden space-y-3"></div>
+
     <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
 </div>
 
@@ -98,14 +102,8 @@
     /* ---------- Dummy store (in-memory + localStorage) ---------- */
     const STORAGE_KEY = "dummy_holiday_lists";
     let STORE = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || [
-        {
-            id: 1, title: "India Holidays 2025", year: "2025", region: "India", notes: "Govt + optional", status: "Active",
-            file_name: "india_2025.pdf", file_url: "#", created_at: new Date().toISOString()
-        },
-        {
-            id: 2, title: "US Holidays 2025", year: "2025", region: "USA", notes: "", status: "Archived",
-            file_name: "us_2025.pdf", file_url: "#", created_at: new Date(Date.now() - 86400000).toISOString()
-        }
+        { id: 1, title: "India Holidays 2025", year: "2025", region: "India", notes: "Govt + optional", status: "Active", file_name: "india_2025.pdf", file_url: "#", created_at: new Date().toISOString() },
+        { id: 2, title: "US Holidays 2025", year: "2025", region: "USA", notes: "", status: "Archived", file_name: "us_2025.pdf", file_url: "#", created_at: new Date(Date.now() - 86400000).toISOString() }
     ];
     function persist() { localStorage.setItem(STORAGE_KEY, JSON.stringify(STORE)); }
 
@@ -113,6 +111,7 @@
     const uploadForm = document.getElementById("uploadForm");
     const uploadMsg = document.getElementById("uploadMsg");
     const rows = document.getElementById("rows");
+    const cards = document.getElementById("cards");
     const listMsg = document.getElementById("listMsg");
     const qEl = document.getElementById("q");
     const fYear = document.getElementById("fYear");
@@ -123,20 +122,18 @@
     /* ---------- Helpers ---------- */
     function tdWrap(el) { const td = document.createElement("td"); td.className = "px-4 py-2"; td.appendChild(el); return td; }
     function input(v, cls = "w-44") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
-    function select(opts, cur) {
-        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm";
-        opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o || "—"; if (o === cur) op.selected = true; s.appendChild(op); }); return s;
-    }
+    function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o || "—"; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
     function a(href, text) { const x = document.createElement("a"); x.href = href; x.target = "_blank"; x.rel = "noopener"; x.className = "text-slate-700 underline"; x.textContent = text; return x; }
+    function prettyDate(iso) { return new Date(iso).toLocaleString(); }
 
-    /* ---------- Render ---------- */
+    /* ---------- Filtering ---------- */
     function filtered() {
-        const q = qEl.value.trim().toLowerCase();
-        const y = fYear.value.trim();
-        const r = fRegion.value.trim().toLowerCase();
+        const q = (qEl.value || "").trim().toLowerCase();
+        const y = (fYear.value || "").trim();
+        const r = (fRegion.value || "").trim().toLowerCase();
         const s = fStatus.value;
         return STORE.filter(it => {
-            if (q && !(`${it.title} ${it.notes}`.toLowerCase().includes(q))) return false;
+            if (q && !(`${it.title} ${it.notes || ""}`.toLowerCase().includes(q))) return false;
             if (y && it.year !== y) return false;
             if (r && !(it.region || "").toLowerCase().includes(r)) return false;
             if (s && it.status !== s) return false;
@@ -144,52 +141,64 @@
         });
     }
 
+    /* ---------- Render ---------- */
     function loadList() {
-        rows.innerHTML = "";
         const data = filtered();
+
+        // TABLE (≥sm)
+        if (rows) { rows.innerHTML = ""; }
         data.forEach(r => {
             const tr = document.createElement("tr");
-
             const titleI = input(r.title, "w-56");
             const yearI = input(r.year, "w-24");
             const regionI = input(r.region, "w-40");
-            const uploaded = document.createElement("span"); uploaded.textContent = new Date(r.created_at).toLocaleString();
+            const uploaded = document.createElement("span"); uploaded.textContent = prettyDate(r.created_at);
             const statusS = select(["Active", "Archived"], r.status);
             const fileLnk = r.file_url ? a(r.file_url, r.file_name || "PDF") : document.createElement("span"); if (!r.file_url) fileLnk.textContent = "—";
 
             const actions = document.createElement("div");
-            const saveBtn = document.createElement("button");
-            saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900";
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
-            const previewBtn = document.createElement("a");
-            previewBtn.className = "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50";
-            previewBtn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Preview';
-            previewBtn.href = r.file_url || "#"; previewBtn.target = "_blank"; previewBtn.rel = "noopener";
-            const delBtn = document.createElement("button");
-            delBtn.className = "px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50";
-            delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
+            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            const previewBtn = document.createElement("a"); previewBtn.className = "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; previewBtn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Preview'; previewBtn.href = r.file_url || "#"; previewBtn.target = "_blank"; previewBtn.rel = "noopener";
+            const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
             actions.append(saveBtn, previewBtn, delBtn);
 
-            tr.append(tdWrap(titleI), tdWrap(yearI), tdWrap(regionI), tdWrap(uploaded),
-                tdWrap(statusS), tdWrap(fileLnk), tdWrap(actions));
-            rows.appendChild(tr);
+            tr.append(tdWrap(titleI), tdWrap(yearI), tdWrap(regionI), tdWrap(uploaded), tdWrap(statusS), tdWrap(fileLnk), tdWrap(actions));
+            if (rows) rows.appendChild(tr);
 
-            saveBtn.addEventListener("click", () => {
+            function save() {
                 r.title = titleI.value.trim();
                 r.year = yearI.value.trim();
                 r.region = regionI.value.trim();
                 r.status = statusS.value;
-                persist();
-                flash("Saved.");
-                loadList();
-            });
+                persist(); flash("Saved."); loadList();
+            }
+            saveBtn.addEventListener("click", save);
+            delBtn.addEventListener("click", () => { if (!confirm("Delete this holiday list?")) return; STORE = STORE.filter(x => x.id !== r.id); persist(); loadList(); });
+        });
 
-            delBtn.addEventListener("click", () => {
-                if (!confirm("Delete this holiday list?")) return;
-                STORE = STORE.filter(x => x.id !== r.id);
-                persist();
-                loadList();
-            });
+        // CARDS (mobile)
+        cards.innerHTML = "";
+        data.forEach(r => {
+            const card = document.createElement("div");
+            card.className = "rounded-xl border border-slate-200 p-3";
+            card.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="text-sm font-semibold text-slate-800">${r.title}</div>
+          <div class="text-xs text-slate-600 mt-0.5">${r.region || '—'} • ${r.year}</div>
+          <div class="text-xs text-slate-500 mt-0.5">Uploaded: ${prettyDate(r.created_at)}</div>
+          <div class="text-xs text-slate-700 mt-1">Status: <span class="font-medium">${r.status}</span></div>
+          ${r.file_url ? `<a class="text-xs text-slate-700 underline mt-1 inline-block" href="${r.file_url}" target="_blank" rel="noopener">${r.file_name || 'PDF'}</a>` : `<span class="text-xs text-slate-500 mt-1 inline-block">No file</span>`}
+        </div>
+        <div class="flex flex-col gap-1">
+          <button class="text-xs px-2 py-1 rounded bg-slate-800 text-white hover:bg-slate-900" data-act="save">Save</button>
+          <a class="text-xs px-2 py-1 rounded border border-slate-300 hover:bg-slate-50 text-center ${r.file_url ? '' : 'pointer-events-none opacity-50'}" ${r.file_url ? `href="${r.file_url}" target="_blank" rel="noopener"` : ''}>Preview</a>
+          <button class="text-xs px-2 py-1 rounded border border-rose-300 text-rose-700 hover:bg-rose-50" data-act="del">Delete</button>
+        </div>
+      </div>`;
+            card.querySelector('[data-act="save"]').addEventListener("click", () => { r.status = r.status === "Active" ? "Active" : "Archived"; persist(); flash("Saved."); loadList(); });
+            card.querySelector('[data-act="del"]').addEventListener("click", () => { if (!confirm("Delete this holiday list?")) return; STORE = STORE.filter(x => x.id !== r.id); persist(); loadList(); });
+            cards.appendChild(card);
         });
 
         listMsg.textContent = data.length ? "" : "No holiday lists yet.";
@@ -204,20 +213,10 @@
         const region = (fd.get("region") || "").toString().trim();
         const notes = (fd.get("notes") || "").toString().trim();
         const file = fd.get("file");
-
         if (!title || !year || !file) { flash("Missing required fields.", true); return; }
-
         const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
-        STORE.unshift({
-            id, title, year, region, notes, status: "Active",
-            file_name: file.name || "uploaded.pdf",
-            file_url: "#", // dummy
-            created_at: new Date().toISOString()
-        });
-        persist();
-        uploadForm.reset();
-        flash("Uploaded ✓");
-        loadList();
+        STORE.unshift({ id, title, year, region, notes, status: "Active", file_name: file.name || "uploaded.pdf", file_url: "#", created_at: new Date().toISOString() });
+        persist(); uploadForm.reset(); flash("Uploaded ✓"); loadList();
     });
 
     /* ---------- Filters ---------- */

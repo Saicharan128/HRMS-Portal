@@ -1,25 +1,27 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-store mr-2"></i> Marketplace
             </h1>
-            <p class="text-slate-600 text-sm">Access third-party HR services, tools, and integrations.</p>
+            <p class="text-slate-600 text-xs sm:text-sm">Access third-party HR services, tools, and integrations.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <button id="manageInstallsBtn"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-plug mr-1"></i> Manage Installs
             </button>
             <button id="submitVendorBtn"
-                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-paper-plane mr-1"></i> Submit Your App
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
@@ -37,7 +39,7 @@
             </button>
         </div>
         <div class="flex items-center gap-2">
-            <div class="hidden md:block text-sm text-slate-600">
+            <div class="text-sm text-slate-600 md:block hidden">
                 <span id="resultCount">0</span> results
             </div>
             <select id="sortSelect" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
@@ -56,78 +58,81 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Filters -->
-        <aside id="filtersPanel" class="lg:col-span-1 rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-lg font-semibold text-slate-800">
-                    <i class="fa-solid fa-filter mr-2"></i> Filters
-                </h3>
-                <button id="resetFilters" class="text-sm text-slate-500 hover:text-slate-700">Reset</button>
-            </div>
-
-            <div class="space-y-5">
-                <div>
-                    <div class="text-sm font-medium text-slate-700 mb-2">Categories</div>
-                    <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" class="cat" value="payroll"> Payroll
-                        </label>
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" class="cat" value="recruiting"> Recruiting
-                        </label>
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" class="cat" value="time-tracking"> Time Tracking
-                        </label>
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" class="cat" value="benefits"> Benefits
-                        </label>
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" class="cat" value="compliance"> Compliance
-                        </label>
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" class="cat" value="analytics"> Analytics
-                        </label>
+        <aside id="filtersPanel" class="hidden lg:block lg:col-span-1">
+            <!-- mobile drawer wrapper -->
+            <div class="panel rounded-2xl border border-slate-200 bg-white p-5 h-full overflow-auto">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-filter mr-2"></i> Filters
+                    </h3>
+                    <div class="flex items-center gap-3">
+                        <button id="resetFilters" class="text-sm text-slate-500 hover:text-slate-700">Reset</button>
+                        <button id="closeFilters" class="lg:hidden text-slate-400 hover:text-slate-600"
+                            aria-label="Close filters">
+                            <i class="fa-solid fa-times text-lg"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div>
-                    <div class="text-sm font-medium text-slate-700 mb-2">Pricing</div>
-                    <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-2"><input type="checkbox" class="price" value="free">
-                            Free</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="price" value="freemium">
-                            Freemium</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="price" value="paid">
-                            Paid</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="price" value="enterprise">
-                            Enterprise</label>
+                <div class="space-y-5">
+                    <div>
+                        <div class="text-sm font-medium text-slate-700 mb-2">Categories</div>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="cat" value="payroll">
+                                Payroll</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="cat"
+                                    value="recruiting"> Recruiting</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="cat"
+                                    value="time-tracking"> Time Tracking</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="cat" value="benefits">
+                                Benefits</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="cat"
+                                    value="compliance"> Compliance</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="cat" value="analytics">
+                                Analytics</label>
+                        </div>
                     </div>
-                </div>
 
-                <div>
-                    <div class="text-sm font-medium text-slate-700 mb-2">Compliance & Trust</div>
-                    <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-2"><input type="checkbox" class="trust" value="soc2"> SOC
-                            2</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="trust" value="iso27001">
-                            ISO 27001</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="trust" value="gdpr">
-                            GDPR</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="trust" value="hipaa">
-                            HIPAA</label>
+                    <div>
+                        <div class="text-sm font-medium text-slate-700 mb-2">Pricing</div>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="price" value="free">
+                                Free</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="price"
+                                    value="freemium"> Freemium</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="price" value="paid">
+                                Paid</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="price"
+                                    value="enterprise"> Enterprise</label>
+                        </div>
                     </div>
-                </div>
 
-                <div>
-                    <div class="text-sm font-medium text-slate-700 mb-2">Works With</div>
-                    <div class="space-y-2 text-sm">
-                        <label class="flex items-center gap-2"><input type="checkbox" class="works" value="slack">
-                            Slack</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="works" value="teams">
-                            Microsoft Teams</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="works" value="gdrive">
-                            Google Drive</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" class="works" value="okta">
-                            Okta/SSO</label>
+                    <div>
+                        <div class="text-sm font-medium text-slate-700 mb-2">Compliance & Trust</div>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="trust" value="soc2">
+                                SOC 2</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="trust"
+                                    value="iso27001"> ISO 27001</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="trust" value="gdpr">
+                                GDPR</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="trust" value="hipaa">
+                                HIPAA</label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm font-medium text-slate-700 mb-2">Works With</div>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="works" value="slack">
+                                Slack</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="works" value="teams">
+                                Microsoft Teams</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="works" value="gdrive">
+                                Google Drive</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="works" value="okta">
+                                Okta/SSO</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -135,21 +140,20 @@
 
         <!-- Results -->
         <section class="lg:col-span-3">
-            <!-- Featured strip -->
-            <div class="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white p-5 mb-6">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <div class="text-xs uppercase tracking-wide text-slate-500 mb-1">Featured</div>
-                        <div class="flex items-center gap-2">
-                            <img src="https://dummyimage.com/48x48/0ea5e9/ffffff&text=PF" alt=""
-                                class="w-10 h-10 rounded-lg">
-                            <div>
-                                <div class="font-semibold text-slate-800">PayFlow</div>
-                                <div class="text-sm text-slate-600">Global payroll with automated tax filings.</div>
-                            </div>
+            <!-- Featured -->
+            <div class="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white p-4 sm:p-5 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-start gap-2">
+                        <img src="https://dummyimage.com/48x48/0ea5e9/ffffff&text=PF" alt=""
+                            class="w-10 h-10 rounded-lg">
+                        <div>
+                            <div class="text-[11px] uppercase tracking-wide text-slate-500 mb-1">Featured</div>
+                            <div class="font-semibold text-slate-800">PayFlow</div>
+                            <div class="text-sm text-slate-600">Global payroll with automated tax filings.</div>
                         </div>
                     </div>
-                    <button class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"
+                    <button
+                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm w-full sm:w-auto"
                         onclick="installApp('payflow')">
                         <i class="fa-solid fa-download mr-1"></i> Install
                     </button>
@@ -157,9 +161,7 @@
             </div>
 
             <!-- App grid -->
-            <div id="appsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                <!-- Cards injected by JS -->
-            </div>
+            <div id="appsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"></div>
 
             <!-- Pagination -->
             <div class="flex items-center justify-center gap-2 mt-6">
@@ -174,6 +176,9 @@
                     Next <i class="fa-solid fa-chevron-right ml-1"></i>
                 </button>
             </div>
+            <!-- mobile results count -->
+            <div class="mt-3 text-xs text-slate-500 md:hidden text-center"><span id="resultCountMobile">0</span> results
+            </div>
         </section>
     </div>
 </div>
@@ -183,11 +188,11 @@
     <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl">
-                <div class="p-6 border-b border-slate-200 flex items-start justify-between">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-start justify-between">
                     <div class="flex items-center gap-3">
                         <img id="modalLogo" src="" class="w-10 h-10 rounded-lg" alt="">
                         <div>
-                            <h3 id="modalTitle" class="text-lg font-semibold text-slate-800"></h3>
+                            <h3 id="modalTitle" class="text-base sm:text-lg font-semibold text-slate-800"></h3>
                             <div id="modalSubtitle" class="text-sm text-slate-600"></div>
                         </div>
                     </div>
@@ -195,7 +200,7 @@
                         <i class="fa-solid fa-times text-xl"></i>
                     </button>
                 </div>
-                <div class="p-6 space-y-4">
+                <div class="p-4 sm:p-6 space-y-4">
                     <div id="modalBadges" class="flex flex-wrap gap-2"></div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="rounded-lg bg-slate-50 p-3">
@@ -237,60 +242,12 @@
 <script>
     /* ---------- Data (mock) ---------- */
     const ALL_APPS = [
-        {
-            id: 'payflow', name: 'PayFlow', category: 'payroll',
-            desc: 'Global payroll, automated filings, localized compliance.',
-            price: 'Paid • from $4/emp/mo', pricingKey: 'paid',
-            rating: 4.8, installs: 12840,
-            badges: ['SOC 2', 'GDPR'],
-            works: ['slack', 'okta'],
-            logo: 'https://dummyimage.com/64x64/0ea5e9/ffffff&text=PF'
-        },
-        {
-            id: 'hirely', name: 'Hirely ATS', category: 'recruiting',
-            desc: 'Modern applicant tracking with AI screening.',
-            price: 'Freemium', pricingKey: 'freemium',
-            rating: 4.6, installs: 8930,
-            badges: ['ISO 27001'],
-            works: ['slack', 'gdrive'],
-            logo: 'https://dummyimage.com/64x64/8b5cf6/ffffff&text=HA'
-        },
-        {
-            id: 'chronos', name: 'Chronos Time', category: 'time-tracking',
-            desc: 'Time, attendance, geofencing, and overtime rules.',
-            price: 'Paid • from $2/user/mo', pricingKey: 'paid',
-            rating: 4.5, installs: 15210,
-            badges: ['SOC 2'],
-            works: ['teams'],
-            logo: 'https://dummyimage.com/64x64/10b981/ffffff&text=CT'
-        },
-        {
-            id: 'beneplus', name: 'BenePlus', category: 'benefits',
-            desc: 'Benefits enrollment, carrier sync, self-service.',
-            price: 'Enterprise', pricingKey: 'enterprise',
-            rating: 4.4, installs: 3740,
-            badges: ['HIPAA', 'GDPR'],
-            works: ['okta'],
-            logo: 'https://dummyimage.com/64x64/f59e0b/ffffff&text=BP'
-        },
-        {
-            id: 'guardrail', name: 'GuardRail', category: 'compliance',
-            desc: 'Policy, audits, and automated risk alerts.',
-            price: 'Paid', pricingKey: 'paid',
-            rating: 4.7, installs: 6420,
-            badges: ['SOC 2', 'ISO 27001'],
-            works: ['gdrive', 'slack'],
-            logo: 'https://dummyimage.com/64x64/ef4444/ffffff&text=GR'
-        },
-        {
-            id: 'insightHR', name: 'InsightHR', category: 'analytics',
-            desc: 'People analytics, retention risk, and headcount planning.',
-            price: 'Free', pricingKey: 'free',
-            rating: 4.3, installs: 2210,
-            badges: [],
-            works: ['gdrive', 'teams'],
-            logo: 'https://dummyimage.com/64x64/06b6d4/ffffff&text=IH'
-        }
+        { id: 'payflow', name: 'PayFlow', category: 'payroll', desc: 'Global payroll, automated filings, localized compliance.', price: 'Paid • from $4/emp/mo', pricingKey: 'paid', rating: 4.8, installs: 12840, badges: ['SOC 2', 'GDPR'], works: ['slack', 'okta'], logo: 'https://dummyimage.com/64x64/0ea5e9/ffffff&text=PF' },
+        { id: 'hirely', name: 'Hirely ATS', category: 'recruiting', desc: 'Modern applicant tracking with AI screening.', price: 'Freemium', pricingKey: 'freemium', rating: 4.6, installs: 8930, badges: ['ISO 27001'], works: ['slack', 'gdrive'], logo: 'https://dummyimage.com/64x64/8b5cf6/ffffff&text=HA' },
+        { id: 'chronos', name: 'Chronos Time', category: 'time-tracking', desc: 'Time, attendance, geofencing, and overtime rules.', price: 'Paid • from $2/user/mo', pricingKey: 'paid', rating: 4.5, installs: 15210, badges: ['SOC 2'], works: ['teams'], logo: 'https://dummyimage.com/64x64/10b981/ffffff&text=CT' },
+        { id: 'beneplus', name: 'BenePlus', category: 'benefits', desc: 'Benefits enrollment, carrier sync, self-service.', price: 'Enterprise', pricingKey: 'enterprise', rating: 4.4, installs: 3740, badges: ['HIPAA', 'GDPR'], works: ['okta'], logo: 'https://dummyimage.com/64x64/f59e0b/ffffff&text=BP' },
+        { id: 'guardrail', name: 'GuardRail', category: 'compliance', desc: 'Policy, audits, and automated risk alerts.', price: 'Paid', pricingKey: 'paid', rating: 4.7, installs: 6420, badges: ['SOC 2', 'ISO 27001'], works: ['gdrive', 'slack'], logo: 'https://dummyimage.com/64x64/ef4444/ffffff&text=GR' },
+        { id: 'insightHR', name: 'InsightHR', category: 'analytics', desc: 'People analytics, retention risk, and headcount planning.', price: 'Free', pricingKey: 'free', rating: 4.3, installs: 2210, badges: [], works: ['gdrive', 'teams'], logo: 'https://dummyimage.com/64x64/06b6d4/ffffff&text=IH' }
     ];
 
     /* ---------- State ---------- */
@@ -302,6 +259,7 @@
     /* ---------- Elements ---------- */
     const appsGrid = document.getElementById('appsGrid');
     const resultCount = document.getElementById('resultCount');
+    const resultCountMobile = document.getElementById('resultCountMobile');
     const pageNum = document.getElementById('pageNum');
     const pageTotal = document.getElementById('pageTotal');
 
@@ -318,7 +276,11 @@
         // Search
         const searchInput = document.getElementById('searchInput');
         const clearSearch = document.getElementById('clearSearch');
-        searchInput.addEventListener('input', debounce(() => { filters.q = searchInput.value.trim().toLowerCase(); clearSearch.classList.toggle('hidden', !filters.q); render(); }, 300));
+        searchInput.addEventListener('input', debounce(() => {
+            filters.q = searchInput.value.trim().toLowerCase();
+            clearSearch.classList.toggle('hidden', !filters.q);
+            render();
+        }, 300));
         clearSearch.addEventListener('click', () => { searchInput.value = ''; filters.q = ''; clearSearch.classList.add('hidden'); render(); });
 
         // Pagination
@@ -329,6 +291,13 @@
         document.getElementById('closeAppModal').addEventListener('click', closeModal);
         window.addEventListener('click', (e) => { if (e.target === document.getElementById('appModal')) closeModal(); });
 
+        // Mobile filters drawer
+        document.getElementById('openFilters')?.addEventListener('click', () => openFilters());
+        document.getElementById('closeFilters')?.addEventListener('click', () => closeFilters());
+        document.getElementById('filtersPanel')?.addEventListener('click', (e) => {
+            if (e.target.id === 'filtersPanel') closeFilters();
+        });
+
         render();
     });
 
@@ -336,6 +305,8 @@
     function render() {
         const filtered = applyFilters(ALL_APPS);
         resultCount.textContent = filtered.length;
+        if (resultCountMobile) resultCountMobile.textContent = filtered.length;
+
         const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
         activePage = Math.min(activePage, totalPages);
         pageNum.textContent = activePage;
@@ -345,7 +316,6 @@
 
         const start = (activePage - 1) * perPage;
         const pageItems = filtered.slice(start, start + perPage);
-
         appsGrid.innerHTML = pageItems.map(appCardHTML).join('');
     }
 
@@ -355,50 +325,40 @@
         const trustTags = a.badges.map(b => `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs">${b}</span>`).join(' ');
         const worksTags = a.works.map(w => `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs">${labelWorks(w)}</span>`).join(' ');
         return `
-    <div class="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col">
-      <div class="flex items-start gap-3">
-        <img src="${a.logo}" alt="${a.name}" class="w-12 h-12 rounded-lg">
-        <div class="flex-1">
-          <div class="flex items-center justify-between">
-            <h4 class="font-semibold text-slate-800">${a.name}</h4>
-            <div class="text-sm text-amber-600"><i class="fa-solid fa-star mr-1"></i>${a.rating.toFixed(1)}</div>
-          </div>
-          <div class="text-sm text-slate-600">${a.desc}</div>
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col">
+    <div class="flex items-start gap-3">
+      <img src="${a.logo}" alt="${a.name}" class="w-12 h-12 rounded-lg">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-2">
+          <h4 class="font-semibold text-slate-800 truncate">${a.name}</h4>
+          <div class="text-sm text-amber-600 whitespace-nowrap"><i class="fa-solid fa-star mr-1"></i>${a.rating.toFixed(1)}</div>
         </div>
-      </div>
-
-      <div class="flex flex-wrap gap-2 mt-3">${trustTags} ${worksTags}</div>
-
-      <div class="mt-4 flex items-center justify-between">
-        <div class="text-sm text-slate-600"><i class="fa-solid fa-tags mr-1"></i>${a.price}</div>
-        <div class="flex items-center gap-2">
-          <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="openModal('${a.id}')">
-            <i class="fa-solid fa-circle-info mr-1"></i> Details
-          </button>
-          <button class="px-3 py-2 rounded-lg ${isInstalled ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white text-sm"
-                  onclick="installApp('${a.id}')">
-            <i class="fa-solid ${isInstalled ? 'fa-check' : 'fa-download'} mr-1"></i> ${isInstalled ? 'Installed' : 'Install'}
-          </button>
-        </div>
+        <div class="text-sm text-slate-600">${a.desc}</div>
       </div>
     </div>
-  `;
+    <div class="flex flex-wrap gap-2 mt-3">${trustTags} ${worksTags}</div>
+    <div class="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:justify-between">
+      <div class="text-sm text-slate-600"><i class="fa-solid fa-tags mr-1"></i>${a.price}</div>
+      <div class="flex items-center gap-2">
+        <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="openModal('${a.id}')">
+          <i class="fa-solid fa-circle-info mr-1"></i> Details
+        </button>
+        <button class="px-3 py-2 rounded-lg ${isInstalled ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white text-sm"
+                onclick="installApp('${a.id}')">
+          <i class="fa-solid ${isInstalled ? 'fa-check' : 'fa-download'} mr-1"></i> ${isInstalled ? 'Installed' : 'Install'}
+        </button>
+      </div>
+    </div>
+  </div>`;
     }
-
-    function labelWorks(key) {
-        return ({ slack: 'Slack', teams: 'Microsoft Teams', gdrive: 'Google Drive', okta: 'Okta/SSO' })[key] || key;
-    }
-
+    function labelWorks(key) { return ({ slack: 'Slack', teams: 'Microsoft Teams', gdrive: 'Google Drive', okta: 'Okta/SSO' })[key] || key; }
     function toggleSet(set, val, checked) { checked ? set.add(val) : set.delete(val); activePage = 1; render(); }
-
     function applyFilters(apps) {
         let out = apps.slice();
-
         if (filters.categories.size) out = out.filter(a => filters.categories.has(a.category));
         if (filters.pricing.size) out = out.filter(a => filters.pricing.has(a.pricingKey));
         if (filters.trust.size) out = out.filter(a => a.badges.some(b => Array.from(filters.trust).includes(b.toLowerCase())));
         if (filters.works.size) out = out.filter(a => a.works.some(w => filters.works.has(w)));
-
         if (filters.q) {
             const q = filters.q;
             out = out.filter(a =>
@@ -408,34 +368,28 @@
                 a.price.toLowerCase().includes(q)
             );
         }
-
         switch (filters.sort) {
             case 'rating': out.sort((a, b) => b.rating - a.rating); break;
             case 'installs': out.sort((a, b) => b.installs - a.installs); break;
             case 'new': out.sort((a, b) => a.id.localeCompare(b.id)); break; // placeholder
             case 'price': out.sort((a, b) => priceKey(a.pricingKey) - priceKey(b.pricingKey)); break;
-            default: /* featured */ out.sort((a, b) => b.installs * 0.5 + b.rating * 100 - (a.installs * 0.5 + a.rating * 100));
+            default: out.sort((a, b) => b.installs * 0.5 + b.rating * 100 - (a.installs * 0.5 + a.rating * 100));
         }
-
         return out;
     }
-
     function priceKey(k) { return ({ free: 0, freemium: 1, paid: 2, enterprise: 3 })[k] ?? 9; }
     function getTotalPages() { return Math.max(1, Math.ceil(applyFilters(ALL_APPS).length / perPage)); }
-
     function resetFilters() {
         filters = { categories: new Set(), pricing: new Set(), trust: new Set(), works: new Set(), sort: 'featured', q: '' };
         document.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
         document.getElementById('sortSelect').value = 'featured';
-        document.getElementById('searchInput').value = '';
-        document.getElementById('clearSearch').classList.add('hidden');
+        const si = document.getElementById('searchInput'); si.value = ''; document.getElementById('clearSearch').classList.add('hidden');
         activePage = 1; render();
     }
 
     /* ---------- Modal ---------- */
     function openModal(id) {
-        const a = ALL_APPS.find(x => x.id === id);
-        if (!a) return;
+        const a = ALL_APPS.find(x => x.id === id); if (!a) return;
         document.getElementById('modalLogo').src = a.logo;
         document.getElementById('modalTitle').textContent = a.name;
         document.getElementById('modalSubtitle').textContent = capitalize(a.category);
@@ -450,42 +404,69 @@
         document.getElementById('appModal').classList.remove('hidden');
     }
     function closeModal() { document.getElementById('appModal').classList.add('hidden'); }
-
-    /* ---------- Actions ---------- */
     function installApp(id, fromModal = false) {
-        if (installed.has(id)) {
-            toast('Already installed');
-            return;
-        }
-        installed.add(id);
-        toast('App installed');
-        render();
-        if (fromModal) closeModal();
+        if (installed.has(id)) { toast('Already installed'); return; }
+        installed.add(id); toast('App installed'); render(); if (fromModal) closeModal();
     }
-    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 
     /* ---------- Utilities ---------- */
     function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
     function toast(msg) {
         const n = document.createElement('div');
         n.className = 'fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg text-sm';
-        n.textContent = msg;
-        document.body.appendChild(n);
-        setTimeout(() => { n.remove(); }, 1800);
+        n.textContent = msg; document.body.appendChild(n); setTimeout(() => n.remove(), 1800);
     }
 
-    // Mobile filters toggle
-    document.getElementById('openFilters')?.addEventListener('click', () => {
+    /* Mobile filters drawer */
+    function openFilters() {
         const p = document.getElementById('filtersPanel');
-        p.classList.toggle('hidden');
-    });
+        p.classList.add('mobile-open'); p.classList.remove('hidden');
+        requestAnimationFrame(() => p.classList.add('show'));
+    }
+    function closeFilters() {
+        const p = document.getElementById('filtersPanel');
+        p.classList.remove('show');
+        setTimeout(() => { p.classList.remove('mobile-open'); if (window.innerWidth < 1024) p.classList.add('hidden'); }, 150);
+    }
 </script>
 
 <style>
-    /* Optional: tighter mobile spacing */
-    @media (max-width: 640px) {
-        #appsGrid .rounded-2xl {
-            padding: 1rem;
+    /* Mobile drawer for filters */
+    @media (max-width: 1024px) {
+        #filtersPanel.mobile-open {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: block;
+            background: rgba(0, 0, 0, 0.45);
+            transition: opacity .15s ease;
+            opacity: 0;
+        }
+
+        #filtersPanel.mobile-open.show {
+            opacity: 1;
+        }
+
+        #filtersPanel .panel {
+            width: 100%;
+        }
+
+        #filtersPanel.mobile-open .panel {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 86%;
+            max-width: 360px;
+            border-radius: 0;
+            transform: translateX(-12%);
+            transition: transform .18s ease;
+            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.25);
+        }
+
+        #filtersPanel.mobile-open.show .panel {
+            transform: translateX(0);
         }
     }
 </style>

@@ -9,10 +9,21 @@
             </h1>
             <p class="text-slate-600 text-sm">Build workflows for approvals.</p>
         </div>
-        <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-            <i class="fa-solid fa-arrow-left mr-1"></i> Back
-        </a>
+        <div class="flex items-center gap-2">
+            <button id="exportJsonBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export JSON
+            </button>
+            <label
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-import mr-1"></i> Import JSON
+                <input id="importJsonInput" type="file" accept="application/json" class="hidden">
+            </label>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
     </div>
 
     <!-- Create Workflow (Dummy) -->
@@ -88,7 +99,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+    <div class="mb-2 grid grid-cols-1 md:grid-cols-6 gap-2">
         <input id="q" placeholder="Search name / entity…"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <select id="fEntity" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
@@ -112,10 +123,16 @@
         </select>
         <button id="clearFilters"
             class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
+
+        <!-- Test Run -->
+        <button id="openTestBtn"
+            class="rounded-xl border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 text-sm text-indigo-800">
+            <i class="fa-solid fa-vial mr-1"></i> Test run
+        </button>
     </div>
 
     <!-- KPIs -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Workflows</div>
             <div id="kpiCount" class="text-xl font-semibold text-slate-800">0</div>
@@ -134,11 +151,33 @@
         </div>
     </div>
 
+    <!-- Bulk actions -->
+    <div class="flex items-center gap-2 mb-2">
+        <button id="bulkActivate"
+            class="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm hover:bg-emerald-700 disabled:opacity-50"
+            disabled>
+            <i class="fa-solid fa-play mr-1"></i> Activate Selected
+        </button>
+        <button id="bulkPause"
+            class="px-3 py-1.5 rounded-md bg-amber-600 text-white text-sm hover:bg-amber-700 disabled:opacity-50"
+            disabled>
+            <i class="fa-solid fa-pause mr-1"></i> Pause Selected
+        </button>
+        <button id="bulkDelete"
+            class="px-3 py-1.5 rounded-md bg-rose-600 text-white text-sm hover:bg-rose-700 disabled:opacity-50"
+            disabled>
+            <i class="fa-solid fa-trash mr-1"></i> Delete Selected
+        </button>
+        <span class="text-xs text-slate-500">Tick rows in the table to enable bulk actions.</span>
+    </div>
+
     <!-- List -->
     <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table class="min-w-full text-sm text-left text-slate-700">
             <thead class="bg-slate-50 text-slate-600">
                 <tr>
+                    <th class="px-4 py-2 w-8"><input type="checkbox" id="selectAllRows"
+                            class="rounded border-slate-300"></th>
                     <th class="px-4 py-2">Name</th>
                     <th class="px-4 py-2">Entity</th>
                     <th class="px-4 py-2">Trigger</th>
@@ -152,6 +191,34 @@
         </table>
     </div>
     <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
+</div>
+
+<!-- Test run modal -->
+<div id="testModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-vial mr-2"></i> Test run</h3>
+                    <button id="closeTestBtn" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-3">
+                    <p class="text-sm text-slate-600">Paste a sample payload (JSON). We’ll show workflows (filtered
+                        list) whose conditions match.</p>
+                    <textarea id="testJson" rows="8" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                        placeholder='{"amount":7000,"currency":"INR","weekly_hours":42,"department":"Engineering"}'></textarea>
+                    <div class="flex items-center gap-2">
+                        <button id="runTestBtn"
+                            class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm"><i
+                                class="fa-solid fa-play mr-1"></i> Run</button>
+                        <span id="testMsg" class="text-sm text-slate-600"></span>
+                    </div>
+                    <div id="testResults" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -200,12 +267,29 @@
     const kpiPaused = document.getElementById("kpiPaused");
     const kpiAvgSteps = document.getElementById("kpiAvgSteps");
 
-    /* ---------- Helpers ---------- */
+    const exportJsonBtn = document.getElementById("exportJsonBtn");
+    const importJsonInput = document.getElementById("importJsonInput");
+
+    const bulkActivate = document.getElementById("bulkActivate");
+    const bulkPause = document.getElementById("bulkPause");
+    const bulkDelete = document.getElementById("bulkDelete");
+    const selectAllRows = document.getElementById("selectAllRows");
+
+    const openTestBtn = document.getElementById("openTestBtn");
+    const testModal = document.getElementById("testModal");
+    const closeTestBtn = document.getElementById("closeTestBtn");
+    const testJson = document.getElementById("testJson");
+    const runTestBtn = document.getElementById("runTestBtn");
+    const testMsg = document.getElementById("testMsg");
+    const testResults = document.getElementById("testResults");
+
+    /* ---------- Utils ---------- */
     function el(tag, cls = "", html = "") { const x = document.createElement(tag); if (cls) x.className = cls; if (html) x.innerHTML = html; return x; }
     function input(v, cls = "w-full") { const i = el("input", `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`); i.value = v ?? ""; return i; }
     function select(opts, cur, cls = "w-full") { const s = el("select", `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`); opts.forEach(o => { const op = el("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
-    function smallBtn(icon, title) { const b = el("button", "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"); b.innerHTML = icon + " " + title; return b; }
-    function flash(elm, msg, ok = true) { elm.textContent = msg; elm.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { elm.textContent = ""; elm.className = "text-sm text-slate-600"; }, 1500); }
+    function smallBtn(icon, title) { const b = el("button", "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"); b.innerHTML = icon + (title ? " " + title : ""); return b; }
+    function flash(node, msg, ok = true) { node.textContent = msg; node.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { node.textContent = ""; node.className = "text-sm text-slate-600"; }, 1500); }
+    function td(node) { const td = document.createElement("td"); td.className = "px-4 py-2 align-top"; td.appendChild(node); return td; }
 
     /* ---------- Condition Builder ---------- */
     function addCondRow(c = { field: "amount", op: ">", value: "1000" }) {
@@ -214,7 +298,7 @@
         const o = select([">", "<", "=", "≥", "≤", "≠", "contains", "not contains"], c.op, "col-span-2");
         const v = input(c.value, "col-span-5");
         const rm = smallBtn('<i class="fa-solid fa-trash-can"></i>', ""); rm.classList.add("col-span-1", "text-rose-700");
-        rm.addEventListener("click", () => { wrap.remove(); });
+        rm.addEventListener("click", () => wrap.remove());
         wrap.append(f, o, v, rm);
         condRows.appendChild(wrap);
     }
@@ -227,67 +311,131 @@
         const t = select(["Role", "User", "Dynamic (manager)"], s.approver_type, "md:col-span-3");
         const a = input(s.approver, "md:col-span-3"); a.placeholder = "e.g., Finance";
         const sla = input(s.sla_h, "md:col-span-2"); sla.type = "number"; sla.min = 1; sla.placeholder = "SLA (h)";
-        const aa = el("label", "md:col-span-2 flex items-center gap-2 text-sm text-slate-700"); aa.innerHTML = '<input type="checkbox" class="h-4 w-4"> Auto-approve on SLA'; aa.querySelector("input").checked = !!s.auto_approve;
+        const aa = el("label", "md:col-span-2 flex items-center gap-2 text-sm text-slate-700");
+        aa.innerHTML = '<input type="checkbox" class="h-4 w-4"> Auto-approve on SLA';
+        aa.querySelector("input").checked = !!s.auto_approve;
         const esc = input(s.escalate_to, "md:col-span-2"); esc.placeholder = "Escalate to";
-        const up = smallBtn('<i class="fa-solid fa-arrow-up"></i>', ""); const down = smallBtn('<i class="fa-solid fa-arrow-down"></i>', ""); const rm = smallBtn('<i class="fa-solid fa-xmark"></i>', "");
+        const up = smallBtn('<i class="fa-solid fa-arrow-up"></i>', "");
+        const down = smallBtn('<i class="fa-solid fa-arrow-down"></i>', "");
+        const rm = smallBtn('<i class="fa-solid fa-xmark"></i>', "");
         const controls = el("div", "md:col-span-2 flex items-center gap-2"); controls.append(up, down, rm);
 
         g.append(t, a, sla, aa, esc, controls); row.appendChild(g); stepRows.appendChild(row);
-
         up.addEventListener("click", () => { const prev = row.previousElementSibling; if (prev) stepRows.insertBefore(row, prev); });
         down.addEventListener("click", () => { const next = row.nextElementSibling; if (next) stepRows.insertBefore(next, row); });
         rm.addEventListener("click", () => row.remove());
     }
     addStep.addEventListener("click", () => addStepRow());
 
-    /* ---------- Form Submit ---------- */
-    wfForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const fd = new FormData(wfForm);
-        const name = (fd.get("name") || "").toString().trim();
-        const entity = (fd.get("entity") || "").toString();
-        const trigger = (fd.get("trigger") || "").toString();
-        const desc = (fd.get("desc") || "").toString().trim();
-        if (!name) { flash(wfMsg, "Name is required", true); return; }
-
-        // conditions
-        const conds = [];
-        condRows.querySelectorAll(".grid").forEach(row => {
-            const sel = row.querySelectorAll("select"); const inp = row.querySelector("input[type=text]");
-            const c = { field: sel[0]?.value, op: sel[1]?.value, value: inp?.value || "" };
-            if (c.field && c.op && c.value !== "") conds.push(c);
-        });
-
-        // steps
-        const steps = [];
-        stepRows.querySelectorAll(".rounded-lg").forEach(row => {
-            const sels = row.querySelectorAll("select");
-            const inputs = row.querySelectorAll("input");
-            const [t, a, sla, auto, esc] = [sels[0], inputs[0], inputs[1], inputs[2], inputs[3]];
-            steps.push({
-                approver_type: t?.value || "Role",
-                approver: a?.value || "",
-                sla_h: Number(sla?.value || 24),
-                auto_approve: !!auto?.checked,
-                escalate_to: esc?.value || ""
-            });
-        });
-
-        const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
-        STORE.unshift({ id, name, entity, trigger, desc, conditions: conds, steps, status: "Active", updated_at: new Date().toISOString() });
-        persist();
-        wfForm.reset(); condRows.innerHTML = ""; stepRows.innerHTML = "";
-        flash(wfMsg, "Workflow saved ✓"); load();
-    });
-
     /* ---------- Filters ---------- */
-    [q, fEntity, fStatus, fTrigger].forEach(el => el.addEventListener("input", () => load()));
+    [q, fEntity, fStatus, fTrigger].forEach(elm => elm.addEventListener("input", load));
     clearFilters.addEventListener("click", () => { q.value = ""; fEntity.value = ""; fStatus.value = ""; fTrigger.value = ""; load(); });
 
-    /* ---------- Render ---------- */
+    /* ---------- Selection helpers (bulk) ---------- */
+    function selectedRowIds() {
+        return Array.from(document.querySelectorAll('.row-select:checked')).map(cb => Number(cb.dataset.id));
+    }
+    function refreshBulkButtons() {
+        const cnt = selectedRowIds().length;
+        [bulkActivate, bulkPause, bulkDelete].forEach(b => b.disabled = cnt === 0);
+        // master checkbox state for current filtered view
+        const all = document.querySelectorAll('.row-select');
+        const checked = document.querySelectorAll('.row-select:checked');
+        selectAllRows.indeterminate = checked.length > 0 && checked.length < all.length;
+        selectAllRows.checked = all.length > 0 && checked.length === all.length;
+    }
+    selectAllRows.addEventListener('change', () => {
+        document.querySelectorAll('.row-select').forEach(cb => cb.checked = selectAllRows.checked);
+        refreshBulkButtons();
+    });
+    bulkActivate.addEventListener('click', () => {
+        const ids = selectedRowIds(); if (!ids.length) return;
+        STORE = STORE.map(w => ids.includes(w.id) ? { ...w, status: "Active", updated_at: new Date().toISOString() } : w); persist(); load();
+        toast("Selected workflows activated.", "ok");
+    });
+    bulkPause.addEventListener('click', () => {
+        const ids = selectedRowIds(); if (!ids.length) return;
+        STORE = STORE.map(w => ids.includes(w.id) ? { ...w, status: "Paused", updated_at: new Date().toISOString() } : w); persist(); load();
+        toast("Selected workflows paused.", "ok");
+    });
+    bulkDelete.addEventListener('click', () => {
+        const ids = selectedRowIds(); if (!ids.length) return;
+        if (!confirm("Delete selected workflows?")) return;
+        STORE = STORE.filter(w => !ids.includes(w.id)); persist(); load();
+        toast("Selected workflows deleted.", "ok");
+    });
+
+    /* ---------- Export / Import ---------- */
+    exportJsonBtn.addEventListener('click', () => {
+        const data = filtered();
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: "application/json;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = url; a.download = "workflows.json";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    });
+    importJsonInput.addEventListener('change', async (e) => {
+        const f = e.target.files?.[0]; if (!f) return;
+        try {
+            const text = await f.text();
+            const arr = JSON.parse(text);
+            if (!Array.isArray(arr)) throw new Error("Invalid JSON (expected array).");
+            // very light shape check
+            arr.forEach(x => { if (!x.name || !x.entity) throw new Error("Missing required fields in one of the items."); });
+            // assign new ids to avoid clashes
+            const maxId = Math.max(0, ...STORE.map(x => x.id));
+            let i = 1;
+            const normalized = arr.map(x => ({ ...x, id: maxId + (i++), updated_at: new Date().toISOString() }));
+            STORE = [...normalized, ...STORE]; persist(); load();
+            toast("Imported workflows ✓", "ok");
+        } catch (err) { console.error(err); toast("Failed to import: " + err.message, "err"); }
+        importJsonInput.value = "";
+    });
+
+    /* ---------- Test run ---------- */
+    openTestBtn.addEventListener('click', () => { testModal.classList.remove("hidden"); testMsg.textContent = ""; testResults.innerHTML = ""; });
+    closeTestBtn.addEventListener('click', () => testModal.classList.add("hidden"));
+    window.addEventListener('click', (evt) => { if (evt.target === testModal) testModal.classList.add("hidden"); });
+
+    function matchCondition(payload, c) {
+        const lhs = payload?.[c.field];
+        const rhsRaw = c.value;
+        const numL = Number(lhs), numR = Number(rhsRaw);
+        const isNumCompare = !isNaN(numL) && !isNaN(numR);
+        switch (c.op) {
+            case ">": return isNumCompare ? numL > numR : String(lhs) > String(rhsRaw);
+            case "<": return isNumCompare ? numL < numR : String(lhs) < String(rhsRaw);
+            case "≥": return isNumCompare ? numL >= numR : String(lhs) >= String(rhsRaw);
+            case "≤": return isNumCompare ? numL <= numR : String(lhs) <= String(rhsRaw);
+            case "=": return String(lhs) === String(rhsRaw);
+            case "≠": return String(lhs) !== String(rhsRaw);
+            case "contains": return String(lhs ?? "").toLowerCase().includes(String(rhsRaw).toLowerCase());
+            case "not contains": return !String(lhs ?? "").toLowerCase().includes(String(rhsRaw).toLowerCase());
+            default: return false;
+        }
+    }
+    runTestBtn.addEventListener('click', () => {
+        testMsg.textContent = "Running…";
+        let payload;
+        try {
+            payload = JSON.parse(testJson.value || "{}");
+        } catch (e) { testMsg.textContent = "Invalid JSON"; testMsg.className = "text-sm text-rose-700"; return; }
+        const hits = filtered().filter(w => {
+            const conds = w.conditions || [];
+            if (conds.length === 0) return true; // no conditions = always match
+            return conds.every(c => matchCondition(payload, c));
+        });
+        testResults.innerHTML = hits.length
+            ? hits.map(w => `<div class="rounded-lg border border-emerald-200 bg-emerald-50 p-3"><div class="font-medium text-emerald-900">${w.name}</div><div class="text-sm text-emerald-800">${w.entity} • ${w.trigger} • ${w.status}</div></div>`).join("")
+            : '<div class="rounded-lg border border-slate-200 p-3 text-slate-600">No matching workflows.</div>';
+        testMsg.textContent = `Found ${hits.length} matching workflow(s).`;
+        testMsg.className = "text-sm text-slate-700";
+    });
+
+    /* ---------- Render + KPIs ---------- */
     function filtered() {
         const term = (q.value || "").toLowerCase().trim();
-        const en = fEntity.value; const st = fStatus.value; const tr = fTrigger.value;
+        const en = fEntity.value, st = fStatus.value, tr = fTrigger.value;
         return STORE.filter(r => {
             if (term && !(`${r.name} ${r.entity}`.toLowerCase().includes(term))) return false;
             if (en && r.entity !== en) return false;
@@ -303,36 +451,47 @@
         const avg = data.length ? (data.reduce((a, w) => a + (w.steps?.length || 0), 0) / data.length) : 0;
         kpiAvgSteps.textContent = avg.toFixed(1);
     }
+    function toast(msg, kind = "ok") {
+        listMsg.textContent = msg;
+        listMsg.className = "mt-3 text-sm " + (kind === "ok" ? "text-emerald-700" : "text-rose-700");
+        setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1400);
+    }
+
     function load() {
         const data = filtered();
         rows.innerHTML = "";
         updateKPIs(data);
 
         data.forEach(r => {
-            const tr = el("tr");
+            const tr = document.createElement("tr");
+
+            // row select
+            const selTd = document.createElement("td"); selTd.className = "px-4 py-2 align-top";
+            const cb = document.createElement("input"); cb.type = "checkbox"; cb.className = "row-select rounded border-slate-300"; cb.dataset.id = r.id;
+            cb.addEventListener('change', refreshBulkButtons);
+            selTd.appendChild(cb);
 
             const nameI = input(r.name, "w-56");
             const entS = select(["Expense", "Timesheet", "Leave", "Purchase", "Attendance"], r.entity, "w-36");
             const trigS = select(["On submit", "On edit", "Threshold breach"], r.trigger, "w-40");
-            const stepsS = el("span"); stepsS.textContent = (r.steps || []).length + " step(s)";
+            const stepsS = el("span", "", (r.steps || []).length + " step(s)");
             const statusS = select(["Active", "Paused"], r.status, "w-28");
-            const upd = el("span"); upd.textContent = new Date(r.updated_at).toLocaleString();
+            const upd = el("span", "", new Date(r.updated_at).toLocaleString());
 
-            const actions = el("div");
+            const actions = el("div", "flex flex-wrap gap-2");
             const detailsBtn = smallBtn('<i class="fa-solid fa-caret-down"></i>', "Details");
             const toggleBtn = smallBtn('<i class="fa-solid fa-power-off"></i>', r.status === "Active" ? "Pause" : "Activate");
+            const dupBtn = smallBtn('<i class="fa-solid fa-copy"></i>', "Duplicate");
             const saveBtn = smallBtn('<i class="fa-solid fa-floppy-disk"></i>', "Save");
             const delBtn = smallBtn('<i class="fa-solid fa-trash-can"></i>', "Delete");
-            actions.append(detailsBtn, toggleBtn, saveBtn, delBtn);
+            actions.append(detailsBtn, toggleBtn, dupBtn, saveBtn, delBtn);
 
-            tr.append(
-                td(nameI), td(entS), td(trigS), td(stepsS), td(statusS), td(upd), td(actions)
-            );
+            tr.append(selTd, td(nameI), td(entS), td(trigS), td(stepsS), td(statusS), td(upd), td(actions));
             rows.appendChild(tr);
 
             // details row
-            const tr2 = el("tr");
-            const td2 = el("td", "px-4 pb-4"); td2.colSpan = 7;
+            const tr2 = document.createElement("tr");
+            const td2 = document.createElement("td"); td2.colSpan = 8; td2.className = "px-4 pb-4";
             const det = el("details", "rounded-xl border border-slate-200 bg-white p-4");
             const sum = el("summary", "cursor-pointer text-slate-800 font-medium", "Workflow design");
             const inner = el("div", "grid grid-cols-1 md:grid-cols-2 gap-4 mt-3");
@@ -353,8 +512,7 @@
                 stepBox.appendChild(card);
             });
             inner.append(condBox, stepBox);
-            det.append(sum, inner);
-            td2.appendChild(det); tr2.appendChild(td2); rows.appendChild(tr2);
+            det.append(sum, inner); td2.appendChild(det); tr2.appendChild(td2); rows.appendChild(tr2);
 
             detailsBtn.addEventListener("click", () => { det.open = !det.open; });
 
@@ -364,23 +522,68 @@
                 r.trigger = trigS.value;
                 r.status = statusS.value;
                 r.updated_at = new Date().toISOString();
-                persist(); load();
-                listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
-                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+                persist(); load(); toast("Saved.", "ok");
             }
             saveBtn.addEventListener("click", save);
 
             toggleBtn.addEventListener("click", () => { statusS.value = (r.status === "Active") ? "Paused" : "Active"; save(); });
 
+            dupBtn.addEventListener("click", () => {
+                const newId = Math.max(0, ...STORE.map(x => x.id)) + 1;
+                const copy = JSON.parse(JSON.stringify(r));
+                copy.id = newId;
+                copy.name = r.name + " (Copy)";
+                copy.updated_at = new Date().toISOString();
+                STORE.unshift(copy); persist(); load(); toast("Duplicated ✓", "ok");
+            });
+
             delBtn.addEventListener("click", () => {
                 if (!confirm("Delete this workflow?")) return;
-                STORE = STORE.filter(x => x.id !== r.id); persist(); load();
+                STORE = STORE.filter(x => x.id !== r.id); persist(); load(); toast("Deleted.", "ok");
             });
         });
 
         listMsg.textContent = data.length ? "" : "No workflows.";
+        refreshBulkButtons();
     }
-    function td(elm) { const td = document.createElement("td"); td.className = "px-4 py-2"; td.appendChild(elm); return td; }
+
+    /* ---------- Create form submit ---------- */
+    wfForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fd = new FormData(wfForm);
+        const name = (fd.get("name") || "").toString().trim();
+        const entity = (fd.get("entity") || "").toString();
+        const trigger = (fd.get("trigger") || "").toString();
+        const desc = (fd.get("desc") || "").toString().trim();
+        if (!name) { flash(wfMsg, "Name is required", false); return; }
+
+        // conditions
+        const conds = [];
+        condRows.querySelectorAll(".grid").forEach(row => {
+            const sel = row.querySelectorAll("select"); const inp = row.querySelector("input[type=text]");
+            const c = { field: sel[0]?.value, op: sel[1]?.value, value: inp?.value || "" };
+            if (c.field && c.op && c.value !== "") conds.push(c);
+        });
+        // steps
+        const steps = [];
+        stepRows.querySelectorAll(".rounded-lg").forEach(row => {
+            const sels = row.querySelectorAll("select");
+            const inputs = row.querySelectorAll("input");
+            const [t, a, sla, auto, esc] = [sels[0], inputs[0], inputs[1], inputs[2], inputs[3]];
+            steps.push({
+                approver_type: t?.value || "Role",
+                approver: a?.value || "",
+                sla_h: Number(sla?.value || 24),
+                auto_approve: !!auto?.checked,
+                escalate_to: esc?.value || ""
+            });
+        });
+
+        const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
+        STORE.unshift({ id, name, entity, trigger, desc, conditions: conds, steps, status: "Active", updated_at: new Date().toISOString() });
+        persist(); wfForm.reset(); condRows.innerHTML = ""; stepRows.innerHTML = "";
+        flash(wfMsg, "Workflow saved ✓", true); load();
+    });
 
     /* ---------- Init ---------- */
     load();

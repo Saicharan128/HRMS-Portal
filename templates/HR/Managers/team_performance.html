@@ -1,51 +1,55 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-chart-line mr-2"></i> Performance
             </h1>
             <p class="text-slate-600 text-sm">Drive continuous performance reviews and goal tracking.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="newReviewBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+        <div class="flex flex-wrap items-center gap-2">
+            <button id="newReviewBtn"
+                class="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-plus mr-1"></i> New Review
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
     </div>
 
     <!-- Performance Overview Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="text-sm text-slate-500"><i class="fa-solid fa-users mr-1"></i> Active Reviews</div>
-            <div id="activeReviews" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div class="text-xs sm:text-sm text-slate-500"><i class="fa-solid fa-users mr-1"></i> Active Reviews</div>
+            <div id="activeReviews" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">-</div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="text-sm text-slate-500"><i class="fa-solid fa-clock mr-1"></i> Pending Reviews</div>
-            <div id="pendingReviews" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div class="text-xs sm:text-sm text-slate-500"><i class="fa-solid fa-clock mr-1"></i> Pending Reviews</div>
+            <div id="pendingReviews" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">-</div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="text-sm text-slate-500"><i class="fa-solid fa-chart-simple mr-1"></i> Avg Performance</div>
-            <div id="avgPerformance" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div class="text-xs sm:text-sm text-slate-500"><i class="fa-solid fa-chart-simple mr-1"></i> Avg Performance
+            </div>
+            <div id="avgPerformance" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">-</div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="text-sm text-slate-500"><i class="fa-solid fa-target mr-1"></i> Goals Achieved</div>
-            <div id="goalsAchieved" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div class="text-xs sm:text-sm text-slate-500"><i class="fa-solid fa-target mr-1"></i> Goals Achieved</div>
+            <div id="goalsAchieved" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">-</div>
         </div>
     </div>
 
     <!-- Filters and Controls -->
     <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
-        <div class="flex flex-wrap items-center gap-4">
+        <div class="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3 md:gap-4">
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-slate-700">Period:</label>
-                <select id="periodFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <select id="periodFilter" class="w-full md:w-auto rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option value="all">All Time</option>
                     <option value="current">Current Quarter</option>
                     <option value="last">Last Quarter</option>
@@ -54,7 +58,8 @@
             </div>
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-slate-700">Department:</label>
-                <select id="departmentFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <select id="departmentFilter"
+                    class="w-full md:w-auto rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option value="">All Departments</option>
                     <option value="engineering">Engineering</option>
                     <option value="sales">Sales</option>
@@ -65,7 +70,7 @@
             </div>
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-slate-700">Status:</label>
-                <select id="statusFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <select id="statusFilter" class="w-full md:w-auto rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option value="">All Status</option>
                     <option value="draft">Draft</option>
                     <option value="in-progress">In Progress</option>
@@ -73,11 +78,11 @@
                     <option value="completed">Completed</option>
                 </select>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 md:ml-auto">
                 <input id="searchInput" type="text" placeholder="Search employees..."
-                    class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                    class="w-full md:w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                 <button id="refreshBtn"
-                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                     <i class="fa-solid fa-rotate mr-1"></i> Refresh
                 </button>
             </div>
@@ -86,18 +91,19 @@
 
     <!-- Performance Reviews List -->
     <div class="rounded-2xl border border-slate-200 bg-white">
-        <div class="p-6 border-b border-slate-200">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-slate-800">
+        <div class="p-4 sm:p-6 border-b border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h2 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-clipboard-list mr-2"></i> Performance Reviews
                 </h2>
                 <div class="flex items-center gap-2">
                     <button id="bulkActionsBtn"
-                        class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50" disabled>
+                        class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
                         <i class="fa-solid fa-list-check mr-1"></i> Bulk Actions
                     </button>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm text-slate-600">View:</span>
+                        <span class="hidden sm:inline text-sm text-slate-600">View:</span>
                         <button id="cardViewBtn" class="px-2 py-1 rounded text-sm bg-slate-800 text-white">
                             <i class="fa-solid fa-grip-vertical"></i>
                         </button>
@@ -127,26 +133,26 @@
         </div>
 
         <!-- Cards View -->
-        <div id="cardsView" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div id="cardsView" class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <!-- Cards will be populated here -->
         </div>
 
         <!-- List View -->
         <div id="listView" class="hidden">
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
                 <table class="min-w-full text-sm">
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th class="px-6 py-3 text-left">
+                            <th class="px-4 sm:px-6 py-3 text-left">
                                 <input type="checkbox" id="selectAll" class="rounded border-slate-300">
                             </th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Employee</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Position</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Review Period</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Status</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Overall Rating</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Due Date</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Actions</th>
+                            <th class="px-4 sm:px-6 py-3 text-left font-medium text-slate-700">Employee</th>
+                            <th class="px-4 sm:px-6 py-3 text-left font-medium text-slate-700">Position</th>
+                            <th class="px-4 sm:px-6 py-3 text-left font-medium text-slate-700">Review Period</th>
+                            <th class="px-4 sm:px-6 py-3 text-left font-medium text-slate-700">Status</th>
+                            <th class="px-4 sm:px-6 py-3 text-left font-medium text-slate-700">Overall Rating</th>
+                            <th class="px-4 sm:px-6 py-3 text-left font-medium text-slate-700">Due Date</th>
+                            <th class="px-4 sm:px-6 py-3 text-left font-medium text-slate-700">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="reviewsTableBody" class="divide-y divide-slate-200">
@@ -158,19 +164,20 @@
     </div>
 
     <!-- Pagination -->
-    <div id="paginationContainer" class="hidden mt-6 flex items-center justify-between">
+    <div id="paginationContainer"
+        class="hidden mt-4 sm:mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div class="text-sm text-slate-600">
             Showing <span id="pageInfo">0-0 of 0</span> reviews
         </div>
         <div class="flex items-center gap-2">
-            <button id="prevPageBtn" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
+            <button id="prevPageBtn"
+                class="px-3 py-2 rounded border border-slate-300 text-sm hover:bg-slate-50 disabled:opacity-50"
                 disabled>
                 Previous
             </button>
-            <div id="pageNumbers" class="flex items-center gap-1">
-                <!-- Page numbers will be populated here -->
-            </div>
-            <button id="nextPageBtn" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
+            <div id="pageNumbers" class="hidden sm:flex items-center gap-1"></div>
+            <button id="nextPageBtn"
+                class="px-3 py-2 rounded border border-slate-300 text-sm hover:bg-slate-50 disabled:opacity-50"
                 disabled>
                 Next
             </button>
@@ -181,11 +188,11 @@
 <!-- New Review Modal -->
 <div id="newReviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl">
-                <div class="p-6 border-b border-slate-200">
+                <div class="p-4 sm:p-6 border-b border-slate-200">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-slate-800">
+                        <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                             <i class="fa-solid fa-plus mr-2"></i> New Performance Review
                         </h3>
                         <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600">
@@ -194,7 +201,7 @@
                     </div>
                 </div>
 
-                <form id="newReviewForm" class="p-6 space-y-4">
+                <form id="newReviewForm" class="p-4 sm:p-6 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Employee *</label>
@@ -240,12 +247,14 @@
                             class="w-full rounded-lg border border-slate-300 px-3 py-2"></textarea>
                     </div>
 
-                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+                    <div
+                        class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-slate-200">
                         <button type="button" id="cancelBtn"
-                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
+                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 w-full sm:w-auto">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                        <button type="submit"
+                            class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 w-full sm:w-auto">
                             <i class="fa-solid fa-plus mr-1"></i> Create Review
                         </button>
                     </div>
@@ -258,11 +267,11 @@
 <!-- Review Details Modal -->
 <div id="reviewDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                <div class="p-6 border-b border-slate-200 sticky top-0 bg-white">
+                <div class="p-4 sm:p-6 border-b border-slate-200 sticky top-0 bg-white">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-slate-800">
+                        <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                             <i class="fa-solid fa-chart-line mr-2"></i> Performance Review Details
                         </h3>
                         <button id="closeDetailsModalBtn" class="text-slate-400 hover:text-slate-600">
@@ -271,13 +280,32 @@
                     </div>
                 </div>
 
-                <div id="reviewDetailsContent" class="p-6">
+                <div id="reviewDetailsContent" class="p-4 sm:p-6">
                     <!-- Review details will be loaded here -->
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    @media (max-width: 640px) {
+
+        input,
+        select,
+        button {
+            min-height: 42px;
+        }
+
+        /* bigger tap targets */
+    }
+
+    @supports (-webkit-overflow-scrolling: touch) {
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+</style>
 
 <script>
     // Initialize performance management
@@ -286,7 +314,7 @@
     });
 
     // Global state
-    let currentView = 'cards';
+    let currentView = 'cards'; // mobile-first default
     let currentPage = 1;
     let totalPages = 1;
     let reviews = [];
@@ -295,6 +323,7 @@
     async function initializePerformance() {
         await loadPerformanceData();
         setupEventListeners();
+        if (window.matchMedia('(max-width: 767px)').matches) currentView = 'cards';
         renderReviews();
     }
 
@@ -403,8 +432,27 @@
         document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
         document.getElementById('refreshBtn').addEventListener('click', loadPerformanceData);
 
-        // Select all checkbox
-        document.getElementById('selectAll').addEventListener('change', toggleSelectAll);
+        // Delegate checkbox events (list view only)
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.matches('#selectAll')) toggleSelectAll();
+            if (e.target && e.target.matches('.review-checkbox')) updateBulkActionsButton();
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function (event) {
+            const modals = ['newReviewModal', 'reviewDetailsModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    closeModal(modalId);
+                }
+            });
+        });
+
+        // Keep cards view when downsizing screen
+        window.addEventListener('resize', debounce(() => {
+            if (window.matchMedia('(max-width: 767px)').matches) switchView('cards');
+        }, 200));
     }
 
     function switchView(view) {
@@ -525,28 +573,28 @@
             row.onclick = () => openReviewDetails(review.id);
 
             row.innerHTML = `
-            <td class="px-6 py-4">
+            <td class="px-4 sm:px-6 py-4">
                 <input type="checkbox" class="rounded border-slate-300 review-checkbox" 
                     data-id="${review.id}" onclick="event.stopPropagation()">
             </td>
-            <td class="px-6 py-4">
+            <td class="px-4 sm:px-6 py-4">
                 <div>
                     <div class="font-medium text-slate-800">${review.employee_name}</div>
                     <div class="text-sm text-slate-600">${review.employee_id}</div>
                 </div>
             </td>
-            <td class="px-6 py-4 text-slate-800">${review.position}</td>
-            <td class="px-6 py-4 text-slate-800">${review.review_period}</td>
-            <td class="px-6 py-4">
+            <td class="px-4 sm:px-6 py-4 text-slate-800">${review.position}</td>
+            <td class="px-4 sm:px-6 py-4 text-slate-800">${review.review_period}</td>
+            <td class="px-4 sm:px-6 py-4">
                 <span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(review.status)}">
                     ${formatStatus(review.status)}
                 </span>
             </td>
-            <td class="px-6 py-4">
+            <td class="px-4 sm:px-6 py-4">
                 ${review.overall_rating ? renderStars(review.overall_rating) + ' ' + review.overall_rating + '/5' : 'N/A'}
             </td>
-            <td class="px-6 py-4 text-slate-800">${formatDate(review.due_date)}</td>
-            <td class="px-6 py-4">
+            <td class="px-4 sm:px-6 py-4 text-slate-800">${formatDate(review.due_date)}</td>
+            <td class="px-4 sm:px-6 py-4">
                 <div class="flex items-center gap-2">
                     <button onclick="event.stopPropagation(); editReview(${review.id})" 
                         class="text-blue-600 hover:text-blue-800">
@@ -821,7 +869,7 @@
                             <div class="flex items-center gap-2">
                                 ${renderStars(4.2)} <span class="text-sm text-slate-600">4.2/5</span>
                             </div>
-                            <p class="text-sm text-slate-600 mt-1">nstrates strong technical expertise and continues to learn new technologies.</p>
+                            <p class="text-sm text-slate-600 mt-1">Demonstrates strong technical expertise and continues to learn new technologies.</p>
                         </div>
                         
                         <div>
@@ -888,7 +936,6 @@
     }
 
     function editReview(reviewId) {
-        // Implementation for editing review
         console.log('Edit review:', reviewId);
         showInfo('Edit review functionality would be implemented here');
     }
@@ -916,17 +963,14 @@
     }
 
     function showSuccess(message) {
-        // Implementation for success toast/notification
         console.log('Success:', message);
     }
 
     function showError(message) {
-        // Implementation for error toast/notification
         console.log('Error:', message);
     }
 
     function showInfo(message) {
-        // Implementation for info toast/notification
         console.log('Info:', message);
     }
 
@@ -941,16 +985,5 @@
             timeout = setTimeout(later, wait);
         };
     }
-
-    // Close modals when clicking outside
-    window.addEventListener('click', function (event) {
-        const modals = ['newReviewModal', 'reviewDetailsModal'];
-        modals.forEach(modalId => {
-            const modal = document.getElementById(modalId);
-            if (event.target === modal) {
-                closeModal(modalId);
-            }
-        });
-    });
 </script>
 {% endblock %}

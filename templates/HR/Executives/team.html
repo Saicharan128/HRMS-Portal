@@ -17,6 +17,14 @@
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-layer-group mr-1"></i> Bulk Actions
             </button>
+            <button id="exportBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export
+            </button>
+            <button id="copyLinkBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-link mr-1"></i> Copy View
+            </button>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
@@ -93,10 +101,6 @@
                     <span id="resultCount">0</span> employees
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="exportBtn"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
-                        <i class="fa-solid fa-file-export mr-1"></i> Export
-                    </button>
                     <button id="inviteBtn"
                         class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
                         <i class="fa-solid fa-paper-plane mr-1"></i> Invite
@@ -115,12 +119,10 @@
                             <th class="py-2 px-4">Manager</th>
                             <th class="py-2 px-4">Status</th>
                             <th class="py-2 px-4">Joined</th>
-                            <th class="py-2 px-4 w-20"></th>
+                            <th class="py-2 px-4 w-36"></th>
                         </tr>
                     </thead>
-                    <tbody id="rows" class="text-slate-800">
-                        <!-- injected -->
-                    </tbody>
+                    <tbody id="rows" class="text-slate-800"><!-- injected --></tbody>
                 </table>
             </div>
 
@@ -205,12 +207,18 @@
                         <label class="block text-sm font-medium text-slate-700 mb-1">Join Date</label>
                         <input id="empJoined" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
-                    <div class="flex items-center justify-end gap-2 pt-2">
-                        <button id="empCancel"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="empSave" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save
-                        </button>
+                    <div class="flex items-center justify-between pt-2">
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                            <input id="empInvite" type="checkbox" class="rounded border-slate-300" checked>
+                            Send invite
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <button id="empCancel"
+                                class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                            <button id="empSave" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -218,21 +226,30 @@
     </div>
 </div>
 
+<!-- Toast -->
+<div id="toast" class="fixed top-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg z-50 hidden"></div>
+
 <script>
-    /* ---- Mock Data ---- */
-    let EMPLOYEES = [
+    /* ---- Persistence ---- */
+    const LS_KEY = 'team_employees_v1';
+    const LS_STATE = 'team_view_v1';
+
+    /* ---- Mock Data (seeded if none in localStorage) ---- */
+    let EMPLOYEES = JSON.parse(localStorage.getItem(LS_KEY) || 'null') || [
         { id: 1, first: 'Aarav', last: 'Mehta', email: 'aarav@company.com', role: 'Software Engineer', dept: 'engineering', manager: 'Priya S', status: 'active', joined: '2024-06-10' },
         { id: 2, first: 'Sara', last: 'Lopez', email: 'sara@company.com', role: 'HR Generalist', dept: 'hr', manager: 'David K', status: 'active', joined: '2023-11-01' },
         { id: 3, first: 'Kai', last: 'Ng', email: 'kai@company.com', role: 'Sales Manager', dept: 'sales', manager: 'Meera J', status: 'on_leave', joined: '2022-09-15' },
         { id: 4, first: 'Riya', last: 'Patel', email: 'riya@company.com', role: 'Marketing Analyst', dept: 'marketing', manager: 'Alex R', status: 'active', joined: '2025-01-08' },
         { id: 5, first: 'Noah', last: 'Kim', email: 'noah@company.com', role: 'Finance Associate', dept: 'finance', manager: 'Sana M', status: 'inactive', joined: '2021-04-21' }
     ];
+    persist();
 
-    const OPEN_ROLES = 3; // quick metric
+    /* ---- Quick metric ---- */
+    const OPEN_ROLES = 3;
 
     /* ---- State ---- */
     let activePage = 1;
-    const perPage = 8;
+    const perPage = 10;
     let selected = new Set();
     let filters = { q: '', dept: 'all', status: 'all', sort: 'name' };
 
@@ -244,15 +261,25 @@
 
     /* ---- Init ---- */
     document.addEventListener('DOMContentLoaded', () => {
+        hydrateFromURL();
+        hydrateFromLocal();
+
         // Controls
         const searchInput = document.getElementById('searchInput');
         const clearSearch = document.getElementById('clearSearch');
-        searchInput.addEventListener('input', debounce(() => { filters.q = searchInput.value.trim().toLowerCase(); clearSearch.classList.toggle('hidden', !filters.q); activePage = 1; render(); }, 250));
-        clearSearch.addEventListener('click', () => { searchInput.value = ''; filters.q = ''; clearSearch.classList.add('hidden'); activePage = 1; render(); });
+        searchInput.addEventListener('input', debounce(() => {
+            filters.q = searchInput.value.trim().toLowerCase();
+            clearSearch.classList.toggle('hidden', !filters.q);
+            activePage = 1; render(); persistView();
+        }, 250));
+        clearSearch.addEventListener('click', () => {
+            searchInput.value = ''; filters.q = ''; clearSearch.classList.add('hidden');
+            activePage = 1; render(); persistView();
+        });
 
-        document.getElementById('deptFilter').addEventListener('change', e => { filters.dept = e.target.value; activePage = 1; render(); });
-        document.getElementById('statusFilter').addEventListener('change', e => { filters.status = e.target.value; activePage = 1; render(); });
-        document.getElementById('sortSelect').addEventListener('change', e => { filters.sort = e.target.value; activePage = 1; render(); });
+        document.getElementById('deptFilter').addEventListener('change', e => { filters.dept = e.target.value; activePage = 1; render(); persistView(); });
+        document.getElementById('statusFilter').addEventListener('change', e => { filters.status = e.target.value; activePage = 1; render(); persistView(); });
+        document.getElementById('sortSelect').addEventListener('change', e => { filters.sort = e.target.value; activePage = 1; render(); persistView(); });
 
         document.getElementById('prevPage').addEventListener('click', () => { if (activePage > 1) { activePage--; render(); } });
         document.getElementById('nextPage').addEventListener('click', () => { const total = totalPages(); if (activePage < total) { activePage++; render(); } });
@@ -264,13 +291,14 @@
         });
 
         // Buttons
-        document.getElementById('exportBtn').addEventListener('click', () => alert('✅ Export queued'));
-        document.getElementById('inviteBtn').addEventListener('click', () => alert('📨 Invitations sent'));
+        document.getElementById('inviteBtn').addEventListener('click', inviteSelected);
         document.getElementById('bulkActionBtn').addEventListener('click', bulkActions);
         document.getElementById('addEmployeeBtn').addEventListener('click', () => openEmpModal());
         document.getElementById('closeEmpModal').addEventListener('click', closeEmpModal);
         document.getElementById('empCancel').addEventListener('click', closeEmpModal);
         document.getElementById('empSave').addEventListener('click', saveEmployee);
+        document.getElementById('exportBtn').addEventListener('click', exportCSV);
+        document.getElementById('copyLinkBtn').addEventListener('click', copyViewLink);
 
         // Outside-click close for modal
         window.addEventListener('click', (e) => { if (e.target === document.getElementById('empModal')) closeEmpModal(); });
@@ -282,6 +310,7 @@
 
     /* ---- Render ---- */
     function render() {
+        persist();
         const data = applyFilters(EMPLOYEES);
         resultCount.textContent = data.length;
         document.getElementById('hcTotal').textContent = EMPLOYEES.length;
@@ -297,44 +326,74 @@
 
         const start = (activePage - 1) * perPage;
         const pageItems = data.slice(start, start + perPage);
-        rows.innerHTML = pageItems.map(rowHTML).join('') || `<tr><td colspan="8" class="py-6 text-center text-slate-500">No employees found</td></tr>`;
+        rows.innerHTML = pageItems.map(rowHTML).join('') ||
+            `<tr><td colspan="8" class="py-6 text-center text-slate-500">No employees found</td></tr>`;
 
         // update select-all
         const idsOnPage = pageItems.map(x => x.id);
-        document.getElementById('selectAll').checked = idsOnPage.every(id => selected.has(id)) && idsOnPage.length > 0;
+        document.getElementById('selectAll').checked = idsOnPage.length > 0 && idsOnPage.every(id => selected.has(id));
     }
 
     function rowHTML(e) {
         const checked = selected.has(e.id) ? 'checked' : '';
         return `
-    <tr class="border-b last:border-0">
-      <td class="py-2 px-4"><input type="checkbox" ${checked} onchange="toggleSelect(${e.id}, this.checked)"></td>
-      <td class="py-2 px-4">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">${avatar(e)}</div>
-          <div>
-            <div class="font-medium text-slate-800">${e.first} ${e.last}</div>
-            <div class="text-xs text-slate-500">${e.email}</div>
-          </div>
+  <tr class="border-b last:border-0">
+    <td class="py-2 px-4"><input type="checkbox" ${checked} onchange="toggleSelect(${e.id}, this.checked)"></td>
+    <td class="py-2 px-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">${avatar(e)}</div>
+        <div>
+          <div class="font-medium text-slate-800">${escapeHTML(e.first)} ${escapeHTML(e.last)}</div>
+          <div class="text-xs text-slate-500">${escapeHTML(e.email)}</div>
         </div>
-      </td>
-      <td class="py-2 px-4">${badge(e.role, 'blue')}</td>
-      <td class="py-2 px-4">${capitalize(e.dept)}</td>
-      <td class="py-2 px-4">${e.manager}</td>
-      <td class="py-2 px-4">${statusPill(e.status)}</td>
-      <td class="py-2 px-4">${e.joined}</td>
-      <td class="py-2 px-4 text-right">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openEmpModal(${e.id})"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
-      </td>
-    </tr>
-  `;
+      </div>
+    </td>
+    <td class="py-2 px-4">${badge(e.role, 'blue')}</td>
+    <td class="py-2 px-4">${capitalize(e.dept)}</td>
+    <td class="py-2 px-4">${escapeHTML(e.manager || '—')}</td>
+    <td class="py-2 px-4">${statusPill(e.status)}</td>
+    <td class="py-2 px-4">${e.joined}</td>
+    <td class="py-2 px-4 text-right">
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openEmpModal(${e.id})">
+          <i class="fa-solid fa-pen mr-1"></i> Edit
+        </button>
+        <button class="px-2 py-1 rounded text-white ${e.status === 'inactive' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-700 hover:bg-slate-800'} text-xs" onclick="toggleActive(${e.id})">
+          ${e.status === 'inactive' ? 'Activate' : 'Deactivate'}
+        </button>
+        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteEmployee(${e.id})">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </td>
+  </tr>`;
     }
 
     /* ---- Actions ---- */
     function toggleSelect(id, on) { on ? selected.add(id) : selected.delete(id); }
     function bulkActions() {
-        if (selected.size === 0) { alert('ℹ️ Select at least one employee.'); return; }
-        if (confirm('Mark selected as Active?')) { EMPLOYEES = EMPLOYEES.map(e => selected.has(e.id) ? { ...e, status: 'active' } : e); selected.clear(); render(); }
+        if (selected.size === 0) { toast('Select at least one employee'); return; }
+        if (!confirm('Mark selected employees as Active?')) return;
+        EMPLOYEES = EMPLOYEES.map(e => selected.has(e.id) ? { ...e, status: 'active' } : e);
+        selected.clear(); render(); toast('Updated selected employees');
+    }
+    function inviteSelected() {
+        if (selected.size === 0) { toast('Select at least one employee'); return; }
+        toast('Invitations sent to selected employees');
+    }
+    function toggleActive(id) {
+        EMPLOYEES = EMPLOYEES.map(e => e.id === id ? { ...e, status: e.status === 'inactive' ? 'active' : 'inactive' } : e);
+        render();
+    }
+    function deleteEmployee(id) {
+        const e = EMPLOYEES.find(x => x.id === id);
+        if (!e) return;
+        if (!confirm(`Delete ${e.first} ${e.last}? This cannot be undone.`)) return;
+        EMPLOYEES = EMPLOYEES.filter(x => x.id !== id);
+        selected.delete(id);
+        // adjust pagination if last item on last page removed
+        if ((activePage - 1) * perPage >= applyFilters(EMPLOYEES).length) activePage = Math.max(1, activePage - 1);
+        render(); toast('Employee deleted');
     }
 
     /* ---- Filters/Sort ---- */
@@ -354,7 +413,7 @@
         switch (filters.sort) {
             case 'role': out.sort((a, b) => a.role.localeCompare(b.role)); break;
             case 'dept': out.sort((a, b) => a.dept.localeCompare(b.dept)); break;
-            case 'joined': out.sort((a, b) => a.joined.localeCompare(b.joined)); break;
+            case 'joined': out.sort((a, b) => new Date(a.joined) - new Date(b.joined)); break;
             default: out.sort((a, b) => `${a.first} ${a.last}`.localeCompare(`${b.first} ${b.last}`));
         }
         return out;
@@ -371,7 +430,9 @@
         modal.classList.remove('hidden');
 
         // reset
-        const emp = isEdit ? EMPLOYEES.find(x => x.id === id) : { first: '', last: '', email: '', role: '', dept: 'engineering', manager: '', status: 'active', joined: today() };
+        const emp = isEdit ? EMPLOYEES.find(x => x.id === id) : {
+            first: '', last: '', email: '', role: '', dept: 'engineering', manager: '', status: 'active', joined: today()
+        };
         document.getElementById('empFirst').value = emp.first;
         document.getElementById('empLast').value = emp.last;
         document.getElementById('empEmail').value = emp.email;
@@ -380,46 +441,117 @@
         document.getElementById('empManager').value = emp.manager;
         document.getElementById('empStatus').value = emp.status;
         document.getElementById('empJoined').value = emp.joined;
+        document.getElementById('empInvite').checked = true;
         document.getElementById('empSave').dataset.editId = isEdit ? id : '';
     }
     function closeEmpModal() { document.getElementById('empModal').classList.add('hidden'); }
     function saveEmployee() {
         const id = document.getElementById('empSave').dataset.editId;
         const payload = {
-            first: val('empFirst'), last: val('empLast'), email: val('empEmail'),
-            role: val('empRole'), dept: val('empDept'), manager: val('empManager'),
-            status: val('empStatus'), joined: val('empJoined')
+            first: val('empFirst').trim(), last: val('empLast').trim(), email: val('empEmail').trim().toLowerCase(),
+            role: val('empRole').trim(), dept: val('empDept'), manager: val('empManager').trim(),
+            status: val('empStatus'), joined: val('empJoined') || today()
         };
-        if (!payload.first || !payload.last || !payload.email) { alert('❌ First, Last, and Email are required'); return; }
+        if (!payload.first || !payload.last || !payload.email) { toast('First, Last, and Email are required'); return; }
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(payload.email)) { toast('Invalid email'); return; }
+        const emailTaken = EMPLOYEES.some(e => e.email.toLowerCase() === payload.email && String(e.id) !== String(id || ''));
+        if (emailTaken) { toast('Email already exists'); return; }
+
         if (id) {
             EMPLOYEES = EMPLOYEES.map(e => e.id == id ? { ...e, ...payload } : e);
+            toast('Employee updated');
         } else {
-            EMPLOYEES.push({ id: Date.now(), ...payload });
+            EMPLOYEES.unshift({ id: Date.now(), ...payload });
+            toast('Employee added' + (document.getElementById('empInvite').checked ? ' & invite sent' : ''));
         }
-        closeEmpModal(); render(); alert('✅ Saved');
+        closeEmpModal(); render();
     }
 
-    /* ---- UI Helpers ---- */
+    /* ---- Summary & Chips ---- */
+    function renderDeptChips() {
+        const counts = EMPLOYEES.reduce((m, e) => (m[e.dept] = (m[e.dept] || 0) + 1, m), {});
+        const chips = Object.entries(counts).sort().map(([d, c]) => `
+    <button class="px-2 py-1 rounded-full ${filters.dept === d ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700'} text-xs"
+            onclick="setDept('${d}')">${capitalize(d)} • ${c}</button>`).join(' ');
+        document.getElementById('deptChips').innerHTML = chips || '<span class="text-xs text-slate-500">No data</span>';
+    }
+    function setDept(d) { filters.dept = d; document.getElementById('deptFilter').value = d; activePage = 1; render(); persistView(); }
+
+    /* ---- Export / Link ---- */
+    function exportCSV() {
+        const list = applyFilters(EMPLOYEES);
+        const cols = ['First Name', 'Last Name', 'Email', 'Role', 'Department', 'Manager', 'Status', 'Joined'];
+        const rows = list.map(e => [e.first, e.last, e.email, e.role, capitalize(e.dept), e.manager || '', labelStatus(e.status), e.joined]
+            .map(csvCell).join(',')).join('\n');
+        const blob = new Blob([cols.join(',') + '\n' + rows], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `team-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 300);
+        toast('Export generated');
+    }
+    function copyViewLink() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', filters.q || '');
+        url.searchParams.set('dept', filters.dept);
+        url.searchParams.set('status', filters.status);
+        url.searchParams.set('sort', filters.sort);
+        navigator.clipboard.writeText(url.toString()).then(() => toast('View link copied')).catch(() => toast('Copy failed'));
+    }
+
+    /* ---- Helpers ---- */
+    function persist() { localStorage.setItem(LS_KEY, JSON.stringify(EMPLOYEES)); }
+    function persistView() { localStorage.setItem(LS_STATE, JSON.stringify(filters)); history.replaceState(null, '', buildURLFromFilters()); }
+    function hydrateFromLocal() {
+        const saved = JSON.parse(localStorage.getItem(LS_STATE) || 'null');
+        if (!saved) return;
+        filters = { ...filters, ...saved };
+        document.getElementById('deptFilter').value = filters.dept;
+        document.getElementById('statusFilter').value = filters.status;
+        document.getElementById('sortSelect').value = filters.sort;
+        if (filters.q) { document.getElementById('searchInput').value = filters.q; document.getElementById('clearSearch').classList.remove('hidden'); }
+    }
+    function hydrateFromURL() {
+        const url = new URL(window.location.href);
+        const q = url.searchParams.get('q'); const dept = url.searchParams.get('dept');
+        const status = url.searchParams.get('status'); const sort = url.searchParams.get('sort');
+        if (q) { filters.q = q; }
+        if (dept) { filters.dept = dept; }
+        if (status) { filters.status = status; }
+        if (sort) { filters.sort = sort; }
+    }
+    function buildURLFromFilters() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', filters.q || '');
+        url.searchParams.set('dept', filters.dept);
+        url.searchParams.set('status', filters.status);
+        url.searchParams.set('sort', filters.sort);
+        return url.toString();
+    }
+
     function badge(text, tone) {
         const cls = tone === 'blue' ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-700';
-        return `<span class="px-2 py-0.5 rounded-full ${cls}">${escapeHTML(text)}</span>`;
+        return `<span class="px-2 py-0.5 rounded-full ${cls}">${escapeHTML(text || '—')}</span>`;
     }
     function statusPill(s) {
         const map = { active: 'bg-emerald-50 text-emerald-700', on_leave: 'bg-amber-50 text-amber-700', inactive: 'bg-slate-100 text-slate-700' };
         return `<span class="px-2 py-0.5 rounded-full ${map[s] || map.inactive} text-xs">${labelStatus(s)}</span>`;
     }
     function labelStatus(s) { return ({ active: 'Active', on_leave: 'On Leave', inactive: 'Inactive' })[s] || s; }
-    function avatar(e) { return (e.first[0] || '?').toUpperCase(); }
-    function renderDeptChips() {
-        const counts = EMPLOYEES.reduce((m, e) => (m[e.dept] = (m[e.dept] || 0) + 1, m), {});
-        const chips = Object.entries(counts).sort().map(([d, c]) => `<span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs">${capitalize(d)} • ${c}</span>`).join(' ');
-        document.getElementById('deptChips').innerHTML = chips || '<span class="text-xs text-slate-500">No data</span>';
-    }
-    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function avatar(e) { return (e.first?.[0] || '?').toUpperCase(); }
+    function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
     function val(id) { return document.getElementById(id).value; }
     function today() { const d = new Date(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${d.getFullYear()}-${m}-${day}`; }
-    function escapeHTML(s) { return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
+    function escapeHTML(s) { return String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
     function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+    function csvCell(v) { return `"${String(v ?? '').replace(/"/g, '""')}"`; }
+    function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); t.style.opacity = 1; setTimeout(() => { t.style.opacity = 0; setTimeout(() => t.classList.add('hidden'), 300); }, 1800); }
+
+    window.toggleSelect = toggleSelect; // expose for inline onchange
+    window.openEmpModal = openEmpModal;
+    window.deleteEmployee = deleteEmployee;
+    window.toggleActive = toggleActive;
 </script>
 
 <style>

@@ -1,51 +1,55 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
-                <i class="fa-solid fa-file-shield mr-2"></i> Form 16 Publishing
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-file-shield"></i> <span class="truncate">Form 16 Publishing</span>
             </h1>
-            <p class="text-slate-600 text-sm">Generate, approve, and publish Form 16.</p>
+            <p class="text-slate-600 text-xs sm:text-sm">Generate, approve, and publish Form 16.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="btnGenerate" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+            <button id="btnGenerate"
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-gears mr-1"></i> Generate Now
             </button>
-            <button id="btnApprove" class="px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm">
+            <button id="btnApprove"
+                class="px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-check-double mr-1"></i> Approve Selected
             </button>
-            <button id="btnPublish" class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+            <button id="btnPublish"
+                class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-paper-plane mr-1"></i> Publish Selected
             </button>
             <button id="btnExport"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-file-arrow-down mr-1"></i> Export Logs
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
     </div>
 
     <!-- Tabs -->
-    <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="overviewTab" class="pp-tab active px-4 py-2 rounded-lg text-sm font-medium">
+    <div class="mb-4 sm:mb-6">
+        <div class="flex overflow-x-auto no-scrollbar space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab"
+                class="pp-tab active px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-gauge-high mr-1"></i> Overview
             </button>
-            <button id="queueTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="queueTab" class="pp-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-list-check mr-1"></i> Queue
             </button>
-            <button id="templatesTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="templatesTab" class="pp-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-file-code mr-1"></i> Templates
             </button>
-            <button id="historyTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="historyTab" class="pp-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
             </button>
-            <button id="settingsTab" class="pp-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="settingsTab" class="pp-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-gear mr-1"></i> Settings
             </button>
         </div>
@@ -53,42 +57,42 @@
 
     <!-- Overview -->
     <section id="overviewPanel" class="pp-panel">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- KPIs -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-slate-800">
-                        <i class="fa-solid fa-calendar-day mr-2"></i> Current AY
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-day"></i> Current AY
                     </h3>
                     <span id="cycleBadge" class="px-2 py-1 text-xs rounded bg-amber-50 text-amber-700">Draft</span>
                 </div>
-                <div class="grid grid-cols-5 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Employees</div>
-                        <div id="kpiTotal" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kpiTotal" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Generated</div>
-                        <div id="kpiGen" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kpiGen" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Approved</div>
-                        <div id="kpiApp" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kpiApp" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Published</div>
-                        <div id="kpiPub" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kpiPub" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Failed</div>
-                        <div id="kpiFail" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kpiFail" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                 </div>
-                <div class="relative h-40 mt-4">
+                <div class="relative h-40 sm:h-48 mt-4">
                     <canvas id="progressChart" class="absolute inset-0 w-full h-full"></canvas>
                 </div>
-                <div class="mt-4 flex items-center gap-2">
-                    <select id="cyclePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                <div class="mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
+                    <select id="cyclePicker" class="px-2 py-2 rounded-lg border border-slate-300 text-sm">
                         <option>AY 2025–26</option>
                         <option>AY 2024–25</option>
                         <option>AY 2023–24</option>
@@ -101,24 +105,24 @@
             </div>
 
             <!-- Mix -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-slate-800">
-                        <i class="fa-solid fa-chart-pie mr-2"></i> Status Mix
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie"></i> Status Mix
                     </h3>
                 </div>
-                <div class="relative h-40">
+                <div class="relative h-40 sm:h-48">
                     <canvas id="mixChart" class="absolute inset-0 w-full h-full"></canvas>
                 </div>
-                <div id="mixLegend" class="mt-3 text-sm text-slate-700"></div>
+                <div id="mixLegend" class="mt-3 text-sm text-slate-700 grid grid-cols-2 gap-1 sm:block"></div>
             </div>
 
             <!-- Quick Actions -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-3">
-                    <i class="fa-solid fa-bolt mr-2"></i> Quick Actions
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-bolt"></i> Quick Actions
                 </h3>
-                <div class="space-y-3">
+                <div class="space-y-2 sm:space-y-3">
                     <button id="btnPreview"
                         class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
                         <i class="fa-solid fa-eye mr-2"></i> Preview sample Form 16
@@ -138,15 +142,16 @@
 
     <!-- Queue -->
     <section id="queuePanel" class="pp-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">
-                    <i class="fa-solid fa-list-check mr-2"></i> Generation Queue — AY 2025–26
+        <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> <span class="truncate">Generation Queue — AY 2025–26</span>
                 </h3>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <input id="searchInput" type="text" placeholder="Search name or status..."
-                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
-                    <select id="statusFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-64">
+                    <select id="statusFilter"
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-auto">
                         <option value="all">All</option>
                         <option value="draft">Draft</option>
                         <option value="generated">Generated</option>
@@ -156,14 +161,14 @@
                     </select>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="text-left text-slate-500 border-b sticky top-0 bg-white">
                         <tr>
-                            <th class="py-2 pr-4"><input type="checkbox" id="chkAll"></th>
+                            <th class="py-2 pr-4 pl-3 sm:pl-0"><input type="checkbox" id="chkAll" class="h-4 w-4"></th>
                             <th class="py-2 pr-4">Employee</th>
-                            <th class="py-2 pr-4">Dept</th>
-                            <th class="py-2 pr-4">PAN (last4)</th>
+                            <th class="py-2 pr-4 hidden md:table-cell">Dept</th>
+                            <th class="py-2 pr-4 hidden md:table-cell">PAN (last4)</th>
                             <th class="py-2 pr-4">Status</th>
                             <th class="py-2 pr-4">Actions</th>
                         </tr>
@@ -171,19 +176,21 @@
                     <tbody id="queueRows" class="text-slate-800"></tbody>
                 </table>
             </div>
+            <!-- Mobile helper: show column hints -->
+            <p class="mt-3 text-xs text-slate-500 md:hidden">Tip: Dept &amp; PAN are hidden on small screens.</p>
         </div>
     </section>
 
     <!-- Templates -->
     <section id="templatesPanel" class="pp-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800">
-                        <i class="fa-solid fa-file-code mr-2"></i> Templates
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-3 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-file-code"></i> Templates
                     </h3>
                     <button id="btnNewTpl"
-                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm w-full sm:w-auto">
                         <i class="fa-solid fa-plus mr-1"></i> New
                     </button>
                 </div>
@@ -192,8 +199,8 @@
                         <thead class="text-left text-slate-500 border-b">
                             <tr>
                                 <th class="py-2 pr-4">Name</th>
-                                <th class="py-2 pr-4">Paper</th>
-                                <th class="py-2 pr-4">Locale</th>
+                                <th class="py-2 pr-4 hidden sm:table-cell">Paper</th>
+                                <th class="py-2 pr-4 hidden md:table-cell">Locale</th>
                                 <th class="py-2 pr-4">Status</th>
                                 <th class="py-2 pr-4">Actions</th>
                             </tr>
@@ -202,13 +209,13 @@
                     </table>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
-                    <i class="fa-solid fa-circle-info mr-2"></i> Tips
+            <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info"></i> Tips
                 </h3>
                 <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
                     <li>Include employer TAN, PAN, and address.</li>
-                    <li>Show Part A (TRACES) & Part B (salary details).</li>
+                    <li>Show Part A (TRACES) &amp; Part B (salary details).</li>
                     <li>Embed QR code or verifiable hash ().</li>
                 </ul>
             </div>
@@ -217,23 +224,23 @@
 
     <!-- History -->
     <section id="historyPanel" class="pp-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">
-                    <i class="fa-solid fa-table mr-2"></i> Publish History
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-table"></i> Publish History
                 </h3>
-                <div class="text-sm text-slate-600">Last 10 runs</div>
+                <div class="text-xs sm:text-sm text-slate-600">Last 10 runs</div>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="text-left text-slate-500 border-b sticky top-0 bg-white">
                         <tr>
                             <th class="py-2 pr-4">Time</th>
                             <th class="py-2 pr-4">AY</th>
-                            <th class="py-2 pr-4">Generated</th>
-                            <th class="py-2 pr-4">Approved</th>
+                            <th class="py-2 pr-4 hidden sm:table-cell">Generated</th>
+                            <th class="py-2 pr-4 hidden sm:table-cell">Approved</th>
                             <th class="py-2 pr-4">Published</th>
-                            <th class="py-2 pr-4">Failed</th>
+                            <th class="py-2 pr-4 hidden md:table-cell">Failed</th>
                             <th class="py-2 pr-4">By</th>
                         </tr>
                     </thead>
@@ -245,33 +252,33 @@
 
     <!-- Settings -->
     <section id="settingsPanel" class="pp-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-envelope mr-2"></i> Delivery
                 </h3>
                 <div class="space-y-2 text-sm">
-                    <label class="flex items-center gap-2"><input id="stEmail" type="checkbox" checked> Email PDF to
-                        employee</label>
-                    <label class="flex items-center gap-2"><input id="stPortal" type="checkbox" checked> Publish to
-                        self-service portal</label>
-                    <label class="flex items-center gap-2"><input id="stLock" type="checkbox"> Lock after
-                        publish</label>
+                    <label class="flex items-center gap-2"><input id="stEmail" type="checkbox" checked class="h-4 w-4">
+                        Email PDF to employee</label>
+                    <label class="flex items-center gap-2"><input id="stPortal" type="checkbox" checked class="h-4 w-4">
+                        Publish to self-service portal</label>
+                    <label class="flex items-center gap-2"><input id="stLock" type="checkbox" class="h-4 w-4"> Lock
+                        after publish</label>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-shield-halved mr-2"></i> Security
                 </h3>
                 <div class="space-y-2 text-sm">
-                    <label class="flex items-center gap-2"><input id="stPwd" type="checkbox" checked> PDF password
-                        protect (DOB+PAN last4)</label>
-                    <label class="flex items-center gap-2"><input id="stWater" type="checkbox"> Watermark
-                        “Confidential”</label>
+                    <label class="flex items-center gap-2"><input id="stPwd" type="checkbox" checked class="h-4 w-4">
+                        PDF password protect (DOB+PAN last4)</label>
+                    <label class="flex items-center gap-2"><input id="stWater" type="checkbox" class="h-4 w-4">
+                        Watermark “Confidential”</label>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-clock mr-2"></i> Scheduling
                 </h3>
                 <div class="space-y-2 text-sm">
@@ -280,7 +287,7 @@
                             class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
                     </label>
                     <button id="stSave"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm mt-2">
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm mt-2 w-full sm:w-auto">
                         <i class="fa-solid fa-floppy-disk mr-1"></i> Save
                     </button>
                 </div>
@@ -290,24 +297,24 @@
 </div>
 
 <!-- Generate Modal -->
-<div id="genModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<div id="genModal" class="fixed inset-0 bg-black/50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-slate-800">Generate Form 16</h3>
-                    <button id="closeGenModal" class="text-slate-400 hover:text-slate-600">
-                        <i class="fa-solid fa-times text-xl"></i>
+        <div class="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
+            <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-w-none">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">Generate Form 16</h3>
+                    <button id="closeGenModal" class="text-slate-400 hover:text-slate-600 p-2 -mr-2 sm:mr-0">
+                        <i class="fa-solid fa-times text-lg sm:text-xl"></i>
                     </button>
                 </div>
-                <div class="p-6 space-y-4 text-sm">
-                    <label class="flex items-center gap-2"><input id="optRecalc" type="checkbox" checked> Recalculate
-                        tax totals</label>
-                    <label class="flex items-center gap-2"><input id="optSkipPub" type="checkbox"> Generate only (don’t
-                        publish)</label>
-                    <label class="flex items-center gap-2"><input id="optNotify" type="checkbox" checked> Prepare
-                        notification emails</label>
-                    <div class="flex items-center justify-end gap-2 pt-2">
+                <div class="p-4 sm:p-6 space-y-3 sm:space-y-4 text-sm">
+                    <label class="flex items-center gap-2"><input id="optRecalc" type="checkbox" checked
+                            class="h-4 w-4"> Recalculate tax totals</label>
+                    <label class="flex items-center gap-2"><input id="optSkipPub" type="checkbox" class="h-4 w-4">
+                        Generate only (don’t publish)</label>
+                    <label class="flex items-center gap-2"><input id="optNotify" type="checkbox" checked
+                            class="h-4 w-4"> Prepare notification emails</label>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-2 pt-2">
                         <button id="cancelGen"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
                         <button id="runGen" class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
@@ -465,17 +472,22 @@
     }
     function rowQueue(r) {
         return `<tr class="border-b last:border-0">
-      <td class="py-2 pr-4"><input type="checkbox" class="rowChk" data-id="${r.id}" ${r.status === 'published' ? 'disabled' : ''}></td>
-      <td class="py-2 pr-4">${r.name}</td>
-      <td class="py-2 pr-4">${r.dept}</td>
-      <td class="py-2 pr-4">${r.pan4 || '—'}</td>
+      <td class="py-2 pr-4 pl-3 sm:pl-0"><input type="checkbox" class="rowChk h-4 w-4" data-id="${r.id}" ${r.status === 'published' ? 'disabled' : ''}></td>
+      <td class="py-2 pr-4">
+        <div class="font-medium">${r.name}</div>
+        <div class="text-xs text-slate-500 md:hidden">${r.dept} • PAN ****${r.pan4 || '—'}</div>
+      </td>
+      <td class="py-2 pr-4 hidden md:table-cell">${r.dept}</td>
+      <td class="py-2 pr-4 hidden md:table-cell">${r.pan4 || '—'}</td>
       <td class="py-2 pr-4">${badgePlain(r.status)}</td>
       <td class="py-2 pr-4">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="preview(${r.id})">
-          <i class="fa-solid fa-eye mr-1"></i> Preview
-        </button>
-        ${r.status === 'draft' ? `<button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="markGenerated(${r.id})"><i class="fa-solid fa-hammer mr-1"></i> Generate</button>` : ''}
-        ${r.status === 'generated' ? `<button class="px-2 py-1 rounded text-white bg-indigo-600 hover:bg-indigo-700 text-xs" onclick="markApproved(${r.id})"><i class="fa-solid fa-check mr-1"></i> Approve</button>` : ''}
+        <div class="flex flex-wrap gap-2">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="preview(${r.id})">
+            <i class="fa-solid fa-eye mr-1"></i> Preview
+          </button>
+          ${r.status === 'draft' ? `<button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="markGenerated(${r.id})"><i class="fa-solid fa-hammer mr-1"></i> Generate</button>` : ''}
+          ${r.status === 'generated' ? `<button class="px-2 py-1 rounded text-white bg-indigo-600 hover:bg-indigo-700 text-xs" onclick="markApproved(${r.id})"><i class="fa-solid fa-check mr-1"></i> Approve</button>` : ''}
+        </div>
       </td>
     </tr>`;
     }
@@ -515,17 +527,22 @@
     function renderTemplates() {
         document.getElementById('tplRows').innerHTML = TEMPLATES.map(t => `
       <tr class="border-b last:border-0">
-        <td class="py-2 pr-4">${t.name}</td>
-        <td class="py-2 pr-4">${t.paper}</td>
-        <td class="py-2 pr-4">${t.locale}</td>
+        <td class="py-2 pr-4">
+          <div class="font-medium">${t.name}</div>
+          <div class="text-xs text-slate-500 sm:hidden">Paper: ${t.paper} • Locale: ${t.locale}</div>
+        </td>
+        <td class="py-2 pr-4 hidden sm:table-cell">${t.paper}</td>
+        <td class="py-2 pr-4 hidden md:table-cell">${t.locale}</td>
         <td class="py-2 pr-4">${badgePlain(t.status.toLowerCase())}</td>
         <td class="py-2 pr-4">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('🧪 Test render ()')">
-            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Test
-          </button>
-          <button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="alert('✏️ Edit template ()')">
-            <i class="fa-solid fa-pen mr-1"></i> Edit
-          </button>
+          <div class="flex flex-wrap gap-2">
+            <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('🧪 Test render ()')">
+              <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Test
+            </button>
+            <button class="px-2 py-1 rounded text-white bg-slate-700 hover:bg-slate-800 text-xs" onclick="alert('✏️ Edit template ()')">
+              <i class="fa-solid fa-pen mr-1"></i> Edit
+            </button>
+          </div>
         </td>
       </tr>`).join('');
     }
@@ -536,17 +553,17 @@
       <tr class="border-b last:border-0">
         <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
         <td class="py-2 pr-4">${h.ay}</td>
-        <td class="py-2 pr-4">${h.gen}</td>
-        <td class="py-2 pr-4">${h.app}</td>
+        <td class="py-2 pr-4 hidden sm:table-cell">${h.gen}</td>
+        <td class="py-2 pr-4 hidden sm:table-cell">${h.app}</td>
         <td class="py-2 pr-4">${h.pub}</td>
-        <td class="py-2 pr-4">${h.fail}</td>
+        <td class="py-2 pr-4 hidden md:table-cell">${h.fail}</td>
         <td class="py-2 pr-4">${h.by}</td>
       </tr>`).join('');
     }
 
     // ---- Generate Modal ----
-    function openGen() { document.getElementById('genModal').classList.remove('hidden'); }
-    function closeGen() { document.getElementById('genModal').classList.add('hidden'); }
+    function openGen() { document.getElementById('genModal').classList.remove('hidden'); document.body.classList.add('overflow-hidden'); }
+    function closeGen() { document.getElementById('genModal').classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }
     function runGeneration() {
         // : move all drafts to generated
         QUEUE.filter(x => x.status === 'draft').forEach(x => x.status = 'generated');
@@ -584,6 +601,15 @@
     .pp-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 </style>
 {% endblock %}

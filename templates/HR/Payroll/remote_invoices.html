@@ -10,6 +10,19 @@
             <p class="text-slate-600 text-sm">Process invoices for remote employees and contractors globally.</p>
         </div>
         <div class="flex items-center gap-2">
+            <button id="exportJson"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export
+            </button>
+            <label
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-import mr-1"></i> Import
+                <input id="importJson" type="file" accept="application/json" class="hidden">
+            </label>
+            <button id="resetDemo"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-seedling mr-1"></i> Reset
+            </button>
             <button id="newInvBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-file-circle-plus mr-1"></i> New Invoice
             </button>
@@ -84,7 +97,7 @@
                             <th class="py-2 px-4">Amount</th>
                             <th class="py-2 px-4">In Home CCY</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 w-40"></th>
                         </tr>
                     </thead>
                     <tbody id="qRows" class="text-slate-800"><!-- injected --></tbody>
@@ -278,9 +291,9 @@
                         <option value="queued">Queued</option>
                         <option value="sent">Sent</option>
                     </select>
-                    <button id="genFile"
-                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
-                            class="fa-solid fa-file-arrow-down mr-1"></i> Generate File</button>
+                    <button id="genFile" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                        <i class="fa-solid fa-file-arrow-down mr-1"></i> Generate File
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -292,7 +305,7 @@
                             <th class="py-2 px-4">Count</th>
                             <th class="py-2 px-4">Amount</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-24"></th>
+                            <th class="py-2 px-4 w-40"></th>
                         </tr>
                     </thead>
                     <tbody id="payRows" class="text-slate-800"><!-- injected --></tbody>
@@ -309,8 +322,9 @@
                     Checklist</h3>
                 <div id="compList" class="space-y-3"><!-- injected --></div>
                 <button id="compAll"
-                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
-                        class="fa-solid fa-check mr-1"></i> Mark All Complete</button>
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                    <i class="fa-solid fa-check mr-1"></i> Mark All Complete
+                </button>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>
@@ -342,7 +356,7 @@
     </section>
 </div>
 
-<!-- New Invoice Modal -->
+<!-- Quick Invoice Modal -->
 <div id="invModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
@@ -354,28 +368,36 @@
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-4">
+                        <select id="mType" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>contractor</option>
+                            <option>employee</option>
+                        </select>
                         <input id="mName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Name">
-                        <input id="mCountry" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                            placeholder="Country">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
+                        <input id="mCountry" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Country">
                         <select id="mCcy" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                             <option>USD</option>
                             <option>INR</option>
                             <option>EUR</option>
                             <option>GBP</option>
                         </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
                         <input id="mAmt" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Amount">
+                        <input id="mPeriod" type="month" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
                     <input id="mDesc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="Description">
                     <div class="flex items-center justify-end gap-2 pt-2">
                         <button id="cancelInv"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="saveInv" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
-                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        <button id="saveInv" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                        </button>
                     </div>
                 </div>
             </div>
@@ -384,41 +406,61 @@
 </div>
 
 <script>
-    /* ---------- Mock Data ---------- */
-    let FX = { // illustrative static rates to home=USD (can be changed via homeCcy by inversion)
-        USD: 1.00, EUR: 1.09, GBP: 1.27, INR: 0.012, JPY: 0.0068
-    };
-    let INVS = [
-        { id: 'RI-2401', name: 'Isha Verma', country: 'IN', type: 'employee', ccy: 'INR', amt: 120000, status: 'pending' },
-        { id: 'RI-2402', name: 'PixelCraft Studio', country: 'IN', type: 'contractor', ccy: 'USD', amt: 4200, status: 'approved' },
-        { id: 'RI-2403', name: 'Omar Ali', country: 'AE', type: 'contractor', ccy: 'USD', amt: 1800, status: 'paid' },
-        { id: 'RI-2404', name: 'Noah Kim', country: 'KR', type: 'employee', ccy: 'USD', amt: 2300, status: 'rejected' },
-        { id: 'RI-2405', name: 'Riya Patel', country: 'IN', type: 'employee', ccy: 'INR', amt: 95000, status: 'pending' }
-    ];
-    let PRESETS = [
-        { cc: 'IN', label: 'India • TDS 5% (services)', wh: 5, ccy: 'INR' },
-        { cc: 'US', label: 'USA • 0% (treaty/no withholding)', wh: 0, ccy: 'USD' },
-        { cc: 'EU', label: 'EU • 0–5% (depends)', wh: 3, ccy: 'EUR' },
-        { cc: 'UK', label: 'UK • 0% (contractor services)', wh: 0, ccy: 'GBP' }
-    ];
-    let BATCHES = [
-        { id: 'RB-0003', ccy: 'USD', count: 3, amount: 7900, status: 'sent' },
-        { id: 'RB-0004', ccy: 'INR', count: 2, amount: 215000, status: 'queued' }
-    ];
-    let COMP = [
-        { id: 301, text: 'Residence/tax form on file (W-8/W-9/15CA/15CB etc.)', done: true },
-        { id: 302, text: 'Contract/SOW signed & stored', done: true },
-        { id: 303, text: 'Withholding calculated where applicable', done: false },
-        { id: 304, text: 'Bank/KYC verified', done: true }
-    ];
+    /* ---------- Persistence ---------- */
+    const KEY = 'ri_store_v2';
+    const KEY_AUDIT = 'ri_audit_v2';
 
-    /* ---------- Helpers ---------- */
-    const $ = (id) => document.getElementById(id);
+    const SEED = {
+        FX: { USD: 1.00, EUR: 1.09, GBP: 1.27, INR: 0.012, JPY: 0.0068 }, // USD per 1 unit of currency
+        INVS: [
+            { id: 'RI-2401', name: 'Isha Verma', country: 'IN', type: 'employee', ccy: 'INR', amt: 120000, status: 'pending', ts: { created: iso(-72) } },
+            { id: 'RI-2402', name: 'PixelCraft Studio', country: 'IN', type: 'contractor', ccy: 'USD', amt: 4200, status: 'approved', ts: { created: iso(-60), approved: iso(-36) } },
+            { id: 'RI-2403', name: 'Omar Ali', country: 'AE', type: 'contractor', ccy: 'USD', amt: 1800, status: 'paid', ts: { created: iso(-96), approved: iso(-72), paid: iso(-40) } },
+            { id: 'RI-2404', name: 'Noah Kim', country: 'KR', type: 'employee', ccy: 'USD', amt: 2300, status: 'rejected', ts: { created: iso(-50) } },
+            { id: 'RI-2405', name: 'Riya Patel', country: 'IN', type: 'employee', ccy: 'INR', amt: 95000, status: 'pending', ts: { created: iso(-24) } }
+        ],
+        PRESETS: [
+            { cc: 'IN', label: 'India • TDS 5% (services)', wh: 5, ccy: 'INR' },
+            { cc: 'US', label: 'USA • 0% (treaty/no withholding)', wh: 0, ccy: 'USD' },
+            { cc: 'EU', label: 'EU • 0–5% (depends)', wh: 3, ccy: 'EUR' },
+            { cc: 'UK', label: 'UK • 0% (contractor services)', wh: 0, ccy: 'GBP' }
+        ],
+        BATCHES: [
+            { id: 'RB-0003', ccy: 'USD', count: 3, amount: 7900, status: 'sent', items: [], ts: { created: iso(-40), sent: iso(-38) } },
+            { id: 'RB-0004', ccy: 'INR', count: 2, amount: 215000, status: 'queued', items: [], ts: { created: iso(-6) } }
+        ],
+        COMP: [
+            { id: 301, text: 'Residence/tax form on file (W-8/W-9/15CA/15CB etc.)', done: true },
+            { id: 302, text: 'Contract/SOW signed & stored', done: true },
+            { id: 303, text: 'Withholding calculated where applicable', done: false },
+            { id: 304, text: 'Bank/KYC verified', done: true }
+        ]
+    };
+    let STORE = JSON.parse(localStorage.getItem(KEY) || 'null') || structuredClone(SEED);
+    let AUDIT = JSON.parse(localStorage.getItem(KEY_AUDIT) || 'null') || [];
+
+    function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); localStorage.setItem(KEY_AUDIT, JSON.stringify(AUDIT)); }
+    function iso(hoursOffset = 0) { const d = new Date(Date.now() + hoursOffset * 3600 * 1000); return d.toISOString(); }
+
+    /* ---------- Data / Helpers ---------- */
+    const $ = id => document.getElementById(id);
     function fmt(n, c = 'USD') { const v = Number(n || 0); return new Intl.NumberFormat('en-US', { style: 'currency', currency: c, maximumFractionDigits: 0 }).format(v); }
     function badge(txt, tone) { const m = { emerald: 'bg-emerald-50 text-emerald-700', amber: 'bg-amber-50 text-amber-700', red: 'bg-red-50 text-red-700', slate: 'bg-slate-100 text-slate-700', blue: 'bg-blue-50 text-blue-700' }; return `<span class="px-2 py-0.5 rounded-full ${m[tone] || m.slate} text-xs">${txt}</span>`; }
-    function daysFromNow(d) { const x = new Date(d), n = new Date(); return Math.max(0, Math.ceil((x - n) / (1000 * 60 * 60 * 24))); }
+    function convert(amount, from, to) {
+        const FX = STORE.FX || {};
+        if (!amount || from === to) return Number(amount || 0);
+        const usd = Number(amount) * (FX[from] || 1);     // to USD
+        const res = usd / (FX[to] || 1);                  // USD -> target
+        return res;
+    }
+    function audit(text, type = 'app') { AUDIT.unshift({ id: Date.now(), ts: new Date().toISOString(), type, text }); AUDIT = AUDIT.slice(0, 500); persist(); }
 
-    /* ---------- Init ---------- */
+    /* ---------- Elements ---------- */
+    const qStatus = $('qStatus'), qType = $('qType'), homeCcy = $('homeCcy'), qSearch = $('qSearch'), qClear = $('qClear'), qRows = $('qRows');
+    const saveDraftBtn = $('saveDraft'), submitInvBtn = $('submitInv');
+    const fxPreview = $('fxPreview'), fxConverted = $('fxConverted'), fxWithhold = $('fxWithhold'), fxNet = $('fxNet');
+
+    /* ---------- Tabs / Init ---------- */
     document.addEventListener('DOMContentLoaded', () => {
         // Tabs
         document.querySelectorAll('.ri-tab').forEach(b => {
@@ -427,63 +469,68 @@
                 e.currentTarget.classList.add('active');
                 const name = e.currentTarget.id.replace('Tab', '');
                 document.querySelectorAll('.ri-panel').forEach(p => p.classList.add('hidden'));
-                document.getElementById(name + 'Panel').classList.remove('hidden');
+                $(name + 'Panel').classList.remove('hidden');
                 if (name === 'reports') { ensureCharts(); drawCharts(); }
             });
         });
 
         // Queue filters
-        $('qStatus').addEventListener('change', renderQueue);
-        $('qType').addEventListener('change', renderQueue);
-        $('homeCcy').addEventListener('change', renderQueue);
-        const s = $('qSearch'), c = $('qClear');
-        s.addEventListener('input', () => { c.classList.toggle('hidden', !s.value.trim()); renderQueue(); });
-        c.addEventListener('click', () => { s.value = ''; c.classList.add('hidden'); renderQueue(); });
+        qStatus.addEventListener('change', renderQueue);
+        qType.addEventListener('change', renderQueue);
+        homeCcy.addEventListener('change', () => { renderQueue(); previewCreate(); });
+        qSearch.addEventListener('input', () => { qClear.classList.toggle('hidden', !qSearch.value.trim()); renderQueue(); });
+        qClear.addEventListener('click', () => { qSearch.value = ''; qClear.classList.add('hidden'); renderQueue(); });
 
-        // Create
-        $('cCcy').addEventListener('change', previewCreate);
-        ['cAmt', 'cType', 'cName', 'cCountry', 'cPeriod'].forEach(id => $(id).addEventListener('input', previewCreate));
-        $('homeCcy').addEventListener('change', previewCreate);
+        // Create inputs
+        ['cCcy', 'cAmt', 'cType', 'cName', 'cCountry', 'cPeriod'].forEach(id => $(id).addEventListener('input', previewCreate));
+        $('opHoldTax').addEventListener('change', previewCreate);
+        $('opFxFee').addEventListener('change', previewCreate);
+
+        // FX sim
         $('recalcFx').addEventListener('click', simulateFx);
-        $('fxFrom').addEventListener('change', simulateFx);
-        $('fxTo').addEventListener('change', simulateFx);
-        ;['fxAmt', 'fxWh', 'fxFee'].forEach(id => $(id).addEventListener('input', simulateFx));
+        ['fxFrom', 'fxTo', 'fxAmt', 'fxWh', 'fxFee'].forEach(id => $(id).addEventListener('input', simulateFx));
 
         // Disburse & Compliance
         $('payFilter').addEventListener('change', renderBatches);
-        $('genFile').addEventListener('click', () => alert('✅ Payment file generated'));
-        $('compAll').addEventListener('click', () => { COMP = COMP.map(c => ({ ...c, done: true })); renderCompliance(); });
+        $('genFile').addEventListener('click', generatePaymentBatches);
+        $('compAll').addEventListener('click', () => { STORE.COMP = STORE.COMP.map(c => ({ ...c, done: true })); persist(); renderCompliance(); });
 
         // Modal
         $('newInvBtn').addEventListener('click', openInvModal);
         $('closeInvModal').addEventListener('click', closeInvModal);
         $('cancelInv').addEventListener('click', closeInvModal);
         $('saveInv').addEventListener('click', saveInv);
-        $('saveDraft').addEventListener('click', () => alert('✅ Draft saved'));
-        $('submitInv').addEventListener('click', () => { addInvoiceFromCreate(); alert('📨 Submitted'); });
+        saveDraftBtn.addEventListener('click', () => addInvoiceFromCreate('pending', true));
+        submitInvBtn.addEventListener('click', () => addInvoiceFromCreate('pending', false));
+
+        // Export / Import / Reset
+        $('exportJson').addEventListener('click', () => download('remote_invoices_export.json', JSON.stringify(STORE, null, 2)));
+        $('importJson').addEventListener('change', onImport);
+        $('resetDemo').addEventListener('click', () => { if (!confirm('Reset demo data?')) return; STORE = structuredClone(SEED); AUDIT = []; persist(); paintAll(); });
 
         // Presets
         renderPresets();
 
         // First paint
-        renderQueue(); previewCreate(); simulateFx(); renderBatches(); renderCompliance(); renderWithhold(); renderResidency();
+        paintAll();
     });
 
     /* ---------- Queue ---------- */
     function renderQueue() {
-        const q = ($('qSearch').value || '').toLowerCase();
-        const st = $('qStatus').value, tp = $('qType').value, home = $('homeCcy').value;
-        const toUSD = (val, from) => val * (FX[from] || 1); // convert to USD baseline
-        // derive map for home currency relative to USD
-        const homePerUSD = FX[home] || 1;
-        const data = INVS.filter(i =>
+        const q = (qSearch.value || '').toLowerCase().trim();
+        const st = qStatus.value, tp = qType.value, home = homeCcy.value;
+        const data = STORE.INVS.filter(i =>
             (st === 'all' || i.status === st) && (tp === 'all' || i.type === tp) &&
             (!q || [i.id, i.name, i.country, i.ccy].some(x => String(x).toLowerCase().includes(q)))
         );
-        $('qRows').innerHTML = data.map(i => {
-            const usd = toUSD(i.amt, i.ccy);
-            const inHome = usd / (1 / homePerUSD);
+        qRows.innerHTML = data.map(i => {
+            const inHome = convert(i.amt, i.ccy, home);
             const pill = i.status === 'approved' ? 'emerald' : i.status === 'pending' ? 'amber' : i.status === 'paid' ? 'blue' : 'red';
+            const actions = `
+      ${i.status === 'pending' ? `<button class="px-2 py-1 mr-2 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${i.id}')">Approve</button>
+                                   <button class="px-2 py-1 mr-2 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="rejectInv('${i.id}')">Reject</button>` : ''}
+      ${i.status === 'approved' ? `<button class="px-2 py-1 mr-2 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="markPaid('${i.id}')">Mark Paid</button>` : ''}
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="details('${i.id}')">Details</button>`;
             return `
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${i.id}</td>
@@ -492,56 +539,83 @@
         <td class="py-2 px-4 capitalize">${i.type}</td>
         <td class="py-2 px-4">${fmt(i.amt, i.ccy)}</td>
         <td class="py-2 px-4">${fmt(Math.round(inHome), home)}</td>
-        <td class="py-2 px-4">${badge(i.status.charAt(0).toUpperCase() + i.status.slice(1), pill)}</td>
-        <td class="py-2 px-4 text-right">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${i.id}')">Approve</button>
-        </td>
+        <td class="py-2 px-4">${badge(cap(i.status), pill)}</td>
+        <td class="py-2 px-4 text-right">${actions}</td>
       </tr>`;
         }).join('') || `<tr><td colspan="8" class="py-6 text-center text-slate-500">No invoices</td></tr>`;
     }
-    function approve(id) { const x = INVS.find(i => i.id === id); if (!x) return; x.status = 'approved'; renderQueue(); }
+    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+    function byId(id) { return STORE.INVS.find(i => i.id === id); }
 
-    /* ---------- Create Preview ---------- */
+    function approve(id) {
+        const x = byId(id); if (!x) return;
+        x.status = 'approved'; x.ts = x.ts || {}; x.ts.approved = new Date().toISOString();
+        persist(); audit(`Approved ${id}`, 'approve'); renderQueue(); renderBatches(); drawCharts();
+    }
+    function rejectInv(id) {
+        const x = byId(id); if (!x) return;
+        x.status = 'rejected'; persist(); audit(`Rejected ${id}`, 'reject'); renderQueue(); drawCharts();
+    }
+    function markPaid(id) {
+        const x = byId(id); if (!x) return;
+        x.status = 'paid'; x.ts = x.ts || {}; x.ts.paid = new Date().toISOString();
+        persist(); audit(`Marked paid ${id}`, 'pay'); renderQueue(); renderBatches(); drawCharts();
+    }
+    function details(id) { alert(JSON.stringify(byId(id), null, 2)); }
+
+    /* ---------- Create ---------- */
     function previewCreate() {
-        const home = $('homeCcy').value; const ccy = $('cCcy').value; const amt = Number($('cAmt').value || 0);
-        if (!amt) { $('fxPreview').textContent = '—'; $('fxConverted').textContent = '—'; $('fxWithhold').textContent = '—'; $('fxNet').textContent = '—'; return; }
-        const usd = amt * (FX[ccy] || 1);
-        const homePerUSD = FX[home] || 1;
-        const converted = usd / (1 / homePerUSD);
-        const whPct = $('opHoldTax').checked ? (guessWH($('cCountry').value) || 0) : 0;
+        const home = homeCcy.value, ccy = $('cCcy').value, amt = Number($('cAmt').value || 0);
+        if (!amt) { fxPreview.textContent = '—'; fxConverted.textContent = '—'; fxWithhold.textContent = '—'; fxNet.textContent = '—'; return; }
+        const rate = (STORE.FX[ccy] || 1) / (STORE.FX[home] || 1);
+        const converted = convert(amt, ccy, home);
+        const whPct = $('opHoldTax').checked ? (guessWH(($('cCountry').value || '').trim()) || 0) : 0;
         const fee = $('opFxFee').checked ? 8 : 0;
         const whAmt = converted * (whPct / 100);
         const net = converted - whAmt - fee;
-        $('fxPreview').textContent = `1 ${ccy} ≈ ${(FX[ccy] / (FX[home] || 1)).toFixed(4)} ${home}`;
-        $('fxConverted').textContent = fmt(Math.round(converted), home);
-        $('fxWithhold').textContent = `${fmt(Math.round(whAmt), home)} (${whPct}%)`;
-        $('fxNet').textContent = fmt(Math.round(net), home);
+        fxPreview.textContent = `1 ${ccy} ≈ ${rate.toFixed(4)} ${home}`;
+        fxConverted.textContent = fmt(Math.round(converted), home);
+        fxWithhold.textContent = `${fmt(Math.round(whAmt), home)} (${whPct}%)`;
+        fxNet.textContent = fmt(Math.max(0, Math.round(net)), home);
     }
-    function guessWH(cc) { const p = PRESETS.find(x => x.cc.toLowerCase() === String(cc || '').toLowerCase()); return p ? p.wh : 3; }
-    function addInvoiceFromCreate() {
-        const name = $('cName').value || 'Unknown', country = $('cCountry').value || '—', type = $('cType').value || 'contractor', ccy = $('cCcy').value || 'USD', amt = Number($('cAmt').value || 0);
+    function guessWH(cc) { const p = STORE.PRESETS.find(x => x.cc.toLowerCase() === String(cc).toLowerCase()); return p ? p.wh : 3; }
+
+    function addInvoiceFromCreate(status = 'pending', draft = false) {
+        const name = $('cName').value.trim() || 'Unknown';
+        const country = $('cCountry').value.trim() || '—';
+        const type = $('cType').value || 'contractor';
+        const ccy = $('cCcy').value || 'USD';
+        const amt = Number($('cAmt').value || 0);
+        const period = $('cPeriod').value || '';
+        const desc = $('cDesc').value || '';
         if (!amt) { alert('Amount required'); return; }
-        INVS.push({ id: 'RI-' + Date.now(), name, country, type, ccy, amt, status: $('opAutoApprove').checked ? 'approved' : 'pending' });
-        renderQueue();
+        const id = 'RI-' + Date.now();
+        const autoApprove = $('opAutoApprove').checked && amt <= 2500;
+        const st = draft ? 'pending' : (autoApprove ? 'approved' : status);
+        const ts = { created: new Date().toISOString() };
+        if (st === 'approved') ts.approved = new Date().toISOString();
+        STORE.INVS.push({ id, name, country, type, ccy, amt, status: st, period, desc, ts });
+        persist(); audit(`Created invoice ${id} (${ccy} ${amt})`, 'create');
+        alert(draft ? '✅ Draft saved' : '📨 Submitted');
+        renderQueue(); drawCharts();
     }
 
     /* ---------- FX Simulator ---------- */
     function simulateFx() {
         const from = $('fxFrom').value, to = $('fxTo').value, amt = Number($('fxAmt').value || 0), wh = Number($('fxWh').value || 0), fee = Number($('fxFee').value || 0);
         if (!amt) { $('simRate').textContent = '—'; $('simConv').textContent = '—'; $('simWh').textContent = '—'; $('simNet').textContent = '—'; return; }
-        const usd = amt * (FX[from] || 1);
-        const homePerUSD = FX[to] || 1;
-        const conv = usd / (1 / homePerUSD);
+        const rate = (STORE.FX[from] || 1) / (STORE.FX[to] || 1);
+        const conv = convert(amt, from, to);
         const whAmt = conv * (wh / 100);
-        $('simRate').textContent = `1 ${from} ≈ ${(FX[from] / (FX[to] || 1)).toFixed(4)} ${to}`;
+        $('simRate').textContent = `1 ${from} ≈ ${rate.toFixed(4)} ${to}`;
         $('simConv').textContent = fmt(Math.round(conv), to);
         $('simWh').textContent = fmt(Math.round(whAmt), to);
-        $('simNet').textContent = fmt(Math.round(conv - whAmt - fee), to);
+        $('simNet').textContent = fmt(Math.max(0, Math.round(conv - whAmt - fee)), to);
     }
 
     /* ---------- Presets ---------- */
     function renderPresets() {
-        $('countryPresets').innerHTML = PRESETS.map(p => `
+        $('countryPresets').innerHTML = STORE.PRESETS.map(p => `
     <li class="flex items-center justify-between p-2 rounded bg-slate-50">
       <span>${p.label}</span>
       <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50"
@@ -549,15 +623,19 @@
     </li>`).join('');
     }
     function applyPreset(cc, ccy, wh) {
-        $('cCountry').value = cc; $('cCcy').value = ccy; $('fxWh').value = wh; previewCreate(); simulateFx();
+        $('cCountry').value = cc; $('cCcy').value = ccy; $('fxWh').value = wh;
+        previewCreate(); simulateFx();
     }
 
     /* ---------- Disburse ---------- */
     function renderBatches() {
         const f = $('payFilter').value;
-        const data = f === 'all' ? BATCHES : BATCHES.filter(b => b.status === f);
+        const data = f === 'all' ? STORE.BATCHES : STORE.BATCHES.filter(b => b.status === f);
         $('payRows').innerHTML = data.map(b => {
             const pill = b.status === 'sent' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
+            const actions = b.status === 'queued'
+                ? `<button class="px-2 py-1 mr-2 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="sendBatch('${b.id}')">Mark Sent</button>`
+                : '';
             return `
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${b.id}</td>
@@ -565,26 +643,55 @@
         <td class="py-2 px-4">${b.count}</td>
         <td class="py-2 px-4">${fmt(b.amount, b.ccy)}</td>
         <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${b.status}</span></td>
-        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button></td>
+        <td class="py-2 px-4 text-right">
+          ${actions}
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch ${b.id}\\nItems: '+(b.items?.length||0))">Details</button>
+        </td>
       </tr>`;
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No batches</td></tr>`;
+    }
+    function generatePaymentBatches() {
+        // Group approved invoices by currency into a queued batch and mark them paid-after-send later.
+        const approved = STORE.INVS.filter(i => i.status === 'approved');
+        if (!approved.length) { alert('No approved invoices'); return; }
+        const byCcy = {};
+        approved.forEach(i => { (byCcy[i.ccy] = byCcy[i.ccy] || []).push(i); });
+        Object.entries(byCcy).forEach(([ccy, items]) => {
+            const amount = items.reduce((s, i) => s + i.amt, 0);
+            const id = 'RB-' + String(Date.now()).slice(-6);
+            STORE.BATCHES.unshift({ id, ccy, count: items.length, amount, status: 'queued', items: items.map(i => i.id), ts: { created: new Date().toISOString() } });
+        });
+        persist(); audit(`Generated ${Object.keys(byCcy).length} payment batch(es)`, 'batch'); renderBatches();
+    }
+    function sendBatch(id) {
+        const b = STORE.BATCHES.find(x => x.id === id); if (!b) return;
+        b.status = 'sent'; b.ts = b.ts || {}; b.ts.sent = new Date().toISOString();
+        // Mark invoices as paid
+        (b.items || []).forEach(iid => { const inv = byId(iid); if (inv) { inv.status = 'paid'; inv.ts = inv.ts || {}; inv.ts.paid = new Date().toISOString(); } });
+        persist(); audit(`Batch ${id} marked sent`, 'batch'); renderBatches(); renderQueue(); drawCharts();
     }
 
     /* ---------- Compliance ---------- */
     function renderCompliance() {
-        $('compList').innerHTML = COMP.map(c => `
+        $('compList').innerHTML = STORE.COMP.map(c => `
     <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-      <label class="flex items-center gap-2 text-sm"><input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleComp(${c.id}, this.checked)"> ${c.text}</label>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleComp(${c.id}, this.checked)"> ${c.text}
+      </label>
       ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
     </div>`).join('');
     }
-    function toggleComp(id, on) { const x = COMP.find(c => c.id === id); if (x) { x.done = on; renderCompliance(); } }
+    function toggleComp(id, on) { const x = STORE.COMP.find(c => c.id === id); if (x) { x.done = on; persist(); renderCompliance(); } }
+
     function renderWithhold() {
-        const sum = Math.round(INVS.reduce((s, i) => s + (i.status !== 'rejected' ? (i.amt * (i.ccy === 'INR' ? FX.INR : FX[i.ccy] || 1)) * 0.03 : 0), 0));
+        // estimate: 3% of USD-equivalent for all non-rejected
+        const usdSum = STORE.INVS
+            .filter(i => i.status !== 'rejected')
+            .reduce((s, i) => s + (Number(i.amt || 0) * (STORE.FX[i.ccy] || 1)), 0);
+        const estWh = Math.round(usdSum * 0.03);
         $('withholdList').innerHTML = `
-    <li class="flex items-center justify-between"><span>Estimated Withholding</span><span class="font-medium">${fmt(sum)}</span></li>
-    <li class="flex items-center justify-between"><span>FX / Transfer Fees</span><span class="font-medium">${fmt(32)}</span></li>
-  `;
+    <li class="flex items-center justify-between"><span>Estimated Withholding</span><span class="font-medium">${fmt(estWh, 'USD')}</span></li>
+    <li class="flex items-center justify-between"><span>FX / Transfer Fees</span><span class="font-medium">${fmt(32, 'USD')}</span></li>`;
     }
     function renderResidency() {
         const items = [
@@ -602,34 +709,102 @@
     function openInvModal() { $('invModal').classList.remove('hidden'); }
     function closeInvModal() { $('invModal').classList.add('hidden'); }
     function saveInv() {
-        const name = $('mName').value || 'Unknown', country = $('mCountry').value || '—', ccy = $('mCcy').value || 'USD', amt = Number($('mAmt').value || 0);
+        const name = $('mName').value.trim() || 'Unknown';
+        const country = $('mCountry').value.trim() || '—';
+        const ccy = $('mCcy').value || 'USD';
+        const amt = Number($('mAmt').value || 0);
+        const type = $('mType').value || 'contractor';
+        const period = $('mPeriod').value || '';
+        const desc = $('mDesc').value || '';
         if (!amt) { alert('Amount required'); return; }
-        INVS.push({ id: 'RI-' + Date.now(), name, country, type: 'contractor', ccy, amt, status: 'pending' });
-        closeInvModal(); renderQueue();
+        const id = 'RI-' + Date.now();
+        STORE.INVS.push({ id, name, country, type, ccy, amt, status: 'pending', period, desc, ts: { created: new Date().toISOString() } });
+        persist(); audit(`Created invoice ${id} (quick)`, 'create');
+        closeInvModal(); renderQueue(); drawCharts();
     }
 
-    /* ---------- Reports (Charts) ---------- */
+    /* ---------- Reports (Chart.js) ---------- */
     let chartsReady = false, spendC, slaC;
     function ensureCharts() {
         if (typeof Chart !== 'undefined') { chartsReady = true; return; }
         if (chartsReady) return;
-        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); };
+        document.head.appendChild(s);
     }
     function drawCharts() {
+        if (!chartsReady) return;
         const c1 = document.getElementById('spendChart').getContext('2d');
         const c2 = document.getElementById('slaChart').getContext('2d');
         spendC && spendC.destroy(); slaC && slaC.destroy();
-        const byCcy = { USD: 6000, INR: 215000, EUR: 0, GBP: 0 };
-        spendC = new Chart(c1, { type: 'pie', data: { labels: Object.keys(byCcy), datasets: [{ data: Object.values(byCcy), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
-        slaC = new Chart(c2, { type: 'bar', data: { labels: ['Submit', 'Approve', 'Pay'], datasets: [{ label: 'Median Hours', data: [8, 20, 12], backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+
+        // Spend by currency (paid+approved pipeline)
+        const byCcy = STORE.INVS
+            .filter(i => i.status === 'approved' || i.status === 'paid')
+            .reduce((m, i) => (m[i.ccy] = (m[i.ccy] || 0) + Number(i.amt || 0), m), {});
+        const labels = Object.keys(byCcy).length ? Object.keys(byCcy) : ['USD', 'INR', 'EUR', 'GBP'];
+        const values = Object.keys(byCcy).length ? Object.values(byCcy) : [0, 0, 0, 0];
+
+        spendC = new Chart(c1, {
+            type: 'pie',
+            data: {
+                labels, datasets: [{
+                    data: values, borderWidth: 2, borderColor: '#fff',
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // SLA: median hours for submit->approve, approve->pay
+        const diffsSA = STORE.INVS.filter(i => i.ts?.created && i.ts?.approved)
+            .map(i => (new Date(i.ts.approved) - new Date(i.ts.created)) / 36e5);
+        const diffsAP = STORE.INVS.filter(i => i.ts?.approved && i.ts?.paid)
+            .map(i => (new Date(i.ts.paid) - new Date(i.ts.approved)) / 36e5);
+        const medSA = median(diffsSA) || 0, medAP = median(diffsAP) || 0;
+
+        slaC = new Chart(c2, {
+            type: 'bar',
+            data: { labels: ['Submit→Approve', 'Approve→Pay'], datasets: [{ data: [Math.round(medSA), Math.round(medAP)], backgroundColor: '#06b6d4' }] },
+            options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+    }
+    function median(a) { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+
+    /* ---------- Export / Import ---------- */
+    function download(name, text) {
+        const blob = new Blob([text], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 200);
+    }
+    function onImport(e) {
+        const f = e.target.files?.[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const obj = JSON.parse(reader.result);
+                if (!obj || typeof obj !== 'object') throw new Error('bad');
+                // Minimal shape check
+                if (!obj.INVS || !obj.FX) throw new Error('missing keys');
+                STORE = obj; persist(); paintAll();
+                alert('✅ Imported');
+            } catch { alert('❌ Invalid JSON'); }
+        };
+        reader.readAsText(f); e.target.value = '';
+    }
+
+    /* ---------- Paint All ---------- */
+    function paintAll() {
+        renderQueue(); renderBatches(); renderCompliance(); renderWithhold(); renderResidency();
+        previewCreate(); simulateFx(); ensureCharts(); drawCharts();
     }
 </script>
 
 <style>
     .ri-tab.active {
         background-color: #1e293b;
-        color: white;
+        color: #fff;
     }
 
     .ri-tab:not(.active) {

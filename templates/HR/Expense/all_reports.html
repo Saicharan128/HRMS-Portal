@@ -13,6 +13,15 @@
             <button id="newReportBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-plus mr-1"></i> Generate Report
             </button>
+            <button id="exportViewBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export Current View (CSV)
+            </button>
+            <label
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-import mr-1"></i> Import
+                <input id="importJsonInput" type="file" accept="application/json" class="hidden">
+            </label>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
@@ -45,154 +54,122 @@
         <!-- HR Reports -->
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-blue-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-users text-blue-600"></i>
-                </div>
+                <div class="p-2 bg-blue-100 rounded-lg mr-3"><i class="fa-solid fa-users text-blue-600"></i></div>
                 <h3 class="text-lg font-semibold text-slate-800">HR Reports</h3>
             </div>
             <div class="space-y-2">
                 <button onclick="generateQuickReport('employee_roster')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-user-group mr-2 text-slate-500"></i> Employee Roster
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-user-group mr-2 text-slate-500"></i> Employee Roster</button>
                 <button onclick="generateQuickReport('headcount_analysis')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-chart-line mr-2 text-slate-500"></i> Headcount Analysis
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-chart-line mr-2 text-slate-500"></i> Headcount Analysis</button>
                 <button onclick="generateQuickReport('turnover_report')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-door-open mr-2 text-slate-500"></i> Turnover Report
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-door-open mr-2 text-slate-500"></i> Turnover Report</button>
                 <button onclick="generateQuickReport('diversity_metrics')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-balance-scale mr-2 text-slate-500"></i> Diversity Metrics
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-balance-scale mr-2 text-slate-500"></i> Diversity Metrics</button>
                 <button onclick="generateQuickReport('recruitment_pipeline')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-funnel-dollar mr-2 text-slate-500"></i> Recruitment Pipeline
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-funnel-dollar mr-2 text-slate-500"></i> Recruitment Pipeline</button>
             </div>
         </div>
 
         <!-- Performance Reports -->
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-green-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-chart-line text-green-600"></i>
+                <div class="p-2 bg-green-100 rounded-lg mr-3"><i class="fa-solid fa-chart-line text-green-600"></i>
                 </div>
                 <h3 class="text-lg font-semibold text-slate-800">Performance Reports</h3>
             </div>
             <div class="space-y-2">
                 <button onclick="generateQuickReport('performance_summary')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-star mr-2 text-slate-500"></i> Performance Summary
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-star mr-2 text-slate-500"></i> Performance Summary</button>
                 <button onclick="generateQuickReport('goal_achievement')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-target mr-2 text-slate-500"></i> Goal Achievement
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-target mr-2 text-slate-500"></i> Goal Achievement</button>
                 <button onclick="generateQuickReport('review_completion')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-clipboard-check mr-2 text-slate-500"></i> Review Completion
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-clipboard-check mr-2 text-slate-500"></i> Review Completion</button>
                 <button onclick="generateQuickReport('top_performers')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-trophy mr-2 text-slate-500"></i> Top Performers
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-trophy mr-2 text-slate-500"></i> Top Performers</button>
                 <button onclick="generateQuickReport('training_completion')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-graduation-cap mr-2 text-slate-500"></i> Training Completion
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-graduation-cap mr-2 text-slate-500"></i> Training Completion</button>
             </div>
         </div>
 
         <!-- Financial Reports -->
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-yellow-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-dollar-sign text-yellow-600"></i>
+                <div class="p-2 bg-yellow-100 rounded-lg mr-3"><i class="fa-solid fa-dollar-sign text-yellow-600"></i>
                 </div>
                 <h3 class="text-lg font-semibold text-slate-800">Financial Reports</h3>
             </div>
             <div class="space-y-2">
                 <button onclick="generateQuickReport('payroll_summary')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-money-bill mr-2 text-slate-500"></i> Payroll Summary
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-money-bill mr-2 text-slate-500"></i> Payroll Summary</button>
                 <button onclick="generateQuickReport('cost_analysis')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-calculator mr-2 text-slate-500"></i> Cost Analysis
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-calculator mr-2 text-slate-500"></i> Cost Analysis</button>
                 <button onclick="generateQuickReport('expense_reports')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-receipt mr-2 text-slate-500"></i> Expense Reports
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-receipt mr-2 text-slate-500"></i> Expense Reports</button>
                 <button onclick="generateQuickReport('budget_variance')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Budget Variance
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Budget Variance</button>
                 <button onclick="generateQuickReport('contractor_payments')"
-                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-handshake mr-2 text-slate-500"></i> Contractor Payments
-                </button>
+                    class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-handshake mr-2 text-slate-500"></i> Contractor Payments</button>
             </div>
         </div>
     </div>
 
-    <!-- Time & Attendance Reports -->
+    <!-- Time & Attendance + Compliance -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-purple-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-clock text-purple-600"></i>
-                </div>
+                <div class="p-2 bg-purple-100 rounded-lg mr-3"><i class="fa-solid fa-clock text-purple-600"></i></div>
                 <h3 class="text-lg font-semibold text-slate-800">Time & Attendance</h3>
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <button onclick="generateQuickReport('attendance_summary')"
-                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-calendar-days mr-2 text-slate-500"></i> Attendance Summary
-                </button>
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-calendar-days mr-2 text-slate-500"></i> Attendance Summary</button>
                 <button onclick="generateQuickReport('leave_analysis')"
-                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-plane-departure mr-2 text-slate-500"></i> Leave Analysis
-                </button>
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-plane-departure mr-2 text-slate-500"></i> Leave Analysis</button>
                 <button onclick="generateQuickReport('overtime_report')"
-                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-clock mr-2 text-slate-500"></i> Overtime Report
-                </button>
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-clock mr-2 text-slate-500"></i> Overtime Report</button>
                 <button onclick="generateQuickReport('tardiness_report')"
-                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-exclamation-triangle mr-2 text-slate-500"></i> Tardiness Report
-                </button>
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-exclamation-triangle mr-2 text-slate-500"></i> Tardiness Report</button>
             </div>
         </div>
 
-        <!-- Compliance Reports -->
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-red-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-shield-halved text-red-600"></i>
-                </div>
+                <div class="p-2 bg-red-100 rounded-lg mr-3"><i class="fa-solid fa-shield-halved text-red-600"></i></div>
                 <h3 class="text-lg font-semibold text-slate-800">Compliance & Legal</h3>
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <button onclick="generateQuickReport('eeo_report')"
-                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-balance-scale mr-2 text-slate-500"></i> EEO Report
-                </button>
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-balance-scale mr-2 text-slate-500"></i> EEO Report</button>
                 <button onclick="generateQuickReport('safety_incidents')"
-                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-hard-hat mr-2 text-slate-500"></i> Safety Incidents
-                </button>
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-hard-hat mr-2 text-slate-500"></i> Safety Incidents</button>
                 <button onclick="generateQuickReport('policy_compliance')"
-                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-file-contract mr-2 text-slate-500"></i> Policy Compliance
-                </button>
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-file-contract mr-2 text-slate-500"></i> Policy Compliance</button>
                 <button onclick="generateQuickReport('audit_trail')"
-                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-search mr-2 text-slate-500"></i> Audit Trail
-                </button>
+                    class="text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-sm"><i
+                        class="fa-solid fa-search mr-2 text-slate-500"></i> Audit Trail</button>
             </div>
         </div>
     </div>
@@ -200,31 +177,48 @@
     <!-- Reports Dashboard -->
     <div class="rounded-2xl border border-slate-200 bg-white">
         <div class="p-6 border-b border-slate-200">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <h2 class="text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-list mr-2"></i> Generated Reports
                 </h2>
-                <div class="flex items-center gap-2">
-                    <div class="flex items-center gap-2">
-                        <label class="text-sm text-slate-600">Filter:</label>
-                        <select id="reportTypeFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                            <option value="">All Types</option>
-                            <option value="hr">HR Reports</option>
-                            <option value="performance">Performance</option>
-                            <option value="financial">Financial</option>
-                            <option value="attendance">Time & Attendance</option>
-                            <option value="compliance">Compliance</option>
-                        </select>
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="relative">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input id="searchInput" type="text" placeholder="Search reports"
+                            class="w-64 pl-9 pr-10 py-2 rounded-lg border border-slate-300 text-sm">
+                        <button id="clearSearch"
+                            class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <label class="text-sm text-slate-600">Period:</label>
-                        <select id="periodFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                            <option value="7">Last 7 days</option>
-                            <option value="30">Last 30 days</option>
-                            <option value="90">Last 90 days</option>
-                            <option value="all">All time</option>
-                        </select>
-                    </div>
+                    <select id="reportTypeFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <option value="">All Types</option>
+                        <option value="hr">HR Reports</option>
+                        <option value="performance">Performance</option>
+                        <option value="financial">Financial</option>
+                        <option value="attendance">Time & Attendance</option>
+                        <option value="compliance">Compliance</option>
+                    </select>
+                    <select id="periodFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                        <option value="all">All time</option>
+                    </select>
+                    <select id="sortSelect" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <option value="generated_date_desc">Newest</option>
+                        <option value="generated_date_asc">Oldest</option>
+                        <option value="name_asc">Name (A–Z)</option>
+                        <option value="name_desc">Name (Z–A)</option>
+                        <option value="size_desc">Size (big → small)</option>
+                        <option value="size_asc">Size (small → big)</option>
+                    </select>
+                    <select id="pageSize" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <option value="10" selected>10 / page</option>
+                        <option value="25">25 / page</option>
+                        <option value="50">50 / page</option>
+                    </select>
                     <button id="refreshReports"
                         class="px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-sm">
                         <i class="fa-solid fa-rotate mr-1"></i> Refresh
@@ -233,25 +227,27 @@
             </div>
         </div>
 
-        <!-- Loading State -->
+        <!-- Loading -->
         <div id="loadingState" class="p-8 text-center">
             <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
             <p class="mt-2 text-sm text-slate-600">Loading reports...</p>
         </div>
 
-        <!-- Empty State -->
+        <!-- Empty -->
         <div id="emptyState" class="hidden p-8 text-center">
             <i class="fa-solid fa-chart-simple text-4xl text-slate-300 mb-4"></i>
-            <h3 class="text-lg font-medium text-slate-800 mb-2">No Reports Generated Yet</h3>
+            <h3 class="text-lg font-medium text-slate-800 mb-2">No Reports Found</h3>
             <p class="text-slate-600 mb-4">Start by generating your first report from the categories above.</p>
         </div>
 
-        <!-- Reports Table -->
+        <!-- Table -->
         <div id="reportsTable" class="hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
+                            <th class="px-6 py-3 text-left font-medium text-slate-700 w-10"><input id="selectAll"
+                                    type="checkbox"></th>
                             <th class="px-6 py-3 text-left font-medium text-slate-700">Report Name</th>
                             <th class="px-6 py-3 text-left font-medium text-slate-700">Type</th>
                             <th class="px-6 py-3 text-left font-medium text-slate-700">Generated</th>
@@ -261,36 +257,42 @@
                             <th class="px-6 py-3 text-left font-medium text-slate-700">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="reportsTableBody" class="divide-y divide-slate-200">
-                        <!-- Rows will be populated here -->
-                    </tbody>
+                    <tbody id="reportsTableBody" class="divide-y divide-slate-200"></tbody>
                 </table>
+            </div>
+
+            <!-- Bulk bar -->
+            <div id="bulkBar"
+                class="hidden px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div class="text-sm text-slate-700"><span id="bulkCount">0</span> selected</div>
+                <div class="flex items-center gap-2">
+                    <button id="bulkDelete"
+                        class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-100 text-red-700">
+                        <i class="fa-solid fa-trash mr-1"></i> Delete
+                    </button>
+                    <button id="bulkExport"
+                        class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-100">
+                        <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+                    </button>
+                </div>
             </div>
 
             <!-- Pagination -->
             <div id="paginationContainer" class="p-6 border-t border-slate-200 flex items-center justify-between">
-                <div class="text-sm text-slate-600">
-                    Showing <span id="pageInfo">0-0 of 0</span> reports
-                </div>
+                <div class="text-sm text-slate-600">Showing <span id="pageInfo">0-0 of 0</span> reports</div>
                 <div class="flex items-center gap-2">
                     <button id="prevPageBtn" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
-                        disabled>
-                        Previous
-                    </button>
-                    <div id="pageNumbers" class="flex items-center gap-1">
-                        <!-- Page numbers will be populated here -->
-                    </div>
+                        disabled>Previous</button>
+                    <div id="pageNumbers" class="flex items-center gap-1"></div>
                     <button id="nextPageBtn" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
-                        disabled>
-                        Next
-                    </button>
+                        disabled>Next</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Generate Report Modal -->
+<!-- Generate Report Modal (unchanged core layout; wired below) -->
 <div id="generateReportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
@@ -352,17 +354,12 @@
                         </div>
                     </div>
 
-                    <!-- Custom Date Range -->
                     <div id="customDateRange" class="hidden grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
-                            <input type="date" name="start_date"
-                                class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">End Date</label>
-                            <input type="date" name="end_date"
-                                class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">Start Date</label><input
+                                type="date" name="start_date"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">End Date</label><input
+                                type="date" name="end_date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                         </div>
                     </div>
 
@@ -430,9 +427,7 @@
 
                     <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
                         <button type="button" id="cancelGenerate"
-                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
-                            Cancel
-                        </button>
+                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
                         <button type="submit" class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
                             <i class="fa-solid fa-cog mr-1"></i> Generate Report
                         </button>
@@ -458,369 +453,327 @@
                                 class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
                                 <i class="fa-solid fa-download mr-1"></i> Download
                             </button>
-                            <button id="closePreviewModal" class="text-slate-400 hover:text-slate-600">
-                                <i class="fa-solid fa-times text-xl"></i>
-                            </button>
+                            <button id="closePreviewModal" class="text-slate-400 hover:text-slate-600"><i
+                                    class="fa-solid fa-times text-xl"></i></button>
                         </div>
                     </div>
                 </div>
-
-                <div id="reportPreviewContent" class="p-6">
-                    <!-- Report preview will be loaded here -->
-                </div>
+                <div id="reportPreviewContent" class="p-6"></div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Success Toast -->
+<!-- Toasts -->
 <div id="successToast"
     class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
-    <div class="flex items-center">
-        <i class="fa-solid fa-check-circle mr-2"></i>
-        <span id="successMessage"></span>
-    </div>
+    <div class="flex items-center"><i class="fa-solid fa-check-circle mr-2"></i><span id="successMessage"></span></div>
 </div>
-
-<!-- Error Toast -->
 <div id="errorToast"
     class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
-    <div class="flex items-center">
-        <i class="fa-solid fa-exclamation-circle mr-2"></i>
-        <span id="errorMessage"></span>
+    <div class="flex items-center"><i class="fa-solid fa-exclamation-circle mr-2"></i><span id="errorMessage"></span>
     </div>
 </div>
-
-<!-- Info Toast -->
 <div id="infoToast"
     class="fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
-    <div class="flex items-center">
-        <i class="fa-solid fa-info-circle mr-2"></i>
-        <span id="infoMessage"></span>
-    </div>
+    <div class="flex items-center"><i class="fa-solid fa-info-circle mr-2"></i><span id="infoMessage"></span></div>
 </div>
 
 <script>
-    // Initialize reports management
-    document.addEventListener('DOMContentLoaded', function () {
-        initializeReports();
-    });
+    /* ---------- Persistence Keys ---------- */
+    const LS_REPORTS = 'reports_v1';
 
-    // Global state
+    /* ---------- State ---------- */
     let reports = [];
     let filteredReports = [];
+    let selected = new Set();
     let currentPage = 1;
     let totalPages = 1;
     let reportIdCounter = 6;
+    let lastPreviewId = null;
+
+    /* ---------- Init ---------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeReports();
+    });
 
     async function initializeReports() {
         await loadReportsData();
         setupEventListeners();
+        applyFilters(); // this also renders
+    }
+
+    /* ---------- Loading & Mock ---------- */
+    async function loadReportsData() {
+        document.getElementById('loadingState').classList.remove('hidden');
+        await new Promise(r => setTimeout(r, 600)); // simulate latency
+
+        const ls = localStorage.getItem(LS_REPORTS);
+        if (ls) {
+            reports = JSON.parse(ls);
+            reportIdCounter = Math.max(6, ...reports.map(r => r.id)) + 1;
+        } else {
+            reports = [
+                { id: 1, name: "Employee Roster Q4 2024", type: "hr", generated_date: "2024-01-15T10:30:00", generated_by: "Sarah Johnson", file_size: "2.4 MB", format: "pdf", status: "completed", download_count: 15 },
+                { id: 2, name: "Performance Summary December", type: "performance", generated_date: "2024-01-14T14:22:00", generated_by: "Mike Davis", file_size: "1.8 MB", format: "excel", status: "completed", download_count: 8 },
+                { id: 3, name: "Payroll Summary December 2024", type: "financial", generated_date: "2024-01-13T09:15:00", generated_by: "Lisa Brown", file_size: "3.2 MB", format: "pdf", status: "completed", download_count: 22 },
+                { id: 4, name: "Attendance Analysis Q4", type: "attendance", generated_date: "2024-01-12T16:45:00", generated_by: "Tom Wilson", file_size: "1.5 MB", format: "csv", status: "processing", download_count: 0 },
+                { id: 5, name: "EEO Compliance Report 2024", type: "compliance", generated_date: "2024-01-11T11:20:00", generated_by: "Sarah Johnson", file_size: "987 KB", format: "pdf", status: "completed", download_count: 5 }
+            ];
+            persist();
+        }
+
+        updateSummaryStats();
+        document.getElementById('loadingState').classList.add('hidden');
+    }
+
+    /* ---------- Summary ---------- */
+    function updateSummaryStats() {
+        const today = new Date().toDateString();
+        const todayCount = reports.filter(r => new Date(r.generated_date).toDateString() === today).length;
+        const downloads = reports.reduce((s, r) => s + (r.download_count || 0), 0);
+        const scheduledReports = reports.filter(r => r.status === 'scheduled').length;
+
+        $('#totalReports').textContent = reports.length;
+        $('#todayReports').textContent = todayCount;
+        $('#totalDownloads').textContent = downloads;
+        $('#scheduledReports').textContent = scheduledReports;
+    }
+
+    /* ---------- Events ---------- */
+    function setupEventListeners() {
+        // open/close modal
+        $('#newReportBtn').addEventListener('click', openGenerateReportModal);
+        $('#closeGenerateModal').addEventListener('click', () => closeModal('generateReportModal'));
+        $('#cancelGenerate').addEventListener('click', () => closeModal('generateReportModal'));
+        $('#closePreviewModal').addEventListener('click', () => closeModal('reportPreviewModal'));
+
+        // form & controls
+        $('#generateReportForm').addEventListener('submit', handleGenerateReport);
+        document.querySelector('select[name="report_type"]').addEventListener('change', updateTemplateOptions);
+        document.querySelector('select[name="date_range"]').addEventListener('change', toggleCustomDateRange);
+        $('#scheduleReport').addEventListener('change', toggleScheduleOptions);
+
+        // filters/search/sort
+        $('#reportTypeFilter').addEventListener('change', applyFilters);
+        $('#periodFilter').addEventListener('change', applyFilters);
+        $('#sortSelect').addEventListener('change', applyFilters);
+        $('#pageSize').addEventListener('change', () => { currentPage = 1; renderReports(); });
+        $('#refreshReports').addEventListener('click', async () => { await loadReportsData(); applyFilters(); });
+
+        const search = $('#searchInput'); const clearBtn = $('#clearSearch');
+        search.addEventListener('input', debounce(() => {
+            clearBtn.classList.toggle('hidden', !search.value);
+            applyFilters();
+        }, 250));
+        clearBtn.addEventListener('click', () => { search.value = ''; clearBtn.classList.add('hidden'); applyFilters(); });
+
+        // pagination
+        $('#prevPageBtn').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderReports(); } });
+        $('#nextPageBtn').addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderReports(); } });
+
+        // table helpers
+        $('#selectAll').addEventListener('change', (e) => {
+            const idsOnPage = currentPageItems().map(r => r.id);
+            if (e.target.checked) idsOnPage.forEach(id => selected.add(id)); else idsOnPage.forEach(id => selected.delete(id));
+            syncBulkBar(); renderReportsTableOnly();
+        });
+
+        // export/import
+        $('#exportViewBtn').addEventListener('click', () => exportCSV(currentPageItems()));
+        $('#importJsonInput').addEventListener('change', importJSON);
+
+        // bulk actions
+        $('#bulkDelete').addEventListener('click', () => bulkDelete());
+        $('#bulkExport').addEventListener('click', () => exportCSV(reports.filter(r => selected.has(r.id))));
+
+        // download from preview
+        $('#downloadReportBtn').addEventListener('click', () => {
+            if (!lastPreviewId) return;
+            downloadReport(lastPreviewId);
+        });
+
+        // click outside to close modals
+        window.addEventListener('click', (e) => {
+            ['generateReportModal', 'reportPreviewModal'].forEach(id => {
+                const m = $('#' + id);
+                if (e.target === m) closeModal(id);
+            });
+        });
+    }
+
+    /* ---------- Filters / Sort ---------- */
+    function applyFilters() {
+        const typeFilter = $('#reportTypeFilter').value;
+        const periodFilter = $('#periodFilter').value;
+        const search = ($('#searchInput').value || '').toLowerCase();
+
+        filteredReports = reports.filter(report => {
+            const matchesType = !typeFilter || report.type === typeFilter;
+            let matchesPeriod = true;
+            if (periodFilter && periodFilter !== 'all') {
+                const d = new Date(report.generated_date);
+                const cutoff = new Date(Date.now() - parseInt(periodFilter, 10) * 24 * 60 * 60 * 1000);
+                matchesPeriod = d >= cutoff;
+            }
+            const matchesSearch =
+                report.name.toLowerCase().includes(search) ||
+                (report.generated_by || '').toLowerCase().includes(search) ||
+                report.type.toLowerCase().includes(search) ||
+                String(report.id).includes(search);
+
+            return matchesType && matchesPeriod && matchesSearch;
+        });
+
+        sortFiltered();
+        currentPage = 1;
         renderReports();
     }
 
-    async function loadReportsData() {
-        try {
-            document.getElementById('loadingState').classList.remove('hidden');
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Mock reports data
-            const mockReports = [
-                {
-                    id: 1,
-                    name: "Employee Roster Q4 2024",
-                    type: "hr",
-                    generated_date: "2024-01-15T10:30:00",
-                    generated_by: "Sarah Johnson",
-                    file_size: "2.4 MB",
-                    format: "pdf",
-                    status: "completed",
-                    download_count: 15
-                },
-                {
-                    id: 2,
-                    name: "Performance Summary December",
-                    type: "performance",
-                    generated_date: "2024-01-14T14:22:00",
-                    generated_by: "Mike Davis",
-                    file_size: "1.8 MB",
-                    format: "excel",
-                    status: "completed",
-                    download_count: 8
-                },
-                {
-                    id: 3,
-                    name: "Payroll Summary December 2024",
-                    type: "financial",
-                    generated_date: "2024-01-13T09:15:00",
-                    generated_by: "Lisa Brown",
-                    file_size: "3.2 MB",
-                    format: "pdf",
-                    status: "completed",
-                    download_count: 22
-                },
-                {
-                    id: 4,
-                    name: "Attendance Analysis Q4",
-                    type: "attendance",
-                    generated_date: "2024-01-12T16:45:00",
-                    generated_by: "Tom Wilson",
-                    file_size: "1.5 MB",
-                    format: "csv",
-                    status: "processing",
-                    download_count: 0
-                },
-                {
-                    id: 5,
-                    name: "EEO Compliance Report 2024",
-                    type: "compliance",
-                    generated_date: "2024-01-11T11:20:00",
-                    generated_by: "Sarah Johnson",
-                    file_size: "987 KB",
-                    format: "pdf",
-                    status: "completed",
-                    download_count: 5
-                }
-            ];
-
-            reports = mockReports;
-            filteredReports = [...reports];
-
-            // Update summary stats
-            updateSummaryStats();
-
-            document.getElementById('loadingState').classList.add('hidden');
-
-        } catch (error) {
-            console.error('Error loading reports data:', error);
-            document.getElementById('loadingState').classList.add('hidden');
-            showError('Failed to load reports data');
-        }
-    }
-
-    function updateSummaryStats() {
-        const today = new Date().toDateString();
-        const todayReports = reports.filter(r =>
-            new Date(r.generated_date).toDateString() === today
-        ).length;
-
-        const totalDownloads = reports.reduce((sum, r) => sum + r.download_count, 0);
-        const scheduledReports = 3; // Mock scheduled reports count
-
-        document.getElementById('totalReports').textContent = reports.length;
-        document.getElementById('todayReports').textContent = todayReports;
-        document.getElementById('totalDownloads').textContent = totalDownloads;
-        document.getElementById('scheduledReports').textContent = scheduledReports;
-    }
-
-    function setupEventListeners() {
-        // Modal controls
-        document.getElementById('newReportBtn').addEventListener('click', openGenerateReportModal);
-        document.getElementById('closeGenerateModal').addEventListener('click', () => closeModal('generateReportModal'));
-        document.getElementById('cancelGenerate').addEventListener('click', () => closeModal('generateReportModal'));
-        document.getElementById('closePreviewModal').addEventListener('click', () => closeModal('reportPreviewModal'));
-
-        // Form submission
-        document.getElementById('generateReportForm').addEventListener('submit', handleGenerateReport);
-
-        // Filters
-        document.getElementById('reportTypeFilter').addEventListener('change', applyFilters);
-        document.getElementById('periodFilter').addEventListener('change', applyFilters);
-        document.getElementById('refreshReports').addEventListener('click', loadReportsData);
-
-        // Report type change handler
-        document.querySelector('select[name="report_type"]').addEventListener('change', updateTemplateOptions);
-
-        // Date range change handler
-        document.querySelector('select[name="date_range"]').addEventListener('change', toggleCustomDateRange);
-
-        // Schedule checkbox
-        document.getElementById('scheduleReport').addEventListener('change', toggleScheduleOptions);
-
-        // Pagination controls
-        document.getElementById('prevPageBtn').addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderReports();
-            }
-        });
-
-        document.getElementById('nextPageBtn').addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderReports();
-            }
-        });
-
-        // Download report from preview modal
-        document.getElementById('downloadReportBtn').addEventListener('click', () => {
-            showInfo('Download functionality would be implemented here');
-        });
-
-        // Close modals when clicking outside
-        window.addEventListener('click', function (event) {
-            const modals = ['generateReportModal', 'reportPreviewModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (event.target === modal) {
-                    closeModal(modalId);
-                }
-            });
-        });
-    }
-
-    function openGenerateReportModal() {
-        document.getElementById('generateReportModal').classList.remove('hidden');
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
-        if (modalId === 'generateReportModal') {
-            document.getElementById('generateReportForm').reset();
-            document.getElementById('customDateRange').classList.add('hidden');
-            document.getElementById('scheduleOptions').classList.add('hidden');
-        }
-    }
-
-    function updateTemplateOptions() {
-        const reportType = document.querySelector('select[name="report_type"]').value;
-        const templateSelect = document.querySelector('select[name="template_id"]');
-
-        // Clear existing options
-        templateSelect.innerHTML = '<option value="">Select Template</option>';
-
-        const templates = {
-            'hr': [
-                { value: 'employee_roster', text: 'Employee Roster' },
-                { value: 'headcount_analysis', text: 'Headcount Analysis' },
-                { value: 'turnover_report', text: 'Turnover Report' },
-                { value: 'diversity_metrics', text: 'Diversity Metrics' }
-            ],
-            'performance': [
-                { value: 'performance_summary', text: 'Performance Summary' },
-                { value: 'goal_achievement', text: 'Goal Achievement' },
-                { value: 'review_completion', text: 'Review Completion' },
-                { value: 'top_performers', text: 'Top Performers' }
-            ],
-            'financial': [
-                { value: 'payroll_summary', text: 'Payroll Summary' },
-                { value: 'cost_analysis', text: 'Cost Analysis' },
-                { value: 'expense_reports', text: 'Expense Reports' },
-                { value: 'budget_variance', text: 'Budget Variance' }
-            ],
-            'attendance': [
-                { value: 'attendance_summary', text: 'Attendance Summary' },
-                { value: 'leave_analysis', text: 'Leave Analysis' },
-                { value: 'overtime_report', text: 'Overtime Report' },
-                { value: 'tardiness_report', text: 'Tardiness Report' }
-            ],
-            'compliance': [
-                { value: 'eeo_report', text: 'EEO Report' },
-                { value: 'safety_incidents', text: 'Safety Incidents' },
-                { value: 'policy_compliance', text: 'Policy Compliance' },
-                { value: 'audit_trail', text: 'Audit Trail' }
-            ]
+    function sortFiltered() {
+        const mode = $('#sortSelect').value;
+        const sizeToKB = (s) => {
+            // "3.2 MB" / "987 KB"
+            if (!s) return 0;
+            const [num, unit] = s.split(' ');
+            const n = parseFloat(num);
+            return unit.toUpperCase().startsWith('M') ? n * 1024 : n;
         };
+        const cmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 
-        if (templates[reportType]) {
-            templates[reportType].forEach(template => {
-                const option = document.createElement('option');
-                option.value = template.value;
-                option.textContent = template.text;
-                templateSelect.appendChild(option);
-            });
+        switch (mode) {
+            case 'generated_date_asc': filteredReports.sort((a, b) => cmp(new Date(a.generated_date), new Date(b.generated_date))); break;
+            case 'generated_date_desc': filteredReports.sort((a, b) => cmp(new Date(b.generated_date), new Date(a.generated_date))); break;
+            case 'name_asc': filteredReports.sort((a, b) => a.name.localeCompare(b.name)); break;
+            case 'name_desc': filteredReports.sort((a, b) => b.name.localeCompare(a.name)); break;
+            case 'size_asc': filteredReports.sort((a, b) => sizeToKB(a.file_size) - sizeToKB(b.file_size)); break;
+            case 'size_desc': filteredReports.sort((a, b) => sizeToKB(b.file_size) - sizeToKB(a.file_size)); break;
         }
     }
 
-    function toggleCustomDateRange() {
-        const dateRange = document.querySelector('select[name="date_range"]').value;
-        const customRange = document.getElementById('customDateRange');
+    /* ---------- Render ---------- */
+    function renderReports() {
+        if (filteredReports.length === 0) {
+            $('#emptyState').classList.remove('hidden');
+            $('#reportsTable').classList.add('hidden');
+            selected.clear(); syncBulkBar();
+            return;
+        }
+        $('#emptyState').classList.add('hidden');
+        $('#reportsTable').classList.remove('hidden');
+        renderReportsTableOnly();
+        updatePagination();
+    }
 
-        if (dateRange === 'custom') {
-            customRange.classList.remove('hidden');
-        } else {
-            customRange.classList.add('hidden');
+    function renderReportsTableOnly() {
+        const tbody = $('#reportsTableBody');
+        tbody.innerHTML = '';
+        currentPageItems().forEach(report => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50';
+            const checked = selected.has(report.id) ? 'checked' : '';
+            tr.innerHTML = `
+      <td class="px-6 py-4"><input type="checkbox" ${checked} onchange="toggleSelect(${report.id}, this.checked)"></td>
+      <td class="px-6 py-4"><div><div class="font-medium text-slate-800">${escapeHTML(report.name)}</div><div class="text-sm text-slate-600">ID: #${report.id}</div></div></td>
+      <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-medium ${getTypeBadgeClass(report.type)}">${formatType(report.type)}</span></td>
+      <td class="px-6 py-4 text-slate-800">${formatDate(report.generated_date)}</td>
+      <td class="px-6 py-4 text-slate-800">${escapeHTML(report.generated_by)}</td>
+      <td class="px-6 py-4 text-slate-800">${report.file_size}</td>
+      <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(report.status)}">${formatStatus(report.status)}</span></td>
+      <td class="px-6 py-4">
+        <div class="flex items-center gap-2">
+          ${report.status === 'completed' ? `
+            <button onclick="previewReport(${report.id})" class="text-blue-600 hover:text-blue-800" title="Preview"><i class="fa-solid fa-eye"></i></button>
+            <button onclick="downloadReport(${report.id})" class="text-green-600 hover:text-green-800" title="Download"><i class="fa-solid fa-download"></i></button>
+            <button onclick="shareReport(${report.id})" class="text-purple-600 hover:text-purple-800" title="Share"><i class="fa-solid fa-share"></i></button>
+          ` : `<span class="text-slate-400"><i class="fa-solid fa-clock" title="Processing"></i></span>`}
+          <button onclick="deleteReport(${report.id})" class="text-red-600 hover:text-red-800" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </td>
+    `;
+            tbody.appendChild(tr);
+        });
+
+        // select-all state
+        const idsOnPage = currentPageItems().map(r => r.id);
+        $('#selectAll').checked = idsOnPage.length > 0 && idsOnPage.every(id => selected.has(id));
+        syncBulkBar();
+    }
+
+    function updatePagination() {
+        const itemsPerPage = parseInt($('#pageSize').value, 10);
+        totalPages = Math.max(1, Math.ceil(filteredReports.length / itemsPerPage));
+        const start = (currentPage - 1) * itemsPerPage + 1;
+        const end = Math.min(currentPage * itemsPerPage, filteredReports.length);
+        $('#pageInfo').textContent = `${filteredReports.length ? start : 0}-${filteredReports.length ? end : 0} of ${filteredReports.length}`;
+
+        $('#prevPageBtn').disabled = currentPage === 1;
+        $('#nextPageBtn').disabled = currentPage === totalPages;
+
+        const pageNumbers = $('#pageNumbers'); pageNumbers.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = i === currentPage ? 'px-3 py-1 rounded bg-slate-800 text-white text-sm' : 'px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50';
+                btn.onclick = () => { currentPage = i; renderReports(); };
+                pageNumbers.appendChild(btn);
+            } else if (Math.abs(i - currentPage) === 3) {
+                const dots = document.createElement('span'); dots.textContent = '...'; dots.className = 'px-2 text-slate-400';
+                pageNumbers.appendChild(dots);
+            }
         }
     }
 
-    function toggleScheduleOptions() {
-        const scheduleCheckbox = document.getElementById('scheduleReport');
-        const scheduleOptions = document.getElementById('scheduleOptions');
-
-        if (scheduleCheckbox.checked) {
-            scheduleOptions.classList.remove('hidden');
-        } else {
-            scheduleOptions.classList.add('hidden');
-        }
+    function currentPageItems() {
+        const itemsPerPage = parseInt($('#pageSize').value, 10);
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredReports.slice(start, start + itemsPerPage);
     }
 
+    /* ---------- Generate / Quick ---------- */
     async function handleGenerateReport(e) {
         e.preventDefault();
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const original = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Generating...';
+        submitBtn.disabled = true;
 
         try {
-            const formData = new FormData(e.target);
-            const reportData = Object.fromEntries(formData.entries());
+            const data = Object.fromEntries(new FormData(form).entries());
+            await new Promise(r => setTimeout(r, 800));
 
-            // Show loading state
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Generating...';
-            submitBtn.disabled = true;
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // Create a new report based on form data
             const newReport = {
                 id: reportIdCounter++,
-                name: reportData.report_name || `${formatReportName(reportData.template_id)} - ${new Date().toLocaleDateString()}`,
-                type: reportData.report_type,
+                name: data.report_name || `${formatReportName(data.template_id)} - ${new Date().toLocaleDateString()}`,
+                type: data.report_type,
                 generated_date: new Date().toISOString(),
                 generated_by: "Current User",
                 file_size: `${(Math.random() * 3 + 0.5).toFixed(1)} MB`,
-                format: reportData.format,
-                status: "completed",
+                format: data.format,
+                status: data.schedule_report ? 'scheduled' : 'completed',
                 download_count: 0
             };
-
-            // Add to reports array
             reports.unshift(newReport);
-            filteredReports = [...reports];
-
-            console.log('Generated report:', newReport);
-
-            showSuccess('Report generated successfully!');
-
-            // Close modal and update display
+            persist();
+            showSuccess('Report generated successfully');
             closeModal('generateReportModal');
             updateSummaryStats();
-            renderReports();
-
-            // Reset button
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-
-        } catch (error) {
-            console.error('Error generating report:', error);
+            applyFilters();
+        } catch (err) {
+            console.error(err);
             showError('Failed to generate report');
-
-            // Reset button
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '<i class="fa-solid fa-cog mr-1"></i> Generate Report';
+        } finally {
+            submitBtn.innerHTML = original;
             submitBtn.disabled = false;
         }
     }
 
     async function generateQuickReport(reportType) {
         try {
-            showInfo(`Generating ${formatReportName(reportType)} report...`);
-
-            // Simulate quick report generation
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Create new report
+            showInfo(`Generating ${formatReportName(reportType)}...`);
+            await new Promise(r => setTimeout(r, 600));
             const newReport = {
                 id: reportIdCounter++,
                 name: `${formatReportName(reportType)} - ${new Date().toLocaleDateString()}`,
@@ -832,588 +785,253 @@
                 status: "completed",
                 download_count: 0
             };
-
-            // Add to reports array
             reports.unshift(newReport);
-            filteredReports = [...reports];
-
-            showSuccess(`${formatReportName(reportType)} report generated successfully!`);
-
+            persist();
+            showSuccess(`${formatReportName(reportType)} generated`);
             updateSummaryStats();
-            renderReports();
-
-        } catch (error) {
-            console.error('Error generating quick report:', error);
+            applyFilters();
+        } catch (e) {
+            console.error(e);
             showError('Failed to generate report');
         }
     }
 
-    function getReportTypeFromTemplate(template) {
-        const templateTypeMap = {
-            'employee_roster': 'hr',
-            'headcount_analysis': 'hr',
-            'turnover_report': 'hr',
-            'diversity_metrics': 'hr',
-            'recruitment_pipeline': 'hr',
-            'performance_summary': 'performance',
-            'goal_achievement': 'performance',
-            'review_completion': 'performance',
-            'top_performers': 'performance',
-            'training_completion': 'performance',
-            'payroll_summary': 'financial',
-            'cost_analysis': 'financial',
-            'expense_reports': 'financial',
-            'budget_variance': 'financial',
-            'contractor_payments': 'financial',
-            'attendance_summary': 'attendance',
-            'leave_analysis': 'attendance',
-            'overtime_report': 'attendance',
-            'tardiness_report': 'attendance',
-            'eeo_report': 'compliance',
-            'safety_incidents': 'compliance',
-            'policy_compliance': 'compliance',
-            'audit_trail': 'compliance'
-        };
-        return templateTypeMap[template] || 'hr';
+    /* ---------- Preview Builders ---------- */
+    function previewReport(id) {
+        const report = reports.find(r => r.id === id); if (!report) return;
+        lastPreviewId = id;
+        $('#reportPreviewContent').innerHTML = generateReportPreview(report);
+        $('#reportPreviewModal').classList.remove('hidden');
     }
-
-    function formatReportName(reportType) {
-        return reportType.split('_').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
-    }
-
-    function applyFilters() {
-        const typeFilter = document.getElementById('reportTypeFilter').value;
-        const periodFilter = document.getElementById('periodFilter').value;
-
-        filteredReports = reports.filter(report => {
-            const matchesType = !typeFilter || report.type === typeFilter;
-
-            let matchesPeriod = true;
-            if (periodFilter && periodFilter !== 'all') {
-                const reportDate = new Date(report.generated_date);
-                const now = new Date();
-                const daysAgo = parseInt(periodFilter);
-                const cutoffDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
-                matchesPeriod = reportDate >= cutoffDate;
-            }
-
-            return matchesType && matchesPeriod;
-        });
-
-        currentPage = 1;
-        renderReports();
-    }
-
-    function renderReports() {
-        if (filteredReports.length === 0) {
-            document.getElementById('emptyState').classList.remove('hidden');
-            document.getElementById('reportsTable').classList.add('hidden');
-            return;
-        }
-
-        document.getElementById('emptyState').classList.add('hidden');
-        document.getElementById('reportsTable').classList.remove('hidden');
-
-        renderReportsTable();
-        updatePagination();
-    }
-
-    function renderReportsTable() {
-        const tbody = document.getElementById('reportsTableBody');
-        tbody.innerHTML = '';
-
-        const itemsPerPage = 10;
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const pageReports = filteredReports.slice(startIndex, endIndex);
-
-        pageReports.forEach(report => {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-slate-50';
-
-            row.innerHTML = `
-            <td class="px-6 py-4">
-                <div>
-                    <div class="font-medium text-slate-800">${report.name}</div>
-                    <div class="text-sm text-slate-600">ID: #${report.id}</div>
-                </div>
-            </td>
-            <td class="px-6 py-4">
-                <span class="px-2 py-1 rounded text-xs font-medium ${getTypeBadgeClass(report.type)}">
-                    ${formatType(report.type)}
-                </span>
-            </td>
-            <td class="px-6 py-4 text-slate-800">${formatDate(report.generated_date)}</td>
-            <td class="px-6 py-4 text-slate-800">${report.generated_by}</td>
-            <td class="px-6 py-4 text-slate-800">${report.file_size}</td>
-            <td class="px-6 py-4">
-                <span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(report.status)}">
-                    ${formatStatus(report.status)}
-                </span>
-            </td>
-            <td class="px-6 py-4">
-                <div class="flex items-center gap-2">
-                    ${report.status === 'completed' ? `
-                        <button onclick="previewReport(${report.id})" 
-                            class="text-blue-600 hover:text-blue-800" title="Preview">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-                        <button onclick="downloadReport(${report.id})" 
-                            class="text-green-600 hover:text-green-800" title="Download">
-                            <i class="fa-solid fa-download"></i>
-                        </button>
-                        <button onclick="shareReport(${report.id})" 
-                            class="text-purple-600 hover:text-purple-800" title="Share">
-                            <i class="fa-solid fa-share"></i>
-                        </button>
-                    ` : `
-                        <span class="text-slate-400">
-                            <i class="fa-solid fa-clock" title="Processing"></i>
-                        </span>
-                    `}
-                    <button onclick="deleteReport(${report.id})" 
-                        class="text-red-600 hover:text-red-800" title="Delete">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-
-            tbody.appendChild(row);
-        });
-    }
-
-    function updatePagination() {
-        const itemsPerPage = 10;
-        totalPages = Math.ceil(filteredReports.length / itemsPerPage);
-
-        const start = (currentPage - 1) * itemsPerPage + 1;
-        const end = Math.min(currentPage * itemsPerPage, filteredReports.length);
-        document.getElementById('pageInfo').textContent = `${start}-${end} of ${filteredReports.length}`;
-
-        document.getElementById('prevPageBtn').disabled = currentPage === 1;
-        document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
-
-        // Update page numbers
-        const pageNumbers = document.getElementById('pageNumbers');
-        pageNumbers.innerHTML = '';
-
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
-                const pageBtn = document.createElement('button');
-                pageBtn.textContent = i;
-                pageBtn.className = i === currentPage
-                    ? 'px-3 py-1 rounded bg-slate-800 text-white text-sm'
-                    : 'px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50';
-                pageBtn.onclick = () => goToPage(i);
-                pageNumbers.appendChild(pageBtn);
-            } else if (Math.abs(i - currentPage) === 3) {
-                const ellipsis = document.createElement('span');
-                ellipsis.textContent = '...';
-                ellipsis.className = 'px-2 text-slate-400';
-                pageNumbers.appendChild(ellipsis);
-            }
-        }
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        renderReports();
-    }
-
-    function getTypeBadgeClass(type) {
-        const classes = {
-            'hr': 'bg-blue-100 text-blue-700',
-            'performance': 'bg-green-100 text-green-700',
-            'financial': 'bg-yellow-100 text-yellow-700',
-            'attendance': 'bg-purple-100 text-purple-700',
-            'compliance': 'bg-red-100 text-red-700'
-        };
-        return classes[type] || 'bg-slate-100 text-slate-700';
-    }
-
-    function formatType(type) {
-        const types = {
-            'hr': 'HR Report',
-            'performance': 'Performance',
-            'financial': 'Financial',
-            'attendance': 'Time & Attendance',
-            'compliance': 'Compliance'
-        };
-        return types[type] || type;
-    }
-
-    function getStatusBadgeClass(status) {
-        const classes = {
-            'completed': 'bg-green-100 text-green-700',
-            'processing': 'bg-blue-100 text-blue-700',
-            'failed': 'bg-red-100 text-red-700',
-            'scheduled': 'bg-yellow-100 text-yellow-700'
-        };
-        return classes[status] || 'bg-slate-100 text-slate-700';
-    }
-
-    function formatStatus(status) {
-        return status.charAt(0).toUpperCase() + status.slice(1);
-    }
-
-    function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    function previewReport(reportId) {
-        const report = reports.find(r => r.id === reportId);
-        if (!report) return;
-
-        const modal = document.getElementById('reportPreviewModal');
-        const content = document.getElementById('reportPreviewContent');
-
-        // Generate mock report preview
-        content.innerHTML = generateReportPreview(report);
-
-        modal.classList.remove('hidden');
-    }
-
     function generateReportPreview(report) {
-        // Generate different previews based on report type
         switch (report.type) {
-            case 'hr':
-                return generateHRReportPreview(report);
-            case 'performance':
-                return generatePerformanceReportPreview(report);
-            case 'financial':
-                return generateFinancialReportPreview(report);
-            case 'attendance':
-                return generateAttendanceReportPreview(report);
-            case 'compliance':
-                return generateComplianceReportPreview(report);
-            default:
-                return '<p class="text-slate-600">Report preview not available.</p>';
+            case 'hr': return hrPreview(report);
+            case 'performance': return perfPreview(report);
+            case 'financial': return finPreview(report);
+            case 'attendance': return attPreview(report);
+            case 'compliance': return compPreview(report);
+            default: return '<p class="text-slate-600">Report preview not available.</p>';
         }
     }
-
-    function generateHRReportPreview(report) {
+    function hrPreview(r) {
         return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Total Employees</h5>
-                    <p class="text-2xl font-bold text-blue-600">247</p>
-                </div>
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">New Hires</h5>
-                    <p class="text-2xl font-bold text-green-600">15</p>
-                </div>
-                <div class="bg-red-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Departures</h5>
-                    <p class="text-2xl font-bold text-red-600">8</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Department Breakdown</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Engineering</span>
-                        <span class="font-medium">95 employees</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Sales</span>
-                        <span class="font-medium">42 employees</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Marketing</span>
-                        <span class="font-medium">28 employees</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+  <div class="space-y-6">
+    <div class="border-b border-slate-200 pb-4">
+      <h4 class="text-xl font-semibold text-slate-800">${escapeHTML(r.name)}</h4>
+      <p class="text-slate-600">Generated on ${formatDate(r.generated_date)} by ${escapeHTML(r.generated_by)}</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-blue-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Total Employees</h5><p class="text-2xl font-bold text-blue-600">247</p></div>
+      <div class="bg-green-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">New Hires</h5><p class="text-2xl font-bold text-green-600">15</p></div>
+      <div class="bg-red-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Departures</h5><p class="text-2xl font-bold text-red-600">8</p></div>
+    </div>
+    <div class="bg-slate-50 p-4 rounded-lg">
+      <h5 class="font-medium text-slate-800 mb-3">Department Breakdown</h5>
+      <div class="space-y-2">
+        <div class="flex justify-between"><span>Engineering</span><span class="font-medium">95 employees</span></div>
+        <div class="flex justify-between"><span>Sales</span><span class="font-medium">42 employees</span></div>
+        <div class="flex justify-between"><span>Marketing</span><span class="font-medium">28 employees</span></div>
+      </div>
+    </div>
+  </div>`;
+    }
+    function perfPreview(r) {
+        return `
+  <div class="space-y-6">
+    <div class="border-b border-slate-200 pb-4">
+      <h4 class="text-xl font-semibold text-slate-800">${escapeHTML(r.name)}</h4>
+      <p class="text-slate-600">Generated on ${formatDate(r.generated_date)} by ${escapeHTML(r.generated_by)}</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-green-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Avg Rating</h5><p class="text-2xl font-bold text-green-600">4.2/5</p></div>
+      <div class="bg-blue-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Reviews Completed</h5><p class="text-2xl font-bold text-blue-600">89%</p></div>
+      <div class="bg-yellow-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Goals Achieved</h5><p class="text-2xl font-bold text-yellow-600">76%</p></div>
+      <div class="bg-purple-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Top Performers</h5><p class="text-2xl font-bold text-purple-600">23</p></div>
+    </div>
+  </div>`;
+    }
+    function finPreview(r) {
+        return `
+  <div class="space-y-6">
+    <div class="border-b border-slate-200 pb-4">
+      <h4 class="text-xl font-semibold text-slate-800">${escapeHTML(r.name)}</h4>
+      <p class="text-slate-600">Generated on ${formatDate(r.generated_date)} by ${escapeHTML(r.generated_by)}</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-green-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Total Payroll</h5><p class="text-2xl font-bold text-green-600">$1.2M</p></div>
+      <div class="bg-blue-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Benefits Cost</h5><p class="text-2xl font-bold text-blue-600">$245K</p></div>
+      <div class="bg-yellow-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Expenses</h5><p class="text-2xl font-bold text-yellow-600">$89K</p></div>
+    </div>
+  </div>`;
+    }
+    function attPreview(r) {
+        return `
+  <div class="space-y-6">
+    <div class="border-b border-slate-200 pb-4">
+      <h4 class="text-xl font-semibold text-slate-800">${escapeHTML(r.name)}</h4>
+      <p class="text-slate-600">Generated on ${formatDate(r.generated_date)} by ${escapeHTML(r.generated_by)}</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-green-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Avg Attendance</h5><p class="text-2xl font-bold text-green-600">94.2%</p></div>
+      <div class="bg-blue-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">On Time %</h5><p class="text-2xl font-bold text-blue-600">87.5%</p></div>
+      <div class="bg-yellow-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Leave Days</h5><p class="text-2xl font-bold text-yellow-600">156</p></div>
+      <div class="bg-red-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Sick Days</h5><p class="text-2xl font-bold text-red-600">89</p></div>
+    </div>
+  </div>`;
+    }
+    function compPreview(r) {
+        return `
+  <div class="space-y-6">
+    <div class="border-b border-slate-200 pb-4">
+      <h4 class="text-xl font-semibold text-slate-800">${escapeHTML(r.name)}</h4>
+      <p class="text-slate-600">Generated on ${formatDate(r.generated_date)} by ${escapeHTML(r.generated_by)}</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-green-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Compliance Score</h5><p class="text-2xl font-bold text-green-600">96%</p></div>
+      <div class="bg-yellow-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Open Issues</h5><p class="text-2xl font-bold text-yellow-600">3</p></div>
+      <div class="bg-blue-50 p-4 rounded-lg"><h5 class="font-medium text-slate-800">Training Complete</h5><p class="text-2xl font-bold text-blue-600">89%</p></div>
+    </div>
+  </div>`;
     }
 
-    function generatePerformanceReportPreview(report) {
-        return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Avg Rating</h5>
-                    <p class="text-2xl font-bold text-green-600">4.2/5</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Reviews Completed</h5>
-                    <p class="text-2xl font-bold text-blue-600">89%</p>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Goals Achieved</h5>
-                    <p class="text-2xl font-bold text-yellow-600">76%</p>
-                </div>
-                <div class="bg-purple-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Top Performers</h5>
-                    <p class="text-2xl font-bold text-purple-600">23</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Performance Distribution</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Exceeds Expectations (4.5-5.0)</span>
-                        <span class="font-medium">18%</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Meets Expectations (3.5-4.4)</span>
-                        <span class="font-medium">67%</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Below Expectations (2.0-3.4)</span>
-                        <span class="font-medium">15%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    }
-
-    function generateFinancialReportPreview(report) {
-        return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Total Payroll</h5>
-                    <p class="text-2xl font-bold text-green-600">$1.2M</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Benefits Cost</h5>
-                    <p class="text-2xl font-bold text-blue-600">$245K</p>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Expenses</h5>
-                    <p class="text-2xl font-bold text-yellow-600">$89K</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Department Costs</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Engineering</span>
-                        <span class="font-medium">$687,500</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Sales</span>
-                        <span class="font-medium">$312,000</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Marketing</span>
-                        <span class="font-medium">$156,000</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    }
-
-    function generateAttendanceReportPreview(report) {
-        return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Avg Attendance</h5>
-                    <p class="text-2xl font-bold text-green-600">94.2%</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">On Time %</h5>
-                    <p class="text-2xl font-bold text-blue-600">87.5%</p>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Leave Days</h5>
-                    <p class="text-2xl font-bold text-yellow-600">156</p>
-                </div>
-                <div class="bg-red-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Sick Days</h5>
-                    <p class="text-2xl font-bold text-red-600">89</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Attendance Trends</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Perfect Attendance</span>
-                        <span class="font-medium">42 employees</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>1-2 Absences</span>
-                        <span class="font-medium">128 employees</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>3+ Absences</span>
-                        <span class="font-medium">77 employees</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    }
-
-    function generateComplianceReportPreview(report) {
-        return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Compliance Score</h5>
-                    <p class="text-2xl font-bold text-green-600">96%</p>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Open Issues</h5>
-                    <p class="text-2xl font-bold text-yellow-600">3</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Training Complete</h5>
-                    <p class="text-2xl font-bold text-blue-600">89%</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Compliance Areas</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Equal Opportunity</span>
-                        <span class="font-medium text-green-600">✓ Compliant</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Safety Training</span>
-                        <span class="font-medium text-green-600">✓ Compliant</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Data Privacy</span>
-                        <span class="font-medium text-yellow-600">⚠ Review Required</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    }
-
-    function downloadReport(reportId) {
-        const report = reports.find(r => r.id === reportId);
-        if (!report) return;
-
-        showInfo(`Downloading ${report.name}...`);
-
-        // Simulate download
+    /* ---------- Actions ---------- */
+    function downloadReport(id) {
+        const r = reports.find(x => x.id === id); if (!r) return;
+        showInfo(`Downloading ${r.name}...`);
         setTimeout(() => {
-            // Update download count
-            report.download_count++;
-            updateSummaryStats();
-            renderReports();
-            showSuccess('Report downloaded successfully!');
-        }, 1000);
+            r.download_count = (r.download_count || 0) + 1;
+            persist(); updateSummaryStats(); renderReportsTableOnly();
+            showSuccess('Report downloaded');
+        }, 600);
     }
-
-    function shareReport(reportId) {
-        const report = reports.find(r => r.id === reportId);
-        if (!report) return;
-
-        // Simple share functionality - in a real app, this would generate shareable links
-        const shareData = {
-            title: report.name,
-            text: `Check out this report: ${report.name}`,
-            url: window.location.href + `?report=${report.id}`
-        };
-
+    function shareReport(id) {
+        const r = reports.find(x => x.id === id); if (!r) return;
+        const url = window.location.origin + window.location.pathname + `?report=${r.id}`;
         if (navigator.share) {
-            navigator.share(shareData);
+            navigator.share({ title: r.name, text: `Check out this report: ${r.name}`, url });
         } else {
-            // Fallback - copy link to clipboard
-            navigator.clipboard.writeText(shareData.url).then(() => {
-                showSuccess('Report link copied to clipboard!');
-            }).catch(() => {
-                showInfo('Share functionality not available');
-            });
+            navigator.clipboard.writeText(url).then(() => showSuccess('Link copied to clipboard')).catch(() => showInfo('Share not available'));
         }
     }
+    function deleteReport(id) {
+        const r = reports.find(x => x.id === id); if (!r) return;
+        if (!confirm(`Delete "${r.name}"? This cannot be undone.`)) return;
+        reports = reports.filter(x => x.id !== id);
+        selected.delete(id);
+        persist(); updateSummaryStats(); applyFilters(); showSuccess('Report deleted');
+    }
 
-    function deleteReport(reportId) {
-        const report = reports.find(r => r.id === reportId);
-        if (!report) return;
+    /* ---------- Bulk ---------- */
+    function toggleSelect(id, on) { on ? selected.add(id) : selected.delete(id); syncBulkBar(); }
+    function syncBulkBar() {
+        const n = selected.size;
+        $('#bulkCount').textContent = n;
+        $('#bulkBar').classList.toggle('hidden', n === 0);
+    }
+    function bulkDelete() {
+        if (selected.size === 0) return;
+        if (!confirm(`Delete ${selected.size} selected report(s)?`)) return;
+        reports = reports.filter(r => !selected.has(r.id));
+        selected.clear(); persist(); updateSummaryStats(); applyFilters(); showSuccess('Selected reports deleted');
+    }
 
-        if (confirm(`Are you sure you want to delete "${report.name}"? This action cannot be undone.`)) {
-            // Simulate deletion
-            reports = reports.filter(r => r.id !== reportId);
-            filteredReports = filteredReports.filter(r => r.id !== reportId);
+    /* ---------- Export / Import ---------- */
+    function exportCSV(items) {
+        if (!items || items.length === 0) { showInfo('Nothing to export'); return; }
+        const cols = ['id', 'name', 'type', 'generated_date', 'generated_by', 'file_size', 'format', 'status', 'download_count'];
+        const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        const csv = [cols.join(','), ...items.map(r => cols.map(c => esc(r[c])).join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = `reports-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 300);
+        showSuccess('CSV exported');
+    }
+    function importJSON(evt) {
+        const f = evt.target.files?.[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const arr = JSON.parse(reader.result);
+                if (!Array.isArray(arr)) throw new Error('Invalid format');
+                // merge by id (replace), otherwise append
+                const byId = new Map(reports.map(r => [r.id, r]));
+                arr.forEach(r => {
+                    if (!r.id) { r.id = reportIdCounter++; }
+                    byId.set(r.id, r);
+                });
+                reports = Array.from(byId.values()).sort((a, b) => new Date(b.generated_date) - new Date(a.generated_date));
+                persist(); updateSummaryStats(); applyFilters(); showSuccess('Reports imported');
+            } catch (e) { showError('Invalid JSON'); }
+        };
+        reader.readAsText(f); evt.target.value = '';
+    }
 
-            updateSummaryStats();
-            renderReports();
-            showSuccess('Report deleted successfully');
+    /* ---------- Modal / Form helpers ---------- */
+    function openGenerateReportModal() { $('#generateReportModal').classList.remove('hidden'); }
+    function closeModal(id) {
+        $('#' + id).classList.add('hidden');
+        if (id === 'generateReportModal') {
+            $('#generateReportForm').reset();
+            $('#customDateRange').classList.add('hidden');
+            $('#scheduleOptions').classList.add('hidden');
         }
     }
-
-    // Toast notification functions
-    function showToast(type, message) {
-        const toast = document.getElementById(`${type}Toast`);
-        const messageElement = document.getElementById(`${type}Message`);
-
-        messageElement.textContent = message;
-        toast.classList.remove('translate-x-full');
-
-        // Auto hide after 3 seconds
-        setTimeout(() => {
-            toast.classList.add('translate-x-full');
-        }, 3000);
+    function updateTemplateOptions() {
+        const reportType = document.querySelector('select[name="report_type"]').value;
+        const templateSelect = document.querySelector('select[name="template_id"]');
+        templateSelect.innerHTML = '<option value="">Select Template</option>';
+        const templates = {
+            hr: [{ value: 'employee_roster', text: 'Employee Roster' }, { value: 'headcount_analysis', text: 'Headcount Analysis' }, { value: 'turnover_report', text: 'Turnover Report' }, { value: 'diversity_metrics', text: 'Diversity Metrics' }],
+            performance: [{ value: 'performance_summary', text: 'Performance Summary' }, { value: 'goal_achievement', text: 'Goal Achievement' }, { value: 'review_completion', text: 'Review Completion' }, { value: 'top_performers', text: 'Top Performers' }],
+            financial: [{ value: 'payroll_summary', text: 'Payroll Summary' }, { value: 'cost_analysis', text: 'Cost Analysis' }, { value: 'expense_reports', text: 'Expense Reports' }, { value: 'budget_variance', text: 'Budget Variance' }],
+            attendance: [{ value: 'attendance_summary', text: 'Attendance Summary' }, { value: 'leave_analysis', text: 'Leave Analysis' }, { value: 'overtime_report', text: 'Overtime Report' }, { value: 'tardiness_report', text: 'Tardiness Report' }],
+            compliance: [{ value: 'eeo_report', text: 'EEO Report' }, { value: 'safety_incidents', text: 'Safety Incidents' }, { value: 'policy_compliance', text: 'Policy Compliance' }, { value: 'audit_trail', text: 'Audit Trail' }]
+        };
+        (templates[reportType] || []).forEach(t => {
+            const o = document.createElement('option'); o.value = t.value; o.textContent = t.text; templateSelect.appendChild(o);
+        });
+    }
+    function toggleCustomDateRange() {
+        const val = document.querySelector('select[name="date_range"]').value;
+        $('#customDateRange').classList.toggle('hidden', val !== 'custom');
+    }
+    function toggleScheduleOptions() {
+        $('#scheduleOptions').classList.toggle('hidden', !$('#scheduleReport').checked);
     }
 
-    function showSuccess(message) {
-        showToast('success', message);
-        console.log('Success:', message);
+    /* ---------- Utils ---------- */
+    function getReportTypeFromTemplate(t) {
+        const map = {
+            employee_roster: 'hr', headcount_analysis: 'hr', turnover_report: 'hr', diversity_metrics: 'hr', recruitment_pipeline: 'hr',
+            performance_summary: 'performance', goal_achievement: 'performance', review_completion: 'performance', top_performers: 'performance', training_completion: 'performance',
+            payroll_summary: 'financial', cost_analysis: 'financial', expense_reports: 'financial', budget_variance: 'financial', contractor_payments: 'financial',
+            attendance_summary: 'attendance', leave_analysis: 'attendance', overtime_report: 'attendance', tardiness_report: 'attendance',
+            eeo_report: 'compliance', safety_incidents: 'compliance', policy_compliance: 'compliance', audit_trail: 'compliance'
+        }; return map[t] || 'hr';
     }
-
-    function showError(message) {
-        showToast('error', message);
-        console.log('Error:', message);
+    function formatReportName(s) { return String(s || '').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); }
+    function getTypeBadgeClass(type) {
+        const c = { hr: 'bg-blue-100 text-blue-700', performance: 'bg-green-100 text-green-700', financial: 'bg-yellow-100 text-yellow-700', attendance: 'bg-purple-100 text-purple-700', compliance: 'bg-red-100 text-red-700' };
+        return c[type] || 'bg-slate-100 text-slate-700';
     }
-
-    function showInfo(message) {
-        showToast('info', message);
-        console.log('Info:', message);
+    function getStatusBadgeClass(s) {
+        const c = { completed: 'bg-green-100 text-green-700', processing: 'bg-blue-100 text-blue-700', failed: 'bg-red-100 text-red-700', scheduled: 'bg-yellow-100 text-yellow-700' };
+        return c[s] || 'bg-slate-100 text-slate-700';
     }
+    function formatStatus(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function formatDate(d) { return new Date(d).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+    function escapeHTML(s) { return String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
+    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+    function $(sel) { return document.querySelector(sel); }
+    function persist() { localStorage.setItem(LS_REPORTS, JSON.stringify(reports)); }
 
-    // Auto-refresh reports every 30 seconds (disabled for )
-    // setInterval(() => {
-    //     loadReportsData();
-    // }, 30000);
+    /* ---------- Expose for inline handlers ---------- */
+    window.previewReport = previewReport;
+    window.downloadReport = downloadReport;
+    window.shareReport = shareReport;
+    window.deleteReport = deleteReport;
+    window.toggleSelect = toggleSelect;
+    window.generateQuickReport = generateQuickReport;
 </script>
 {% endblock %}

@@ -1,20 +1,21 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-person-circle-plus mr-2"></i> Onboarding
             </h1>
             <p class="text-slate-600 text-sm">Automate new hire setup with seamless onboarding workflows.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="newFlowBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+        <div class="flex flex-wrap items-center gap-2">
+            <button id="newFlowBtn"
+                class="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> New Flow
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
@@ -22,14 +23,17 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="flowsTab" class="ob-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+        <div
+            class="flex space-x-1 bg-slate-100 p-1 rounded-xl overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-slate-300">
+            <button id="flowsTab"
+                class="ob-tab active px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-diagram-project mr-1"></i> Flows</button>
-            <button id="hiresTab" class="ob-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="hiresTab" class="ob-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-user-plus mr-1"></i> New Hires</button>
-            <button id="tasksTab" class="ob-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="tasksTab" class="ob-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-list-check mr-1"></i> Tasks</button>
-            <button id="settingsTab" class="ob-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="settingsTab"
+                class="ob-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-gear mr-1"></i> Settings</button>
         </div>
     </div>
@@ -93,9 +97,7 @@
                     <div class="rounded-lg border border-slate-200 p-4">
                         <div class="font-medium text-slate-800 mb-2"><i class="fa-solid fa-layer-group mr-1"></i> Flow
                             Canvas</div>
-                        <ul id="flowCanvas" class="space-y-2 text-sm">
-                            <!-- steps injected -->
-                        </ul>
+                        <ul id="flowCanvas" class="space-y-2 text-sm"><!-- steps injected --></ul>
                         <div class="mt-3">
                             <button id="clearCanvas"
                                 class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
@@ -113,9 +115,7 @@
                         class="px-3 py-2 rounded-lg text-white bg-purple-600 hover:bg-purple-700 text-sm"><i
                             class="fa-solid fa-plus mr-1"></i> New</button>
                 </div>
-                <div id="templatesList" class="space-y-3">
-                    <!-- injected -->
-                </div>
+                <div id="templatesList" class="space-y-3"><!-- injected --></div>
             </div>
         </div>
     </section>
@@ -123,10 +123,20 @@
     <!-- New Hires -->
     <section id="hiresPanel" class="ob-panel hidden">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
                 <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-user-plus mr-2"></i> New Hires
                 </h3>
                 <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input id="hireSearch" placeholder="Search name or manager"
+                            class="w-48 sm:w-64 pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200 text-sm">
+                        <button id="hireSearchClear"
+                            class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
                     <button id="addHireBtn"
                         class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
                             class="fa-solid fa-plus mr-1"></i> Add</button>
@@ -140,21 +150,19 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
+                <table class="min-w-full text-xs sm:text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
                             <th class="py-2 px-4">Employee</th>
                             <th class="py-2 px-4">Role</th>
-                            <th class="py-2 px-4">Start</th>
-                            <th class="py-2 px-4">Manager</th>
+                            <th class="py-2 px-4 hidden sm:table-cell">Start</th>
+                            <th class="py-2 px-4 hidden md:table-cell">Manager</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28">Progress</th>
-                            <th class="py-2 px-4 w-24"></th>
+                            <th class="py-2 px-4 w-24 sm:w-28">Progress</th>
+                            <th class="py-2 px-4 w-20 sm:w-24"></th>
                         </tr>
                     </thead>
-                    <tbody id="hiresRows" class="text-slate-800">
-                        <!-- injected -->
-                    </tbody>
+                    <tbody id="hiresRows" class="text-slate-800"><!-- injected --></tbody>
                 </table>
             </div>
         </div>
@@ -179,9 +187,7 @@
                         </button>
                     </div>
                 </div>
-                <div id="taskList" class="space-y-3">
-                    <!-- injected -->
-                </div>
+                <div id="taskList" class="space-y-3"><!-- injected --></div>
             </div>
 
             <!-- Right: Documents & Equipment -->
@@ -236,7 +242,7 @@
 
 <script>
     /* ---------- Mock Data ---------- */
-    let FLOW = []; // sequence of steps
+    let FLOW = [];
     let TEMPLATES = [
         { id: 1, name: 'Engineering • Remote', steps: ['signed_offer', 'account_setup', 'equipment', 'docs', 'orientation', 'buddy'] },
         { id: 2, name: 'Sales • In-office', steps: ['signed_offer', 'docs', 'orientation', 'benefits'] }
@@ -282,10 +288,8 @@
             });
         });
 
-        // Flow builder interactions
-        document.querySelectorAll('.ob-chip').forEach(chip => {
-            chip.addEventListener('click', () => { addStep(chip.dataset.task); });
-        });
+        // Flow builder
+        document.querySelectorAll('.ob-chip').forEach(chip => chip.addEventListener('click', () => addStep(chip.dataset.task)));
         $('clearCanvas').addEventListener('click', () => { FLOW = []; renderFlow(); });
         $('saveFlow').addEventListener('click', () => alert('✅ Flow saved'));
         $('publishFlow').addEventListener('click', () => alert('🚀 Flow published'));
@@ -297,6 +301,9 @@
         // Hires
         $('addHireBtn').addEventListener('click', addHire);
         $('hireFilter').addEventListener('change', renderHires);
+        const hs = $('hireSearch'), hc = $('hireSearchClear');
+        hs.addEventListener('input', debounce(() => { hc.classList.toggle('hidden', !hs.value.trim()); renderHires(); }, 250));
+        hc.addEventListener('click', () => { hs.value = ''; hc.classList.add('hidden'); renderHires(); });
 
         // Tasks
         $('taskView').addEventListener('change', renderTasks);
@@ -306,7 +313,7 @@
         $('addRule').addEventListener('click', () => { RULES.push({ id: Date.now(), name: 'New Rule', condition: 'any', action: 'Notify HR', enabled: true }); renderRules(); });
         $('saveBuddy').addEventListener('click', () => alert('✅ Buddy settings saved'));
 
-        // Initial renders
+        // Initial paint
         renderFlow(); renderTemplates(); renderHires(); renderTasks(); renderDocs(); renderEquip(); renderRules();
     });
 
@@ -320,8 +327,7 @@
         <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveStep(${idx},1)">↓</button>
         <button class="px-2 py-1 text-xs rounded text-white bg-red-600 hover:bg-red-700" onclick="removeStep(${idx})">Remove</button>
       </div>
-    </li>
-  `).join('') || `<li class="text-slate-500 text-sm">No steps yet. Select from the library.</li>`;
+    </li>`).join('') || `<li class="text-slate-500 text-sm">No steps yet. Select from the library.</li>`;
     }
     function renderTemplates() {
         $('templatesList').innerHTML = TEMPLATES.map(t => `
@@ -338,19 +344,21 @@
     }
     function renderHires() {
         const f = $('hireFilter').value;
-        const data = f === 'all' ? HIRES : HIRES.filter(h => h.status === f);
+        const q = ($('hireSearch').value || '').toLowerCase();
+        const data = (f === 'all' ? HIRES : HIRES.filter(h => h.status === f))
+            .filter(h => !q || h.name.toLowerCase().includes(q) || h.manager.toLowerCase().includes(q));
         $('hiresRows').innerHTML = data.map(h => `
     <tr class="border-b last:border-0">
       <td class="py-2 px-4 font-medium">${h.name}</td>
       <td class="py-2 px-4">${h.role}</td>
-      <td class="py-2 px-4">${h.start}</td>
-      <td class="py-2 px-4">${h.manager}</td>
+      <td class="py-2 px-4 hidden sm:table-cell">${h.start}</td>
+      <td class="py-2 px-4 hidden md:table-cell">${h.manager}</td>
       <td class="py-2 px-4">${statusPill(h.status)}</td>
       <td class="py-2 px-4">
-        <div class="w-28 h-2 bg-slate-200 rounded"><div class="h-2 rounded ${h.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}" style="width:${h.progress}%"></div></div>
+        <div class="w-24 sm:w-28 h-2 bg-slate-200 rounded"><div class="h-2 rounded ${h.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}" style="width:${h.progress}%"></div></div>
       </td>
       <td class="py-2 px-4 text-right">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="advance(${h.id})"><i class="fa-solid fa-forward mr-1"></i> Advance</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-[10px] sm:text-xs hover:bg-slate-50" onclick="advance(${h.id})"><i class="fa-solid fa-forward mr-1"></i> Advance</button>
       </td>
     </tr>`).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No hires</td></tr>`;
     }
@@ -374,8 +382,7 @@
         <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="reassign(${t.id})"><i class="fa-solid fa-user-gear mr-1"></i> Reassign</button>
         <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="completeTask(${t.id})"><i class="fa-solid fa-check mr-1"></i> Done</button>
       </div>
-    </div>
-  `).join('') || `<div class="text-slate-500 text-sm">No tasks.</div>`;
+    </div>`).join('') || `<div class="text-slate-500 text-sm">No tasks.</div>`;
     }
     function renderDocs() {
         $('docList').innerHTML = DOCS.map(d => `
@@ -410,8 +417,8 @@
 
     /* ---------- Flow ops ---------- */
     function addStep(s) { FLOW.push(s); renderFlow(); }
-    function moveStep(idx, dir) { const j = idx + dir; if (j < 0 || j >= FLOW.length) return;[FLOW[idx], FLOW[j]] = [FLOW[j], FLOW[idx]]; renderFlow(); }
-    function removeStep(idx) { FLOW.splice(idx, 1); renderFlow(); }
+    function moveStep(i, d) { const j = i + d; if (j < 0 || j >= FLOW.length) return;[FLOW[i], FLOW[j]] = [FLOW[j], FLOW[i]]; renderFlow(); }
+    function removeStep(i) { FLOW.splice(i, 1); renderFlow(); }
     function loadTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; FLOW = t.steps.slice(); renderFlow(); }
     function deleteTemplate(id) { TEMPLATES = TEMPLATES.filter(t => t.id !== id); renderTemplates(); }
 
@@ -424,7 +431,7 @@
     function advance(id) {
         const h = HIRES.find(x => x.id === id); if (!h) return;
         h.progress = Math.min(100, h.progress + 20);
-        if (h.progress === 100) h.status = 'done'; else if (h.progress > 0) h.status = 'in_progress';
+        h.status = h.progress === 100 ? 'done' : h.progress > 0 ? 'in_progress' : 'pending';
         renderHires();
     }
 
@@ -469,6 +476,7 @@
     }
     function today() { const d = new Date(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${d.getFullYear()}-${m}-${day}`; }
     function isOverdue(dateStr) { return new Date(dateStr) < new Date(); }
+    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
 </script>
 
 <style>
@@ -499,6 +507,16 @@
 
     .ob-chip:hover {
         background: #f8fafc;
+    }
+
+    /* nicer thin scrollbar for overflowing tab row */
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

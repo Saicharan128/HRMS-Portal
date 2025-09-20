@@ -1,45 +1,56 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-6xl">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-800">Job Catalog</h1>
-            <p class="text-slate-600 text-sm">Maintain standardized roles with levels, skills, and salary bands. Jobs
-                and Sourcing can reference these.</p>
+<!-- Add in <head> of base layout if missing -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-layer-group mr-2"></i> Job Catalog
+            </h1>
+            <p class="text-slate-600 text-xs sm:text-sm">Maintain a standardized library of job roles and descriptions.
+            </p>
         </div>
         <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Back</a>
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto text-center">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
     </div>
 
     <!-- Create Catalog Entry -->
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 class="text-lg font-semibold text-slate-800 mb-3">Add Role to Catalog</h2>
-        <form id="catalogForm" class="grid md:grid-cols-2 gap-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 mb-6 sm:mb-8">
+        <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
+            <i class="fa-solid fa-square-plus mr-2"></i> Create Catalog Entry
+        </h2>
+        <form id="createForm" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Title *</label>
-                <input name="title" required class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <label class="block text-sm text-slate-600 mb-1">Title *</label>
+                <input name="title" required class="w-full rounded-lg border border-slate-300 px-3 py-2" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Family</label>
-                <input name="family" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <label class="block text-sm text-slate-600 mb-1">Family</label>
+                <input name="family" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="Engineering / HR / Finance" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
-                <input name="level" placeholder="e.g., L2 / Senior"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <label class="block text-sm text-slate-600 mb-1">Level</label>
+                <input name="level" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="L2 / Senior / Manager" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Department</label>
-                <input name="department" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <label class="block text-sm text-slate-600 mb-1">Department</label>
+                <input name="department" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
-                <input name="location" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <label class="block text-sm text-slate-600 mb-1">Location</label>
+                <input name="location" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Employment Type</label>
-                <select name="employment_type" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
-                    <option value="">Select…</option>
+                <label class="block text-sm text-slate-600 mb-1">Employment Type</label>
+                <select name="employment_type" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <option value="">—</option>
                     <option>Full-time</option>
                     <option>Part-time</option>
                     <option>Contract</option>
@@ -47,229 +58,294 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Min Experience (yrs)</label>
+                <label class="block text-sm text-slate-600 mb-1">Min Experience (yrs)</label>
                 <input name="min_experience" type="number" min="0"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Max Experience (yrs)</label>
+                <label class="block text-sm text-slate-600 mb-1">Max Experience (yrs)</label>
                 <input name="max_experience" type="number" min="0"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Salary Min</label>
+                <label class="block text-sm text-slate-600 mb-1">Salary Min</label>
                 <input name="salary_min" type="number" min="0"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Salary Max</label>
+                <label class="block text-sm text-slate-600 mb-1">Salary Max</label>
                 <input name="salary_max" type="number" min="0"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Currency</label>
-                <input name="currency" value="INR" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <label class="block text-sm text-slate-600 mb-1">Currency</label>
+                <input name="currency" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="INR / USD" />
+            </div>
+            <div>
+                <label class="block text-sm text-slate-600 mb-1">Status</label>
+                <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <option value="Active" selected>Active</option>
+                    <option value="Archived">Archived</option>
+                </select>
             </div>
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-slate-700 mb-1">Skills (comma-separated)</label>
-                <input name="skills" placeholder="Python, SQL, APIs"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <label class="block text-sm text-slate-600 mb-1">Description</label>
+                <textarea name="description" rows="2"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2"></textarea>
             </div>
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-slate-700 mb-1">Role Description</label>
-                <textarea name="description" rows="3"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea>
+                <label class="block text-sm text-slate-600 mb-1">Responsibilities</label>
+                <textarea name="responsibilities" rows="2"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2"></textarea>
             </div>
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-slate-700 mb-1">Responsibilities</label>
-                <textarea name="responsibilities" rows="3"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea>
+                <label class="block text-sm text-slate-600 mb-1">Requirements</label>
+                <textarea name="requirements" rows="2"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2"></textarea>
             </div>
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-slate-700 mb-1">Requirements</label>
-                <textarea name="requirements" rows="3"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea>
+                <label class="block text-sm text-slate-600 mb-1">Skills (comma-separated)</label>
+                <input name="skills" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    placeholder="Python, SQL, APIs" />
             </div>
-            <div class="md:col-span-2 flex items-center justify-between">
-                <p class="text-xs text-slate-500">Fields marked * are required.</p>
-                <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900" type="submit">Add to
-                    Catalog</button>
+            <div class="md:col-span-2 flex flex-wrap items-center gap-3">
+                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                </button>
+                <span id="createMsg" class="text-sm text-slate-600"></span>
             </div>
         </form>
-        <div id="formMsg" class="mt-3 text-sm"></div>
     </div>
 
     <!-- Filters -->
-    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
-            <select id="statusFilter" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
-                <option value="">All</option>
-                <option>Active</option>
-                <option>Archived</option>
-            </select>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 lg:col-span-2">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Search</label>
-            <input id="searchInput" placeholder="Search title/skills/department/location/description…"
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
-        </div>
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-5 gap-2">
+        <input id="q" placeholder="Search title, dept, text…"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fDepartment" placeholder="Department"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fLocation" placeholder="Location"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fLevel" placeholder="Level" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">All</option>
+            <option value="Active">Active</option>
+            <option value="Archived">Archived</option>
+        </select>
     </div>
 
-    <!-- Table -->
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-slate-800">My Catalog</h2>
-            <button id="refreshBtn"
-                class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Refresh</button>
-        </div>
-
-        <div class="mt-4 overflow-auto">
-            <table class="min-w-full text-sm">
-                <thead class="text-left text-slate-600 border-b">
-                    <tr>
-                        <th class="py-2 pr-3">Title</th>
-                        <th class="py-2 pr-3">Level</th>
-                        <th class="py-2 pr-3">Dept</th>
-                        <th class="py-2 pr-3">Location</th>
-                        <th class="py-2 pr-3">Type</th>
-                        <th class="py-2 pr-3">Exp</th>
-                        <th class="py-2 pr-3">Status</th>
-                        <th class="py-2 pr-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="catalogTbody" class="align-top"></tbody>
-            </table>
-        </div>
-        <div id="listMsg" class="mt-3 text-sm"></div>
+    <!-- Catalog Table (≥sm) -->
+    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white hidden sm:block">
+        <table class="min-w-full text-sm text-left text-slate-700">
+            <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                    <th class="px-4 py-2">Title</th>
+                    <th class="px-4 py-2">Family</th>
+                    <th class="px-4 py-2">Level</th>
+                    <th class="px-4 py-2">Dept</th>
+                    <th class="px-4 py-2">Location</th>
+                    <th class="px-4 py-2">Type</th>
+                    <th class="px-4 py-2">Exp</th>
+                    <th class="px-4 py-2">Salary</th>
+                    <th class="px-4 py-2">Status</th>
+                    <th class="px-4 py-2 w-56">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="rows" class="divide-y divide-slate-200"></tbody>
+        </table>
     </div>
+    <!-- Catalog Cards (mobile) -->
+    <div id="cards" class="sm:hidden space-y-3"></div>
+
+    <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
 </div>
 
 <script>
     async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function postJSON(url, data) { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function putJSON(url, data) { const r = await fetch(url, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function del(url) { const r = await fetch(url, { method: "DELETE" }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function postForm(url, formEl) { const fd = new FormData(formEl); const r = await fetch(url, { method: "POST", body: fd }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function putJSON(url, payload) { const r = await fetch(url, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function delReq(url) { const r = await fetch(url, { method: "DELETE" }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
 
-    const catalogForm = document.getElementById("catalogForm");
-    const formMsg = document.getElementById("formMsg");
-    const statusFilter = document.getElementById("statusFilter");
-    const searchInput = document.getElementById("searchInput");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const catalogTbody = document.getElementById("catalogTbody");
+    const createForm = document.getElementById("createForm");
+    const createMsg = document.getElementById("createMsg");
+    const rows = document.getElementById("rows");
+    const cards = document.getElementById("cards");
     const listMsg = document.getElementById("listMsg");
 
-    function input(value, cls = "w-44") { const i = document.createElement("input"); i.value = value || ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
-    function select(options, current) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; options.forEach(o => { const opt = document.createElement("option"); opt.value = o; opt.textContent = o; if (o === current) opt.selected = true; s.appendChild(opt); }); return s; }
+    const qEl = document.getElementById("q");
+    const fDepartment = document.getElementById("fDepartment");
+    const fLocation = document.getElementById("fLocation");
+    const fLevel = document.getElementById("fLevel");
+    const fStatus = document.getElementById("fStatus");
 
-    async function loadCatalog() {
-        try {
-            listMsg.textContent = "Loading...";
-            const params = new URLSearchParams();
-            if (statusFilter.value) params.set("status", statusFilter.value);
-            if (searchInput.value.trim()) params.set("q", searchInput.value.trim());
-            const data = await fetchJSON("/api/job_catalog?" + params.toString());
-            catalogTbody.innerHTML = "";
-            data.forEach(row => {
-                const tr = document.createElement("tr");
+    function tdWrap(el) { const td = document.createElement("td"); td.className = "px-4 py-2"; td.appendChild(el); return td; }
+    function input(v, cls = "w-40") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
+    function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o || "—"; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
 
-                const titleI = input(row.title, "w-56");
-                const levelI = input(row.level || "", "w-28");
-                const deptI = input(row.department || "", "w-40");
-                const locI = input(row.location || "", "w-36");
-                const typeS = select(["", "Full-time", "Part-time", "Contract", "Intern"], row.employment_type || "");
-                const expI = input(`${row.min_experience ?? ""}-${row.max_experience ?? ""}`, "w-24"); // quick edit
-
-                const statusS = select(["Active", "Archived"], row.status);
-
-                const tdTitle = document.createElement("td"); tdTitle.className = "py-2 pr-3"; tdTitle.appendChild(titleI);
-                const tdLevel = document.createElement("td"); tdLevel.className = "py-2 pr-3"; tdLevel.appendChild(levelI);
-                const tdDept = document.createElement("td"); tdDept.className = "py-2 pr-3"; tdDept.appendChild(deptI);
-                const tdLoc = document.createElement("td"); tdLoc.className = "py-2 pr-3"; tdLoc.appendChild(locI);
-                const tdType = document.createElement("td"); tdType.className = "py-2 pr-3"; tdType.appendChild(typeS);
-                const tdExp = document.createElement("td"); tdExp.className = "py-2 pr-3"; tdExp.appendChild(expI);
-                const tdStatus = document.createElement("td"); tdStatus.className = "py-2 pr-3"; tdStatus.appendChild(statusS);
-
-                const tdAct = document.createElement("td"); tdAct.className = "py-2 pr-3";
-                const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.textContent = "Save";
-                const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50"; delBtn.textContent = "Delete";
-                tdAct.append(saveBtn, delBtn);
-
-                tr.append(tdTitle, tdLevel, tdDept, tdLoc, tdType, tdExp, tdStatus, tdAct);
-                catalogTbody.appendChild(tr);
-
-                saveBtn.addEventListener("click", async () => {
-                    // Parse "min-max" experience input quickly
-                    let min = null, max = null;
-                    const txt = (expI.value || "").trim();
-                    if (txt) {
-                        const m = txt.split("-").map(s => s.trim());
-                        if (m[0] !== undefined && m[0] !== "" && !isNaN(parseInt(m[0]))) min = parseInt(m[0]);
-                        if (m[1] !== undefined && m[1] !== "" && !isNaN(parseInt(m[1]))) max = parseInt(m[1]);
-                    }
-                    try {
-                        await putJSON(`/api/job_catalog/${row.id}`, {
-                            title: titleI.value.trim(),
-                            level: levelI.value.trim(),
-                            department: deptI.value.trim(),
-                            location: locI.value.trim(),
-                            employment_type: typeS.value,
-                            min_experience: min,
-                            max_experience: max,
-                            status: statusS.value
-                        });
-                        listMsg.className = "mt-3 text-sm text-emerald-700";
-                        listMsg.textContent = "Saved.";
-                        setTimeout(() => listMsg.textContent = "", 1200);
-                    } catch (e) {
-                        listMsg.className = "mt-3 text-sm text-rose-700";
-                        listMsg.textContent = "Failed to save.";
-                        console.error(e);
-                    }
-                });
-
-                delBtn.addEventListener("click", async () => {
-                    if (!confirm("Delete this catalog entry?")) return;
-                    try {
-                        await del(`/api/job_catalog/${row.id}`);
-                        await loadCatalog();
-                    } catch (e) {
-                        listMsg.className = "mt-3 text-sm text-rose-700";
-                        listMsg.textContent = "Failed to delete.";
-                        console.error(e);
-                    }
-                });
-            });
-            listMsg.textContent = data.length ? "" : "No catalog entries yet.";
-        } catch (e) {
-            listMsg.className = "mt-3 text-sm text-rose-700";
-            listMsg.textContent = "Failed to load catalog.";
-            console.error(e);
-        }
+    function cardField(label, html) {
+        return `
+  <div>
+    <div class="text-[11px] text-slate-500 mb-1">${label}</div>
+    ${html}
+  </div>`;
     }
 
-    catalogForm?.addEventListener("submit", async (ev) => {
-        ev.preventDefault();
-        formMsg.textContent = "";
-        const fd = new FormData(catalogForm);
-        const payload = Object.fromEntries(fd.entries());
+    async function loadList() {
+        listMsg.textContent = "Loading…";
+        const params = new URLSearchParams();
+        if (fStatus.value) params.set("status", fStatus.value);
+        if (fDepartment.value) params.set("department", fDepartment.value.trim());
+        if (fLocation.value) params.set("location", fLocation.value.trim());
+        if (fLevel.value) params.set("level", fLevel.value.trim());
+        if (qEl.value) params.set("q", qEl.value.trim());
+
+        const data = await fetchJSON(`/api/job_catalog${params.toString() ? `?${params.toString()}` : ""}`);
+        rows.innerHTML = ""; cards.innerHTML = "";
+
+        data.forEach(r => {
+            /* ---------- TABLE ROW (≥sm) ---------- */
+            const tr = document.createElement("tr");
+            const titleI = input(r.title, "w-56");
+            const familyI = input(r.family, "w-36");
+            const levelI = input(r.level, "w-28");
+            const deptI = input(r.department, "w-40");
+            const locI = input(r.location, "w-36");
+            const typeS = select(["", "Full-time", "Part-time", "Contract", "Intern"], r.employment_type || "");
+            const expI = input((r.min_experience ?? "") + (r.max_experience ? ("–" + r.max_experience) : ""), "w-28"); expI.disabled = true; expI.title = "Edit in details below";
+            const salI = input((r.salary_min ?? "") + (r.salary_max ? ("–" + r.salary_max) : ""), "w-32"); salI.disabled = true; salI.title = "Edit in details below";
+            const statusS = select(["Active", "Archived"], r.status);
+
+            const actions = document.createElement("div");
+            const editBtn = document.createElement("button"); editBtn.className = "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; editBtn.innerHTML = '<i class="fa-solid fa-pen-to-square mr-1"></i>Edit';
+            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
+            actions.append(editBtn, saveBtn, delBtn);
+
+            tr.append(tdWrap(titleI), tdWrap(familyI), tdWrap(levelI), tdWrap(deptI), tdWrap(locI), tdWrap(typeS), tdWrap(expI), tdWrap(salI), tdWrap(statusS), tdWrap(actions));
+            rows.appendChild(tr);
+
+            // Expandable details row
+            const tr2 = document.createElement("tr");
+            tr2.innerHTML = `
+      <td colspan="10" class="px-4 pb-4">
+        <details class="rounded-xl border border-slate-200 bg-white p-4">
+          <summary class="cursor-pointer text-slate-800 font-medium">Details</summary>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <div>${cardField("Min Experience (yrs)", `<input id="minExp-${r.id}" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.min_experience ?? ""}">`)}</div>
+            <div>${cardField("Max Experience (yrs)", `<input id="maxExp-${r.id}" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.max_experience ?? ""}">`)}</div>
+            <div>${cardField("Salary Min", `<input id="salMin-${r.id}" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.salary_min ?? ""}">`)}</div>
+            <div>${cardField("Salary Max", `<input id="salMax-${r.id}" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.salary_max ?? ""}">`)}</div>
+            <div>${cardField("Currency", `<input id="curr-${r.id}" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.currency || ""}">`)}</div>
+            <div>${cardField("Skills (comma)", `<input id="skills-${r.id}" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.skills || ""}">`)}</div>
+            <div class="md:col-span-2">${cardField("Description", `<textarea id="desc-${r.id}" rows="2" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm">${r.description || ""}</textarea>`)}</div>
+            <div class="md:col-span-2">${cardField("Responsibilities", `<textarea id="resp-${r.id}" rows="2" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm">${r.responsibilities || ""}</textarea>`)}</div>
+            <div class="md:col-span-2">${cardField("Requirements", `<textarea id="req-${r.id}" rows="2" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm">${r.requirements || ""}</textarea>`)}</div>
+          </div>
+        </details>
+      </td>`;
+            rows.appendChild(tr2);
+
+            editBtn.addEventListener("click", () => { const det = tr2.querySelector("details"); det.open = true; det.scrollIntoView({ behavior: "smooth", block: "center" }); });
+
+            async function saveFromInputs(src) {
+                try {
+                    await putJSON(`/api/job_catalog/${r.id}`, {
+                        title: titleI.value.trim(),
+                        family: familyI.value.trim(),
+                        level: levelI.value.trim(),
+                        department: deptI.value.trim(),
+                        location: locI.value.trim(),
+                        employment_type: typeS.value,
+                        min_experience: document.getElementById(`minExp-${r.id}`)?.value ?? src.minExp?.value ?? "",
+                        max_experience: document.getElementById(`maxExp-${r.id}`)?.value ?? src.maxExp?.value ?? "",
+                        salary_min: document.getElementById(`salMin-${r.id}`)?.value ?? src.salMin?.value ?? "",
+                        salary_max: document.getElementById(`salMax-${r.id}`)?.value ?? src.salMax?.value ?? "",
+                        currency: (document.getElementById(`curr-${r.id}`)?.value ?? src.curr?.value ?? "").trim(),
+                        description: document.getElementById(`desc-${r.id}`)?.value ?? src.desc?.value ?? "",
+                        responsibilities: document.getElementById(`resp-${r.id}`)?.value ?? src.resp?.value ?? "",
+                        requirements: document.getElementById(`req-${r.id}`)?.value ?? src.req?.value ?? "",
+                        skills: document.getElementById(`skills-${r.id}`)?.value ?? src.skills?.value ?? "",
+                        status: statusS.value
+                    });
+                    listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
+                    await loadList();
+                } catch (e) { console.error(e); listMsg.className = "mt-3 text-sm text-rose-700"; listMsg.textContent = "Save failed."; }
+            }
+            saveBtn.addEventListener("click", () => saveFromInputs({}));
+
+            delBtn.addEventListener("click", async () => { if (!confirm("Delete this catalog entry?")) return; try { await delReq(`/api/job_catalog/${r.id}`); await loadList(); } catch (e) { listMsg.className = "mt-3 text-sm text-rose-700"; listMsg.textContent = "Delete failed."; } });
+
+            /* ---------- CARD (mobile) ---------- */
+            const card = document.createElement("div");
+            card.className = "rounded-xl border border-slate-200 p-3";
+            card.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          ${cardField("Title", `<input class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" id="c-title-${r.id}" value="${r.title || ""}">`)}
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            ${cardField("Family", `<input class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" id="c-family-${r.id}" value="${r.family || ""}">`)}
+            ${cardField("Level", `<input class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" id="c-level-${r.id}" value="${r.level || ""}">`)}
+            ${cardField("Dept", `<input class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" id="c-dept-${r.id}" value="${r.department || ""}">`)}
+            ${cardField("Location", `<input class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" id="c-loc-${r.id}" value="${r.location || ""}">`)}
+            ${cardField("Type", (() => { const s = document.createElement('select'); s.id = "c-type-${r.id}"; s.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm";["", "Full-time", "Part-time", "Contract", "Intern"].forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o || "—"; if (o === (r.employment_type || "")) op.selected = true; s.appendChild(op); }); return s.outerHTML; })())}
+            ${cardField("Status", (() => { const s = document.createElement('select'); s.id = "c-status-${r.id}"; s.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm";["Active", "Archived"].forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === r.status) op.selected = true; s.appendChild(op); }); return s.outerHTML; })())}
+          </div>
+          <details class="mt-3">
+            <summary class="text-sm text-slate-700 cursor-pointer">More</summary>
+            <div class="grid grid-cols-2 gap-2 mt-2">
+              ${cardField("Min Exp", `<input id="c-minExp-${r.id}" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.min_experience ?? ""}">`)}
+              ${cardField("Max Exp", `<input id="c-maxExp-${r.id}" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.max_experience ?? ""}">`)}
+              ${cardField("Salary Min", `<input id="c-salMin-${r.id}" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.salary_min ?? ""}">`)}
+              ${cardField("Salary Max", `<input id="c-salMax-${r.id}" type="number" min="0" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.salary_max ?? ""}">`)}
+              ${cardField("Currency", `<input id="c-curr-${r.id}" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.currency || ""}">`)}
+              ${cardField("Skills", `<input id="c-skills-${r.id}" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm" value="${r.skills || ""}">`)}
+            </div>
+            <div class="mt-2">
+              ${cardField("Description", `<textarea id="c-desc-${r.id}" rows="2" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm">${r.description || ""}</textarea>`)}
+              ${cardField("Responsibilities", `<textarea id="c-resp-${r.id}" rows="2" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm">${r.responsibilities || ""}</textarea>`)}
+              ${cardField("Requirements", `<textarea id="c-req-${r.id}" rows="2" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-sm">${r.requirements || ""}</textarea>`)}
+            </div>
+          </details>
+        </div>
+        <div class="flex flex-col gap-1">
+          <button class="text-xs px-2 py-1 rounded bg-slate-800 text-white hover:bg-slate-900" data-act="save">Save</button>
+          <button class="text-xs px-2 py-1 rounded border border-rose-300 text-rose-700 hover:bg-rose-50" data-act="del">Delete</button>
+        </div>
+      </div>`;
+            cards.appendChild(card);
+
+            card.querySelector('[data-act="save"]').addEventListener("click", () => saveFromInputs({
+                minExp: card.querySelector(`#c-minExp-${r.id}`),
+                maxExp: card.querySelector(`#c-maxExp-${r.id}`),
+                salMin: card.querySelector(`#c-salMin-${r.id}`),
+                salMax: card.querySelector(`#c-salMax-${r.id}`),
+                curr: card.querySelector(`#c-curr-${r.id}`),
+                skills: card.querySelector(`#c-skills-${r.id}`),
+                desc: card.querySelector(`#c-desc-${r.id}`),
+                resp: card.querySelector(`#c-resp-${r.id}`),
+                req: card.querySelector(`#c-req-${r.id}`),
+                // also override top fields from card
+                get title() { return card.querySelector(`#c-title-${r.id}`); },
+            }));
+            card.querySelector('[data-act="del"]').addEventListener("click", async () => { if (!confirm("Delete this catalog entry?")) return; try { await delReq(`/api/job_catalog/${r.id}`); await loadList(); } catch (e) { listMsg.className = "mt-3 text-sm text-rose-700"; listMsg.textContent = "Delete failed."; } });
+        });
+
+        listMsg.textContent = data.length ? "" : "No catalog entries yet.";
+    }
+
+    createForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        createMsg.textContent = "Saving…";
         try {
-            await postJSON("/api/job_catalog", payload);
-            formMsg.className = "mt-3 text-sm text-emerald-700";
-            formMsg.textContent = "Role added to catalog.";
-            catalogForm.reset();
-            await loadCatalog();
-        } catch (e) {
-            formMsg.className = "mt-3 text-sm text-rose-700";
-            formMsg.textContent = "Failed to add role.";
-            console.error(e);
-        }
+            await postForm("/api/job_catalog", createForm);
+            createMsg.className = "text-sm text-emerald-700"; createMsg.textContent = "Entry created ✓";
+            createForm.reset(); await loadList();
+        } catch (e) { console.error(e); createMsg.className = "text-sm text-rose-700"; createMsg.textContent = "Failed to create entry"; }
     });
 
-    statusFilter?.addEventListener("change", loadCatalog);
-    searchInput?.addEventListener("input", () => { clearTimeout(window.__t); window.__t = setTimeout(loadCatalog, 300); });
-    refreshBtn?.addEventListener("click", loadCatalog);
+    // Live filtering
+    [qEl, fDepartment, fLocation, fLevel, fStatus].forEach(el => el.addEventListener("input", () => loadList().catch(console.error)));
 
-    loadCatalog();
+    loadList().catch(console.error);
 </script>
 {% endblock %}

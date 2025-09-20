@@ -9,10 +9,23 @@
             </h1>
             <p class="text-slate-600 text-sm">Track global workforce distribution and locations.</p>
         </div>
-        <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-            <i class="fa-solid fa-arrow-left mr-1"></i> Back
-        </a>
+        <div class="flex items-center gap-2">
+            <button id="fitBtn" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-up-right-and-down-left-from-center mr-1"></i> Fit to results
+            </button>
+            <button id="toggleHeat"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-fire mr-1"></i> Heatmap
+            </button>
+            <button id="exportCsv"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-arrow-down mr-1"></i> Export CSV
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
     </div>
 
     <!-- Summary cards -->
@@ -60,6 +73,26 @@
         </button>
     </div>
 
+    <!-- Legend -->
+    <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-wrap items-center gap-4 text-sm">
+            <span class="font-medium text-slate-700">Legend:</span>
+            <span><span class="inline-block w-3 h-3 rounded-full align-middle mr-1"
+                    style="background:#7c3aed"></span>Employees <span id="countEmployees"
+                    class="text-slate-500"></span></span>
+            <span><span class="inline-block w-3 h-3 rounded-full align-middle mr-1" style="background:#059669"></span>HR
+                <span id="countHR" class="text-slate-500"></span></span>
+            <span><span class="inline-block w-3 h-3 rounded-full align-middle mr-1"
+                    style="background:#2563eb"></span>Leaders <span id="countLeaders"
+                    class="text-slate-500"></span></span>
+            <span><span class="inline-block w-3 h-3 rounded-full align-middle mr-1"
+                    style="background:#dc2626"></span>CXOs <span id="countCXOs" class="text-slate-500"></span></span>
+            <span><span class="inline-block w-3 h-3 rounded-full align-middle mr-1"
+                    style="background:#ea580c"></span>Contractors / Remote <span id="countContractors"
+                    class="text-slate-500"></span></span>
+        </div>
+    </div>
+
     <!-- Map + Side panel -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-2">
@@ -76,76 +109,58 @@
 
 <!-- Leaflet core -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-<!-- (Optional) Marker clustering to avoid overlaps if you have many users -->
+<!-- Marker clustering -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
+<!-- Heatmap plugin -->
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
 <script>
-    // ====== CONFIG you can tweak ======
-    const DEFAULT_COUNTRY = "India"; // used when we can’t infer anything
-    // Hubs used for deterministic placement when a user has no location info.
+    /* ====== CONFIG ====== */
+    const DEFAULT_COUNTRY = "India";
     const HUBS_BY_COUNTRY = {
         "India": [
-            ["Bengaluru", 12.9716, 77.5946],
-            ["Hyderabad", 17.3850, 78.4867],
-            ["Mumbai", 19.0760, 72.8777],
-            ["Pune", 18.5204, 73.8567],
-            ["Delhi", 28.6139, 77.2090],
-            ["Chennai", 13.0827, 80.2707],
-            ["Kolkata", 22.5726, 88.3639],
-            ["Gurugram", 28.4595, 77.0266]
+            ["Bengaluru", 12.9716, 77.5946], ["Hyderabad", 17.3850, 78.4867],
+            ["Mumbai", 19.0760, 72.8777], ["Pune", 18.5204, 73.8567],
+            ["Delhi", 28.6139, 77.2090], ["Chennai", 13.0827, 80.2707],
+            ["Kolkata", 22.5726, 88.3639], ["Gurugram", 28.4595, 77.0266]
         ],
         "United States": [
-            ["San Francisco", 37.7749, -122.4194],
-            ["New York", 40.7128, -74.0060],
-            ["Austin", 30.2672, -97.7431],
-            ["Seattle", 47.6062, -122.3321]
+            ["San Francisco", 37.7749, -122.4194], ["New York", 40.7128, -74.0060],
+            ["Austin", 30.2672, -97.7431], ["Seattle", 47.6062, -122.3321]
         ],
-        "United Kingdom": [
-            ["London", 51.5072, -0.1276],
-            ["Manchester", 53.4808, -2.2426]
-        ],
+        "United Kingdom": [["London", 51.5072, -0.1276], ["Manchester", 53.4808, -2.2426]],
         "Singapore": [["Singapore", 1.3521, 103.8198]],
         "United Arab Emirates": [["Dubai", 25.2048, 55.2708]],
         "Canada": [["Toronto", 43.65107, -79.347015]],
         "Australia": [["Sydney", -33.8688, 151.2093]]
     };
 
-    // ====== Utilities ======
+    /* ====== Utilities ====== */
     async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(await r.text()); return r.json(); }
     function includes(h, n) { return (h || "").toLowerCase().includes((n || "").toLowerCase()); }
     function pick(arr, i) { return arr[i % arr.length]; }
+    function hash32(s) { s = String(s || ""); let h = 2166136261 >>> 0; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 
-    // Simple stable hash (string → 32-bit integer)
-    function hash32(s) {
-        s = String(s || "");
-        let h = 2166136261 >>> 0; // FNV-like
-        for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-        return h >>> 0;
-    }
-
-    // Base gazetteer
     const GEO = {
         "India": [22.3511148, 78.6677428],
         "United States": [39.7837304, -100.4458825], "USA": [39.78, -100.44], "US": [39.78, -100.44],
         "United Kingdom": [54.7023545, -3.2765753], "UK": [54.7, -3.27],
-        "Germany": [51.0834196, 10.4234469],
-        "Canada": [61.0666922, -107.991707],
-        "Australia": [-25.274398, 133.775136],
-        "Singapore": [1.352083, 103.819836],
+        "Germany": [51.0834196, 10.4234469], "Canada": [61.0666922, -107.991707],
+        "Australia": [-25.274398, 133.775136], "Singapore": [1.352083, 103.819836],
         "United Arab Emirates": [23.424076, 53.847818], "UAE": [23.424076, 53.847818],
         "France": [46.227638, 2.213749], "Spain": [40.463667, -3.74922],
         "Netherlands": [52.132633, 5.291266], "Brazil": [-14.235004, -51.92528]
     };
     const CITY = {
         "Bengaluru": [12.9716, 77.5946], "Bangalore": [12.9716, 77.5946],
-        "Hyderabad": [17.385, 78.4867],
-        "Mumbai": [19.076, 72.8777], "Pune": [18.5204, 73.8567],
+        "Hyderabad": [17.385, 78.4867], "Mumbai": [19.076, 72.8777], "Pune": [18.5204, 73.8567],
         "Delhi": [28.6139, 77.209], "Gurgaon": [28.4595, 77.0266], "Gurugram": [28.4595, 77.0266],
         "Chennai": [13.0827, 80.2707], "Kolkata": [22.5726, 88.3639],
         "San Francisco": [37.7749, -122.4194], "New York": [40.7128, -74.006],
@@ -154,114 +169,92 @@
         "Singapore": [1.3521, 103.8198], "Dubai": [25.2048, 55.2708], "Paris": [48.8566, 2.3522]
     };
 
-    // Infer country from email TLD (very rough but useful fallback)
     function inferCountryFromEmail(email) {
         if (!email) return null;
         const tld = (email.split(".").pop() || "").toLowerCase();
         const map = {
-            "in": "India", "sg": "Singapore", "ae": "United Arab Emirates",
-            "uk": "United Kingdom", "de": "Germany", "us": "United States",
-            "ca": "Canada", "au": "Australia", "fr": "France", "es": "Spain", "nl": "Netherlands", "br": "Brazil"
+            in: "India", sg: "Singapore", ae: "United Arab Emirates", uk: "United Kingdom", de: "Germany",
+            us: "United States", ca: "Canada", au: "Australia", fr: "France", es: "Spain", nl: "Netherlands", br: "Brazil"
         };
         return map[tld] || null;
     }
-
-    // Employee type → color
     function typeColor(t) {
         switch ((t || "").toLowerCase()) {
-            case "employees": return "#7c3aed"; // purple
-            case "hr": return "#059669";        // green
-            case "leaders": return "#2563eb";   // blue
-            case "cxos": return "#dc2626";      // red
-            case "contractors / remote staff": return "#ea580c"; // orange
-            default: return "#334155";          // slate
+            case "employees": return "#7c3aed";
+            case "hr": return "#059669";
+            case "leaders": return "#2563eb";
+            case "cxos": return "#dc2626";
+            case "contractors / remote staff": return "#ea580c";
+            default: return "#334155";
         }
     }
-
-    // Get a lat/lng for a user (covers missing data robustly)
     function getLatLngForUser(u) {
-        // 1) explicit lat/lng
         if (u.lat && u.lng) return [Number(u.lat), Number(u.lng)];
-
-        // 2) city or country fields
         const city = (u.city || u.location || "").trim();
         const country = (u.country || "").trim();
         if (CITY[city]) return CITY[city];
         if (GEO[country]) return GEO[country];
-
-        // 3) try reading country name embedded in location text
         const guessCountry = Object.keys(GEO).find(k => includes(city, k));
         if (guessCountry) return GEO[guessCountry];
-
-        // 4) infer from email domain TLD (e.g., .in → India)
         const emailCountry = inferCountryFromEmail(u.email);
         if (emailCountry && GEO[emailCountry]) return GEO[emailCountry];
-
-        // 5) deterministic placement into hubs of a default country
         const home = country || emailCountry || DEFAULT_COUNTRY;
         const hubs = HUBS_BY_COUNTRY[home] || HUBS_BY_COUNTRY[DEFAULT_COUNTRY];
         const key = u.username || u.email || u.name || u.full_name || String(u.id || "");
         const idx = hash32(key);
         const hub = pick(hubs, idx);
-        // small jitter so multiple users in same hub don't overlap exactly
-        const jitter = () => ((idx % 1000) / 100000) * (Math.random() > 0.5 ? 1 : -1);
-        return [hub[1] + jitter(), hub[2] + jitter()];
+        // deterministic jitter based on hash (no Math.random -> stable)
+        const j = ((idx % 1000) / 100000) * ((idx % 2) ? 1 : -1);
+        return [hub[1] + j, hub[2] + j];
     }
-
-    // Aggregations
     function aggregate(users) {
-        const byCountry = new Map();
-        const byCity = new Map();
+        const byCountry = new Map(), byCity = new Map(), byType = new Map();
         users.forEach(u => {
             const ctry = (u.country || inferCountryFromEmail(u.email) || DEFAULT_COUNTRY);
             byCountry.set(ctry, (byCountry.get(ctry) || 0) + 1);
             const cty = (u.city || u.location || "").trim();
             if (cty) byCity.set(cty, (byCity.get(cty) || 0) + 1);
+            const t = u.employee_type || "Employees";
+            byType.set(t, (byType.get(t) || 0) + 1);
         });
-        return { byCountry, byCity };
+        return { byCountry, byCity, byType };
     }
-
-    function renderTopList(mapAgg) {
+    function renderTopList(agg) {
         const topDiv = document.getElementById("topList");
-        const items = [...mapAgg.byCountry.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+        const items = [...agg.byCountry.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
         topDiv.innerHTML = items.map(([country, n]) => `
-      <div class="flex items-center justify-between">
-        <span class="text-slate-700">${country}</span>
-        <span class="text-slate-900 font-medium">${n}</span>
-      </div>
-      <div class="w-full bg-slate-200 rounded-full h-1.5">
-        <div class="bg-slate-600 h-1.5 rounded-full" style="width:${items[0] ? Math.round(n / items[0][1] * 100) : 0}%"></div>
-      </div>
-    `).join("");
+    <div class="flex items-center justify-between">
+      <span class="text-slate-700">${country}</span>
+      <span class="text-slate-900 font-medium">${n}</span>
+    </div>
+    <div class="w-full bg-slate-200 rounded-full h-1.5">
+      <div class="bg-slate-600 h-1.5 rounded-full" style="width:${items[0] ? Math.round(n / items[0][1] * 100) : 0}%"></div>
+    </div>
+  `).join("");
     }
-
-    function renderBreakdown(mapAgg) {
+    function renderBreakdown(agg) {
         const out = [];
         out.push(`<div class="font-medium text-slate-800 mb-1">By country</div>`);
-        [...mapAgg.byCountry.entries()].sort().forEach(([k, v]) => out.push(`<div>${k}: <span class="font-medium">${v}</span></div>`));
+        [...agg.byCountry.entries()].sort().forEach(([k, v]) => out.push(`<div>${k}: <span class="font-medium">${v}</span></div>`));
         out.push(`<div class="font-medium text-slate-800 mt-3 mb-1">Top cities</div>`);
-        [...mapAgg.byCity.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).forEach(([k, v]) => out.push(`<div>${k}: <span class="font-medium">${v}</span></div>`));
+        [...agg.byCity.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).forEach(([k, v]) => out.push(`<div>${k}: <span class="font-medium">${v}</span></div>`));
         document.getElementById("breakdown").innerHTML = out.join("");
     }
-
     async function loadSummaryCards(users) {
         document.getElementById("sumHeadcount").textContent = users.length;
         try {
             const jobs = await fetchJSON("/api/jobs");
             document.getElementById("sumOpenJobs").textContent = jobs.filter(j => j.status === "Open").length;
         } catch { document.getElementById("sumOpenJobs").textContent = "0"; }
-
         const { byCountry, byCity } = aggregate(users);
         document.getElementById("sumCountries").textContent = [...byCountry.keys()].length;
         document.getElementById("sumCities").textContent = byCity.size;
     }
-
     function applyFilters(all) {
         const q = (document.getElementById("q").value || "").toLowerCase().trim();
         const t = document.getElementById("fType").value;
         const d = (document.getElementById("fDept").value || "").toLowerCase().trim();
         const c = (document.getElementById("fCountry").value || "").toLowerCase().trim();
-
         return all.filter(u => {
             const hay = [u.name, u.full_name, u.username, u.email, u.city, u.location, u.country, u.employee_type, u.subposition]
                 .map(x => (x || "").toLowerCase()).join(" ");
@@ -272,8 +265,16 @@
             return okQ && okT && okD && okC;
         });
     }
+    function updateTypeCounts(agg) {
+        const get = (k) => agg.byType.get(k) || 0;
+        document.getElementById("countEmployees").textContent = `(${get("Employees")})`;
+        document.getElementById("countHR").textContent = `(${get("HR")})`;
+        document.getElementById("countLeaders").textContent = `(${get("Leaders")})`;
+        document.getElementById("countCXOs").textContent = `(${get("CXOs")})`;
+        document.getElementById("countContractors").textContent = `(${get("Contractors / Remote staff")})`;
+    }
 
-    // Layers (so Employees can be toggled)
+    /* ====== Map + layers ====== */
     const LAYERS = {
         "Employees": L.markerClusterGroup(),
         "HR": L.markerClusterGroup(),
@@ -281,14 +282,14 @@
         "CXOs": L.markerClusterGroup(),
         "Contractors / Remote staff": L.markerClusterGroup(),
     };
+    let MAP, markers = [], HEAT = null, lastLatLngs = [];
 
-    let MAP, markers = [];
     function resetMarkers() {
         markers.forEach(m => { try { MAP.removeLayer(m); } catch { } });
         markers = [];
         Object.values(LAYERS).forEach(g => g.clearLayers());
+        if (HEAT) { try { MAP.removeLayer(HEAT); } catch { } HEAT = null; }
     }
-
     function addMarker(latlng, user) {
         const icon = L.divIcon({
             className: "custom-pin",
@@ -297,22 +298,19 @@
         });
         const m = L.marker(latlng, { icon });
         m.bindPopup(`
-      <div class="text-sm">
-        <div class="font-semibold text-slate-800">${user.name || user.full_name || user.username || "User"}</div>
-        <div class="text-slate-600">${user.employee_type || ""}${user.subposition ? " • " + user.subposition : ""}</div>
-        <div class="mt-1">${user.email || ""}</div>
-        <div class="text-slate-500">${user.city || user.location || user.country || "-"}</div>
-      </div>
-    `);
-
-        const layerKey = ["Employees", "HR", "Leaders", "CXOs", "Contractors / Remote staff"]
-            .find(k => k === (user.employee_type || "")) || "Employees";
+    <div class="text-sm">
+      <div class="font-semibold text-slate-800">${user.name || user.full_name || user.username || "User"}</div>
+      <div class="text-slate-600">${user.employee_type || ""}${user.subposition ? " • " + user.subposition : ""}</div>
+      <div class="mt-1">${user.email || ""}</div>
+      <div class="text-slate-500">${user.city || user.location || user.country || "-"}</div>
+    </div>
+  `);
+        const layerKey = ["Employees", "HR", "Leaders", "CXOs", "Contractors / Remote staff"].find(k => k === (user.employee_type || "")) || "Employees";
         LAYERS[layerKey].addLayer(m);
         markers.push(m);
         return m;
     }
-
-    function ensureOverlaysOnMap() {
+    function ensureOverlays() {
         const overlays = {
             "Employees": LAYERS["Employees"],
             "HR": LAYERS["HR"],
@@ -327,45 +325,86 @@
         }
     }
 
+    /* ====== Bootstrap ====== */
     async function loadMap() {
         MAP = L.map('map', { scrollWheelZoom: true }).setView([20, 0], 2);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 7, attribution: '&copy; OpenStreetMap'
-        }).addTo(MAP);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 7, attribution: '&copy; OpenStreetMap' }).addTo(MAP);
 
         let allUsers = [];
 
         async function refresh() {
             try {
                 if (!allUsers.length) allUsers = await fetchJSON('/api/users');
-
                 const filtered = applyFilters(allUsers);
-                resetMarkers();
 
+                resetMarkers();
+                const latlngs = [];
                 filtered.forEach(u => {
                     const ll = getLatLngForUser(u);
-                    if (ll) addMarker(ll, u);
+                    if (ll) { addMarker(ll, u); latlngs.push(ll); }
                 });
+                lastLatLngs = latlngs;
 
-                ensureOverlaysOnMap();
+                ensureOverlays();
 
                 const agg = aggregate(filtered);
                 renderTopList(agg);
                 renderBreakdown(agg);
+                updateTypeCounts(agg);
                 await loadSummaryCards(filtered);
-            } catch (e) {
-                console.error("Failed to load world map", e);
-            }
+
+                // If we have results, fit once (only on initial or explicit button)
+                if (latlngs.length && MAP._fitOnNextRefresh) { fitTo(latlngs); MAP._fitOnNextRefresh = false; }
+            } catch (e) { console.error("Failed to load world map", e); }
         }
 
+        function fitTo(latlngs) {
+            if (!latlngs.length) return;
+            try {
+                const bounds = L.latLngBounds(latlngs.map(ll => L.latLng(ll[0], ll[1])));
+                MAP.fitBounds(bounds.pad(0.15), { maxZoom: 5 });
+            } catch { }
+        }
+
+        // UI events
         document.getElementById("reload").addEventListener("click", refresh);
-        ["q", "fType", "fDept", "fCountry"].forEach(id => document.getElementById(id).addEventListener("input", refresh));
+        ["q", "fType", "fDept", "fCountry"].forEach(id => {
+            document.getElementById(id).addEventListener("input", () => { MAP._fitOnNextRefresh = true; refresh(); });
+        });
         document.getElementById("onlyEmployees")?.addEventListener("click", () => {
             const fType = document.getElementById("fType");
             fType.value = "Employees";
             fType.dispatchEvent(new Event("input"));
         });
+        document.getElementById("fitBtn").addEventListener("click", () => fitTo(lastLatLngs));
 
+        // Heatmap toggle
+        document.getElementById("toggleHeat").addEventListener("click", () => {
+            if (HEAT) {
+                try { MAP.removeLayer(HEAT); } catch { }
+                HEAT = null;
+                return;
+            }
+            if (!lastLatLngs.length) return;
+            HEAT = L.heatLayer(lastLatLngs.map(ll => [ll[0], ll[1], 0.6]), { radius: 18, blur: 12, minOpacity: 0.3 });
+            HEAT.addTo(MAP);
+        });
+
+        // Export CSV of filtered
+        document.getElementById("exportCsv").addEventListener("click", () => {
+            const filtered = applyFilters(allUsers);
+            const cols = ["id", "name", "username", "email", "employee_type", "subposition", "city", "country", "lat", "lng"];
+            const safe = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+            const rows = [cols.join(",")].concat(
+                filtered.map(u => cols.map(k => safe(u[k])).join(","))
+            );
+            const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); a.href = url; a.download = "users_filtered.csv";
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        });
+
+        MAP._fitOnNextRefresh = true;
         await refresh();
     }
 

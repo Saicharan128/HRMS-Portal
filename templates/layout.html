@@ -219,50 +219,220 @@
         .dark .brand-logo.theme-invert {
             filter: invert(1) hue-rotate(180deg) brightness(1.1) contrast(0.95);
         }
+
+        /* ---------- MOBILE RESPONSIVE ENHANCEMENTS ---------- */
+
+        /* Mobile navigation */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        /* Better touch targets for mobile */
+        @media (max-width: 768px) {
+
+            button,
+            a {
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Stack navigation items on mobile */
+            .nav-items {
+                gap: 0.5rem;
+            }
+
+            /* Responsive text sizing */
+            .nav-brand {
+                font-size: 1.125rem;
+            }
+
+            /* Better spacing for mobile */
+            .main-content {
+                padding-left: 1rem;
+                padding-right: 1rem;
+                padding-top: 1.5rem;
+                padding-bottom: 1.5rem;
+            }
+
+            /* Flash messages responsive */
+            .flash-container {
+                margin-left: 1rem;
+                margin-right: 1rem;
+            }
+
+            /* Footer responsive */
+            .footer-content {
+                text-align: center;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        /* Tablet and small desktop adjustments */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .main-content {
+                max-width: 48rem;
+            }
+        }
+
+        /* Hide/show elements based on screen size */
+        .mobile-only {
+            display: block;
+        }
+
+        .desktop-only {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-only {
+                display: none;
+            }
+
+            .desktop-only {
+                display: block;
+            }
+        }
+
+        /* Responsive table wrapper */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive table {
+                font-size: 0.875rem;
+            }
+
+            .table-responsive th,
+            .table-responsive td {
+                padding: 0.5rem;
+                white-space: nowrap;
+            }
+        }
     </style>
 </head>
 
 <body>
     <!-- Top Nav -->
     <nav class="border-b border-slate-200">
-        <div class="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
-            <a href="{{ url_for('index') }}" class="text-xl font-semibold">PeopleOps</a>
-            <div class="flex items-center gap-2">
-                <!-- Button text only (no emoji) -->
-                <button id="themeToggle" class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
-                    <i id="themeIcon" class="fa-solid {% if theme=='dark' %}fa-sun{% else %}fa-moon{% endif %} mr-1"></i>
-                    <span id="themeLabel">{{ 'Light Mode' if theme == 'dark' else 'Dark Mode' }}</span>
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-3">
+            <!-- Mobile Navigation -->
+            <div class="flex items-center justify-between">
+                <a href="{{ url_for('index') }}" class="nav-brand text-xl font-semibold">PeopleOps</a>
+
+                <!-- Mobile menu button -->
+                <button id="mobileMenuBtn"
+                    class="mobile-only md:hidden text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                    <i class="fa-solid fa-bars"></i>
                 </button>
 
-                {% if session.get('username') %}
-                <span class="text-sm">Hello, <strong>{{ session.get('username') }}</strong></span>
-                <a href="{{ url_for('dashboard') }}" class="text-sm px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
-                    <i class="fa-solid fa-gauge-high mr-1"></i> Dashboard
-                </a>
-                <a href="{{ url_for('run_duplicates') }}"
-                    class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
-                    <i class="fa-solid fa-file-arrow-up mr-1"></i> Bulk Upload
-                </a>
-                <a href="{{ url_for('logout') }}" class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
-                </a>
-                {% else %}
-                <a href="{{ url_for('login') }}"
-                    class="text-sm px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
-                    <i class="fa-solid fa-right-to-bracket mr-1"></i>
-                    Login</a>
-                <a href="{{ url_for('register') }}"
-                    class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
-                    <i class="fa-solid fa-user-plus mr-1"></i>
-                    Register</a>
-                {% endif %}
+                <!-- Desktop Navigation -->
+                <div class="desktop-only hidden md:flex items-center nav-items">
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle"
+                        class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                        <i id="themeIcon"
+                            class="fa-solid {% if theme=='dark' %}fa-sun{% else %}fa-moon{% endif %} mr-1"></i>
+                        <span id="themeLabel">{{ 'Light Mode' if theme == 'dark' else 'Dark Mode' }}</span>
+                    </button>
+
+                    {% if session.get('username') %}
+                    <span class="text-sm hidden lg:inline">Hello, <strong>{{ session.get('username') }}</strong></span>
+                    <a href="{{ url_for('dashboard') }}"
+                        class="text-sm px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                        <i class="fa-solid fa-gauge-high mr-1"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('run_duplicates') }}"
+                        class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                        <i class="fa-solid fa-file-arrow-up mr-1"></i>
+                        <span class="hidden lg:inline">Bulk Upload</span>
+                        <span class="lg:hidden">Upload</span>
+                    </a>
+                    <a href="{{ url_for('logout') }}"
+                        class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i>
+                        <span class="hidden lg:inline">Logout</span>
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}"
+                        class="text-sm px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                        <i class="fa-solid fa-right-to-bracket mr-1"></i>
+                        Login</a>
+                    <a href="{{ url_for('register') }}"
+                        class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                        <i class="fa-solid fa-user-plus mr-1"></i>
+                        Register</a>
+                    {% endif %}
+                </div>
             </div>
+
+            <!-- Mobile Slide-out Menu -->
+            <div id="mobileMenu"
+                class="mobile-menu mobile-only fixed inset-y-0 right-0 w-64 bg-white dark:bg-slate-900 shadow-xl z-50 md:hidden">
+                <div class="flex flex-col h-full">
+                    <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+                        <span class="font-semibold">Menu</span>
+                        <button id="closeMobileMenu" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 p-4 space-y-3">
+                        <!-- Theme Toggle Mobile -->
+                        <button id="themeToggleMobile"
+                            class="w-full text-left px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100">
+                            <i id="themeIconMobile"
+                                class="fa-solid {% if theme=='dark' %}fa-sun{% else %}fa-moon{% endif %} mr-2"></i>
+                            <span id="themeLabelMobile">{{ 'Light Mode' if theme == 'dark' else 'Dark Mode' }}</span>
+                        </button>
+
+                        {% if session.get('username') %}
+                        <div class="px-3 py-2 text-sm text-slate-600 dark:text-slate-400">
+                            Hello, <strong>{{ session.get('username') }}</strong>
+                        </div>
+                        <a href="{{ url_for('dashboard') }}"
+                            class="w-full text-left px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 block">
+                            <i class="fa-solid fa-gauge-high mr-2"></i> Dashboard
+                        </a>
+                        <a href="{{ url_for('run_duplicates') }}"
+                            class="w-full text-left px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100 block">
+                            <i class="fa-solid fa-file-arrow-up mr-2"></i> Bulk Upload
+                        </a>
+                        <a href="{{ url_for('logout') }}"
+                            class="w-full text-left px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100 block">
+                            <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('login') }}"
+                            class="w-full text-left px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 block">
+                            <i class="fa-solid fa-right-to-bracket mr-2"></i> Login
+                        </a>
+                        <a href="{{ url_for('register') }}"
+                            class="w-full text-left px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100 block">
+                            <i class="fa-solid fa-user-plus mr-2"></i> Register
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile menu backdrop -->
+            <div id="mobileMenuBackdrop" class="mobile-only fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
         </div>
     </nav>
 
     <!-- Flash Messages -->
     {% if get_flashed_messages(with_categories=true) %}
-    <div class="mx-auto max-w-2xl mt-6 px-4">
+    <div class="flash-container mx-auto max-w-2xl mt-4 sm:mt-6 px-4">
         {% for category, message in get_flashed_messages(with_categories=true) %}
         {% set color = "bg-blue-50 text-blue-800 border-blue-200" %}
         {% if category == "error" %}{% set color = "bg-red-50 text-red-800 border-red-200" %}{% endif %}
@@ -274,36 +444,91 @@
     {% endif %}
 
     <!-- Page Content -->
-    <main class="mx-auto max-w-5xl px-4 py-8">
+    <main class="main-content mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="py-6">
-        <div class="mx-auto max-w-5xl px-4 text-sm text-slate-500">
-            © {{ 2025 }} PeopleOps 
+    <footer class="py-6 border-t border-slate-200 dark:border-slate-700">
+        <div class="footer-content mx-auto max-w-5xl px-4 text-sm text-slate-500 sm:px-6 lg:px-8">
+            © {{ 2025 }} PeopleOps
         </div>
     </footer>
 
-    <!-- Toggle logic: update session, flip <html class="dark"> immediately -->
+    <!-- JavaScript -->
     <script>
-        document.getElementById('themeToggle')?.addEventListener('click', async () => {
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
+        const mobileMenuBackdrop = document.getElementById('mobileMenuBackdrop');
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('open');
+            mobileMenuBackdrop.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenuFunc() {
+            mobileMenu.classList.remove('open');
+            mobileMenuBackdrop.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        mobileMenuBtn?.addEventListener('click', openMobileMenu);
+        closeMobileMenu?.addEventListener('click', closeMobileMenuFunc);
+        mobileMenuBackdrop?.addEventListener('click', closeMobileMenuFunc);
+
+        // Close mobile menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mobileMenu.classList.contains('open')) {
+                closeMobileMenuFunc();
+            }
+        });
+
+        // Theme toggle functionality for both desktop and mobile
+        async function toggleTheme() {
             try {
-                const r = await fetch('{{ url_for("theme_toggle") }}', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                const r = await fetch('{{ url_for("theme_toggle") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
                 const j = await r.json();
                 const dark = j.theme === 'dark';
 
                 // Flip <html class="dark">
                 document.documentElement.classList.toggle('dark', dark);
 
-                // Update only the label + icon (don't wipe out the <i>)
+                // Update desktop theme toggle
                 const label = document.getElementById('themeLabel');
                 const icon = document.getElementById('themeIcon');
-                label.textContent = dark ? 'Light Mode' : 'Dark Mode';
-                icon.classList.remove(dark ? 'fa-moon' : 'fa-sun');
-                icon.classList.add(dark ? 'fa-sun' : 'fa-moon');
+                if (label && icon) {
+                    label.textContent = dark ? 'Light Mode' : 'Dark Mode';
+                    icon.classList.remove(dark ? 'fa-moon' : 'fa-sun');
+                    icon.classList.add(dark ? 'fa-sun' : 'fa-moon');
+                }
+
+                // Update mobile theme toggle
+                const labelMobile = document.getElementById('themeLabelMobile');
+                const iconMobile = document.getElementById('themeIconMobile');
+                if (labelMobile && iconMobile) {
+                    labelMobile.textContent = dark ? 'Light Mode' : 'Dark Mode';
+                    iconMobile.classList.remove(dark ? 'fa-moon' : 'fa-sun');
+                    iconMobile.classList.add(dark ? 'fa-sun' : 'fa-moon');
+                }
             } catch (e) {
                 console.error('Theme toggle failed', e);
             }
+        }
+
+        // Add event listeners for theme toggles
+        document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+        document.getElementById('themeToggleMobile')?.addEventListener('click', toggleTheme);
+
+        // Close mobile menu when clicking internal links
+        document.querySelectorAll('#mobileMenu a').forEach(link => {
+            link.addEventListener('click', () => {
+                setTimeout(closeMobileMenuFunc, 100);
+            });
         });
     </script>
 </body>

@@ -23,15 +23,15 @@
     <!-- Tabs -->
     <div class="mb-6">
         <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="builderTab" class="wf-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button data-tab="builder" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
                     class="fa-solid fa-sitemap mr-1"></i> Builder</button>
-            <button id="libraryTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button data-tab="library" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
                     class="fa-solid fa-box-archive mr-1"></i> Library</button>
-            <button id="runsTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button data-tab="runs" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
                     class="fa-solid fa-play mr-1"></i> Runs</button>
-            <button id="analyticsTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button data-tab="analytics" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
                     class="fa-solid fa-chart-line mr-1"></i> Analytics</button>
-            <button id="settingsTab" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button data-tab="settings" class="wf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
                     class="fa-solid fa-gear mr-1"></i> Settings</button>
         </div>
     </div>
@@ -88,10 +88,23 @@
 
             <!-- Middle: Canvas -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                     <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-layer-group mr-2"></i> Canvas
                     </h3>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center flex-wrap gap-2">
+                        <button id="undoBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Undo</button>
+                        <button id="redoBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Redo</button>
+                        <button id="importBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Import
+                            JSON</button>
+                        <button id="exportBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Export
+                            JSON</button>
+                        <button id="simulateBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                                class="fa-solid fa-flask mr-1"></i> Simulate</button>
                         <button id="clearCanvas"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
                         <button id="saveWorkflow"
@@ -103,6 +116,7 @@
                     </div>
                 </div>
                 <ul id="canvas" class="space-y-2 text-sm min-h-[120px]"><!-- items injected --></ul>
+                <input id="fileInput" type="file" accept="application/json" class="hidden">
             </div>
 
             <!-- Right: Inspector -->
@@ -119,12 +133,16 @@
     <!-- Library -->
     <section id="libraryPanel" class="wf-panel hidden">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between mb-4 gap-2">
                 <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-box-archive mr-2"></i> Templates
                 </h3>
-                <button id="newTemplate"
-                    class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
-                        class="fa-solid fa-plus mr-1"></i> New</button>
+                <div class="flex items-center gap-2">
+                    <input id="tplSearch" placeholder="Search templates…"
+                        class="px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                    <button id="newTemplate"
+                        class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
+                            class="fa-solid fa-plus mr-1"></i> New</button>
+                </div>
             </div>
             <div id="templateList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"><!-- injected --></div>
         </div>
@@ -149,10 +167,10 @@
                             <th class="py-2 px-4">Workflow</th>
                             <th class="py-2 px-4">Triggered By</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-24"></th>
+                            <th class="py-2 px-4 w-40"></th>
                         </tr>
                     </thead>
-                    <tbody id="runRows" class="text-slate-800"><!-- injected --></tbody>
+                    <tbody id="runRows" class="text-slate-800"></tbody>
                 </table>
             </div>
         </div>
@@ -180,7 +198,7 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-plug mr-2"></i> Integrations
                 </h3>
-                <div class="space-y-3 text-sm" id="intList"><!-- injected --></div>
+                <div class="space-y-3 text-sm" id="intList"></div>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-lock mr-2"></i> Permissions
@@ -207,311 +225,101 @@
     </section>
 </div>
 
-<script>
-    /* ------------ Mock Data ------------ */
-    let CANVAS = [];
-    let SELECTED = null;
+<!-- Toasts -->
+<div id="toast" class="fixed top-4 right-4 z-50 hidden">
+    <div id="toastInner" class="px-4 py-2 rounded-lg shadow text-white"></div>
+</div>
 
-    let TEMPLATES = [
-        {
-            id: 1, name: 'Travel • Fast-Track ≤ ₹5k', nodes: [
-                { type: 'trigger', key: 'report_submitted' },
-                { type: 'step', key: 'validate_receipts', cfg: { required: 'yes' } },
-                { type: 'step', key: 'categorize_expense', cfg: { policy: 'travel' } },
-                { type: 'step', key: 'manager_approval', cfg: { approver: 'Manager', sla: 12 } },
-                { type: 'step', key: 'reimburse_payroll', cfg: { cycle: 'next' } },
-                { type: 'step', key: 'notify_employee' }
-            ]
-        },
-        {
-            id: 2, name: 'General • Standard Review', nodes: [
-                { type: 'trigger', key: 'report_submitted' },
-                { type: 'step', key: 'fraud_check', cfg: { model: 'rules' } },
-                { type: 'step', key: 'compute_tax', cfg: { region: 'IN' } },
-                { type: 'step', key: 'finance_approval', cfg: { approver: 'Finance', sla: 24 } },
-                { type: 'step', key: 'post_to_gl', cfg: { account: '6100-EXP' } },
-                { type: 'step', key: 'reimburse_payroll', cfg: { cycle: 'monthly' } },
-                { type: 'step', key: 'export_csv' }
-            ]
-        }
-    ];
-
-    let RUNS = [
-        { id: 701, at: '2025-09-14 14:10', wf: 'Travel • Fast-Track ≤ ₹5k', who: 'System', status: 'success' },
-        { id: 702, at: '2025-09-14 20:35', wf: 'General • Standard Review', who: 'Finance Bot', status: 'success' },
-        { id: 703, at: '2025-09-15 09:00', wf: 'Travel • Audit Trail', who: 'System', status: 'failed' }
-    ];
-
-    let INTEGRATIONS = [
-        { name: 'Concur', state: 'Connected' },
-        { name: 'Expensify', state: 'Connected' },
-        { name: 'QuickBooks', state: 'Connected' },
-        { name: 'SAP', state: 'Pending' },
-        { name: 'Slack', state: 'Connected' },
-        { name: 'Payroll', state: 'Connected' }
-    ];
-
-    /* ------------ Elements & Init ------------ */
-    const $ = (id) => document.getElementById(id);
-    document.addEventListener('DOMContentLoaded', () => {
-        // Tabs
-        document.querySelectorAll('.wf-tab').forEach(b => {
-            b.addEventListener('click', (e) => {
-                document.querySelectorAll('.wf-tab').forEach(x => x.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                const name = e.currentTarget.id.replace('Tab', '');
-                document.querySelectorAll('.wf-panel').forEach(p => p.classList.add('hidden'));
-                document.getElementById(name + 'Panel').classList.remove('hidden');
-                if (name === 'analytics') { ensureCharts(); drawCharts(); }
-            });
-        });
-
-        // Builder
-        document.querySelectorAll('.wf-chip').forEach(chip => {
-            chip.addEventListener('click', () => addNode({ type: chip.dataset.type, key: chip.dataset.key, cfg: defaultCfg(chip.dataset.key) }));
-        });
-        $('clearCanvas').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); });
-        $('saveWorkflow').addEventListener('click', () => alert('✅ Workflow saved'));
-        $('publishWorkflow').addEventListener('click', () => alert('🚀 Workflow published'));
-        $('newWorkflowBtn').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); alert('✨ New workflow started'); });
-
-        // Library
-        $('newTemplate').addEventListener('click', () => { TEMPLATES.push({ id: Date.now(), name: 'Untitled Template', nodes: [...CANVAS] }); renderTemplates(); alert('✅ Template created'); });
-
-        // Runs
-        $('runFilter').addEventListener('change', renderRuns);
-
-        // Settings
-        renderIntegrations();
-
-        // Initial renders
-        renderCanvas(); renderInspector(); renderTemplates(); renderRuns();
-    });
-
-    /* ------------ Builder ------------ */
-    function addNode(n) { CANVAS.push(n); renderCanvas(); }
-    function moveNode(i, d) { const j = i + d; if (j < 0 || j >= CANVAS.length) return;[CANVAS[i], CANVAS[j]] = [CANVAS[j], CANVAS[i]]; renderCanvas(); }
-    function removeNode(i) { CANVAS.splice(i, 1); if (SELECTED === i) SELECTED = null; renderCanvas(); renderInspector(); }
-    function selectNode(i) { SELECTED = i; renderInspector(); }
-
-    function renderCanvas() {
-        $('canvas').innerHTML = CANVAS.map((n, i) => `
-    <li class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200 ${SELECTED === i ? 'ring-2 ring-blue-200' : ''}">
-      <div class="flex items-center gap-2">${icon(n.key)} <span class="font-medium">${label(n)}</span> ${n.type === 'trigger' ? badge('Trigger', 'amber') : ''}</div>
-      <div class="flex items-center gap-2">
-        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},-1)">↑</button>
-        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},1)">↓</button>
-        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="selectNode(${i})">Edit</button>
-        <button class="px-2 py-1 text-xs rounded text-white bg-red-600 hover:bg-red-700" onclick="removeNode(${i})">Remove</button>
-      </div>
-    </li>
-  `).join('') || `<li class="text-slate-500 text-sm">No nodes yet. Click a Trigger or Step to add.</li>`;
-    }
-
-    function renderInspector() {
-        const box = $('inspector');
-        if (SELECTED === null) { box.innerHTML = '<div class="text-slate-500">Select a node to edit settings.</div>'; return; }
-        const n = CANVAS[SELECTED]; const cfg = n.cfg || {};
-        box.innerHTML = `
-    <div class="space-y-3">
-      <div class="flex items-center gap-2"><div>${icon(n.key)}</div><div class="font-medium">${label(n)}</div></div>
-      ${n.type === 'trigger' ? triggerEditor(cfg) : stepEditor(n.key, cfg)}
-      <div class="flex items-center justify-end gap-2">
-        <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="cancelEdit()">Cancel</button>
-        <button class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700" onclick="saveEdit()">Save</button>
-      </div>
-    </div>`;
-    }
-    function cancelEdit() { SELECTED = null; renderInspector(); }
-    function saveEdit() {
-        const form = document.querySelector('#inspector form');
-        if (!form) { SELECTED = null; renderInspector(); return; }
-        const data = Object.fromEntries(new FormData(form).entries());
-        const n = CANVAS[SELECTED]; n.cfg = { ...n.cfg, ...data };
-        alert('✅ Node updated'); SELECTED = null; renderInspector();
-    }
-
-    function triggerEditor(cfg) {
-        return `
-    <form class="space-y-3">
-      <div>
-        <label class="block text-xs text-slate-500 mb-1">When</label>
-        <select name="when" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-          <option value="immediate" ${sel(cfg.when, 'immediate')}>Immediate</option>
-          <option value="scheduled" ${sel(cfg.when, 'scheduled')}>Scheduled</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs text-slate-500 mb-1">Filter (JEXL)</label>
-        <input name="filter" value="${esc(cfg.filter || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., total<=5000 && currency=='INR'">
-      </div>
-    </form>`;
-    }
-
-    function stepEditor(key, cfg) {
-        if (key === 'validate_receipts') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Required</label>
-          <select name="required" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-            <option ${sel(cfg.required, 'yes')}>yes</option><option ${sel(cfg.required, 'no')}>no</option>
-          </select>
+<!-- Modal: Simulation -->
+<div id="simModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-flask mr-2"></i> Simulation
+                    </h3>
+                    <button id="simClose" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div id="simLog" class="text-sm max-h-[55vh] overflow-auto space-y-2"></div>
+                    <div class="flex items-center justify-end">
+                        <button id="simOk"
+                            class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </form>`;
-        }
-        if (key === 'categorize_expense') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Policy</label>
-          <select name="policy" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-            <option ${sel(cfg.policy, 'travel')}>travel</option><option ${sel(cfg.policy, 'meals')}>meals</option><option ${sel(cfg.policy, 'office')}>office</option>
-          </select>
-        </div>
-      </form>`;
-        }
-        if (key === 'fx_convert') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">From</label><input name="from" value="${esc(cfg.from || 'USD')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        <div><label class="block text-xs text-slate-500 mb-1">To</label><input name="to" value="${esc(cfg.to || 'INR')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        <div><label class="block text-xs text-slate-500 mb-1">Rate Source</label><input name="source" value="${esc(cfg.source || 'ECB')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-      </form>`;
-        }
-        if (key === 'compute_tax') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Region</label><input name="region" value="${esc(cfg.region || 'IN')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        <div><label class="block text-xs text-slate-500 mb-1">GST %</label><input type="number" step="0.01" name="gst" value="${esc(cfg.gst || 18)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-      </form>`;
-        }
-        if (key === 'manager_approval' || key === 'finance_approval' || key === 'escalation') {
-            const approver = key === 'manager_approval' ? 'Manager' : (key === 'finance_approval' ? 'Finance' : 'Controller');
-            const sla = key === 'escalation' ? 8 : 24;
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Approver</label><input name="approver" value="${esc(cfg.approver || approver)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        <div><label class="block text-xs text-slate-500 mb-1">SLA (hours)</label><input type="number" name="sla" value="${esc(cfg.sla || sla)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-      </form>`;
-        }
-        if (key === 'reimburse_payroll') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Cycle</label>
-          <select name="cycle" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-            <option ${sel(cfg.cycle, 'next')}>next</option><option ${sel(cfg.cycle, 'monthly')}>monthly</option>
-          </select>
-        </div>
-      </form>`;
-        }
-        if (key === 'post_to_gl') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Account</label><input name="account" value="${esc(cfg.account || '6100-EXP')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-      </form>`;
-        }
-        if (key === 'export_csv') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Columns</label><input name="cols" value="${esc(cfg.cols || 'date,merchant,amount,category')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-      </form>`;
-        }
-        if (key === 'notify_employee') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Channel</label><input name="channel" value="${esc(cfg.channel || 'email')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        <div><label class="block text-xs text-slate-500 mb-1">Template</label><input name="template" value="${esc(cfg.template || 'reimbursed')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-      </form>`;
-        }
-        if (key === 'webhook') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">URL</label><input name="url" value="${esc(cfg.url || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="https://api.example.com/hook"></div>
-        <div><label class="block text-xs text-slate-500 mb-1">Method</label>
-          <select name="method" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-            <option ${sel(cfg.method, 'POST')}>POST</option><option ${sel(cfg.method, 'PUT')}>PUT</option>
-          </select>
-        </div>
-      </form>`;
-        }
-        if (key === 'fraud_check') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Model</label>
-          <select name="model" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-            <option ${sel(cfg.model, 'rules')}>rules</option><option ${sel(cfg.model, 'ml')}>ml</option>
-          </select>
-        </div>
-      </form>`;
-        }
-        // generic
-        return `<form class="space-y-3"><div class="text-slate-500">No configurable fields.</div></form>`;
-    }
-
-    /* ------------ Library ------------ */
-    function renderTemplates() {
-        $('templateList').innerHTML = TEMPLATES.map(t => `
-    <div class="rounded-xl border border-slate-200 p-4 flex items-center justify-between">
-      <div>
-        <div class="font-medium text-slate-800">${t.name}</div>
-        <div class="text-xs text-slate-600">${t.nodes.map(label).join(' • ')}</div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="loadTemplate(${t.id})"><i class="fa-solid fa-arrow-down mr-1"></i> Load</button>
-        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteTemplate(${t.id})"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
-      </div>
     </div>
-  `).join('') || `<div class="text-slate-500 text-sm">No templates</div>`;
-    }
-    function loadTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; CANVAS = t.nodes.map(n => ({ ...n, cfg: defaultCfg(n.key), ...n })); SELECTED = null; renderCanvas(); renderInspector(); }
-    function deleteTemplate(id) { TEMPLATES = TEMPLATES.filter(t => t.id !== id); renderTemplates(); }
+</div>
 
-    /* ------------ Runs ------------ */
-    function renderRuns() {
-        const f = $('runFilter').value;
-        const data = f === 'all' ? RUNS : RUNS.filter(r => r.status === f);
-        $('runRows').innerHTML = data.map(r => {
-            const pill = r.status === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700';
-            return `
-      <tr class="border-b last:border-0">
-        <td class="py-2 px-4 text-slate-600">${r.at}</td>
-        <td class="py-2 px-4">${r.wf}</td>
-        <td class="py-2 px-4">${r.who}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${r.status}</span></td>
-        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Run details coming soon')">Details</button></td>
-      </tr>`;
-        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No runs</td></tr>`;
+<script>
+    /* ================== Persistence & State ================== */
+    const LS_KEY = 'expense_wf_store_v1';
+    function loadStore() {
+        const s = localStorage.getItem(LS_KEY);
+        if (s) return JSON.parse(s);
+        return {
+            canvas: [],
+            templates: [
+                {
+                    id: 1, name: 'Travel • Fast-Track ≤ ₹5k', nodes: [
+                        { type: 'trigger', key: 'report_submitted' },
+                        { type: 'step', key: 'validate_receipts', cfg: { required: 'yes' } },
+                        { type: 'step', key: 'categorize_expense', cfg: { policy: 'travel' } },
+                        { type: 'step', key: 'manager_approval', cfg: { approver: 'Manager', sla: 12 } },
+                        { type: 'step', key: 'reimburse_payroll', cfg: { cycle: 'next' } },
+                        { type: 'step', key: 'notify_employee' }
+                    ]
+                },
+                {
+                    id: 2, name: 'General • Standard Review', nodes: [
+                        { type: 'trigger', key: 'report_submitted' },
+                        { type: 'step', key: 'fraud_check', cfg: { model: 'rules' } },
+                        { type: 'step', key: 'compute_tax', cfg: { region: 'IN', gst: 18 } },
+                        { type: 'step', key: 'finance_approval', cfg: { approver: 'Finance', sla: 24 } },
+                        { type: 'step', key: 'post_to_gl', cfg: { account: '6100-EXP' } },
+                        { type: 'step', key: 'reimburse_payroll', cfg: { cycle: 'monthly' } },
+                        { type: 'step', key: 'export_csv' }
+                    ]
+                }
+            ],
+            runs: [
+                { id: 701, at: '2025-09-14 14:10', wf: 'Travel • Fast-Track ≤ ₹5k', who: 'System', status: 'success' },
+                { id: 702, at: '2025-09-14 20:35', wf: 'General • Standard Review', who: 'Finance Bot', status: 'success' },
+                { id: 703, at: '2025-09-15 09:00', wf: 'Travel • Audit Trail', who: 'System', status: 'failed' }
+            ],
+            integrations: [
+                { name: 'Concur', state: 'Connected' },
+                { name: 'Expensify', state: 'Connected' },
+                { name: 'QuickBooks', state: 'Connected' },
+                { name: 'SAP', state: 'Pending' },
+                { name: 'Slack', state: 'Connected' },
+                { name: 'Payroll', state: 'Connected' }
+            ]
+        };
+    }
+    let STORE = loadStore();
+    function persist() { localStorage.setItem(LS_KEY, JSON.stringify(STORE)); }
+
+    /* ================== Utilities ================== */
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const sel = (v, exp) => String(v || '') === String(exp) ? 'selected' : '';
+    const badge = (txt, tone) => `<span class="px-2 py-0.5 rounded-full ${({ emerald: 'bg-emerald-50 text-emerald-700', amber: 'bg-amber-50 text-amber-700', slate: 'bg-slate-100 text-slate-700' })[tone] || 'bg-slate-100 text-slate-700'} text-xs">${txt}</span>`;
+    function toast(msg, type = 'info') {
+        const t = $('toast'), b = $('toastInner');
+        const tones = { success: 'bg-emerald-600', error: 'bg-rose-600', info: 'bg-slate-800', warn: 'bg-amber-600' };
+        b.className = `px-4 py-2 rounded-lg shadow text-white ${tones[type] || tones.info}`;
+        b.textContent = msg; t.classList.remove('hidden');
+        setTimeout(() => t.classList.add('hidden'), 2200);
+    }
+    function downloadJSON(filename, data) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
     }
 
-    /* ------------ Analytics ------------ */
-    let chartsReady = false, ttcC, successC;
-    function ensureCharts() {
-        if (typeof Chart !== 'undefined') { chartsReady = true; return; }
-        if (chartsReady) return;
-        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
-    }
-    function drawCharts() {
-        const tctx = document.getElementById('ttcChart').getContext('2d');
-        const sctx = document.getElementById('successChart').getContext('2d');
-        ttcC && ttcC.destroy(); successC && successC.destroy();
-        ttcC = new Chart(tctx, { type: 'bar', data: { labels: ['Travel', 'Meals', 'Office', 'Other'], datasets: [{ label: 'Median Hours to Reimburse', data: [24, 18, 36, 30], backgroundColor: '#3b82f6' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
-        successC = new Chart(sctx, { type: 'pie', data: { labels: ['Receipt Validate', 'Approvals', 'Payroll', 'GL Post', 'Notify'], datasets: [{ data: [98, 93, 97, 95, 99], borderWidth: 2, borderColor: '#fff', backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
-    }
-
-    /* ------------ Settings ------------ */
-    function renderIntegrations() {
-        $('intList').innerHTML = INTEGRATIONS.map(i => `
-    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-      <div class="font-medium text-slate-800">${i.name}</div>
-      <div class="flex items-center gap-2">
-        <span class="px-2 py-0.5 rounded-full text-xs ${i.state === 'Connected' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${i.state}</span>
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleInt('${i.name}')">${i.state === 'Connected' ? 'Disconnect' : 'Connect'}</button>
-      </div>
-    </div>`).join('');
-    }
-    function toggleInt(name) { INTEGRATIONS = INTEGRATIONS.map(x => x.name === name ? { ...x, state: x.state === 'Connected' ? 'Pending' : 'Connected' } : x); renderIntegrations(); }
-
-    /* ------------ Helpers ------------ */
+    /* ================== Icons & Labels ================== */
     function icon(k) {
         const m = {
             report_submitted: '<i class="fa-solid fa-paper-plane"></i>',
@@ -531,28 +339,17 @@
             webhook: '<i class="fa-solid fa-plug"></i>',
             escalation: '<i class="fa-solid fa-triangle-exclamation"></i>',
             fraud_check: '<i class="fa-solid fa-user-secret"></i>'
-        }; return m[k] || '<i class="fa-solid fa-circle-dot"></i>';
+        };
+        return m[k] || '<i class="fa-solid fa-circle-dot"></i>';
     }
     function label(n) {
         const names = {
-            report_submitted: 'Report Submitted',
-            receipt_missing: 'Receipt Missing',
-            policy_violation: 'Policy Violation',
-            month_end_close: 'Month-End Close',
-            validate_receipts: 'Validate Receipts',
-            categorize_expense: 'Categorize Expense',
-            fx_convert: 'FX Convert',
-            compute_tax: 'Compute Tax',
-            manager_approval: 'Manager Approval',
-            finance_approval: 'Finance Approval',
-            reimburse_payroll: 'Reimburse via Payroll',
-            post_to_gl: 'Post to GL',
-            export_csv: 'Export CSV',
-            notify_employee: 'Notify Employee',
-            webhook: 'Webhook',
-            escalation: 'Escalation',
-            fraud_check: 'Fraud Check'
-        }; return names[n.key] || n.key;
+            report_submitted: 'Report Submitted', receipt_missing: 'Receipt Missing', policy_violation: 'Policy Violation', month_end_close: 'Month-End Close',
+            validate_receipts: 'Validate Receipts', categorize_expense: 'Categorize Expense', fx_convert: 'FX Convert', compute_tax: 'Compute Tax',
+            manager_approval: 'Manager Approval', finance_approval: 'Finance Approval', reimburse_payroll: 'Reimburse via Payroll',
+            post_to_gl: 'Post to GL', export_csv: 'Export CSV', notify_employee: 'Notify Employee', webhook: 'Webhook', escalation: 'Escalation', fraud_check: 'Fraud Check'
+        };
+        return names[n.key] || n.key;
     }
     function defaultCfg(key) {
         if (key === 'validate_receipts') return { required: 'yes' };
@@ -570,15 +367,404 @@
         if (key === 'fraud_check') return { model: 'rules' };
         return {};
     }
-    function badge(txt, tone) { const m = { emerald: 'bg-emerald-50 text-emerald-700', amber: 'bg-amber-50 text-amber-700', slate: 'bg-slate-100 text-slate-700' }; return `<span class="px-2 py-0.5 rounded-full ${m[tone] || m.slate} text-xs">${txt}</span>`; }
-    function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c])); }
-    function sel(v, exp) { return (String(v || '') === String(exp)) ? 'selected' : ''; }
+
+    /* ================== Builder State (with Undo) ================== */
+    let CANVAS = STORE.canvas || [];
+    let SELECTED = null;
+    let UNDO = [], REDO = [];
+    function snap() { UNDO.push(JSON.stringify(CANVAS)); if (UNDO.length > 30) UNDO.shift(); REDO.length = 0; }
+    function undo() { if (!UNDO.length) return; REDO.push(JSON.stringify(CANVAS)); CANVAS = JSON.parse(UNDO.pop()); SELECTED = null; renderCanvas(); renderInspector(); }
+    function redo() { if (!REDO.length) return; UNDO.push(JSON.stringify(CANVAS)); CANVAS = JSON.parse(REDO.pop()); SELECTED = null; renderCanvas(); renderInspector(); }
+
+    /* ================== Tabs (hash-sticky) ================== */
+    function setActiveTab(name) {
+        document.querySelectorAll('.wf-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+        document.querySelectorAll('.wf-panel').forEach(p => p.classList.add('hidden'));
+        $(`${name}Panel`).classList.remove('hidden');
+        location.hash = name;
+        if (name === 'analytics') { ensureCharts(); drawCharts(); }
+    }
+    function initTabs() {
+        document.querySelectorAll('.wf-tab').forEach(b => b.addEventListener('click', () => setActiveTab(b.dataset.tab)));
+        setActiveTab((location.hash || '#builder').replace('#', ''));
+    }
+
+    /* ================== Builder: renderers & editors ================== */
+    function addNode(n) { snap(); CANVAS.push(n); persistCanvas(); renderCanvas(); }
+    function moveNode(i, d) { const j = i + d; if (j < 0 || j >= CANVAS.length) return; snap();[CANVAS[i], CANVAS[j]] = [CANVAS[j], CANVAS[i]]; persistCanvas(); renderCanvas(); }
+    function duplicateNode(i) { snap(); const c = JSON.parse(JSON.stringify(CANVAS[i])); CANVAS.splice(i + 1, 0, c); persistCanvas(); renderCanvas(); }
+    function toggleDisable(i) { snap(); CANVAS[i].disabled = !CANVAS[i].disabled; persistCanvas(); renderCanvas(); }
+    function removeNode(i) { snap(); CANVAS.splice(i, 1); if (SELECTED === i) SELECTED = null; persistCanvas(); renderCanvas(); renderInspector(); }
+    function selectNode(i) { SELECTED = i; renderInspector(); }
+    function persistCanvas() { STORE.canvas = CANVAS; persist(); }
+
+    function renderCanvas() {
+        $('canvas').innerHTML = CANVAS.map((n, i) => `
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200 ${SELECTED === i ? 'ring-2 ring-blue-200' : ''} ${n.disabled ? 'opacity-50' : ''}">
+      <div class="flex items-center gap-2">
+        ${icon(n.key)} <span class="font-medium">${label(n)}</span>
+        ${n.type === 'trigger' ? badge('Trigger', 'amber') : ''}
+        ${n.disabled ? badge('Disabled', 'slate') : ''}
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" title="Up"    onclick="moveNode(${i},-1)">↑</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" title="Down"  onclick="moveNode(${i}, 1)">↓</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" title="Duplicate" onclick="duplicateNode(${i})">⧉</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" title="Enable/Disable" onclick="toggleDisable(${i})">${CANVAS[i].disabled ? 'Enable' : 'Disable'}</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="selectNode(${i})">Edit</button>
+        <button class="px-2 py-1 text-xs rounded text-white bg-red-600 hover:bg-red-700" onclick="removeNode(${i})">Remove</button>
+      </div>
+    </li>
+  `).join('') || `<li class="text-slate-500 text-sm">No nodes yet. Click a Trigger or Step to add.</li>`;
+    }
+
+    function triggerEditor(cfg) {
+        return `
+    <form class="space-y-3">
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">When</label>
+        <select name="when" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option value="immediate" ${sel(cfg.when, 'immediate')}>Immediate</option>
+          <option value="scheduled" ${sel(cfg.when, 'scheduled')}>Scheduled</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-500 mb-1">Filter (JEXL)</label>
+        <input name="filter" value="${esc(cfg.filter || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., total<=5000 && currency=='INR'">
+      </div>
+    </form>
+  `;
+    }
+    function stepEditor(key, cfg) {
+        if (key === 'validate_receipts') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Required</label>
+        <select name="required" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option ${sel(cfg.required, 'yes')}>yes</option><option ${sel(cfg.required, 'no')}>no</option>
+        </select>
+      </div>
+    </form>`;
+        if (key === 'categorize_expense') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Policy</label>
+        <select name="policy" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option ${sel(cfg.policy, 'travel')}>travel</option>
+          <option ${sel(cfg.policy, 'meals')}>meals</option>
+          <option ${sel(cfg.policy, 'office')}>office</option>
+        </select>
+      </div>
+    </form>`;
+        if (key === 'fx_convert') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">From</label><input name="from" value="${esc(cfg.from || 'USD')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">To</label><input name="to" value="${esc(cfg.to || 'INR')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">Rate Source</label><input name="source" value="${esc(cfg.source || 'ECB')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+    </form>`;
+        if (key === 'compute_tax') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Region</label><input name="region" value="${esc(cfg.region || 'IN')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">GST %</label><input type="number" step="0.01" name="gst" value="${esc(cfg.gst || 18)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+    </form>`;
+        if (['manager_approval', 'finance_approval', 'escalation'].includes(key)) {
+            const defaults = key === 'manager_approval' ? { approver: 'Manager', sla: 24 } :
+                key === 'finance_approval' ? { approver: 'Finance', sla: 24 } : { approver: 'Controller', sla: 8 };
+            return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Approver</label><input name="approver" value="${esc(cfg.approver || defaults.approver)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">SLA (hours)</label><input type="number" name="sla" value="${esc(cfg.sla || defaults.sla)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+    </form>`;
+        }
+        if (key === 'reimburse_payroll') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Cycle</label>
+        <select name="cycle" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option ${sel(cfg.cycle, 'next')}>next</option><option ${sel(cfg.cycle, 'monthly')}>monthly</option>
+        </select>
+      </div>
+    </form>`;
+        if (key === 'post_to_gl') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Account</label><input name="account" value="${esc(cfg.account || '6100-EXP')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+    </form>`;
+        if (key === 'export_csv') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Columns</label><input name="cols" value="${esc(cfg.cols || 'date,merchant,amount,category')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      <div class="text-xs">
+        <button type="button" class="mt-1 px-2 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="previewCSVCols()">Preview CSV Header</button>
+      </div>
+    </form>`;
+        if (key === 'notify_employee') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Channel</label><input name="channel" value="${esc(cfg.channel || 'email')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">Template</label><input name="template" value="${esc(cfg.template || 'reimbursed')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+    </form>`;
+        if (key === 'webhook') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">URL</label><input name="url" value="${esc(cfg.url || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="https://api.example.com/hook"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">Method</label>
+        <select name="method" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option ${sel(cfg.method, 'POST')}>POST</option><option ${sel(cfg.method, 'PUT')}>PUT</option>
+        </select>
+      </div>
+    </form>`;
+        if (key === 'fraud_check') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Model</label>
+        <select name="model" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option ${sel(cfg.model, 'rules')}>rules</option><option ${sel(cfg.model, 'ml')}>ml</option>
+        </select>
+      </div>
+    </form>`;
+        return `<form class="space-y-3"><div class="text-slate-500">No configurable fields.</div></form>`;
+    }
+
+    function renderInspector() {
+        const box = $('inspector');
+        if (SELECTED === null) { box.innerHTML = '<div class="text-slate-500">Select a node to edit settings.</div>'; return; }
+        const n = CANVAS[SELECTED]; const cfg = n.cfg || {};
+        box.innerHTML = `
+    <div class="space-y-3">
+      <div class="flex items-center gap-2"><div>${icon(n.key)}</div><div class="font-medium">${label(n)}</div></div>
+      ${n.type === 'trigger' ? triggerEditor(cfg) : stepEditor(n.key, cfg)}
+      <div class="flex items-center justify-between">
+        <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="cancelEdit()">Cancel</button>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="saveAsTemplateFromNode()">Save as Template</button>
+          <button class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700" onclick="saveEdit()">Save</button>
+        </div>
+      </div>
+    </div>`;
+    }
+    function cancelEdit() { SELECTED = null; renderInspector(); }
+    function saveEdit() {
+        const form = document.querySelector('#inspector form');
+        if (!form) { SELECTED = null; renderInspector(); return; }
+        const data = Object.fromEntries(new FormData(form).entries());
+        // Basic guardrails
+        if (CANVAS[SELECTED].key === 'webhook' && data.url && !/^https?:\/\//i.test(data.url)) { toast('Webhook URL must be http(s)', 'warn'); return; }
+        snap();
+        const n = CANVAS[SELECTED];
+        n.cfg = { ...(n.cfg || {}), ...data };
+        persistCanvas(); toast('Node updated', 'success'); SELECTED = null; renderInspector();
+    }
+    function saveAsTemplateFromNode() {
+        const name = prompt('Template name');
+        if (!name) return;
+        // Save the *whole* canvas as a template snapshot
+        STORE.templates.push({ id: Date.now(), name, nodes: JSON.parse(JSON.stringify(CANVAS)) });
+        persist(); renderTemplates(); toast('Template saved', 'success');
+    }
+    function previewCSVCols() {
+        if (SELECTED === null) return;
+        const cols = (CANVAS[SELECTED]?.cfg?.cols || 'date,merchant,amount,category').split(',').map(s => s.trim()).filter(Boolean);
+        toast('CSV header: ' + cols.join(', '), 'info');
+    }
+
+    /* ================== Library ================== */
+    function renderTemplates() {
+        const q = ($('tplSearch')?.value || '').toLowerCase();
+        const items = STORE.templates.filter(t => !q || `${t.name} ${t.nodes.map(n => label(n)).join(' ')}`.toLowerCase().includes(q));
+        $('templateList').innerHTML = items.map(t => `
+    <div class="rounded-xl border border-slate-200 p-4 flex items-center justify-between">
+      <div class="min-w-0">
+        <div class="font-medium text-slate-800 truncate" title="${esc(t.name)}">${t.name}</div>
+        <div class="text-xs text-slate-600 truncate" title="${esc(t.nodes.map(label).join(' • '))}">${t.nodes.map(label).join(' • ')}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="previewTemplate(${t.id})">Preview</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="loadTemplate(${t.id})"><i class="fa-solid fa-arrow-down mr-1"></i> Load</button>
+        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteTemplate(${t.id})"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
+      </div>
+    </div>
+  `).join('') || `<div class="text-slate-500 text-sm">No templates</div>`;
+    }
+    function loadTemplate(id) {
+        const t = STORE.templates.find(x => x.id === id); if (!t) return;
+        snap(); CANVAS = t.nodes.map(n => ({ ...n, cfg: { ...defaultCfg(n.key), ...(n.cfg || {}) } }));
+        SELECTED = null; persistCanvas(); renderCanvas(); renderInspector(); toast('Template loaded', 'success'); setActiveTab('builder');
+    }
+    function previewTemplate(id) {
+        const t = STORE.templates.find(x => x.id === id); if (!t) return;
+        alert(`${t.name}\n\n` + t.nodes.map((n, i) => `${i + 1}. ${label(n)}${n.type === 'trigger' ? ' (Trigger)' : ''}`).join('\n'));
+    }
+    function deleteTemplate(id) {
+        if (!confirm('Delete this template?')) return;
+        STORE.templates = STORE.templates.filter(t => t.id !== id); persist(); renderTemplates();
+    }
+
+    /* ================== Runs ================== */
+    function renderRuns() {
+        const f = $('runFilter').value;
+        const data = f === 'all' ? STORE.runs : STORE.runs.filter(r => r.status === f);
+        $('runRows').innerHTML = data.map(r => {
+            const pill = r.status === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700';
+            return `
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 text-slate-600">${r.at}</td>
+        <td class="py-2 px-4">${r.wf}</td>
+        <td class="py-2 px-4">${r.who}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${r.status}</span></td>
+        <td class="py-2 px-4 text-right">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Run details coming soon')">Details</button>
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="replayRun('${r.wf}')">Replay</button>
+        </td>
+      </tr>`;
+        }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No runs</td></tr>`;
+    }
+    function replayRun(name) {
+        setActiveTab('builder');
+        toast(`Loaded "${name}" for simulation (mock)`, 'info');
+    }
+
+    /* ================== Analytics ================== */
+    let chartsReady = false, ttcC, successC;
+    function ensureCharts() {
+        if (typeof Chart !== 'undefined') { chartsReady = true; return; }
+        if (chartsReady) return;
+        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
+    }
+    function drawCharts() {
+        if (!chartsReady) return;
+        const tctx = $('ttcChart').getContext('2d');
+        const sctx = $('successChart').getContext('2d');
+        ttcC && ttcC.destroy(); successC && successC.destroy();
+        ttcC = new Chart(tctx, { type: 'bar', data: { labels: ['Travel', 'Meals', 'Office', 'Other'], datasets: [{ label: 'Median Hours to Reimburse', data: [24, 18, 36, 30] }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+        successC = new Chart(sctx, { type: 'pie', data: { labels: ['Receipt Validate', 'Approvals', 'Payroll', 'GL Post', 'Notify'], datasets: [{ data: [98, 93, 97, 95, 99], borderWidth: 2, borderColor: '#fff' }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+    }
+
+    /* ================== Settings ================== */
+    function renderIntegrations() {
+        $('intList').innerHTML = STORE.integrations.map(i => `
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="font-medium text-slate-800">${i.name}</div>
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded-full text-xs ${i.state === 'Connected' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${i.state}</span>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleInt('${i.name}')">${i.state === 'Connected' ? 'Disconnect' : 'Connect'}</button>
+      </div>
+    </div>
+  `).join('');
+    }
+    function toggleInt(name) {
+        STORE.integrations = STORE.integrations.map(x => x.name === name ? { ...x, state: x.state === 'Connected' ? 'Pending' : 'Connected' } : x);
+        persist(); renderIntegrations();
+    }
+
+    /* ================== Import / Export / Save / Publish ================== */
+    function exportJSON() { downloadJSON('workflow.json', CANVAS); }
+    function importJSON(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!Array.isArray(data)) throw new Error('Invalid format');
+                snap(); CANVAS = data; persistCanvas(); renderCanvas(); renderInspector(); toast('Workflow imported', 'success');
+            } catch (err) { toast('Failed to import: ' + err.message, 'error'); }
+        };
+        reader.readAsText(file);
+    }
+    function saveDraft() { persistCanvas(); toast('Draft saved', 'success'); }
+    function validateWorkflow() {
+        const problems = [];
+        const active = CANVAS.filter(n => !n.disabled);
+        if (!active.length) problems.push('Add at least one node.');
+        if (!active.some(n => n.type === 'trigger')) problems.push('Add at least one Trigger.');
+        if (active.findIndex(n => n.type === 'trigger') > 0) problems.push('A Trigger should be the first node.');
+        // simple requireds
+        active.forEach((n, idx) => {
+            if (n.key === 'webhook' && (!n.cfg || !n.cfg.url)) problems.push(`Node ${idx + 1} Webhook: URL required`);
+            if (n.key === 'compute_tax' && isNaN(Number(n?.cfg?.gst))) problems.push(`Node ${idx + 1} Compute Tax: GST must be a number`);
+        });
+        return problems;
+    }
+    function publish() {
+        const errs = validateWorkflow();
+        if (errs.length) { alert('Please fix before publishing:\n\n- ' + errs.join('\n- ')); return; }
+        toast('Workflow published', 'success');
+    }
+
+    /* ================== Simulation ================== */
+    function simulate() {
+        if (!CANVAS.length) { toast('Nothing to simulate', 'warn'); return; }
+        const log = [];
+        const active = CANVAS.filter(n => !n.disabled);
+        if (!active.length) { toast('All nodes are disabled', 'warn'); return; }
+        active.forEach((n, i) => {
+            const name = label(n);
+            if (n.type === 'trigger') {
+                log.push(`▶ Trigger: ${name} (${n.cfg?.when || 'immediate'})`);
+            } else {
+                const status = Math.random() > 0.03 ? 'ok' : 'failed';
+                log.push(`• Step ${i}: ${name} — ${status}${status === 'failed' ? ' (mock)' : ''}`);
+            }
+        });
+        $('simLog').innerHTML = log.map(l => `<div>${esc(l)}</div>`).join('');
+        $('simModal').classList.remove('hidden');
+    }
+    $('simClose').onclick = $('simOk').onclick = () => $('simModal').classList.add('hidden');
+
+    /* ================== Events & Boot ================== */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tabs
+        initTabs();
+
+        // Chips
+        document.querySelectorAll('.wf-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                addNode({ type: chip.dataset.type, key: chip.dataset.key, cfg: defaultCfg(chip.dataset.key) });
+            });
+        });
+
+        // Builder buttons
+        $('clearCanvas').addEventListener('click', () => { snap(); CANVAS = []; SELECTED = null; persistCanvas(); renderCanvas(); renderInspector(); });
+        $('saveWorkflow').addEventListener('click', saveDraft);
+        $('publishWorkflow').addEventListener('click', publish);
+        $('newWorkflowBtn').addEventListener('click', () => { snap(); CANVAS = []; SELECTED = null; persistCanvas(); renderCanvas(); renderInspector(); toast('New workflow', 'info'); });
+        $('simulateBtn').addEventListener('click', simulate);
+        $('undoBtn').addEventListener('click', undo);
+        $('redoBtn').addEventListener('click', redo);
+        $('exportBtn').addEventListener('click', exportJSON);
+        $('importBtn').addEventListener('click', () => $('fileInput').click());
+        $('fileInput').addEventListener('change', (e) => e.target.files[0] && importJSON(e.target.files[0]));
+
+        // Library
+        $('newTemplate').addEventListener('click', () => {
+            const name = prompt('Template name');
+            if (!name) return;
+            STORE.templates.push({ id: Date.now(), name, nodes: JSON.parse(JSON.stringify(CANVAS)) });
+            persist(); renderTemplates(); toast('Template created', 'success');
+        });
+        $('tplSearch').addEventListener('input', renderTemplates);
+
+        // Runs
+        $('runFilter').addEventListener('change', renderRuns);
+
+        // Integrations
+        renderIntegrations();
+
+        // Initial draws
+        renderCanvas(); renderInspector(); renderTemplates(); renderRuns();
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            const mod = e.ctrlKey || e.metaKey;
+            if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); saveDraft(); }
+            if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
+            if (mod && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); redo(); }
+            if (e.key === 'Delete' && SELECTED !== null) { e.preventDefault(); removeNode(SELECTED); }
+        });
+    });
+
+    /* expose for inline buttons */
+    window.moveNode = moveNode; window.removeNode = removeNode; window.selectNode = selectNode;
+    window.duplicateNode = duplicateNode; window.toggleDisable = toggleDisable;
+    window.replayRun = replayRun;
 </script>
 
 <style>
     .wf-tab.active {
         background-color: #1e293b;
-        color: white;
+        color: #fff;
     }
 
     .wf-tab:not(.active) {
@@ -595,7 +781,7 @@
         align-items: center;
         gap: .375rem;
         border: 1px solid rgb(203, 213, 225);
-        background: white;
+        background: #fff;
         border-radius: .5rem;
         padding: .375rem .5rem;
         font-size: .875rem;
@@ -603,6 +789,11 @@
 
     .wf-chip:hover {
         background: #f8fafc;
+    }
+
+    /* small niceties */
+    #toast {
+        transition: opacity .2s ease;
     }
 </style>
 {% endblock %}

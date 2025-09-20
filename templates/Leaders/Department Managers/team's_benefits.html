@@ -3,8 +3,8 @@
 <div class="mx-auto max-w-7xl">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+        <div class="min-w-0">
+            <h1 class="text-2xl font-semibold text-slate-800 truncate">
                 <i class="fa-solid fa-gift mr-2"></i> Team's benefits
             </h1>
             <p class="text-slate-600 text-sm">Manage employee perks, benefits, and eligibility.</p>
@@ -12,7 +12,7 @@
         <div class="flex items-center gap-2">
             <button id="syncVendors"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-                <i class="fa-solid fa-rotate mr-1"></i> Sync vendors
+                <i class="fa-solid fa-arrows-rotate mr-1"></i> Sync vendors
             </button>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
@@ -23,18 +23,18 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="plansTab" class="tb-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+        <div class="flex overflow-auto no-scrollbar space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="plansTab" class="tb-tab active px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"><i
                     class="fa-solid fa-layer-group mr-1"></i> Plans</button>
-            <button id="eligibilityTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="eligibilityTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"><i
                     class="fa-solid fa-id-badge mr-1"></i> Eligibility</button>
-            <button id="enrollTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="enrollTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"><i
                     class="fa-solid fa-user-check mr-1"></i> Enrollments</button>
-            <button id="claimsTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="claimsTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"><i
                     class="fa-solid fa-file-invoice-dollar mr-1"></i> Claims</button>
-            <button id="complianceTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="complianceTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"><i
                     class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
-            <button id="reportsTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="reportsTab" class="tb-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"><i
                     class="fa-solid fa-chart-line mr-1"></i> Reports</button>
         </div>
     </div>
@@ -43,24 +43,27 @@
     <section id="plansPanel" class="tb-panel">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
                     <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-layer-group mr-2"></i>
                         Benefit Plans</h3>
-                    <div class="flex items-center gap-2">
-                        <select id="planFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="planFilter"
+                            class="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
                             <option value="all">All</option>
                             <option value="active">Active</option>
                             <option value="archived">Archived</option>
                         </select>
                         <button id="newPlan"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm w-full sm:w-auto">
                             <i class="fa-solid fa-plus mr-1"></i> New Plan
                         </button>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+
+                <!-- Desktop table -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="min-w-full text-sm">
-                        <thead class="text-left text-slate-500 border-b">
+                        <thead class="text-left text-slate-500 border-b sticky -top-px bg-white">
                             <tr>
                                 <th class="py-2 px-4">Plan</th>
                                 <th class="py-2 px-4">Type</th>
@@ -73,6 +76,9 @@
                         <tbody id="planRows" class="text-slate-800"><!-- injected --></tbody>
                     </table>
                 </div>
+
+                <!-- Mobile cards -->
+                <div id="planListMobile" class="sm:hidden space-y-3"><!-- injected --></div>
             </div>
 
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
@@ -87,20 +93,22 @@
     <section id="eligibilityPanel" class="tb-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
                     <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-id-badge mr-2"></i> Rules
                     </h3>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
                         <select id="eligPlan"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"></select>
+                            class="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"></select>
                         <button id="newRule"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm w-full sm:w-auto"><i
                                 class="fa-solid fa-plus mr-1"></i> Add Rule</button>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+
+                <!-- Desktop -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="min-w-full text-sm">
-                        <thead class="text-left text-slate-500 border-b">
+                        <thead class="text-left text-slate-500 border-b sticky -top-px bg-white">
                             <tr>
                                 <th class="py-2 px-4">Condition</th>
                                 <th class="py-2 px-4">Operator</th>
@@ -112,6 +120,8 @@
                         <tbody id="ruleRows" class="text-slate-800"><!-- injected --></tbody>
                     </table>
                 </div>
+                <!-- Mobile -->
+                <div id="ruleListMobile" class="sm:hidden space-y-3"><!-- injected --></div>
             </div>
 
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
@@ -138,19 +148,22 @@
     <!-- Enrollments -->
     <section id="enrollPanel" class="tb-panel hidden">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
                 <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-user-check mr-2"></i> Active
                     Enrollments</h3>
-                <div class="flex items-center gap-2">
-                    <select id="enrPlan" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"></select>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <select id="enrPlan"
+                        class="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"></select>
                     <button id="bulkEnroll"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50 w-full sm:w-auto"><i
                             class="fa-solid fa-user-plus mr-1"></i> Bulk Enroll</button>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+
+            <!-- Desktop -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="text-left text-slate-500 border-b sticky -top-px bg-white">
                         <tr>
                             <th class="py-2 px-4">Employee</th>
                             <th class="py-2 px-4">Plan</th>
@@ -163,6 +176,8 @@
                     <tbody id="enrRows" class="text-slate-800"><!-- injected --></tbody>
                 </table>
             </div>
+            <!-- Mobile -->
+            <div id="enrListMobile" class="sm:hidden space-y-3"><!-- injected --></div>
         </div>
     </section>
 
@@ -170,11 +185,12 @@
     <section id="claimsPanel" class="tb-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
                     <h3 class="text-lg font-semibold text-slate-800"><i
                             class="fa-solid fa-file-invoice-dollar mr-2"></i> Claims</h3>
-                    <div class="flex items-center gap-2">
-                        <select id="clStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="clStatus"
+                            class="flex-1 sm:flex-none px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
                             <option value="all">All</option>
                             <option value="submitted">Submitted</option>
                             <option value="approved">Approved</option>
@@ -182,13 +198,15 @@
                             <option value="paid">Paid</option>
                         </select>
                         <button id="newClaim"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm w-full sm:w-auto"><i
                                 class="fa-solid fa-circle-plus mr-1"></i> New</button>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+
+                <!-- Desktop -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="min-w-full text-sm">
-                        <thead class="text-left text-slate-500 border-b">
+                        <thead class="text-left text-slate-500 border-b sticky -top-px bg-white">
                             <tr>
                                 <th class="py-2 px-4">ID</th>
                                 <th class="py-2 px-4">Employee</th>
@@ -201,11 +219,21 @@
                         <tbody id="claimRows" class="text-slate-800"><!-- injected --></tbody>
                     </table>
                 </div>
+                <!-- Mobile -->
+                <div id="claimListMobile" class="sm:hidden space-y-3"><!-- injected --></div>
             </div>
+
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-stopwatch mr-2"></i> SLA
                 </h3>
-                <ul id="slaBox" class="space-y-2 text-sm"><!-- injected --></ul>
+                <ul id="slaBox" class="space-y-2 text-sm">
+                    <li class="flex items-center justify-between"><span>Submission → Review</span><span
+                            class="font-medium">≤ 2 business days</span></li>
+                    <li class="flex items-center justify-between"><span>Review → Approval</span><span
+                            class="font-medium">≤ 3 business days</span></li>
+                    <li class="flex items-center justify-between"><span>Approval → Payout</span><span
+                            class="font-medium">≤ 5 business days</span></li>
+                </ul>
             </div>
         </div>
     </section>
@@ -218,7 +246,7 @@
                     Checklist</h3>
                 <div id="compList" class="space-y-3"><!-- injected --></div>
                 <button id="compAll"
-                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm w-full sm:w-auto"><i
                         class="fa-solid fa-check mr-1"></i> Mark All</button>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
@@ -240,31 +268,35 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Spend
                     by Plan</h3>
-                <canvas id="spendChart" height="220"></canvas>
+                <div class="relative h-56 sm:h-64">
+                    <canvas id="spendChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-heart-pulse mr-2"></i>
                     Adoption & Usage</h3>
-                <canvas id="adoptChart" height="220"></canvas>
+                <div class="relative h-56 sm:h-64">
+                    <canvas id="adoptChart" class="absolute inset-0 w-full h-full"></canvas>
+                </div>
             </div>
         </div>
     </section>
 </div>
 
 <!-- New Plan Modal -->
-<div id="planModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<div id="planModal" class="fixed inset-0 bg-black/50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-800">Create Benefit Plan</h3>
-                    <button id="closePlan" class="text-slate-400 hover:text-slate-600"><i
+                    <button id="closePlan" class="text-slate-400 hover:text-slate-600 p-1"><i
                             class="fa-solid fa-times text-xl"></i></button>
                 </div>
-                <div class="p-6 space-y-4">
+                <div class="p-4 sm:p-6 space-y-4">
                     <input id="plName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="Plan name">
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <select id="plType" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                             <option>Health</option>
                             <option>Dental</option>
@@ -278,16 +310,17 @@
                             <option value="archived">Archived</option>
                         </select>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input id="plEr" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Employer %">
                         <input id="plEe" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Employee %">
                     </div>
-                    <div class="flex items-center justify-end gap-2 pt-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 pt-2">
                         <button id="cancelPlan"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="savePlan" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                            class="w-full sm:w-auto px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="savePlan"
+                            class="w-full sm:w-auto px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
                                 class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
                     </div>
                 </div>
@@ -297,17 +330,17 @@
 </div>
 
 <!-- New Rule Modal -->
-<div id="ruleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<div id="ruleModal" class="fixed inset-0 bg-black/50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-800">Add Eligibility Rule</h3>
-                    <button id="closeRule" class="text-slate-400 hover:text-slate-600"><i
+                    <button id="closeRule" class="text-slate-400 hover:text-slate-600 p-1"><i
                             class="fa-solid fa-times text-xl"></i></button>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="grid grid-cols-3 gap-3">
+                <div class="p-4 sm:p-6 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <select id="rField" class="rounded-lg border border-slate-300 px-3 py-2">
                             <option value="department">Department</option>
                             <option value="location">Location</option>
@@ -322,8 +355,9 @@
                         </select>
                         <input id="rVal" class="rounded-lg border border-slate-300 px-3 py-2" placeholder="Value">
                     </div>
-                    <div class="flex items-center justify-end gap-2">
-                        <button id="saveRule" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
+                        <button id="saveRule"
+                            class="w-full sm:w-auto px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
                                 class="fa-solid fa-plus mr-1"></i> Add</button>
                     </div>
                 </div>
@@ -333,30 +367,31 @@
 </div>
 
 <!-- New Claim Modal -->
-<div id="claimModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<div id="claimModal" class="fixed inset-0 bg-black/50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-800">New Claim</h3>
-                    <button id="closeClaim" class="text-slate-400 hover:text-slate-600"><i
+                    <button id="closeClaim" class="text-slate-400 hover:text-slate-600 p-1"><i
                             class="fa-solid fa-times text-xl"></i></button>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 sm:p-6 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input id="clEmp" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Employee name">
                         <select id="clPlan" class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input id="clAmt" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Amount">
                         <input id="clDate" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
                     <input id="clDesc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="Description">
-                    <div class="flex items-center justify-end gap-2">
-                        <button id="saveClaim" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
+                        <button id="saveClaim"
+                            class="w-full sm:w-auto px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
                                 class="fa-solid fa-floppy-disk mr-1"></i> Submit</button>
                     </div>
                 </div>
@@ -415,7 +450,7 @@
         });
 
         // Plans
-        $('planFilter').addEventListener('change', renderPlans);
+        $('planFilter').addEventListener('change', () => { renderPlans(); renderPlanSummary(); });
         $('newPlan').addEventListener('click', () => $('planModal').classList.remove('hidden'));
         $('closePlan').addEventListener('click', closePlan);
         $('cancelPlan').addEventListener('click', closePlan);
@@ -455,17 +490,37 @@
     function renderPlans() {
         const f = $('planFilter').value;
         const data = PLANS.filter(p => f === 'all' || p.status === f);
+
+        // Desktop rows
         $('planRows').innerHTML = data.map(p => `
     <tr class="border-b last:border-0">
       <td class="py-2 px-4 font-medium">${p.name}</td>
       <td class="py-2 px-4">${p.type}</td>
       <td class="py-2 px-4">${p.er}%</td>
       <td class="py-2 px-4">${p.ee}%</td>
-      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill(p.status)}">${p.status}</span></td>
+      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill(p.status)} capitalize">${p.status}</span></td>
       <td class="py-2 px-4 text-right">
         <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Open ${p.name}')">Open</button>
       </td>
     </tr>`).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No plans</td></tr>`;
+
+        // Mobile cards
+        $('planListMobile').innerHTML = data.map(p => `
+      <div class="rounded-xl border border-slate-200 p-4">
+        <div class="flex items-center justify-between">
+          <div class="font-medium text-slate-800">${p.name}</div>
+          <span class="px-2 py-0.5 rounded-full text-xs ${pill(p.status)} capitalize">${p.status}</span>
+        </div>
+        <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+          <div><span class="text-slate-500">Type:</span> <span class="text-slate-800">${p.type}</span></div>
+          <div><span class="text-slate-500">Employer %:</span> <span class="text-slate-800">${p.er}%</span></div>
+          <div><span class="text-slate-500">Employee %:</span> <span class="text-slate-800">${p.ee}%</span></div>
+        </div>
+        <div class="mt-3">
+          <button class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="alert('Open ${p.name}')">Open</button>
+        </div>
+      </div>
+    `).join('') || `<div class="text-center py-6 text-slate-500">No plans</div>`;
     }
     function renderPlanSummary() {
         const active = PLANS.filter(p => p.status === 'active');
@@ -492,8 +547,10 @@
         $('eligPlan').innerHTML = opts; $('enrPlan').innerHTML = '<option value="all">All</option>' + opts; $('clPlan').innerHTML = opts;
     }
     function renderRules() {
-        const pid = Number($('eligPlan').value || PLANS[0]?.id); if (!pid) { $('ruleRows').innerHTML = ''; return; }
+        const pid = Number($('eligPlan').value || PLANS[0]?.id); if (!pid) { $('ruleRows').innerHTML = ''; $('ruleListMobile').innerHTML = ''; return; }
         const data = RULES.filter(r => r.plan === pid);
+
+        // Desktop
         $('ruleRows').innerHTML = data.map((r, i) => `
     <tr class="border-b last:border-0">
       <td class="py-2 px-4">${cap(r.field)}</td>
@@ -504,6 +561,17 @@
         <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="delRule(${pid},${i})">Delete</button>
       </td>
     </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No rules</td></tr>`;
+
+        // Mobile
+        $('ruleListMobile').innerHTML = data.map((r, i) => `
+      <div class="rounded-xl border border-slate-200 p-4">
+        <div class="flex items-center justify-between">
+          <div class="font-medium text-slate-800">${cap(r.field)} ${opText(r.op)} <span class="text-slate-600">${r.value}</span></div>
+          <button class="text-red-600 text-sm" onclick="delRule(${pid},${i})">Delete</button>
+        </div>
+        <div class="mt-1 text-sm text-slate-600">Applies To: ${r.who}</div>
+      </div>
+    `).join('') || `<div class="text-center py-6 text-slate-500">No rules</div>`;
     }
     $('eligPlan').addEventListener('change', renderRules);
     function saveRule() {
@@ -532,6 +600,8 @@
     function renderEnrollments() {
         const pid = $('enrPlan').value;
         const data = pid === 'all' || !pid ? ENROLL : ENROLL.filter(e => e.plan === Number(pid));
+
+        // Desktop
         $('enrRows').innerHTML = data.map(e => {
             const p = PLANS.find(p => p.id === e.plan);
             return `
@@ -544,6 +614,24 @@
         <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Edit enrollment')">Edit</button></td>
       </tr>`;
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No enrollments</td></tr>`;
+
+        // Mobile
+        $('enrListMobile').innerHTML = data.map(e => {
+            const p = PLANS.find(p => p.id === e.plan);
+            return `
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="font-medium text-slate-800">${e.emp}</div>
+              <div class="mt-1 grid grid-cols-2 gap-2 text-sm">
+                <div><span class="text-slate-500">Plan:</span> <span class="text-slate-800">${p?.name || '—'}</span></div>
+                <div><span class="text-slate-500">Coverage:</span> <span class="text-slate-800">${e.cov}</span></div>
+                <div><span class="text-slate-500">Employee:</span> <span class="text-slate-800">${money(e.ee)}</span></div>
+                <div><span class="text-slate-500">Employer:</span> <span class="text-slate-800">${money(e.er)}</span></div>
+              </div>
+              <div class="mt-3">
+                <button class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="alert('Edit enrollment')">Edit</button>
+              </div>
+            </div>`;
+        }).join('') || `<div class="text-center py-6 text-slate-500">No enrollments</div>`;
     }
     $('enrPlan').addEventListener('change', renderEnrollments);
 
@@ -551,6 +639,8 @@
     function renderClaims() {
         const f = $('clStatus').value;
         const data = f === 'all' ? CLAIMS : CLAIMS.filter(c => c.st === f);
+
+        // Desktop
         $('claimRows').innerHTML = data.map(c => {
             const p = PLANS.find(p => p.id === c.plan);
             return `
@@ -563,6 +653,26 @@
         <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approveClaim('${c.id}')">Approve</button></td>
       </tr>`;
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No claims</td></tr>`;
+
+        // Mobile
+        $('claimListMobile').innerHTML = data.map(c => {
+            const p = PLANS.find(p => p.id === c.plan);
+            return `
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="flex items-center justify-between">
+                <div class="font-medium text-slate-800">${c.id}</div>
+                <span class="px-2 py-0.5 rounded-full text-xs ${statusPill(c.st)} capitalize">${c.st}</span>
+              </div>
+              <div class="mt-1 grid grid-cols-2 gap-2 text-sm">
+                <div><span class="text-slate-500">Employee:</span> <span class="text-slate-800">${c.emp}</span></div>
+                <div><span class="text-slate-500">Plan:</span> <span class="text-slate-800">${p?.name || '—'}</span></div>
+                <div><span class="text-slate-500">Amount:</span> <span class="text-slate-800">${money(c.amt)}</span></div>
+              </div>
+              <div class="mt-3">
+                <button class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="approveClaim('${c.id}')">Approve</button>
+              </div>
+            </div>`;
+        }).join('') || `<div class="text-center py-6 text-slate-500">No claims</div>`;
     }
     function approveClaim(id) { const x = CLAIMS.find(c => c.id === id); if (!x) return; x.st = 'approved'; renderClaims(); }
     function saveClaim() {
@@ -606,21 +716,22 @@
     }
     function drawCharts() {
         if (!chartsReady) return;
-        const ctx1 = document.getElementById('spendChart'); const ctx2 = document.getElementById('adoptChart');
+        const ctx1 = document.getElementById('spendChart').getContext('2d');
+        const ctx2 = document.getElementById('adoptChart').getContext('2d');
         spendC && spendC.destroy(); adoptC && adoptC.destroy();
 
         const byPlan = { 'Health': 52000, 'Vision': 6500, 'Wellness': 2400, 'Retirement': 31000 };
         spendC = new Chart(ctx1, {
             type: 'pie',
-            data: { labels: Object.keys(byPlan), datasets: [{ data: Object.values(byPlan), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] },
-            options: { plugins: { legend: { position: 'bottom' } } }
+            data: { labels: Object.keys(byPlan), datasets: [{ data: Object.values(byPlan) }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
 
         const adopt = { 'Silver Health': 32, 'Vision Basic': 18, 'Wellness Wallet': 9, 'Retirement 401k': 26 };
         adoptC = new Chart(ctx2, {
             type: 'bar',
-            data: { labels: Object.keys(adopt), datasets: [{ data: Object.values(adopt), backgroundColor: '#06b6d4' }] },
-            options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+            data: { labels: Object.keys(adopt), datasets: [{ data: Object.values(adopt) }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
         });
     }
 
@@ -643,6 +754,16 @@
     .tb-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    /* nicer mobile scrolling for tabs */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 </style>
 {% endblock %}

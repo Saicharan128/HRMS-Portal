@@ -31,18 +31,24 @@
     <!-- Tabs -->
     <div class="mb-6">
         <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="overviewTab" class="trc-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-gauge-high mr-1"></i> Overview</button>
-            <button id="calculatorTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-calculator mr-1"></i> Calculator</button>
-            <button id="guidanceTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-circle-info mr-1"></i> Guidance</button>
-            <button id="whatifTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-wand-magic-sparkles mr-1"></i> What-If</button>
-            <button id="historyTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-clock-rotate-left mr-1"></i> History</button>
-            <button id="settingsTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-gear mr-1"></i> Settings</button>
+            <button id="overviewTab" class="trc-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-gauge-high mr-1"></i> Overview
+            </button>
+            <button id="calculatorTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-calculator mr-1"></i> Calculator
+            </button>
+            <button id="guidanceTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-circle-info mr-1"></i> Guidance
+            </button>
+            <button id="whatifTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> What-If
+            </button>
+            <button id="historyTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
+            </button>
+            <button id="settingsTab" class="trc-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-gear mr-1"></i> Settings
+            </button>
         </div>
     </div>
 
@@ -282,8 +288,10 @@
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-bell mr-2"></i> Reminders
                 </h3>
                 <div class="space-y-2 text-sm">
-                    <label class="block">Opt-out deadline<input id="stDeadline" type="date"
-                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+                    <label class="block">Opt-out deadline
+                        <input id="stDeadline" type="date"
+                            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </label>
                     <label class="flex items-center gap-2"><input id="stNudges" type="checkbox" checked> Nudge those
                         worse on default</label>
                 </div>
@@ -307,11 +315,12 @@
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
                     <h3 id="modalTitle" class="text-lg font-semibold text-slate-800">Preview</h3>
-                    <button id="closeModal" class="text-slate-400 hover:text-slate-600"><i
-                            class="fa-solid fa-times text-xl"></i></button>
+                    <button id="closeModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
                 </div>
                 <div id="modalBody" class="p-6 text-sm space-y-2">
-                    <p>👀 This is a  preview.</p>
+                    <p>👀 This is a preview.</p>
                 </div>
                 <div class="px-6 pb-6 flex items-center justify-end gap-2">
                     <button id="dismissModal"
@@ -326,7 +335,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ----  Data ----
+    // ---- Data ----
     const EMP = [
         { id: 1, name: 'Ananya Rao', code: 'EMP001', ctc: 1200000, ded: 225000 }, // old better
         { id: 2, name: 'Rohit Mehta', code: 'EMP002', ctc: 900000, ded: 50000 }, // new better
@@ -379,6 +388,11 @@
         document.getElementById('btnPreview').addEventListener('click', () => openModal('Advice Preview', 'Personalized guidance would appear here.'));
         document.getElementById('btnSharePDF').addEventListener('click', () => alert('📄 Guidance PDF shared ()'));
         document.getElementById('stSave').addEventListener('click', () => alert('💾 Settings saved'));
+        document.getElementById('btnSendTips').addEventListener('click', () => alert('✉️ Tips sent ()')); // added
+
+        // helpful UX hooks
+        document.getElementById('fyPicker').addEventListener('change', () => alert('🔁 Switched FY ()'));
+        document.getElementById('stDefault').addEventListener('change', () => { renderKPIs(); drawCharts(); });
 
         document.getElementById('calcSearch').addEventListener('input', renderCalculator);
         document.getElementById('calcFilter').addEventListener('change', renderCalculator);
@@ -396,10 +410,8 @@
     }
     function closeModal() { document.getElementById('Modal').classList.add('hidden'); }
 
-    // ---- Tax helpers (high-level  only) ----
-    // NOTE: This is a simplified calculator for  UI.
+    // ---- Tax helpers (simplified, illustrative only) ----
     function taxNewRegime(income) {
-        // sample slabs FY25-26  (not authoritative)
         const slabs = [
             { upto: 300000, rate: 0.00 },
             { upto: 700000, rate: 0.05 },
@@ -418,7 +430,7 @@
         return Math.max(0, Math.round(tax));
     }
     function taxOldRegime(income, deductions, hra = 0) {
-        const taxable = Math.max(0, income - deductions - hra - 50000); // standard deduction 
+        const taxable = Math.max(0, income - deductions - hra - 50000); // standard deduction (illustrative)
         const slabs = [
             { upto: 250000, rate: 0.00 },
             { upto: 500000, rate: 0.05 },
@@ -446,10 +458,12 @@
         });
         const betterOnDefault = mix.filter(m => m.sug === defaultReg).length;
         const savingsSum = mix.reduce((a, b) => a + b.save, 0);
+
         document.getElementById('kpiEmp').textContent = EMP.length;
         document.getElementById('kpiDefault').textContent = defaultReg.charAt(0).toUpperCase() + defaultReg.slice(1);
         document.getElementById('kpiBetter').textContent = betterOnDefault;
         document.getElementById('kpiSavings').textContent = savingsSum.toLocaleString('en-IN');
+
         const badge = document.getElementById('orgBadge');
         const ready = EMP.length > 0;
         badge.textContent = ready ? 'Ready' : 'Draft';
@@ -464,14 +478,20 @@
             data: {
                 labels: ['Employees', 'Better on Default', 'Savings (₹)'],
                 datasets: [{
-                    label: 'Org', data: [
+                    label: 'Org',
+                    data: [
                         EMP.length,
                         Number(document.getElementById('kpiBetter').textContent) || 0,
-                        Number((document.getElementById('kpiSavings').textContent || '0').replaceAll(',', '')) || 0
+                        Number((document.getElementById('kpiSavings').textContent || '0').replace(/,/g, '')) || 0
                     ]
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                animation: false,
+                scales: { y: { beginAtZero: true } }
+            }
         });
 
         const defReg = (document.getElementById('stDefault') ? document.getElementById('stDefault').value : 'new');
@@ -480,12 +500,16 @@
             const tNew = taxNewRegime(e.ctc), tOld = taxOldRegime(e.ctc, e.ded, 0);
             (tNew <= tOld ? mix.new++ : mix.old++);
         });
+
         const ctx2 = document.getElementById('mixChart').getContext('2d');
         if (_mixChart) _mixChart.destroy();
         _mixChart = new Chart(ctx2, {
             type: 'doughnut',
             data: { labels: ['New better', 'Old better'], datasets: [{ data: [mix.new, mix.old] }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } }, animation: false }
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '65%',
+                plugins: { legend: { display: false } }, animation: false
+            }
         });
         document.getElementById('mixLegend').innerHTML =
             `<div class="flex items-center justify-between text-sm"><span>New better</span><span>${mix.new}</span></div>` +
@@ -507,21 +531,22 @@
             .filter(r => (flt === 'all') ? true : r.sug === flt)
             .filter(r => r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q))
             .sort((a, b) => a.name.localeCompare(b.name));
+
         document.getElementById('calcRows').innerHTML = rows.map(r => `
-    <tr class="border-b last:border-0">
-      <td class="py-2 pr-4">${r.name}</td>
-      <td class="py-2 pr-4">${r.code}</td>
-      <td class="py-2 pr-4">₹${r.ctc.toLocaleString('en-IN')}</td>
-      <td class="py-2 pr-4">₹${r.ded.toLocaleString('en-IN')}</td>
-      <td class="py-2 pr-4">${badgeRegime(r.sug)}</td>
-      <td class="py-2 pr-4">₹${r.save.toLocaleString('en-IN')}</td>
-      <td class="py-2 pr-4">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50"
-                onclick="alert('Advice for ${r.name}: ${r.sug.toUpperCase()} ()')">
-          <i class="fa-solid fa-envelope-open-text mr-1"></i> Advise
-        </button>
-      </td>
-    </tr>`).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No records.</td></tr>`;
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4">${r.name}</td>
+        <td class="py-2 pr-4">${r.code}</td>
+        <td class="py-2 pr-4">₹${r.ctc.toLocaleString('en-IN')}</td>
+        <td class="py-2 pr-4">₹${r.ded.toLocaleString('en-IN')}</td>
+        <td class="py-2 pr-4">${badgeRegime(r.sug)}</td>
+        <td class="py-2 pr-4">₹${r.save.toLocaleString('en-IN')}</td>
+        <td class="py-2 pr-4">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50"
+                  onclick="alert('Advice for ${r.name}: ${r.sug.toUpperCase()} ()')">
+            <i class="fa-solid fa-envelope-open-text mr-1"></i> Advise
+          </button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No records.</td></tr>`;
     }
 
     // ---- What-If compute ----
@@ -540,11 +565,11 @@
     // ---- History ----
     function renderHistory() {
         document.getElementById('histRows').innerHTML = HISTORY.map(h => `
-    <tr class="border-b last:border-0">
-      <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
-      <td class="py-2 pr-4">${h.action}</td>
-      <td class="py-2 pr-4">${h.by}</td>
-    </tr>`).join('');
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+        <td class="py-2 pr-4">${h.action}</td>
+        <td class="py-2 pr-4">${h.by}</td>
+      </tr>`).join('');
     }
 
     // ---- Utils ----

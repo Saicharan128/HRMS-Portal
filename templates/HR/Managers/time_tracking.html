@@ -7,12 +7,18 @@
             <h1 class="text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-business-time mr-2"></i> Time tracking
             </h1>
-            <p class="text-slate-600 text-sm">Monitor hours/shifts/productivity.</p>
+            <p class="text-slate-600 text-sm">Monitor hours, shifts, and productivity.</p>
         </div>
-        <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-            <i class="fa-solid fa-arrow-left mr-1"></i> Back
-        </a>
+        <div class="flex items-center gap-2">
+            <button id="exportCsvBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
     </div>
 
     <!-- Manual Entry (Dummy) -->
@@ -61,7 +67,7 @@
                 <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                     placeholder="Optional notes">
             </div>
-            <div class="md:col-span-8 flex items-center gap-3">
+            <div class="md:col-span-8 flex flex-wrap items-center gap-3">
                 <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
                     <i class="fa-solid fa-plus mr-1"></i> Add Entry
                 </button>
@@ -71,7 +77,7 @@
     </div>
 
     <!-- Filters + Metrics -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+    <div class="mb-3 grid grid-cols-1 md:grid-cols-7 gap-2">
         <input id="qEmp" placeholder="Search employee / project…"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
@@ -90,6 +96,8 @@
             <option>Approved</option>
             <option>Rejected</option>
         </select>
+        <button id="clearFilters"
+            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
     </div>
 
     <!-- KPI Chips -->
@@ -112,11 +120,29 @@
         </div>
     </div>
 
+    <!-- Bulk actions -->
+    <div class="flex items-center gap-2 mb-2">
+        <button id="bulkApprove"
+            class="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm hover:bg-emerald-700 disabled:opacity-50"
+            disabled>
+            <i class="fa-solid fa-check mr-1"></i> Approve Selected
+        </button>
+        <button id="bulkReject"
+            class="px-3 py-1.5 rounded-md bg-rose-600 text-white text-sm hover:bg-rose-700 disabled:opacity-50"
+            disabled>
+            <i class="fa-solid fa-xmark mr-1"></i> Reject Selected
+        </button>
+        <span class="text-xs text-slate-500">Select rows in the table to enable bulk actions.</span>
+    </div>
+
     <!-- Table -->
     <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table class="min-w-full text-sm text-left text-slate-700">
             <thead class="bg-slate-50 text-slate-600">
                 <tr>
+                    <th class="px-4 py-2 w-8">
+                        <input type="checkbox" id="selectAllRows" class="rounded border-slate-300">
+                    </th>
                     <th class="px-4 py-2">Employee</th>
                     <th class="px-4 py-2">Date</th>
                     <th class="px-4 py-2">In</th>
@@ -160,14 +186,20 @@
     const fProject = document.getElementById("fProject");
     const fShift = document.getElementById("fShift");
     const fStatus = document.getElementById("fStatus");
+    const clearFilters = document.getElementById("clearFilters");
 
     const kpiTotal = document.getElementById("kpiTotal");
     const kpiAvg = document.getElementById("kpiAvg");
     const kpiOT = document.getElementById("kpiOT");
     const kpiProd = document.getElementById("kpiProd");
 
+    const bulkApprove = document.getElementById("bulkApprove");
+    const bulkReject = document.getElementById("bulkReject");
+    const selectAllRows = document.getElementById("selectAllRows");
+    const exportCsvBtn = document.getElementById("exportCsvBtn");
+
     /* ---------- Helpers ---------- */
-    function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2"; c.appendChild(el); return c; }
+    function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2 align-top"; c.appendChild(el); return c; }
     function input(v, cls = "w-28") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
     function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 1; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
     function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
@@ -222,6 +254,15 @@
         kpiProd.textContent = prod + " %";
     }
 
+    /* ---------- Selection helpers (bulk) ---------- */
+    function selectedRowIds() {
+        return Array.from(document.querySelectorAll('.row-select:checked')).map(cb => Number(cb.dataset.id));
+    }
+    function refreshBulkButtons() {
+        const has = selectedRowIds().length > 0;
+        bulkApprove.disabled = !has; bulkReject.disabled = !has;
+    }
+
     /* ---------- Render ---------- */
     function load() {
         rows.innerHTML = "";
@@ -230,6 +271,13 @@
 
         data.forEach(r => {
             const tr = document.createElement("tr");
+
+            const selectTd = document.createElement("td");
+            selectTd.className = "px-4 py-2 align-top";
+            const cb = document.createElement("input");
+            cb.type = "checkbox"; cb.className = "row-select rounded border-slate-300"; cb.dataset.id = r.id;
+            cb.addEventListener('change', refreshBulkButtons);
+            selectTd.appendChild(cb);
 
             const empI = input(r.employee, "w-48");
             const dateI = input(r.date, "w-32"); dateI.type = "date";
@@ -257,7 +305,7 @@
             delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
             actions.append(approveBtn, rejectBtn, saveBtn, delBtn);
 
-            tr.append(td(empI), td(dateI), td(inI), td(outI), td(brI), td(hrs),
+            tr.append(selectTd, td(empI), td(dateI), td(inI), td(outI), td(brI), td(hrs),
                 td(projI), td(shiftS), td(statusS), td(notesT), td(actions));
             rows.appendChild(tr);
 
@@ -288,6 +336,7 @@
         });
 
         listMsg.textContent = data.length ? "" : "No entries.";
+        refreshBulkButtons();
     }
 
     /* ---------- Create (dummy) ---------- */
@@ -303,7 +352,7 @@
         const project = (fd.get("project") || "").toString().trim();
         const notes = (fd.get("notes") || "").toString().trim();
 
-        if (!employee || !date || !in_time || !out_time) { flash(entryMsg, "Missing required fields.", true); return; }
+        if (!employee || !date || !in_time || !out_time) { flash(entryMsg, "Missing required fields.", false); return; }
         const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
         STORE.unshift({ id, employee, date, in_time, out_time, break_min, project, shift, status: "Logged", notes });
         persist(); entryForm.reset(); flash(entryMsg, "Entry added ✓"); load();
@@ -311,6 +360,72 @@
 
     /* ---------- Live filtering ---------- */
     [qEmp, fFrom, fTo, fProject, fShift, fStatus].forEach(el => el.addEventListener("input", load));
+    clearFilters.addEventListener("click", () => {
+        qEmp.value = ""; fFrom.value = ""; fTo.value = ""; fProject.value = ""; fShift.value = ""; fStatus.value = "";
+        load();
+    });
+
+    /* ---------- Bulk actions ---------- */
+    selectAllRows.addEventListener('change', () => {
+        document.querySelectorAll('.row-select').forEach(cb => cb.checked = selectAllRows.checked);
+        refreshBulkButtons();
+    });
+
+    bulkApprove.addEventListener('click', () => {
+        const ids = selectedRowIds();
+        if (!ids.length) return;
+        STORE = STORE.map(r => ids.includes(r.id) ? { ...r, status: "Approved" } : r);
+        persist(); load();
+        listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Selected entries approved.";
+        setTimeout(() => listMsg.textContent = "", 1200);
+    });
+
+    bulkReject.addEventListener('click', () => {
+        const ids = selectedRowIds();
+        if (!ids.length) return;
+        STORE = STORE.map(r => ids.includes(r.id) ? { ...r, status: "Rejected" } : r);
+        persist(); load();
+        listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Selected entries rejected.";
+        setTimeout(() => listMsg.textContent = "", 1200);
+    });
+
+    /* ---------- Export CSV of filtered view ---------- */
+    function toCSV(rowsArr) {
+        const header = ["ID", "Employee", "Date", "In", "Out", "Break (min)", "Hours", "Project", "Shift", "Status", "Notes"];
+        const lines = [header.join(",")];
+        rowsArr.forEach(r => {
+            const vals = [
+                r.id,
+                r.employee,
+                r.date,
+                r.in_time || "",
+                r.out_time || "",
+                Number(r.break_min || 0),
+                (workMinutes(r) / 60).toFixed(2),
+                r.project || "",
+                r.shift || "",
+                r.status || "",
+                (r.notes || "").replace(/\n/g, " ")
+            ].map(v => {
+                const s = String(v ?? "");
+                return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+            });
+            lines.push(vals.join(","));
+        });
+        return lines.join("\n");
+    }
+
+    exportCsvBtn.addEventListener('click', () => {
+        const data = filtered();
+        if (!data.length) { alert("No rows to export for current filter."); return; }
+        const csv = toCSV(data);
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "time-tracking.csv";
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+    });
 
     /* ---------- Init ---------- */
     load();

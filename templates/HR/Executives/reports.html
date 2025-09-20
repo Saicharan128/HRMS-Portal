@@ -13,6 +13,10 @@
             <button id="newReportBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-plus mr-1"></i> Generate Report
             </button>
+            <button id="exportCsvBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+            </button>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
@@ -21,7 +25,7 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-chart-bar mr-1"></i> Total Reports</div>
             <div id="totalReports" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
@@ -38,16 +42,24 @@
             <div class="text-sm text-slate-500"><i class="fa-solid fa-calendar-check mr-1"></i> Scheduled</div>
             <div id="scheduledReports" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
         </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+            <div class="text-sm text-slate-500 flex items-center justify-between">
+                <span><i class="fa-solid fa-filter mr-2"></i> Saved View</span>
+                <button id="saveViewBtn"
+                    class="text-xs px-2 py-1 rounded border border-slate-300 hover:bg-slate-50">Save</button>
+            </div>
+            <select id="savedViews" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <option value="">(none)</option>
+            </select>
+        </div>
     </div>
 
-    <!-- Report Categories -->
+    <!-- Report Categories (Quick generate) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <!-- HR Reports -->
+        <!-- HR -->
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-blue-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-users text-blue-600"></i>
-                </div>
+                <div class="p-2 bg-blue-100 rounded-lg mr-3"><i class="fa-solid fa-users text-blue-600"></i></div>
                 <h3 class="text-lg font-semibold text-slate-800">HR Reports</h3>
             </div>
             <div class="space-y-2">
@@ -73,12 +85,10 @@
                 </button>
             </div>
         </div>
-
-        <!-- Performance Reports -->
+        <!-- Performance -->
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-green-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-chart-line text-green-600"></i>
+                <div class="p-2 bg-green-100 rounded-lg mr-3"><i class="fa-solid fa-chart-line text-green-600"></i>
                 </div>
                 <h3 class="text-lg font-semibold text-slate-800">Performance Reports</h3>
             </div>
@@ -105,12 +115,10 @@
                 </button>
             </div>
         </div>
-
-        <!-- Financial Reports -->
+        <!-- Financial -->
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-yellow-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-dollar-sign text-yellow-600"></i>
+                <div class="p-2 bg-yellow-100 rounded-lg mr-3"><i class="fa-solid fa-dollar-sign text-yellow-600"></i>
                 </div>
                 <h3 class="text-lg font-semibold text-slate-800">Financial Reports</h3>
             </div>
@@ -139,13 +147,11 @@
         </div>
     </div>
 
-    <!-- Time & Attendance Reports -->
+    <!-- Time & Attendance + Compliance -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-purple-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-clock text-purple-600"></i>
-                </div>
+                <div class="p-2 bg-purple-100 rounded-lg mr-3"><i class="fa-solid fa-clock text-purple-600"></i></div>
                 <h3 class="text-lg font-semibold text-slate-800">Time & Attendance</h3>
             </div>
             <div class="grid grid-cols-2 gap-2">
@@ -167,13 +173,9 @@
                 </button>
             </div>
         </div>
-
-        <!-- Compliance Reports -->
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center mb-4">
-                <div class="p-2 bg-red-100 rounded-lg mr-3">
-                    <i class="fa-solid fa-shield-halved text-red-600"></i>
-                </div>
+                <div class="p-2 bg-red-100 rounded-lg mr-3"><i class="fa-solid fa-shield-halved text-red-600"></i></div>
                 <h3 class="text-lg font-semibold text-slate-800">Compliance & Legal</h3>
             </div>
             <div class="grid grid-cols-2 gap-2">
@@ -201,28 +203,32 @@
     <div class="rounded-2xl border border-slate-200 bg-white">
         <div class="p-6 border-b border-slate-200">
             <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-slate-800">
-                    <i class="fa-solid fa-list mr-2"></i> Generated Reports
+                <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list mr-2"></i> Generated Reports
                 </h2>
                 <div class="flex items-center gap-2">
+                    <div class="hidden md:flex items-center gap-2">
+                        <label class="text-sm text-slate-600">Search:</label>
+                        <input id="searchBox" placeholder="name, owner, type…"
+                            class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    </div>
                     <div class="flex items-center gap-2">
-                        <label class="text-sm text-slate-600">Filter:</label>
+                        <label class="text-sm text-slate-600">Type:</label>
                         <select id="reportTypeFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                            <option value="">All Types</option>
-                            <option value="hr">HR Reports</option>
+                            <option value="">All</option>
+                            <option value="hr">HR</option>
                             <option value="performance">Performance</option>
                             <option value="financial">Financial</option>
-                            <option value="attendance">Time & Attendance</option>
+                            <option value="attendance">Attendance</option>
                             <option value="compliance">Compliance</option>
                         </select>
                     </div>
                     <div class="flex items-center gap-2">
                         <label class="text-sm text-slate-600">Period:</label>
                         <select id="periodFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                            <option value="7">Last 7 days</option>
-                            <option value="30">Last 30 days</option>
-                            <option value="90">Last 90 days</option>
-                            <option value="all">All time</option>
+                            <option value="7">Last 7d</option>
+                            <option value="30">Last 30d</option>
+                            <option value="90">Last 90d</option>
+                            <option value="all">All</option>
                         </select>
                     </div>
                     <button id="refreshReports"
@@ -233,37 +239,63 @@
             </div>
         </div>
 
-        <!-- Loading State -->
+        <!-- Loading -->
         <div id="loadingState" class="p-8 text-center">
             <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
             <p class="mt-2 text-sm text-slate-600">Loading reports...</p>
         </div>
 
-        <!-- Empty State -->
+        <!-- Empty -->
         <div id="emptyState" class="hidden p-8 text-center">
             <i class="fa-solid fa-chart-simple text-4xl text-slate-300 mb-4"></i>
             <h3 class="text-lg font-medium text-slate-800 mb-2">No Reports Generated Yet</h3>
-            <p class="text-slate-600 mb-4">Start by generating your first report from the categories above.</p>
+            <p class="text-slate-600 mb-4">Start by generating your first report above.</p>
         </div>
 
-        <!-- Reports Table -->
+        <!-- Table -->
         <div id="reportsTable" class="hidden">
+            <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <input id="selectAll" type="checkbox" class="rounded border-slate-300">
+                    <span class="text-sm text-slate-600">Select all</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="bulkDownload"
+                        class="px-3 py-1.5 rounded border border-slate-300 text-sm hover:bg-slate-50" disabled>
+                        <i class="fa-solid fa-download mr-1"></i> Download
+                    </button>
+                    <button id="bulkDelete"
+                        class="px-3 py-1.5 rounded border border-slate-300 text-sm hover:bg-slate-50" disabled>
+                        <i class="fa-solid fa-trash mr-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Report Name</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Type</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Generated</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Generated By</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Size</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Status</th>
-                            <th class="px-6 py-3 text-left font-medium text-slate-700">Actions</th>
+                            <th class="px-4 py-3 w-8"></th>
+                            <th class="px-4 py-3 text-left font-medium text-slate-700 cursor-pointer" data-sort="name">
+                                Report Name <i class="fa-solid fa-sort text-slate-400"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left font-medium text-slate-700 cursor-pointer" data-sort="type">
+                                Type <i class="fa-solid fa-sort text-slate-400"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left font-medium text-slate-700 cursor-pointer"
+                                data-sort="generated_date">
+                                Generated <i class="fa-solid fa-sort text-slate-400"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left font-medium text-slate-700 cursor-pointer"
+                                data-sort="generated_by">
+                                Generated By <i class="fa-solid fa-sort text-slate-400"></i>
+                            </th>
+                            <th class="px-4 py-3 text-left font-medium text-slate-700">Size</th>
+                            <th class="px-4 py-3 text-left font-medium text-slate-700">Status</th>
+                            <th class="px-4 py-3 text-left font-medium text-slate-700">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="reportsTableBody" class="divide-y divide-slate-200">
-                        <!-- Rows will be populated here -->
-                    </tbody>
+                    <tbody id="reportsTableBody" class="divide-y divide-slate-200"></tbody>
                 </table>
             </div>
 
@@ -274,17 +306,39 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button id="prevPageBtn" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
-                        disabled>
-                        Previous
-                    </button>
-                    <div id="pageNumbers" class="flex items-center gap-1">
-                        <!-- Page numbers will be populated here -->
-                    </div>
+                        disabled>Previous</button>
+                    <div id="pageNumbers" class="flex items-center gap-1"></div>
                     <button id="nextPageBtn" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
-                        disabled>
-                        Next
-                    </button>
+                        disabled>Next</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Trends -->
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-chart-column mr-2"></i> Reports
+                by Type</h3>
+            <canvas id="typeChart" height="140"></canvas>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-chart-area mr-2"></i> Last 30d
+                Volume</h3>
+            <canvas id="volumeChart" height="140"></canvas>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-bolt mr-2"></i> Quick Actions
+            </h3>
+            <div class="grid grid-cols-2 gap-2">
+                <button id="markProcessingBtn"
+                    class="px-3 py-2 rounded border border-slate-300 hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-hourglass-half mr-1"></i> Simulate Processing
+                </button>
+                <button id="markCompleteBtn"
+                    class="px-3 py-2 rounded border border-slate-300 hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-check mr-1"></i> Simulate Complete
+                </button>
             </div>
         </div>
     </div>
@@ -352,7 +406,6 @@
                         </div>
                     </div>
 
-                    <!-- Custom Date Range -->
                     <div id="customDateRange" class="hidden grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
@@ -430,9 +483,7 @@
 
                     <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
                         <button type="button" id="cancelGenerate"
-                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
-                            Cancel
-                        </button>
+                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
                         <button type="submit" class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
                             <i class="fa-solid fa-cog mr-1"></i> Generate Report
                         </button>
@@ -450,9 +501,8 @@
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b border-slate-200 sticky top-0 bg-white">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-slate-800">
-                            <i class="fa-solid fa-eye mr-2"></i> Report Preview
-                        </h3>
+                        <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-eye mr-2"></i> Report
+                            Preview</h3>
                         <div class="flex items-center gap-2">
                             <button id="downloadReportBtn"
                                 class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
@@ -464,363 +514,346 @@
                         </div>
                     </div>
                 </div>
-
-                <div id="reportPreviewContent" class="p-6">
-                    <!-- Report preview will be loaded here -->
-                </div>
+                <div id="reportPreviewContent" class="p-6"></div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Success Toast -->
+<!-- Toasts -->
 <div id="successToast"
     class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
-    <div class="flex items-center">
-        <i class="fa-solid fa-check-circle mr-2"></i>
-        <span id="successMessage"></span>
-    </div>
+    <div class="flex items-center"><i class="fa-solid fa-check-circle mr-2"></i><span id="successMessage"></span></div>
 </div>
-
-<!-- Error Toast -->
 <div id="errorToast"
     class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
-    <div class="flex items-center">
-        <i class="fa-solid fa-exclamation-circle mr-2"></i>
-        <span id="errorMessage"></span>
+    <div class="flex items-center"><i class="fa-solid fa-exclamation-circle mr-2"></i><span id="errorMessage"></span>
     </div>
 </div>
-
-<!-- Info Toast -->
 <div id="infoToast"
     class="fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full">
-    <div class="flex items-center">
-        <i class="fa-solid fa-info-circle mr-2"></i>
-        <span id="infoMessage"></span>
-    </div>
+    <div class="flex items-center"><i class="fa-solid fa-info-circle mr-2"></i><span id="infoMessage"></span></div>
 </div>
 
-<script>
-    // Initialize reports management
-    document.addEventListener('DOMContentLoaded', function () {
-        initializeReports();
-    });
+<!-- Charts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-    // Global state
+<script>
+    /* ---------- State ---------- */
     let reports = [];
     let filteredReports = [];
     let currentPage = 1;
     let totalPages = 1;
     let reportIdCounter = 6;
+    let sortState = { key: 'generated_date', dir: 'desc' };
+    const LS_KEY = 'reports_saved_views_v1';
+
+    /* ---------- Init ---------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeReports();
+    });
 
     async function initializeReports() {
         await loadReportsData();
         setupEventListeners();
         renderReports();
+        renderCharts();
+        hydrateSavedViews();
     }
 
+    /* ---------- Mock Load ---------- */
     async function loadReportsData() {
-        try {
-            document.getElementById('loadingState').classList.remove('hidden');
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Mock reports data
-            const mockReports = [
-                {
-                    id: 1,
-                    name: "Employee Roster Q4 2024",
-                    type: "hr",
-                    generated_date: "2024-01-15T10:30:00",
-                    generated_by: "Sarah Johnson",
-                    file_size: "2.4 MB",
-                    format: "pdf",
-                    status: "completed",
-                    download_count: 15
-                },
-                {
-                    id: 2,
-                    name: "Performance Summary December",
-                    type: "performance",
-                    generated_date: "2024-01-14T14:22:00",
-                    generated_by: "Mike Davis",
-                    file_size: "1.8 MB",
-                    format: "excel",
-                    status: "completed",
-                    download_count: 8
-                },
-                {
-                    id: 3,
-                    name: "Payroll Summary December 2024",
-                    type: "financial",
-                    generated_date: "2024-01-13T09:15:00",
-                    generated_by: "Lisa Brown",
-                    file_size: "3.2 MB",
-                    format: "pdf",
-                    status: "completed",
-                    download_count: 22
-                },
-                {
-                    id: 4,
-                    name: "Attendance Analysis Q4",
-                    type: "attendance",
-                    generated_date: "2024-01-12T16:45:00",
-                    generated_by: "Tom Wilson",
-                    file_size: "1.5 MB",
-                    format: "csv",
-                    status: "processing",
-                    download_count: 0
-                },
-                {
-                    id: 5,
-                    name: "EEO Compliance Report 2024",
-                    type: "compliance",
-                    generated_date: "2024-01-11T11:20:00",
-                    generated_by: "Sarah Johnson",
-                    file_size: "987 KB",
-                    format: "pdf",
-                    status: "completed",
-                    download_count: 5
-                }
-            ];
-
-            reports = mockReports;
-            filteredReports = [...reports];
-
-            // Update summary stats
-            updateSummaryStats();
-
-            document.getElementById('loadingState').classList.add('hidden');
-
-        } catch (error) {
-            console.error('Error loading reports data:', error);
-            document.getElementById('loadingState').classList.add('hidden');
-            showError('Failed to load reports data');
-        }
+        document.getElementById('loadingState').classList.remove('hidden');
+        await new Promise(r => setTimeout(r, 600));
+        reports = [
+            { id: 1, name: "Employee Roster Q4 2024", type: "hr", generated_date: "2024-01-15T10:30:00", generated_by: "Sarah Johnson", file_size: "2.4 MB", format: "pdf", status: "completed", download_count: 15 },
+            { id: 2, name: "Performance Summary December", type: "performance", generated_date: "2024-01-14T14:22:00", generated_by: "Mike Davis", file_size: "1.8 MB", format: "excel", status: "completed", download_count: 8 },
+            { id: 3, name: "Payroll Summary December 2024", type: "financial", generated_date: "2024-01-13T09:15:00", generated_by: "Lisa Brown", file_size: "3.2 MB", format: "pdf", status: "completed", download_count: 22 },
+            { id: 4, name: "Attendance Analysis Q4", type: "attendance", generated_date: "2024-01-12T16:45:00", generated_by: "Tom Wilson", file_size: "1.5 MB", format: "csv", status: "processing", download_count: 0 },
+            { id: 5, name: "EEO Compliance Report 2024", type: "compliance", generated_date: "2024-01-11T11:20:00", generated_by: "Sarah Johnson", file_size: "987 KB", format: "pdf", status: "completed", download_count: 5 }
+        ];
+        filteredReports = [...reports];
+        updateSummaryStats();
+        document.getElementById('loadingState').classList.add('hidden');
     }
 
+    /* ---------- Summary ---------- */
     function updateSummaryStats() {
         const today = new Date().toDateString();
-        const todayReports = reports.filter(r =>
-            new Date(r.generated_date).toDateString() === today
-        ).length;
-
-        const totalDownloads = reports.reduce((sum, r) => sum + r.download_count, 0);
-        const scheduledReports = 3; // Mock scheduled reports count
+        const todayCount = reports.filter(r => new Date(r.generated_date).toDateString() === today).length;
+        const totalDownloads = reports.reduce((a, r) => a + r.download_count, 0);
+        const scheduledReports = 3; // mock
 
         document.getElementById('totalReports').textContent = reports.length;
-        document.getElementById('todayReports').textContent = todayReports;
+        document.getElementById('todayReports').textContent = todayCount;
         document.getElementById('totalDownloads').textContent = totalDownloads;
         document.getElementById('scheduledReports').textContent = scheduledReports;
     }
 
+    /* ---------- Events ---------- */
     function setupEventListeners() {
-        // Modal controls
+        // Modals
         document.getElementById('newReportBtn').addEventListener('click', openGenerateReportModal);
         document.getElementById('closeGenerateModal').addEventListener('click', () => closeModal('generateReportModal'));
         document.getElementById('cancelGenerate').addEventListener('click', () => closeModal('generateReportModal'));
         document.getElementById('closePreviewModal').addEventListener('click', () => closeModal('reportPreviewModal'));
-
-        // Form submission
+        // Form
         document.getElementById('generateReportForm').addEventListener('submit', handleGenerateReport);
+        document.querySelector('select[name="report_type"]').addEventListener('change', updateTemplateOptions);
+        document.querySelector('select[name="date_range"]').addEventListener('change', toggleCustomDateRange);
+        document.getElementById('scheduleReport').addEventListener('change', toggleScheduleOptions);
 
         // Filters
         document.getElementById('reportTypeFilter').addEventListener('change', applyFilters);
         document.getElementById('periodFilter').addEventListener('change', applyFilters);
-        document.getElementById('refreshReports').addEventListener('click', loadReportsData);
+        document.getElementById('searchBox').addEventListener('input', debounce(applyFilters, 200));
+        document.getElementById('refreshReports').addEventListener('click', async () => { await loadReportsData(); applyFilters(); });
 
-        // Report type change handler
-        document.querySelector('select[name="report_type"]').addEventListener('change', updateTemplateOptions);
+        // Select all / bulk
+        document.getElementById('selectAll').addEventListener('change', (e) => toggleSelectAll(e.target.checked));
+        document.getElementById('bulkDownload').addEventListener('click', bulkDownload);
+        document.getElementById('bulkDelete').addEventListener('click', bulkDelete);
 
-        // Date range change handler
-        document.querySelector('select[name="date_range"]').addEventListener('change', toggleCustomDateRange);
-
-        // Schedule checkbox
-        document.getElementById('scheduleReport').addEventListener('change', toggleScheduleOptions);
-
-        // Pagination controls
-        document.getElementById('prevPageBtn').addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderReports();
-            }
-        });
-
-        document.getElementById('nextPageBtn').addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderReports();
-            }
-        });
-
-        // Download report from preview modal
-        document.getElementById('downloadReportBtn').addEventListener('click', () => {
-            showInfo('Download functionality would be implemented here');
-        });
-
-        // Close modals when clicking outside
-        window.addEventListener('click', function (event) {
-            const modals = ['generateReportModal', 'reportPreviewModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (event.target === modal) {
-                    closeModal(modalId);
-                }
-            });
-        });
-    }
-
-    function openGenerateReportModal() {
-        document.getElementById('generateReportModal').classList.remove('hidden');
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
-        if (modalId === 'generateReportModal') {
-            document.getElementById('generateReportForm').reset();
-            document.getElementById('customDateRange').classList.add('hidden');
-            document.getElementById('scheduleOptions').classList.add('hidden');
-        }
-    }
-
-    function updateTemplateOptions() {
-        const reportType = document.querySelector('select[name="report_type"]').value;
-        const templateSelect = document.querySelector('select[name="template_id"]');
-
-        // Clear existing options
-        templateSelect.innerHTML = '<option value="">Select Template</option>';
-
-        const templates = {
-            'hr': [
-                { value: 'employee_roster', text: 'Employee Roster' },
-                { value: 'headcount_analysis', text: 'Headcount Analysis' },
-                { value: 'turnover_report', text: 'Turnover Report' },
-                { value: 'diversity_metrics', text: 'Diversity Metrics' }
-            ],
-            'performance': [
-                { value: 'performance_summary', text: 'Performance Summary' },
-                { value: 'goal_achievement', text: 'Goal Achievement' },
-                { value: 'review_completion', text: 'Review Completion' },
-                { value: 'top_performers', text: 'Top Performers' }
-            ],
-            'financial': [
-                { value: 'payroll_summary', text: 'Payroll Summary' },
-                { value: 'cost_analysis', text: 'Cost Analysis' },
-                { value: 'expense_reports', text: 'Expense Reports' },
-                { value: 'budget_variance', text: 'Budget Variance' }
-            ],
-            'attendance': [
-                { value: 'attendance_summary', text: 'Attendance Summary' },
-                { value: 'leave_analysis', text: 'Leave Analysis' },
-                { value: 'overtime_report', text: 'Overtime Report' },
-                { value: 'tardiness_report', text: 'Tardiness Report' }
-            ],
-            'compliance': [
-                { value: 'eeo_report', text: 'EEO Report' },
-                { value: 'safety_incidents', text: 'Safety Incidents' },
-                { value: 'policy_compliance', text: 'Policy Compliance' },
-                { value: 'audit_trail', text: 'Audit Trail' }
-            ]
-        };
-
-        if (templates[reportType]) {
-            templates[reportType].forEach(template => {
-                const option = document.createElement('option');
-                option.value = template.value;
-                option.textContent = template.text;
-                templateSelect.appendChild(option);
-            });
-        }
-    }
-
-    function toggleCustomDateRange() {
-        const dateRange = document.querySelector('select[name="date_range"]').value;
-        const customRange = document.getElementById('customDateRange');
-
-        if (dateRange === 'custom') {
-            customRange.classList.remove('hidden');
-        } else {
-            customRange.classList.add('hidden');
-        }
-    }
-
-    function toggleScheduleOptions() {
-        const scheduleCheckbox = document.getElementById('scheduleReport');
-        const scheduleOptions = document.getElementById('scheduleOptions');
-
-        if (scheduleCheckbox.checked) {
-            scheduleOptions.classList.remove('hidden');
-        } else {
-            scheduleOptions.classList.add('hidden');
-        }
-    }
-
-    async function handleGenerateReport(e) {
-        e.preventDefault();
-
-        try {
-            const formData = new FormData(e.target);
-            const reportData = Object.fromEntries(formData.entries());
-
-            // Show loading state
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Generating...';
-            submitBtn.disabled = true;
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // Create a new report based on form data
-            const newReport = {
-                id: reportIdCounter++,
-                name: reportData.report_name || `${formatReportName(reportData.template_id)} - ${new Date().toLocaleDateString()}`,
-                type: reportData.report_type,
-                generated_date: new Date().toISOString(),
-                generated_by: "Current User",
-                file_size: `${(Math.random() * 3 + 0.5).toFixed(1)} MB`,
-                format: reportData.format,
-                status: "completed",
-                download_count: 0
-            };
-
-            // Add to reports array
-            reports.unshift(newReport);
-            filteredReports = [...reports];
-
-            console.log('Generated report:', newReport);
-
-            showSuccess('Report generated successfully!');
-
-            // Close modal and update display
-            closeModal('generateReportModal');
-            updateSummaryStats();
+        // Sorting
+        document.querySelectorAll('thead th[data-sort]').forEach(th => th.addEventListener('click', () => {
+            const key = th.getAttribute('data-sort');
+            sortState.dir = (sortState.key === key && sortState.dir === 'asc') ? 'desc' : 'asc';
+            sortState.key = key;
             renderReports();
+        }));
 
-            // Reset button
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
+        // Quick actions
+        document.getElementById('markProcessingBtn').addEventListener('click', () => simulateStatus('processing'));
+        document.getElementById('markCompleteBtn').addEventListener('click', () => simulateStatus('completed'));
 
-        } catch (error) {
-            console.error('Error generating report:', error);
-            showError('Failed to generate report');
+        // Export
+        document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
 
-            // Reset button
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '<i class="fa-solid fa-cog mr-1"></i> Generate Report';
-            submitBtn.disabled = false;
+        // Saved views
+        document.getElementById('saveViewBtn').addEventListener('click', saveCurrentView);
+        document.getElementById('savedViews').addEventListener('change', applySavedView);
+
+        // Preview download button
+        document.getElementById('downloadReportBtn').addEventListener('click', () => showInfo('Download would start here'));
+
+        // Click outside modals to close
+        window.addEventListener('click', (e) => {
+            ['generateReportModal', 'reportPreviewModal'].forEach(id => {
+                const modal = document.getElementById(id);
+                if (e.target === modal) modal.classList.add('hidden');
+            });
+        });
+    }
+
+    /* ---------- Saved Views ---------- */
+    function hydrateSavedViews() {
+        const saved = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+        const sel = document.getElementById('savedViews');
+        sel.innerHTML = '<option value="">(none)</option>';
+        saved.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.id;
+            opt.textContent = v.name;
+            sel.appendChild(opt);
+        });
+    }
+    function saveCurrentView() {
+        const name = prompt('Name this view');
+        if (!name) return;
+        const view = {
+            id: Date.now().toString(),
+            name,
+            type: document.getElementById('reportTypeFilter').value,
+            period: document.getElementById('periodFilter').value,
+            search: document.getElementById('searchBox').value
+        };
+        const saved = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+        saved.push(view);
+        localStorage.setItem(LS_KEY, JSON.stringify(saved));
+        hydrateSavedViews();
+        showSuccess('View saved');
+    }
+    function applySavedView() {
+        const id = document.getElementById('savedViews').value;
+        if (!id) return;
+        const saved = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+        const v = saved.find(x => x.id === id);
+        if (!v) return;
+        document.getElementById('reportTypeFilter').value = v.type;
+        document.getElementById('periodFilter').value = v.period;
+        document.getElementById('searchBox').value = v.search;
+        applyFilters();
+    }
+
+    /* ---------- Filters / Search ---------- */
+    function applyFilters() {
+        const typeFilter = document.getElementById('reportTypeFilter').value;
+        const periodFilter = document.getElementById('periodFilter').value;
+        const q = (document.getElementById('searchBox').value || '').toLowerCase().trim();
+
+        filteredReports = reports.filter(report => {
+            const matchesType = !typeFilter || report.type === typeFilter;
+            let matchesPeriod = true;
+            if (periodFilter && periodFilter !== 'all') {
+                const d = new Date(report.generated_date);
+                const cutoff = new Date(Date.now() - parseInt(periodFilter) * 86400000);
+                matchesPeriod = d >= cutoff;
+            }
+            const matchesText = !q || `${report.name} ${report.generated_by} ${report.type}`.toLowerCase().includes(q);
+            return matchesType && matchesPeriod && matchesText;
+        });
+
+        currentPage = 1;
+        renderReports();
+    }
+
+    /* ---------- Render Table & Pagination ---------- */
+    function renderReports() {
+        if (filteredReports.length === 0) {
+            document.getElementById('emptyState').classList.remove('hidden');
+            document.getElementById('reportsTable').classList.add('hidden');
+            return;
+        }
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('reportsTable').classList.remove('hidden');
+
+        // sort
+        filteredReports.sort((a, b) => {
+            const k = sortState.key;
+            let av = a[k], bv = b[k];
+            if (k === 'generated_date') { av = new Date(av).getTime(); bv = new Date(bv).getTime(); }
+            if (typeof av === 'string' && typeof bv === 'string') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+            if (av < bv) return sortState.dir === 'asc' ? -1 : 1;
+            if (av > bv) return sortState.dir === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        renderReportsTable();
+        updatePagination();
+        updateBulkButtons();
+    }
+
+    function renderReportsTable() {
+        const tbody = document.getElementById('reportsTableBody');
+        tbody.innerHTML = '';
+        const itemsPerPage = 10;
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const pageReports = filteredReports.slice(startIndex, startIndex + itemsPerPage);
+
+        pageReports.forEach(report => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+      <td class="px-4 py-3 align-top">
+        <input type="checkbox" class="rowSel rounded border-slate-300" data-id="${report.id}">
+      </td>
+      <td class="px-4 py-3">
+        <div class="font-medium text-slate-800">${report.name}</div>
+        <div class="text-xs text-slate-500">#${report.id} • ${report.format.toUpperCase()}</div>
+      </td>
+      <td class="px-4 py-3">
+        <span class="px-2 py-1 rounded text-xs font-medium ${getTypeBadgeClass(report.type)}">${formatType(report.type)}</span>
+      </td>
+      <td class="px-4 py-3 text-slate-800">${formatDate(report.generated_date)}</td>
+      <td class="px-4 py-3 text-slate-800">${report.generated_by}</td>
+      <td class="px-4 py-3 text-slate-800">${report.file_size}</td>
+      <td class="px-4 py-3">
+        <span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(report.status)}">${formatStatus(report.status)}</span>
+      </td>
+      <td class="px-4 py-3">
+        <div class="flex items-center gap-2">
+          ${report.status === 'completed' ? `
+            <button class="text-blue-600 hover:text-blue-800" title="Preview" onclick="previewReport(${report.id})"><i class="fa-solid fa-eye"></i></button>
+            <button class="text-green-600 hover:text-green-800" title="Download" onclick="downloadReport(${report.id})"><i class="fa-solid fa-download"></i></button>
+            <button class="text-purple-600 hover:text-purple-800" title="Share" onclick="shareReport(${report.id})"><i class="fa-solid fa-share"></i></button>
+          ` : `
+            <button class="text-blue-600 hover:text-blue-800" title="Retry" onclick="retryReport(${report.id})"><i class="fa-solid fa-rotate-right"></i></button>
+          `}
+          <button class="text-red-600 hover:text-red-800" title="Delete" onclick="deleteReport(${report.id})"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </td>
+    `;
+            tbody.appendChild(tr);
+        });
+
+        // wire row checkboxes
+        document.querySelectorAll('.rowSel').forEach(cb => cb.addEventListener('change', updateBulkButtons));
+    }
+
+    function updatePagination() {
+        const itemsPerPage = 10;
+        totalPages = Math.ceil(filteredReports.length / itemsPerPage) || 1;
+        const start = (currentPage - 1) * itemsPerPage + 1;
+        const end = Math.min(currentPage * itemsPerPage, filteredReports.length);
+        document.getElementById('pageInfo').textContent = `${start}-${end} of ${filteredReports.length}`;
+
+        const prev = document.getElementById('prevPageBtn');
+        const next = document.getElementById('nextPageBtn');
+        prev.disabled = currentPage === 1;
+        next.disabled = currentPage === totalPages;
+        prev.onclick = () => { if (currentPage > 1) { currentPage--; renderReports(); } };
+        next.onclick = () => { if (currentPage < totalPages) { currentPage++; renderReports(); } };
+
+        const pages = document.getElementById('pageNumbers');
+        pages.innerHTML = '';
+        const windowSize = 2;
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= windowSize) {
+                const b = document.createElement('button');
+                b.textContent = i;
+                b.className = i === currentPage ? 'px-3 py-1 rounded bg-slate-800 text-white text-sm'
+                    : 'px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50';
+                b.onclick = () => { currentPage = i; renderReports(); };
+                pages.appendChild(b);
+            } else if (Math.abs(i - currentPage) === windowSize + 1) {
+                const dots = document.createElement('span');
+                dots.textContent = '…';
+                dots.className = 'px-2 text-slate-400';
+                pages.appendChild(dots);
+            }
         }
     }
 
+    /* ---------- Bulk ops ---------- */
+    function selectedIds() {
+        return Array.from(document.querySelectorAll('.rowSel:checked')).map(x => parseInt(x.dataset.id, 10));
+    }
+    function updateBulkButtons() {
+        const any = selectedIds().length > 0;
+        document.getElementById('bulkDownload').disabled = !any;
+        document.getElementById('bulkDelete').disabled = !any;
+        const all = document.querySelectorAll('.rowSel').length;
+        const checked = document.querySelectorAll('.rowSel:checked').length;
+        const selAll = document.getElementById('selectAll');
+        selAll.checked = all > 0 && checked === all;
+        selAll.indeterminate = checked > 0 && checked < all;
+    }
+    function toggleSelectAll(on) {
+        document.querySelectorAll('.rowSel').forEach(cb => cb.checked = on);
+        updateBulkButtons();
+    }
+    function bulkDownload() {
+        const ids = selectedIds();
+        if (!ids.length) return;
+        showInfo(`Downloading ${ids.length} report(s)…`);
+        setTimeout(() => { ids.forEach(downloadReport); }, 300);
+    }
+    function bulkDelete() {
+        const ids = selectedIds();
+        if (!ids.length) return;
+        if (!confirm(`Delete ${ids.length} report(s)?`)) return;
+        reports = reports.filter(r => !ids.includes(r.id));
+        filteredReports = filteredReports.filter(r => !ids.includes(r.id));
+        updateSummaryStats();
+        renderReports();
+        showSuccess('Selected reports deleted');
+    }
+
+    /* ---------- Quick generate ---------- */
     async function generateQuickReport(reportType) {
         try {
-            showInfo(`Generating ${formatReportName(reportType)} report...`);
-
-            // Simulate quick report generation
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Create new report
+            showInfo(`Generating ${formatReportName(reportType)}…`);
+            await new Promise(r => setTimeout(r, 1000));
             const newReport = {
                 id: reportIdCounter++,
                 name: `${formatReportName(reportType)} - ${new Date().toLocaleDateString()}`,
@@ -832,588 +865,269 @@
                 status: "completed",
                 download_count: 0
             };
-
-            // Add to reports array
             reports.unshift(newReport);
             filteredReports = [...reports];
-
-            showSuccess(`${formatReportName(reportType)} report generated successfully!`);
-
             updateSummaryStats();
             renderReports();
-
-        } catch (error) {
-            console.error('Error generating quick report:', error);
+            renderCharts();
+            showSuccess('Report generated');
+        } catch (e) {
             showError('Failed to generate report');
         }
     }
 
-    function getReportTypeFromTemplate(template) {
-        const templateTypeMap = {
-            'employee_roster': 'hr',
-            'headcount_analysis': 'hr',
-            'turnover_report': 'hr',
-            'diversity_metrics': 'hr',
-            'recruitment_pipeline': 'hr',
-            'performance_summary': 'performance',
-            'goal_achievement': 'performance',
-            'review_completion': 'performance',
-            'top_performers': 'performance',
-            'training_completion': 'performance',
-            'payroll_summary': 'financial',
-            'cost_analysis': 'financial',
-            'expense_reports': 'financial',
-            'budget_variance': 'financial',
-            'contractor_payments': 'financial',
-            'attendance_summary': 'attendance',
-            'leave_analysis': 'attendance',
-            'overtime_report': 'attendance',
-            'tardiness_report': 'attendance',
-            'eeo_report': 'compliance',
-            'safety_incidents': 'compliance',
-            'policy_compliance': 'compliance',
-            'audit_trail': 'compliance'
+    function getReportTypeFromTemplate(tpl) {
+        const map = {
+            employee_roster: 'hr', headcount_analysis: 'hr', turnover_report: 'hr', diversity_metrics: 'hr', recruitment_pipeline: 'hr',
+            performance_summary: 'performance', goal_achievement: 'performance', review_completion: 'performance', top_performers: 'performance', training_completion: 'performance',
+            payroll_summary: 'financial', cost_analysis: 'financial', expense_reports: 'financial', budget_variance: 'financial', contractor_payments: 'financial',
+            attendance_summary: 'attendance', leave_analysis: 'attendance', overtime_report: 'attendance', tardiness_report: 'attendance',
+            eeo_report: 'compliance', safety_incidents: 'compliance', policy_compliance: 'compliance', audit_trail: 'compliance'
         };
-        return templateTypeMap[template] || 'hr';
+        return map[tpl] || 'hr';
+    }
+    function formatReportName(type) {
+        return type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     }
 
-    function formatReportName(reportType) {
-        return reportType.split('_').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
-    }
-
-    function applyFilters() {
-        const typeFilter = document.getElementById('reportTypeFilter').value;
-        const periodFilter = document.getElementById('periodFilter').value;
-
-        filteredReports = reports.filter(report => {
-            const matchesType = !typeFilter || report.type === typeFilter;
-
-            let matchesPeriod = true;
-            if (periodFilter && periodFilter !== 'all') {
-                const reportDate = new Date(report.generated_date);
-                const now = new Date();
-                const daysAgo = parseInt(periodFilter);
-                const cutoffDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
-                matchesPeriod = reportDate >= cutoffDate;
-            }
-
-            return matchesType && matchesPeriod;
-        });
-
-        currentPage = 1;
-        renderReports();
-    }
-
-    function renderReports() {
-        if (filteredReports.length === 0) {
-            document.getElementById('emptyState').classList.remove('hidden');
-            document.getElementById('reportsTable').classList.add('hidden');
-            return;
+    /* ---------- Generate modal handlers ---------- */
+    function openGenerateReportModal() { document.getElementById('generateReportModal').classList.remove('hidden'); }
+    function closeModal(id) {
+        const el = document.getElementById(id);
+        el.classList.add('hidden');
+        if (id === 'generateReportModal') {
+            const f = document.getElementById('generateReportForm');
+            f.reset();
+            document.getElementById('customDateRange').classList.add('hidden');
+            document.getElementById('scheduleOptions').classList.add('hidden');
         }
-
-        document.getElementById('emptyState').classList.add('hidden');
-        document.getElementById('reportsTable').classList.remove('hidden');
-
-        renderReportsTable();
-        updatePagination();
     }
-
-    function renderReportsTable() {
-        const tbody = document.getElementById('reportsTableBody');
-        tbody.innerHTML = '';
-
-        const itemsPerPage = 10;
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const pageReports = filteredReports.slice(startIndex, endIndex);
-
-        pageReports.forEach(report => {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-slate-50';
-
-            row.innerHTML = `
-            <td class="px-6 py-4">
-                <div>
-                    <div class="font-medium text-slate-800">${report.name}</div>
-                    <div class="text-sm text-slate-600">ID: #${report.id}</div>
-                </div>
-            </td>
-            <td class="px-6 py-4">
-                <span class="px-2 py-1 rounded text-xs font-medium ${getTypeBadgeClass(report.type)}">
-                    ${formatType(report.type)}
-                </span>
-            </td>
-            <td class="px-6 py-4 text-slate-800">${formatDate(report.generated_date)}</td>
-            <td class="px-6 py-4 text-slate-800">${report.generated_by}</td>
-            <td class="px-6 py-4 text-slate-800">${report.file_size}</td>
-            <td class="px-6 py-4">
-                <span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(report.status)}">
-                    ${formatStatus(report.status)}
-                </span>
-            </td>
-            <td class="px-6 py-4">
-                <div class="flex items-center gap-2">
-                    ${report.status === 'completed' ? `
-                        <button onclick="previewReport(${report.id})" 
-                            class="text-blue-600 hover:text-blue-800" title="Preview">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-                        <button onclick="downloadReport(${report.id})" 
-                            class="text-green-600 hover:text-green-800" title="Download">
-                            <i class="fa-solid fa-download"></i>
-                        </button>
-                        <button onclick="shareReport(${report.id})" 
-                            class="text-purple-600 hover:text-purple-800" title="Share">
-                            <i class="fa-solid fa-share"></i>
-                        </button>
-                    ` : `
-                        <span class="text-slate-400">
-                            <i class="fa-solid fa-clock" title="Processing"></i>
-                        </span>
-                    `}
-                    <button onclick="deleteReport(${report.id})" 
-                        class="text-red-600 hover:text-red-800" title="Delete">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-
-            tbody.appendChild(row);
+    function updateTemplateOptions() {
+        const type = document.querySelector('select[name="report_type"]').value;
+        const sel = document.querySelector('select[name="template_id"]');
+        sel.innerHTML = '<option value="">Select Template</option>';
+        const templates = {
+            hr: ['employee_roster', 'headcount_analysis', 'turnover_report', 'diversity_metrics', 'recruitment_pipeline'],
+            performance: ['performance_summary', 'goal_achievement', 'review_completion', 'top_performers', 'training_completion'],
+            financial: ['payroll_summary', 'cost_analysis', 'expense_reports', 'budget_variance', 'contractor_payments'],
+            attendance: ['attendance_summary', 'leave_analysis', 'overtime_report', 'tardiness_report'],
+            compliance: ['eeo_report', 'safety_incidents', 'policy_compliance', 'audit_trail']
+        }[type] || [];
+        templates.forEach(v => {
+            const o = document.createElement('option');
+            o.value = v; o.textContent = formatReportName(v);
+            sel.appendChild(o);
         });
     }
+    function toggleCustomDateRange() {
+        const val = document.querySelector('select[name="date_range"]').value;
+        document.getElementById('customDateRange').classList.toggle('hidden', val !== 'custom');
+    }
+    function toggleScheduleOptions() {
+        document.getElementById('scheduleOptions').classList.toggle('hidden', !document.getElementById('scheduleReport').checked);
+    }
 
-    function updatePagination() {
-        const itemsPerPage = 10;
-        totalPages = Math.ceil(filteredReports.length / itemsPerPage);
-
-        const start = (currentPage - 1) * itemsPerPage + 1;
-        const end = Math.min(currentPage * itemsPerPage, filteredReports.length);
-        document.getElementById('pageInfo').textContent = `${start}-${end} of ${filteredReports.length}`;
-
-        document.getElementById('prevPageBtn').disabled = currentPage === 1;
-        document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
-
-        // Update page numbers
-        const pageNumbers = document.getElementById('pageNumbers');
-        pageNumbers.innerHTML = '';
-
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
-                const pageBtn = document.createElement('button');
-                pageBtn.textContent = i;
-                pageBtn.className = i === currentPage
-                    ? 'px-3 py-1 rounded bg-slate-800 text-white text-sm'
-                    : 'px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50';
-                pageBtn.onclick = () => goToPage(i);
-                pageNumbers.appendChild(pageBtn);
-            } else if (Math.abs(i - currentPage) === 3) {
-                const ellipsis = document.createElement('span');
-                ellipsis.textContent = '...';
-                ellipsis.className = 'px-2 text-slate-400';
-                pageNumbers.appendChild(ellipsis);
-            }
+    async function handleGenerateReport(e) {
+        e.preventDefault();
+        const form = e.target;
+        const btn = form.querySelector('button[type="submit"]');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Generating...';
+        btn.disabled = true;
+        try {
+            const fd = new FormData(form);
+            const data = Object.fromEntries(fd.entries());
+            await new Promise(r => setTimeout(r, 1200));
+            const newReport = {
+                id: reportIdCounter++,
+                name: data.report_name || `${formatReportName(data.template_id || data.report_type)} - ${new Date().toLocaleDateString()}`,
+                type: data.report_type,
+                generated_date: new Date().toISOString(),
+                generated_by: "Current User",
+                file_size: `${(Math.random() * 3 + 0.5).toFixed(1)} MB`,
+                format: data.format,
+                status: "completed",
+                download_count: 0
+            };
+            reports.unshift(newReport);
+            filteredReports = [...reports];
+            updateSummaryStats();
+            renderReports();
+            renderCharts();
+            closeModal('generateReportModal');
+            showSuccess('Report generated successfully!');
+        } catch (err) {
+            showError('Failed to generate report');
+        } finally {
+            btn.innerHTML = orig; btn.disabled = false;
         }
     }
 
-    function goToPage(page) {
-        currentPage = page;
-        renderReports();
-    }
-
-    function getTypeBadgeClass(type) {
-        const classes = {
-            'hr': 'bg-blue-100 text-blue-700',
-            'performance': 'bg-green-100 text-green-700',
-            'financial': 'bg-yellow-100 text-yellow-700',
-            'attendance': 'bg-purple-100 text-purple-700',
-            'compliance': 'bg-red-100 text-red-700'
-        };
-        return classes[type] || 'bg-slate-100 text-slate-700';
-    }
-
-    function formatType(type) {
-        const types = {
-            'hr': 'HR Report',
-            'performance': 'Performance',
-            'financial': 'Financial',
-            'attendance': 'Time & Attendance',
-            'compliance': 'Compliance'
-        };
-        return types[type] || type;
-    }
-
-    function getStatusBadgeClass(status) {
-        const classes = {
-            'completed': 'bg-green-100 text-green-700',
-            'processing': 'bg-blue-100 text-blue-700',
-            'failed': 'bg-red-100 text-red-700',
-            'scheduled': 'bg-yellow-100 text-yellow-700'
-        };
-        return classes[status] || 'bg-slate-100 text-slate-700';
-    }
-
-    function formatStatus(status) {
-        return status.charAt(0).toUpperCase() + status.slice(1);
-    }
-
-    function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    function previewReport(reportId) {
-        const report = reports.find(r => r.id === reportId);
-        if (!report) return;
-
-        const modal = document.getElementById('reportPreviewModal');
+    /* ---------- Preview generators ---------- */
+    function previewReport(id) {
+        const r = reports.find(x => x.id === id); if (!r) return;
         const content = document.getElementById('reportPreviewContent');
-
-        // Generate mock report preview
-        content.innerHTML = generateReportPreview(report);
-
-        modal.classList.remove('hidden');
+        content.innerHTML = generateReportPreview(r) + sampleTable();
+        document.getElementById('reportPreviewModal').classList.remove('hidden');
     }
-
     function generateReportPreview(report) {
-        // Generate different previews based on report type
-        switch (report.type) {
-            case 'hr':
-                return generateHRReportPreview(report);
-            case 'performance':
-                return generatePerformanceReportPreview(report);
-            case 'financial':
-                return generateFinancialReportPreview(report);
-            case 'attendance':
-                return generateAttendanceReportPreview(report);
-            case 'compliance':
-                return generateComplianceReportPreview(report);
-            default:
-                return '<p class="text-slate-600">Report preview not available.</p>';
-        }
+        const header = `
+    <div class="border-b border-slate-200 pb-4 mb-4">
+      <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
+      <p class="text-slate-600">Generated ${formatDate(report.generated_date)} by ${report.generated_by} • ${report.format.toUpperCase()}</p>
+    </div>`;
+        const cards = {
+            hr: [
+                card('Total Employees', '247', 'blue'),
+                card('New Hires', '15', 'emerald'),
+                card('Departures', '8', 'rose')
+            ],
+            performance: [
+                card('Avg Rating', '4.2/5', 'emerald'),
+                card('Reviews Completed', '89%', 'blue'),
+                card('Goals Achieved', '76%', 'amber')
+            ],
+            financial: [
+                card('Total Payroll', '$1.2M', 'emerald'),
+                card('Benefits', '$245K', 'blue'),
+                card('Expenses', '$89K', 'amber')
+            ],
+            attendance: [
+                card('Avg Attendance', '94.2%', 'emerald'),
+                card('On Time %', '87.5%', 'blue'),
+                card('Leave Days', '156', 'amber')
+            ],
+            compliance: [
+                card('Compliance Score', '96%', 'emerald'),
+                card('Open Issues', '3', 'amber'),
+                card('Training Complete', '89%', 'blue')
+            ]
+        }[report.type] || [];
+        return header + `<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">${cards.join('')}</div>`;
     }
-
-    function generateHRReportPreview(report) {
+    function card(label, value, tone) {
+        const colors = { blue: 'bg-blue-50 text-blue-600', emerald: 'bg-emerald-50 text-emerald-600', amber: 'bg-amber-50 text-amber-600', rose: 'bg-rose-50 text-rose-600' };
+        return `<div class="${colors[tone] || 'bg-slate-50 text-slate-700'} p-4 rounded-lg">
+    <div class="text-sm font-medium text-slate-700">${label}</div>
+    <div class="text-2xl font-bold">${value}</div>
+  </div>`;
+    }
+    function sampleTable() {
+        const rows = Array.from({ length: 6 }, (_, i) => `
+    <tr class="${i % 2 ? 'bg-slate-50' : ''}">
+      <td class="px-3 py-2">EMP-${1000 + i}</td>
+      <td class="px-3 py-2">Alex ${String.fromCharCode(65 + i)}</td>
+      <td class="px-3 py-2">Engineering</td>
+      <td class="px-3 py-2 text-right">${(Math.random() * 100000).toFixed(0)}</td>
+    </tr>`).join('');
         return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Total Employees</h5>
-                    <p class="text-2xl font-bold text-blue-600">247</p>
-                </div>
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">New Hires</h5>
-                    <p class="text-2xl font-bold text-green-600">15</p>
-                </div>
-                <div class="bg-red-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Departures</h5>
-                    <p class="text-2xl font-bold text-red-600">8</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Department Breakdown</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Engineering</span>
-                        <span class="font-medium">95 employees</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Sales</span>
-                        <span class="font-medium">42 employees</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Marketing</span>
-                        <span class="font-medium">28 employees</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    <div class="rounded-xl border border-slate-200">
+      <div class="p-3 border-b border-slate-200 font-medium text-slate-800">Sample Data</div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-100 text-slate-600">
+            <tr><th class="px-3 py-2 text-left">Employee ID</th><th class="px-3 py-2 text-left">Name</th><th class="px-3 py-2 text-left">Dept</th><th class="px-3 py-2 text-right">Comp</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
     }
 
-    function generatePerformanceReportPreview(report) {
-        return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Avg Rating</h5>
-                    <p class="text-2xl font-bold text-green-600">4.2/5</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Reviews Completed</h5>
-                    <p class="text-2xl font-bold text-blue-600">89%</p>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Goals Achieved</h5>
-                    <p class="text-2xl font-bold text-yellow-600">76%</p>
-                </div>
-                <div class="bg-purple-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Top Performers</h5>
-                    <p class="text-2xl font-bold text-purple-600">23</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Performance Distribution</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Exceeds Expectations (4.5-5.0)</span>
-                        <span class="font-medium">18%</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Meets Expectations (3.5-4.4)</span>
-                        <span class="font-medium">67%</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Below Expectations (2.0-3.4)</span>
-                        <span class="font-medium">15%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    /* ---------- Actions ---------- */
+    function downloadReport(id) {
+        const r = reports.find(x => x.id === id); if (!r) return;
+        showInfo(`Downloading ${r.name}…`);
+        setTimeout(() => { r.download_count++; updateSummaryStats(); renderReports(); showSuccess('Report downloaded'); }, 600);
+    }
+    function shareReport(id) {
+        const r = reports.find(x => x.id === id); if (!r) return;
+        const url = window.location.href + `?report=${r.id}`;
+        if (navigator.share) navigator.share({ title: r.name, text: r.name, url });
+        else navigator.clipboard.writeText(url).then(() => showSuccess('Link copied')).catch(() => showInfo('Share not available'));
+    }
+    function deleteReport(id) {
+        const r = reports.find(x => x.id === id); if (!r) return;
+        if (!confirm(`Delete "${r.name}"?`)) return;
+        reports = reports.filter(x => x.id !== id);
+        filteredReports = filteredReports.filter(x => x.id !== id);
+        updateSummaryStats(); renderReports(); renderCharts();
+        showSuccess('Report deleted');
+    }
+    function retryReport(id) {
+        const r = reports.find(x => x.id === id); if (!r) return;
+        r.status = 'processing'; renderReports();
+        setTimeout(() => { r.status = 'completed'; renderReports(); showSuccess('Report re-generated'); }, 1200);
     }
 
-    function generateFinancialReportPreview(report) {
-        return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Total Payroll</h5>
-                    <p class="text-2xl font-bold text-green-600">$1.2M</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Benefits Cost</h5>
-                    <p class="text-2xl font-bold text-blue-600">$245K</p>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Expenses</h5>
-                    <p class="text-2xl font-bold text-yellow-600">$89K</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Department Costs</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Engineering</span>
-                        <span class="font-medium">$687,500</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Sales</span>
-                        <span class="font-medium">$312,000</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Marketing</span>
-                        <span class="font-medium">$156,000</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    /* ---------- Charts ---------- */
+    let typeChart, volumeChart;
+    function renderCharts() {
+        const typeCounts = ['hr', 'performance', 'financial', 'attendance', 'compliance'].map(t => reports.filter(r => r.type === t).length);
+        const ctx1 = document.getElementById('typeChart').getContext('2d');
+        typeChart && typeChart.destroy();
+        typeChart = new Chart(ctx1, {
+            type: 'doughnut',
+            data: { labels: ['HR', 'Perf', 'Fin', 'Attend', 'Comp'], datasets: [{ data: typeCounts }] },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // last 30 days mock sparkline
+        const days = Array.from({ length: 30 }, (_, i) => i + 1);
+        const vals = days.map(() => Math.floor(Math.random() * 4));
+        const ctx2 = document.getElementById('volumeChart').getContext('2d');
+        volumeChart && volumeChart.destroy();
+        volumeChart = new Chart(ctx2, {
+            type: 'line',
+            data: { labels: days, datasets: [{ data: vals, fill: false, tension: .3 }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
     }
 
-    function generateAttendanceReportPreview(report) {
-        return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Avg Attendance</h5>
-                    <p class="text-2xl font-bold text-green-600">94.2%</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">On Time %</h5>
-                    <p class="text-2xl font-bold text-blue-600">87.5%</p>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Leave Days</h5>
-                    <p class="text-2xl font-bold text-yellow-600">156</p>
-                </div>
-                <div class="bg-red-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Sick Days</h5>
-                    <p class="text-2xl font-bold text-red-600">89</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Attendance Trends</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Perfect Attendance</span>
-                        <span class="font-medium">42 employees</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>1-2 Absences</span>
-                        <span class="font-medium">128 employees</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>3+ Absences</span>
-                        <span class="font-medium">77 employees</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    /* ---------- Utils ---------- */
+    function getTypeBadgeClass(type) {
+        const c = { hr: 'bg-blue-100 text-blue-700', performance: 'bg-green-100 text-green-700', financial: 'bg-yellow-100 text-yellow-700', attendance: 'bg-purple-100 text-purple-700', compliance: 'bg-red-100 text-red-700' };
+        return c[type] || 'bg-slate-100 text-slate-700';
+    }
+    function formatType(t) { return ({ hr: 'HR', performance: 'Performance', financial: 'Financial', attendance: 'Attendance', compliance: 'Compliance' })[t] || t; }
+    function getStatusBadgeClass(s) { const c = { completed: 'bg-green-100 text-green-700', processing: 'bg-blue-100 text-blue-700', failed: 'bg-red-100 text-red-700', scheduled: 'bg-yellow-100 text-yellow-700' }; return c[s] || 'bg-slate-100 text-slate-700'; }
+    function formatStatus(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function formatDate(ds) {
+        return new Date(ds).toLocaleString('en-US', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    }
+    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+
+    /* ---------- Quick simulate status ---------- */
+    function simulateStatus(status) {
+        const first = reports.find(r => r.status !== status);
+        if (!first) return;
+        first.status = status;
+        renderReports();
+        showInfo(`Set "${first.name}" → ${status}`);
     }
 
-    function generateComplianceReportPreview(report) {
-        return `
-        <div class="space-y-6">
-            <div class="border-b border-slate-200 pb-4">
-                <h4 class="text-xl font-semibold text-slate-800">${report.name}</h4>
-                <p class="text-slate-600">Generated on ${formatDate(report.generated_date)} by ${report.generated_by}</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Compliance Score</h5>
-                    <p class="text-2xl font-bold text-green-600">96%</p>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Open Issues</h5>
-                    <p class="text-2xl font-bold text-yellow-600">3</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h5 class="font-medium text-slate-800">Training Complete</h5>
-                    <p class="text-2xl font-bold text-blue-600">89%</p>
-                </div>
-            </div>
-            
-            <div class="bg-slate-50 p-4 rounded-lg">
-                <h5 class="font-medium text-slate-800 mb-3">Compliance Areas</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Equal Opportunity</span>
-                        <span class="font-medium text-green-600">✓ Compliant</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Safety Training</span>
-                        <span class="font-medium text-green-600">✓ Compliant</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Data Privacy</span>
-                        <span class="font-medium text-yellow-600">⚠ Review Required</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    /* ---------- Export CSV ---------- */
+    function exportCsv() {
+        if (!filteredReports.length) { showInfo('Nothing to export'); return; }
+        const cols = ['id', 'name', 'type', 'generated_date', 'generated_by', 'file_size', 'format', 'status', 'download_count'];
+        const rows = [cols.join(',')].concat(filteredReports.map(r => cols.map(c => `"${String(r[c]).replace(/"/g, '""')}"`).join(',')));
+        const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `reports-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 500);
     }
 
-    function downloadReport(reportId) {
-        const report = reports.find(r => r.id === reportId);
-        if (!report) return;
-
-        showInfo(`Downloading ${report.name}...`);
-
-        // Simulate download
-        setTimeout(() => {
-            // Update download count
-            report.download_count++;
-            updateSummaryStats();
-            renderReports();
-            showSuccess('Report downloaded successfully!');
-        }, 1000);
+    /* ---------- Toasts ---------- */
+    function showToast(kind, msg) {
+        const el = document.getElementById(`${kind}Toast`);
+        document.getElementById(`${kind}Message`).textContent = msg;
+        el.classList.remove('translate-x-full');
+        setTimeout(() => el.classList.add('translate-x-full'), 2500);
     }
-
-    function shareReport(reportId) {
-        const report = reports.find(r => r.id === reportId);
-        if (!report) return;
-
-        // Simple share functionality - in a real app, this would generate shareable links
-        const shareData = {
-            title: report.name,
-            text: `Check out this report: ${report.name}`,
-            url: window.location.href + `?report=${report.id}`
-        };
-
-        if (navigator.share) {
-            navigator.share(shareData);
-        } else {
-            // Fallback - copy link to clipboard
-            navigator.clipboard.writeText(shareData.url).then(() => {
-                showSuccess('Report link copied to clipboard!');
-            }).catch(() => {
-                showInfo('Share functionality not available');
-            });
-        }
-    }
-
-    function deleteReport(reportId) {
-        const report = reports.find(r => r.id === reportId);
-        if (!report) return;
-
-        if (confirm(`Are you sure you want to delete "${report.name}"? This action cannot be undone.`)) {
-            // Simulate deletion
-            reports = reports.filter(r => r.id !== reportId);
-            filteredReports = filteredReports.filter(r => r.id !== reportId);
-
-            updateSummaryStats();
-            renderReports();
-            showSuccess('Report deleted successfully');
-        }
-    }
-
-    // Toast notification functions
-    function showToast(type, message) {
-        const toast = document.getElementById(`${type}Toast`);
-        const messageElement = document.getElementById(`${type}Message`);
-
-        messageElement.textContent = message;
-        toast.classList.remove('translate-x-full');
-
-        // Auto hide after 3 seconds
-        setTimeout(() => {
-            toast.classList.add('translate-x-full');
-        }, 3000);
-    }
-
-    function showSuccess(message) {
-        showToast('success', message);
-        console.log('Success:', message);
-    }
-
-    function showError(message) {
-        showToast('error', message);
-        console.log('Error:', message);
-    }
-
-    function showInfo(message) {
-        showToast('info', message);
-        console.log('Info:', message);
-    }
-
-    // Auto-refresh reports every 30 seconds (disabled for )
-    // setInterval(() => {
-    //     loadReportsData();
-    // }, 30000);
+    function showSuccess(m) { showToast('success', m); }
+    function showError(m) { showToast('error', m); }
+    function showInfo(m) { showToast('info', m); }
 </script>
 {% endblock %}

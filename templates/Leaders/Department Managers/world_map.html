@@ -3,8 +3,8 @@
 <div class="mx-auto max-w-7xl">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+        <div class="min-w-0">
+            <h1 class="text-2xl font-semibold text-slate-800 truncate">
                 <i class="fa-solid fa-earth-asia mr-2"></i> World map
             </h1>
             <p class="text-slate-600 text-sm">Track global workforce distribution and locations.</p>
@@ -16,7 +16,7 @@
     </div>
 
     <!-- Summary cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 sm:mb-6">
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-user-group mr-1"></i> Total Employees</div>
             <div id="sumHeadcount" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
@@ -35,35 +35,58 @@
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 lg:grid-cols-6 gap-2">
-        <input id="q" placeholder="Search name/email/location…"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <select id="fType" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-            <option value="">All Types</option>
-            <option>Employees</option>
-            <option>HR</option>
-            <option>Leaders</option>
-            <option>CXOs</option>
-            <option>Contractors / Remote staff</option>
-        </select>
-        <input id="fDept" placeholder="Department / Subposition"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fCountry" placeholder="Country"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <button id="onlyEmployees"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-            Employees only
-        </button>
-        <button id="reload" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-            <i class="fa-solid fa-rotate mr-1"></i> Reload
-        </button>
+    <!-- Filters: collapsible on mobile -->
+    <div class="mb-4">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium text-slate-700">Filters</h3>
+            <button id="toggleFilters" class="lg:hidden text-sm px-2 py-1 rounded border border-slate-300 bg-white">
+                <i class="fa-solid fa-sliders mr-1"></i> Show
+            </button>
+        </div>
+        <div id="filtersWrap" class="mt-2 grid grid-cols-1 lg:grid-cols-6 gap-2">
+            <input id="q" placeholder="Search name/email/location…"
+                class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <select id="fType" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+                <option value="">All Types</option>
+                <option>Employees</option>
+                <option>HR</option>
+                <option>Leaders</option>
+                <option>CXOs</option>
+                <option>Contractors / Remote staff</option>
+            </select>
+            <input id="fDept" placeholder="Department / Subposition"
+                class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <input id="fCountry" placeholder="Country"
+                class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <button id="onlyEmployees"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                Employees only
+            </button>
+            <button id="reload" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrows-rotate mr-1"></i> Reload
+            </button>
+        </div>
     </div>
 
     <!-- Map + Side panel -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-2">
-            <div id="map" style="height: 560px; border-radius: 12px;"></div>
+            <div id="map" class="rounded-xl"></div>
+            <!-- Legend -->
+            <div class="mt-3 px-3 pb-2">
+                <div class="flex flex-wrap gap-3 text-xs text-slate-600">
+                    <span class="inline-flex items-center gap-1"><span class="legend-dot"
+                            style="background:#7c3aed"></span> Employees</span>
+                    <span class="inline-flex items-center gap-1"><span class="legend-dot"
+                            style="background:#059669"></span> HR</span>
+                    <span class="inline-flex items-center gap-1"><span class="legend-dot"
+                            style="background:#2563eb"></span> Leaders</span>
+                    <span class="inline-flex items-center gap-1"><span class="legend-dot"
+                            style="background:#dc2626"></span> CXOs</span>
+                    <span class="inline-flex items-center gap-1"><span class="legend-dot"
+                            style="background:#ea580c"></span> Contractors</span>
+                </div>
+            </div>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-5">
             <h3 class="text-lg font-semibold text-slate-800 mb-3">Top Locations</h3>
@@ -80,36 +103,26 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-<!-- (Optional) Marker clustering to avoid overlaps if you have many users -->
+<!-- Marker clustering -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
-    // ====== CONFIG you can tweak ======
-    const DEFAULT_COUNTRY = "India"; // used when we can’t infer anything
-    // Hubs used for deterministic placement when a user has no location info.
+    // ====== CONFIG ======
+    const DEFAULT_COUNTRY = "India";
     const HUBS_BY_COUNTRY = {
         "India": [
-            ["Bengaluru", 12.9716, 77.5946],
-            ["Hyderabad", 17.3850, 78.4867],
-            ["Mumbai", 19.0760, 72.8777],
-            ["Pune", 18.5204, 73.8567],
-            ["Delhi", 28.6139, 77.2090],
-            ["Chennai", 13.0827, 80.2707],
-            ["Kolkata", 22.5726, 88.3639],
-            ["Gurugram", 28.4595, 77.0266]
+            ["Bengaluru", 12.9716, 77.5946], ["Hyderabad", 17.3850, 78.4867],
+            ["Mumbai", 19.0760, 72.8777], ["Pune", 18.5204, 73.8567],
+            ["Delhi", 28.6139, 77.2090], ["Chennai", 13.0827, 80.2707],
+            ["Kolkata", 22.5726, 88.3639], ["Gurugram", 28.4595, 77.0266]
         ],
         "United States": [
-            ["San Francisco", 37.7749, -122.4194],
-            ["New York", 40.7128, -74.0060],
-            ["Austin", 30.2672, -97.7431],
-            ["Seattle", 47.6062, -122.3321]
+            ["San Francisco", 37.7749, -122.4194], ["New York", 40.7128, -74.0060],
+            ["Austin", 30.2672, -97.7431], ["Seattle", 47.6062, -122.3321]
         ],
-        "United Kingdom": [
-            ["London", 51.5072, -0.1276],
-            ["Manchester", 53.4808, -2.2426]
-        ],
+        "United Kingdom": [["London", 51.5072, -0.1276], ["Manchester", 53.4808, -2.2426]],
         "Singapore": [["Singapore", 1.3521, 103.8198]],
         "United Arab Emirates": [["Dubai", 25.2048, 55.2708]],
         "Canada": [["Toronto", 43.65107, -79.347015]],
@@ -117,19 +130,23 @@
     };
 
     // ====== Utilities ======
-    async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function fetchJSON(url) {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+    }
+    const debounce = (fn, wait = 300) => {
+        let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); };
+    };
     function includes(h, n) { return (h || "").toLowerCase().includes((n || "").toLowerCase()); }
     function pick(arr, i) { return arr[i % arr.length]; }
-
-    // Simple stable hash (string → 32-bit integer)
     function hash32(s) {
         s = String(s || "");
-        let h = 2166136261 >>> 0; // FNV-like
+        let h = 2166136261 >>> 0;
         for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
         return h >>> 0;
     }
 
-    // Base gazetteer
     const GEO = {
         "India": [22.3511148, 78.6677428],
         "United States": [39.7837304, -100.4458825], "USA": [39.78, -100.44], "US": [39.78, -100.44],
@@ -144,8 +161,7 @@
     };
     const CITY = {
         "Bengaluru": [12.9716, 77.5946], "Bangalore": [12.9716, 77.5946],
-        "Hyderabad": [17.385, 78.4867],
-        "Mumbai": [19.076, 72.8777], "Pune": [18.5204, 73.8567],
+        "Hyderabad": [17.385, 78.4867], "Mumbai": [19.076, 72.8777], "Pune": [18.5204, 73.8567],
         "Delhi": [28.6139, 77.209], "Gurgaon": [28.4595, 77.0266], "Gurugram": [28.4595, 77.0266],
         "Chennai": [13.0827, 80.2707], "Kolkata": [22.5726, 88.3639],
         "San Francisco": [37.7749, -122.4194], "New York": [40.7128, -74.006],
@@ -154,64 +170,50 @@
         "Singapore": [1.3521, 103.8198], "Dubai": [25.2048, 55.2708], "Paris": [48.8566, 2.3522]
     };
 
-    // Infer country from email TLD (very rough but useful fallback)
     function inferCountryFromEmail(email) {
         if (!email) return null;
         const tld = (email.split(".").pop() || "").toLowerCase();
         const map = {
             "in": "India", "sg": "Singapore", "ae": "United Arab Emirates",
             "uk": "United Kingdom", "de": "Germany", "us": "United States",
-            "ca": "Canada", "au": "Australia", "fr": "France", "es": "Spain", "nl": "Netherlands", "br": "Brazil"
+            "ca": "Canada", "au": "Australia", "fr": "France", "es": "Spain",
+            "nl": "Netherlands", "br": "Brazil"
         };
         return map[tld] || null;
     }
 
-    // Employee type → color
     function typeColor(t) {
         switch ((t || "").toLowerCase()) {
-            case "employees": return "#7c3aed"; // purple
-            case "hr": return "#059669";        // green
-            case "leaders": return "#2563eb";   // blue
-            case "cxos": return "#dc2626";      // red
-            case "contractors / remote staff": return "#ea580c"; // orange
-            default: return "#334155";          // slate
+            case "employees": return "#7c3aed";
+            case "hr": return "#059669";
+            case "leaders": return "#2563eb";
+            case "cxos": return "#dc2626";
+            case "contractors / remote staff": return "#ea580c";
+            default: return "#334155";
         }
     }
 
-    // Get a lat/lng for a user (covers missing data robustly)
     function getLatLngForUser(u) {
-        // 1) explicit lat/lng
         if (u.lat && u.lng) return [Number(u.lat), Number(u.lng)];
-
-        // 2) city or country fields
         const city = (u.city || u.location || "").trim();
         const country = (u.country || "").trim();
         if (CITY[city]) return CITY[city];
         if (GEO[country]) return GEO[country];
-
-        // 3) try reading country name embedded in location text
         const guessCountry = Object.keys(GEO).find(k => includes(city, k));
         if (guessCountry) return GEO[guessCountry];
-
-        // 4) infer from email domain TLD (e.g., .in → India)
         const emailCountry = inferCountryFromEmail(u.email);
         if (emailCountry && GEO[emailCountry]) return GEO[emailCountry];
-
-        // 5) deterministic placement into hubs of a default country
         const home = country || emailCountry || DEFAULT_COUNTRY;
         const hubs = HUBS_BY_COUNTRY[home] || HUBS_BY_COUNTRY[DEFAULT_COUNTRY];
         const key = u.username || u.email || u.name || u.full_name || String(u.id || "");
         const idx = hash32(key);
         const hub = pick(hubs, idx);
-        // small jitter so multiple users in same hub don't overlap exactly
         const jitter = () => ((idx % 1000) / 100000) * (Math.random() > 0.5 ? 1 : -1);
         return [hub[1] + jitter(), hub[2] + jitter()];
     }
 
-    // Aggregations
     function aggregate(users) {
-        const byCountry = new Map();
-        const byCity = new Map();
+        const byCountry = new Map(), byCity = new Map();
         users.forEach(u => {
             const ctry = (u.country || inferCountryFromEmail(u.email) || DEFAULT_COUNTRY);
             byCountry.set(ctry, (byCountry.get(ctry) || 0) + 1);
@@ -224,23 +226,26 @@
     function renderTopList(mapAgg) {
         const topDiv = document.getElementById("topList");
         const items = [...mapAgg.byCountry.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+        const max = items[0]?.[1] || 1;
         topDiv.innerHTML = items.map(([country, n]) => `
-      <div class="flex items-center justify-between">
-        <span class="text-slate-700">${country}</span>
-        <span class="text-slate-900 font-medium">${n}</span>
-      </div>
-      <div class="w-full bg-slate-200 rounded-full h-1.5">
-        <div class="bg-slate-600 h-1.5 rounded-full" style="width:${items[0] ? Math.round(n / items[0][1] * 100) : 0}%"></div>
-      </div>
-    `).join("");
+          <div class="flex items-center justify-between">
+            <span class="text-slate-700">${country}</span>
+            <span class="text-slate-900 font-medium">${n}</span>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-1.5">
+            <div class="bg-slate-600 h-1.5 rounded-full" style="width:${Math.round(n / max * 100)}%"></div>
+          </div>
+        `).join("");
     }
 
     function renderBreakdown(mapAgg) {
         const out = [];
         out.push(`<div class="font-medium text-slate-800 mb-1">By country</div>`);
-        [...mapAgg.byCountry.entries()].sort().forEach(([k, v]) => out.push(`<div>${k}: <span class="font-medium">${v}</span></div>`));
+        [...mapAgg.byCountry.entries()].sort().forEach(([k, v]) =>
+            out.push(`<div>${k}: <span class="font-medium">${v}</span></div>`));
         out.push(`<div class="font-medium text-slate-800 mt-3 mb-1">Top cities</div>`);
-        [...mapAgg.byCity.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).forEach(([k, v]) => out.push(`<div>${k}: <span class="font-medium">${v}</span></div>`));
+        [...mapAgg.byCity.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).forEach(([k, v]) =>
+            out.push(`<div>${k}: <span class="font-medium">${v}</span></div>`));
         document.getElementById("breakdown").innerHTML = out.join("");
     }
 
@@ -250,7 +255,6 @@
             const jobs = await fetchJSON("/api/jobs");
             document.getElementById("sumOpenJobs").textContent = jobs.filter(j => j.status === "Open").length;
         } catch { document.getElementById("sumOpenJobs").textContent = "0"; }
-
         const { byCountry, byCity } = aggregate(users);
         document.getElementById("sumCountries").textContent = [...byCountry.keys()].length;
         document.getElementById("sumCities").textContent = byCity.size;
@@ -261,7 +265,6 @@
         const t = document.getElementById("fType").value;
         const d = (document.getElementById("fDept").value || "").toLowerCase().trim();
         const c = (document.getElementById("fCountry").value || "").toLowerCase().trim();
-
         return all.filter(u => {
             const hay = [u.name, u.full_name, u.username, u.email, u.city, u.location, u.country, u.employee_type, u.subposition]
                 .map(x => (x || "").toLowerCase()).join(" ");
@@ -273,7 +276,7 @@
         });
     }
 
-    // Layers (so Employees can be toggled)
+    // Layers
     const LAYERS = {
         "Employees": L.markerClusterGroup(),
         "HR": L.markerClusterGroup(),
@@ -282,7 +285,8 @@
         "Contractors / Remote staff": L.markerClusterGroup(),
     };
 
-    let MAP, markers = [];
+    let MAP, markers = [], allUsers = [];
+
     function resetMarkers() {
         markers.forEach(m => { try { MAP.removeLayer(m); } catch { } });
         markers = [];
@@ -297,14 +301,13 @@
         });
         const m = L.marker(latlng, { icon });
         m.bindPopup(`
-      <div class="text-sm">
-        <div class="font-semibold text-slate-800">${user.name || user.full_name || user.username || "User"}</div>
-        <div class="text-slate-600">${user.employee_type || ""}${user.subposition ? " • " + user.subposition : ""}</div>
-        <div class="mt-1">${user.email || ""}</div>
-        <div class="text-slate-500">${user.city || user.location || user.country || "-"}</div>
-      </div>
-    `);
-
+            <div class="text-sm">
+                <div class="font-semibold text-slate-800">${user.name || user.full_name || user.username || "User"}</div>
+                <div class="text-slate-600">${user.employee_type || ""}${user.subposition ? " • " + user.subposition : ""}</div>
+                <div class="mt-1">${user.email || ""}</div>
+                <div class="text-slate-500">${user.city || user.location || user.country || "-"}</div>
+            </div>
+        `);
         const layerKey = ["Employees", "HR", "Leaders", "CXOs", "Contractors / Remote staff"]
             .find(k => k === (user.employee_type || "")) || "Employees";
         LAYERS[layerKey].addLayer(m);
@@ -322,53 +325,111 @@
         };
         Object.values(overlays).forEach(layer => { if (!MAP.hasLayer(layer)) layer.addTo(MAP); });
         if (!MAP._layersControlAdded) {
-            L.control.layers(null, overlays, { collapsed: false }).addTo(MAP);
+            const collapsed = window.innerWidth < 1024; // collapse on mobile/tablet
+            L.control.layers(null, overlays, { collapsed }).addTo(MAP);
             MAP._layersControlAdded = true;
         }
     }
 
     async function loadMap() {
-        MAP = L.map('map', { scrollWheelZoom: true }).setView([20, 0], 2);
+        // Map init
+        MAP = L.map('map', { scrollWheelZoom: true, zoomControl: true }).setView([20, 0], 2);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 7, attribution: '&copy; OpenStreetMap'
+            maxZoom: 8, attribution: '&copy; OpenStreetMap'
         }).addTo(MAP);
-
-        let allUsers = [];
 
         async function refresh() {
             try {
                 if (!allUsers.length) allUsers = await fetchJSON('/api/users');
-
                 const filtered = applyFilters(allUsers);
                 resetMarkers();
-
                 filtered.forEach(u => {
                     const ll = getLatLngForUser(u);
                     if (ll) addMarker(ll, u);
                 });
-
                 ensureOverlaysOnMap();
-
                 const agg = aggregate(filtered);
                 renderTopList(agg);
                 renderBreakdown(agg);
                 await loadSummaryCards(filtered);
+
+                // Fit bounds (only if we have at least 1 marker)
+                const allGroups = Object.values(LAYERS);
+                const count = allGroups.reduce((s, g) => s + g.getLayers().length, 0);
+                if (count > 0) {
+                    const group = L.featureGroup(allGroups);
+                    MAP.fitBounds(group.getBounds().pad(0.2), { animate: true });
+                }
             } catch (e) {
                 console.error("Failed to load world map", e);
             }
         }
 
-        document.getElementById("reload").addEventListener("click", refresh);
-        ["q", "fType", "fDept", "fCountry"].forEach(id => document.getElementById(id).addEventListener("input", refresh));
+        const debouncedRefresh = debounce(refresh, 250);
+
+        document.getElementById("reload").addEventListener("click", refresh, { passive: true });
+        ["q", "fType", "fDept", "fCountry"].forEach(id =>
+            document.getElementById(id).addEventListener("input", debouncedRefresh, { passive: true })
+        );
         document.getElementById("onlyEmployees")?.addEventListener("click", () => {
             const fType = document.getElementById("fType");
             fType.value = "Employees";
             fType.dispatchEvent(new Event("input"));
-        });
+        }, { passive: true });
 
         await refresh();
     }
 
-    loadMap();
+    // Filters collapsible on small screens
+    (function wireFiltersCollapse() {
+        const btn = document.getElementById('toggleFilters');
+        const wrap = document.getElementById('filtersWrap');
+        const setState = () => {
+            if (window.innerWidth < 1024) {
+                wrap.classList.toggle('hidden', !btn.dataset.open);
+                btn.innerHTML = (btn.dataset.open ? '<i class="fa-solid fa-sliders mr-1"></i> Hide' : '<i class="fa-solid fa-sliders mr-1"></i> Show');
+            } else {
+                wrap.classList.remove('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-sliders mr-1"></i> Show';
+                btn.dataset.open = "";
+            }
+        };
+        btn.addEventListener('click', () => {
+            btn.dataset.open = btn.dataset.open ? "" : "1";
+            setState();
+        });
+        window.addEventListener('resize', debounce(setState, 150));
+        setState();
+    })();
+
+    // Kickoff
+    document.addEventListener('DOMContentLoaded', loadMap);
 </script>
+
+<style>
+    /* Map height responsive */
+    #map {
+        height: 65vh;
+        /* phones/tablets */
+        min-height: 360px;
+    }
+
+    @media (min-width: 1024px) {
+
+        /* lg+ */
+        #map {
+            height: 560px;
+        }
+    }
+
+    /* Tiny colored dots in legend */
+    .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    }
+</style>
 {% endblock %}

@@ -9,10 +9,20 @@
             </h1>
             <p class="text-slate-600 text-sm">Role-based access control for secure feature access.</p>
         </div>
-        <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-            <i class="fa-solid fa-arrow-left mr-1"></i> Back
-        </a>
+        <div class="flex items-center gap-2">
+            <button id="backupBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-database mr-1"></i> Backup
+            </button>
+            <button id="restoreBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-upload mr-1"></i> Restore
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
     </div>
 
     <!-- Create (Dummy) -->
@@ -38,8 +48,9 @@
                         placeholder="expense.read, expense.approve">
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit"><i
-                            class="fa-solid fa-plus mr-1"></i>Add</button>
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-plus mr-1"></i>Add
+                    </button>
                     <span id="roleMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
@@ -61,11 +72,16 @@
                         placeholder="Approve expense reports">
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit"><i
-                            class="fa-solid fa-plus mr-1"></i>Add</button>
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-plus mr-1"></i>Add
+                    </button>
                     <span id="permMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
+            <div class="mt-3 text-xs text-slate-500">
+                Tip: Patterns supported — <code class="font-mono">resource.*</code>, <code
+                    class="font-mono">*.action</code>, or <code class="font-mono">*</code>.
+            </div>
         </div>
 
         <!-- Assign -->
@@ -84,8 +100,9 @@
                         placeholder="Manager">
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit"><i
-                            class="fa-solid fa-plus mr-1"></i>Assign</button>
+                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                        <i class="fa-solid fa-plus mr-1"></i>Assign
+                    </button>
                     <span id="assignMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
@@ -132,8 +149,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Roles -->
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
-                    class="fa-solid fa-id-badge mr-2"></i> Roles</div>
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold">
+                <i class="fa-solid fa-id-badge mr-2"></i> Roles
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-left text-slate-700">
                     <thead class="bg-slate-50 text-slate-600">
@@ -153,8 +171,9 @@
 
         <!-- Permissions -->
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i class="fa-solid fa-key mr-2"></i>
-                Permissions</div>
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold">
+                <i class="fa-solid fa-key mr-2"></i> Permissions
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-left text-slate-700">
                     <thead class="bg-slate-50 text-slate-600">
@@ -172,8 +191,9 @@
 
         <!-- Users -->
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
-                    class="fa-solid fa-users mr-2"></i> Users & Roles</div>
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold">
+                <i class="fa-solid fa-users mr-2"></i> Users & Roles
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-left text-slate-700">
                     <thead class="bg-slate-50 text-slate-600">
@@ -192,8 +212,9 @@
 
         <!-- Policy Simulator -->
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
-                    class="fa-solid fa-vial mr-2"></i> Policy Simulator</div>
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold">
+                <i class="fa-solid fa-vial mr-2"></i> Policy Simulator
+            </div>
             <div class="p-4 grid grid-cols-1 md:grid-cols-5 gap-3">
                 <input id="simUser" class="md:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="U001 - Charan">
@@ -206,16 +227,23 @@
                     <option>edit</option>
                 </select>
                 <div class="md:col-span-5 flex items-center gap-3">
-                    <button id="simBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900"><i
-                            class="fa-solid fa-play mr-1"></i>Simulate</button>
+                    <button id="simBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                        <i class="fa-solid fa-play mr-1"></i>Simulate
+                    </button>
                     <span id="simMsg" class="text-sm text-slate-600"></span>
                 </div>
             </div>
-            <div class="px-4 pb-4 text-xs text-slate-500">Simulator checks permission key =
-                &lt;resource&gt;.&lt;action&gt; (e.g., <span class="font-mono">expense.approve</span>).</div>
+            <div class="px-4 pb-4 text-xs text-slate-500">
+                Simulator checks permission key = &lt;resource&gt;.&lt;action&gt;. Supports wildcard patterns:
+                <code class="font-mono">*</code>, <code class="font-mono">resource.*</code>, <code
+                    class="font-mono">*.action</code>.
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Hidden file input for restore -->
+<input id="restoreFile" type="file" accept="application/json" class="hidden">
 
 <script>
     /* ---------- Dummy store (localStorage) ---------- */
@@ -250,11 +278,13 @@
     const userRows = document.getElementById("userRows"), userListMsg = document.getElementById("userListMsg"), assignForm = document.getElementById("assignForm"), assignMsg = document.getElementById("assignMsg");
     const kpiUsers = document.getElementById("kpiUsers"), kpiRoles = document.getElementById("kpiRoles"), kpiPerms = document.getElementById("kpiPerms"), kpiPolicies = document.getElementById("kpiPolicies");
     const simUser = document.getElementById("simUser"), simResource = document.getElementById("simResource"), simAction = document.getElementById("simAction"), simBtn = document.getElementById("simBtn"), simMsg = document.getElementById("simMsg");
+    const backupBtn = document.getElementById("backupBtn"), restoreBtn = document.getElementById("restoreBtn"), restoreFile = document.getElementById("restoreFile");
 
     /* ---------- Helpers ---------- */
     function td(el) { const x = document.createElement("td"); x.className = "px-4 py-2 align-top"; x.appendChild(el); return x; }
     function input(v, cls = "w-40") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
     function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
+    function btnCopy(text, label = "Copy") { const b = document.createElement("button"); b.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; b.innerHTML = `<i class="fa-solid fa-copy mr-1"></i>${label}`; b.addEventListener("click", async () => { try { await navigator.clipboard.writeText(text); } catch { } b.textContent = "Copied!"; setTimeout(() => b.innerHTML = `<i class="fa-solid fa-copy mr-1"></i>${label}`, 900); }); return b; }
     function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
     const uniq = a => Array.from(new Set(a));
 
@@ -280,6 +310,18 @@
         return true;
     }
 
+    /* ---------- Wildcard matching ---------- */
+    // Supports "*", "resource.*", "*.action" (resource/action = segment around ".")
+    function matchesPattern(key, pattern) {
+        if (pattern === "*") return true;
+        const [kr, ka] = String(key).split(".");
+        const [pr, pa] = String(pattern).split(".");
+        if (!kr || !ka || !pr || !pa) return key === pattern; // fallback exact
+        const resOk = (pr === "*" || pr === kr);
+        const actOk = (pa === "*" || pa === ka);
+        return resOk && actOk;
+    }
+
     /* ---------- Effective Permissions ---------- */
     function rolePerms(roleName) {
         const r = STORE.roles.find(x => x.name === roleName); if (!r) return [];
@@ -294,7 +336,7 @@
         const key = resource.trim() + "." + action.trim();
         const perms = userEffectivePerms(userName);
         if (perms.includes("*")) return true;
-        return perms.includes(key);
+        return perms.some(p => matchesPattern(key, p));
     }
 
     /* ---------- KPIs ---------- */
@@ -318,17 +360,19 @@
             const statusS = select(["Active", "Paused"], r.status || "Active");
 
             const actions = document.createElement("div");
-            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            actions.className = "flex items-center gap-2";
+            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
             const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
-            actions.append(saveBtn, delBtn);
+            const copyBtn = btnCopy(permsI.value, "Copy Perms");
+            actions.append(saveBtn, delBtn, copyBtn);
 
             tr.append(td(nameI), td(descI), td(permsI), td(statusS), td(actions));
             roleRows.appendChild(tr);
 
             saveBtn.addEventListener("click", () => {
                 const newName = nameI.value.trim();
-                if (!newName) { flash(roleListMsg, "Role name required", true); return; }
-                if (newName !== r.name && STORE.roles.some(x => x.name === newName)) { flash(roleListMsg, "Role exists", true); return; }
+                if (!newName) { flash(roleListMsg, "Role name required", false); return; }
+                if (newName !== r.name && STORE.roles.some(x => x.name === newName)) { flash(roleListMsg, "Role exists", false); return; }
                 // update user role refs if renamed
                 STORE.users.forEach(u => { u.roles = u.roles.map(x => x === r.name ? newName : x); });
                 r.name = newName; r.desc = descI.value.trim();
@@ -342,6 +386,7 @@
                 STORE.users.forEach(u => { u.roles = u.roles.filter(x => x !== r.name); });
                 persist(); updateKPIs(); loadRoles(); loadUsers();
             });
+            permsI.addEventListener("input", () => { copyBtn.onclick = null; copyBtn.replaceWith(btnCopy(permsI.value, "Copy Perms")); });
         });
         roleListMsg.textContent = data.length ? "" : "No roles.";
     }
@@ -356,17 +401,19 @@
             const descI = input(p.desc || "", "w-64");
 
             const actions = document.createElement("div");
-            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            actions.className = "flex items-center gap-2";
+            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
             const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
-            actions.append(saveBtn, delBtn);
+            const copyBtn = btnCopy(keyI.value);
+            actions.append(saveBtn, delBtn, copyBtn);
 
             tr.append(td(keyI), td(descI), td(actions));
             permRows.appendChild(tr);
 
             saveBtn.addEventListener("click", () => {
                 const newKey = keyI.value.trim();
-                if (!newKey) { flash(permListMsg, "Key required", true); return; }
-                if (newKey !== p.key && STORE.perms.some(x => x.key === newKey)) { flash(permListMsg, "Permission exists", true); return; }
+                if (!newKey) { flash(permListMsg, "Key required", false); return; }
+                if (newKey !== p.key && STORE.perms.some(x => x.key === newKey)) { flash(permListMsg, "Permission exists", false); return; }
                 // rewrite role permissions if key changed
                 STORE.roles.forEach(r => { r.perms = r.perms.map(k => k === p.key ? newKey : k); });
                 p.key = newKey; p.desc = descI.value.trim();
@@ -378,6 +425,7 @@
                 STORE.perms = STORE.perms.filter(x => x !== p);
                 persist(); updateKPIs(); loadPerms(); loadRoles();
             });
+            keyI.addEventListener("input", () => { copyBtn.onclick = null; copyBtn.replaceWith(btnCopy(keyI.value)); });
         });
         permListMsg.textContent = data.length ? "" : "No permissions.";
     }
@@ -389,24 +437,26 @@
         data.forEach(u => {
             const tr = document.createElement("tr");
             const userI = input(u.user, "w-48");
-            const rolesI = input(u.roles.join(", "), "w-48");
-            const eff = document.createElement("div"); eff.className = "text-xs text-slate-700";
+            const rolesI = input(u.roles.join(", "), "w-56");
+            const eff = document.createElement("div"); eff.className = "text-xs text-slate-700 break-words max-w-xs";
             eff.textContent = userEffectivePerms(u.user).join(", ") || "—";
 
             const actions = document.createElement("div");
-            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            actions.className = "flex items-center gap-2";
+            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
             const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
-            actions.append(saveBtn, delBtn);
+            const copyBtn = btnCopy(eff.textContent, "Copy Perms");
+            actions.append(saveBtn, delBtn, copyBtn);
 
             tr.append(td(userI), td(rolesI), td(eff), td(actions));
             userRows.appendChild(tr);
 
-            function refreshEff() { eff.textContent = userEffectivePerms(userI.value.trim()).join(", ") || "—"; }
+            function refreshEff() { eff.textContent = userEffectivePerms(userI.value.trim()).join(", ") || "—"; copyBtn.onclick = null; copyBtn.replaceWith(btnCopy(eff.textContent, "Copy Perms")); }
 
             saveBtn.addEventListener("click", () => {
                 const newUser = userI.value.trim();
-                if (!newUser) { flash(userListMsg, "User required", true); return; }
-                if (newUser !== u.user && STORE.users.some(x => x.user === newUser)) { flash(userListMsg, "User exists", true); return; }
+                if (!newUser) { flash(userListMsg, "User required", false); return; }
+                if (newUser !== u.user && STORE.users.some(x => x.user === newUser)) { flash(userListMsg, "User exists", false); return; }
                 u.user = newUser;
                 u.roles = uniq(rolesI.value.split(",").map(s => s.trim()).filter(Boolean));
                 persist(); updateKPIs(); refreshEff(); flash(userListMsg, "Saved ✓");
@@ -424,8 +474,8 @@
         e.preventDefault();
         const fd = new FormData(roleForm);
         const name = (fd.get("name") || "").toString().trim();
-        if (!name) { flash(roleMsg, "Name required", true); return; }
-        if (STORE.roles.some(r => r.name === name)) { flash(roleMsg, "Role exists", true); return; }
+        if (!name) { flash(roleMsg, "Name required", false); return; }
+        if (STORE.roles.some(r => r.name === name)) { flash(roleMsg, "Role exists", false); return; }
         const desc = (fd.get("desc") || "").toString().trim();
         const perms = uniq((fd.get("perms") || "").toString().split(",").map(s => s.trim()).filter(Boolean));
         STORE.roles.unshift({ name, desc, perms, status: "Active" }); persist();
@@ -436,8 +486,8 @@
         e.preventDefault();
         const fd = new FormData(permForm);
         const key = (fd.get("key") || "").toString().trim();
-        if (!key) { flash(permMsg, "Key required", true); return; }
-        if (STORE.perms.some(p => p.key === key)) { flash(permMsg, "Permission exists", true); return; }
+        if (!key) { flash(permMsg, "Key required", false); return; }
+        if (STORE.perms.some(p => p.key === key)) { flash(permMsg, "Permission exists", false); return; }
         const desc = (fd.get("desc") || "").toString().trim();
         STORE.perms.unshift({ key, desc }); persist();
         permForm.reset(); flash(permMsg, "Permission added ✓"); updateKPIs(); loadPerms();
@@ -448,8 +498,8 @@
         const fd = new FormData(assignForm);
         const user = (fd.get("user") || "").toString().trim();
         const role = (fd.get("role") || "").toString().trim();
-        if (!user || !role) { flash(assignMsg, "User & Role required", true); return; }
-        if (!STORE.roles.some(r => r.name === role)) { flash(assignMsg, "Role not found", true); return; }
+        if (!user || !role) { flash(assignMsg, "User & Role required", false); return; }
+        if (!STORE.roles.some(r => r.name === role)) { flash(assignMsg, "Role not found", false); return; }
         let u = STORE.users.find(x => x.user === user);
         if (!u) { u = { user, roles: [] }; STORE.users.unshift(u); }
         if (!u.roles.includes(role)) u.roles.push(role);
@@ -459,15 +509,41 @@
     /* ---------- Simulator ---------- */
     simBtn.addEventListener("click", () => {
         const user = simUser.value.trim(), res = simResource.value.trim(), act = simAction.value.trim();
-        if (!user || !res || !act) { flash(simMsg, "Fill all fields", true); return; }
+        if (!user || !res || !act) { flash(simMsg, "Fill all fields", false); return; }
         const ok = isAllowed(user, res, act);
         flash(simMsg, ok ? "✅ Allowed" : "⛔ Not allowed", ok);
     });
 
-    /* ---------- Live filters ---------- */
-    [q, fRole, fPerm, fUser, fStatus].forEach(el => el.addEventListener("input", () => { loadRoles(); loadPerms(); loadUsers(); }));
+    /* ---------- Backup / Restore ---------- */
+    backupBtn.addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(STORE, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `rbac-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 500);
+    });
+    restoreBtn.addEventListener("click", () => restoreFile.click());
+    restoreFile.addEventListener("change", async (e) => {
+        const file = e.target.files?.[0]; if (!file) return;
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+            if (!data.roles || !data.perms || !data.users) throw new Error("Invalid file");
+            STORE = data; persist(); init();
+            alert("✅ RBAC restored");
+        } catch (err) {
+            alert("❌ Failed to restore: " + err.message);
+        } finally { restoreFile.value = ""; }
+    });
 
-    clearFilters.addEventListener("click", () => { q.value = ""; fRole.value = ""; fPerm.value = ""; fUser.value = ""; fStatus.value = ""; loadRoles(); loadPerms(); loadUsers(); });
+    /* ---------- Live filters ---------- */
+    ;[q, fRole, fPerm, fUser, fStatus].forEach(el => el.addEventListener("input", () => { loadRoles(); loadPerms(); loadUsers(); }));
+
+    clearFilters.addEventListener("click", () => {
+        q.value = ""; fRole.value = ""; fPerm.value = ""; fUser.value = ""; fStatus.value = "";
+        loadRoles(); loadPerms(); loadUsers();
+    });
 
     /* ---------- Init ---------- */
     function init() { updateKPIs(); loadRoles(); loadPerms(); loadUsers(); }

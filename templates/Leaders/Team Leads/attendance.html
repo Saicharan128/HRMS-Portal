@@ -15,8 +15,32 @@
         </a>
     </div>
 
+    <!-- KPI strip -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Pending</div>
+            <div id="kpiPending" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Approved</div>
+            <div id="kpiApproved" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Rejected</div>
+            <div id="kpiRejected" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Corrected</div>
+            <div id="kpiCorrected" class="text-xl font-semibold text-slate-800">0</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500">Avg Handle Time</div>
+            <div id="kpiAHT" class="text-xl font-semibold text-slate-800">—</div>
+        </div>
+    </div>
+
     <!-- Create/Correct (Dummy) -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-6">
         <h2 class="text-lg font-semibold text-slate-800 mb-4">
             <i class="fa-solid fa-pen-to-square mr-2"></i> Log/Correct Attendance (Dummy)
         </h2>
@@ -52,8 +76,8 @@
         </form>
     </div>
 
-    <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+    <!-- Controls -->
+    <div class="mb-3 flex flex-wrap items-center gap-2">
         <input id="qEmp" placeholder="Search employee…"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
@@ -71,15 +95,39 @@
             <option>Morning</option>
             <option>Night</option>
         </select>
+        <select id="sortBy" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="created_at|desc">Newest</option>
+            <option value="date|desc">Date ↓</option>
+            <option value="date|asc">Date ↑</option>
+            <option value="employee|asc">Employee A–Z</option>
+            <option value="status|asc">Status</option>
+        </select>
         <button id="clearFilters"
             class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
+
+        <div class="ml-auto flex items-center gap-2">
+            <button id="bulkApprove"
+                class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-700"><i
+                    class="fa-solid fa-check mr-1"></i> Approve</button>
+            <button id="bulkReject" class="px-3 py-2 rounded-lg bg-rose-600 text-white text-sm hover:bg-rose-700"><i
+                    class="fa-solid fa-xmark mr-1"></i> Reject</button>
+            <button id="bulkDelete" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50"><i
+                    class="fa-solid fa-trash mr-1"></i> Delete</button>
+            <button id="exportCsv" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50"><i
+                    class="fa-solid fa-file-csv mr-1"></i> Export CSV</button>
+            <label class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50 cursor-pointer">
+                <i class="fa-solid fa-file-arrow-up mr-1"></i> Import CSV
+                <input id="importCsv" type="file" accept=".csv" class="hidden">
+            </label>
+        </div>
     </div>
 
-    <!-- Pending/All Records Table -->
+    <!-- Table -->
     <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table class="min-w-full text-sm text-left text-slate-700">
-            <thead class="bg-slate-50 text-slate-600">
+            <thead class="bg-slate-50 text-slate-600 sticky top-0">
                 <tr>
+                    <th class="px-4 py-2 w-8"><input id="selAll" type="checkbox"></th>
                     <th class="px-4 py-2">Employee</th>
                     <th class="px-4 py-2">Date</th>
                     <th class="px-4 py-2">In</th>
@@ -88,17 +136,24 @@
                     <th class="px-4 py-2">Reason</th>
                     <th class="px-4 py-2">Status</th>
                     <th class="px-4 py-2 w-64">Admin Note</th>
-                    <th class="px-4 py-2 w-64">Actions</th>
+                    <th class="px-4 py-2 w-56">Actions</th>
                 </tr>
             </thead>
             <tbody id="rows" class="divide-y divide-slate-200"></tbody>
         </table>
     </div>
     <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
+
+    <!-- Audit -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-shield-halved mr-2"></i> Audit Trail
+        </h3>
+        <ul id="audit" class="text-xs text-slate-600 space-y-1"></ul>
+    </div>
 </div>
 
 <script>
-    /* -------- Dummy in-browser store (localStorage) -------- */
+    /* -------- Local store -------- */
     const KEY = "dummy_attendance_admin";
     let STORE = JSON.parse(localStorage.getItem(KEY) || "null") || [
         { id: 1, employee: "E001 - Charan", date: "2025-09-12", in_time: "09:58", out_time: "18:03", shift: "General", reason: "Missed punch OUT", status: "Pending", admin_note: "", created_at: new Date().toISOString() },
@@ -107,7 +162,7 @@
     ];
     function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); }
 
-    /* -------- Elements -------- */
+    /* -------- UI refs -------- */
     const rows = document.getElementById("rows");
     const listMsg = document.getElementById("listMsg");
     const corrForm = document.getElementById("corrForm");
@@ -117,51 +172,87 @@
     const fTo = document.getElementById("fTo");
     const fStatus = document.getElementById("fStatus");
     const fShift = document.getElementById("fShift");
+    const sortBy = document.getElementById("sortBy");
     const clearFilters = document.getElementById("clearFilters");
+    const selAll = document.getElementById("selAll");
+    const audit = document.getElementById("audit");
+
+    /* -------- State (persisted) -------- */
+    const SKEY = "attendance_admin_state";
+    let STATE = JSON.parse(localStorage.getItem(SKEY) || "null") || { q: "", from: "", to: "", status: "", shift: "", sort: "created_at|desc" };
+    function saveState() { localStorage.setItem(SKEY, JSON.stringify(STATE)); }
 
     /* -------- Helpers -------- */
-    function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2"; c.appendChild(el); return c; }
-    function text(v) { const s = document.createElement("span"); s.textContent = v ?? "—"; return s; }
+    const td = el => { const c = document.createElement("td"); c.className = "px-4 py-2"; c.appendChild(el); return c; };
+    const text = v => { const s = document.createElement("span"); s.textContent = v ?? "—"; return s; };
     function input(v, cls = "w-24") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
     function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 1; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
-    function select(opts, cur) {
-        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm";
-        opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o || "—"; if (o === cur) op.selected = true; s.appendChild(op); }); return s;
-    }
+    function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o || "—"; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
     function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
-
-    /* -------- Filtering -------- */
     function withinDate(d) {
         const v = new Date(d).setHours(0, 0, 0, 0);
-        const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null;
-        const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null;
+        const f1 = STATE.from ? new Date(STATE.from).setHours(0, 0, 0, 0) : null;
+        const f2 = STATE.to ? new Date(STATE.to).setHours(23, 59, 59, 999) : null;
         if (f1 && v < f1) return false;
         if (f2 && v > f2) return false;
         return true;
     }
+    function addAudit(msg) { const li = document.createElement('li'); li.textContent = new Date().toLocaleString() + " • " + msg; audit.prepend(li); }
+
+    /* -------- Filters & sorting -------- */
     function filtered() {
-        const q = qEmp.value.trim().toLowerCase();
-        const st = fStatus.value;
-        const sh = fShift.value;
         return STORE.filter(r => {
-            if (q && !r.employee.toLowerCase().includes(q)) return false;
-            if (st && r.status !== st) return false;
-            if (sh && r.shift !== sh) return false;
+            if (STATE.q && !r.employee.toLowerCase().includes(STATE.q)) return false;
+            if (STATE.status && r.status !== STATE.status) return false;
+            if (STATE.shift && r.shift !== STATE.shift) return false;
             if (!withinDate(r.date)) return false;
             return true;
+        }).sort((a, b) => {
+            const [k, dir] = STATE.sort.split("|");
+            let va = a[k], vb = b[k];
+            if (k === "date" || k === "created_at") { va = new Date(va).getTime(); vb = new Date(vb).getTime(); }
+            return dir === "asc" ? (va > vb ? 1 : va < vb ? -1 : 0) : (va < vb ? 1 : va > vb ? -1 : 0);
         });
     }
 
+    /* -------- Validation helpers -------- */
+    function timeToMin(t) { if (!t) return null; const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+    function durationMinutes(inT, outT) { const a = timeToMin(inT), b = timeToMin(outT); if (a == null || b == null) return null; let d = b - a; if (d < 0) d += 24 * 60; return d; }
+
+    /* -------- KPIs -------- */
+    function updateKPIs() {
+        const p = STORE.filter(x => x.status === "Pending").length;
+        const a = STORE.filter(x => x.status === "Approved").length;
+        const r = STORE.filter(x => x.status === "Rejected").length;
+        const c = STORE.filter(x => x.status === "Corrected").length;
+        document.getElementById('kpiPending').textContent = p;
+        document.getElementById('kpiApproved').textContent = a;
+        document.getElementById('kpiRejected').textContent = r;
+        document.getElementById('kpiCorrected').textContent = c;
+
+        // naive handle time = now - created_at for non-pending
+        const handled = STORE.filter(x => x.status !== "Pending");
+        if (!handled.length) { document.getElementById('kpiAHT').textContent = "—"; return; }
+        const mins = handled.map(x => (Date.now() - new Date(x.created_at).getTime()) / 60000);
+        const avg = Math.round(mins.reduce((s, v) => s + v, 0) / mins.length);
+        document.getElementById('kpiAHT').textContent = avg + " min";
+    }
+
     /* -------- Render -------- */
+    let selected = new Set();
     function load() {
         rows.innerHTML = "";
         const data = filtered();
+        selected.forEach(id => { if (!data.some(x => x.id === id)) selected.delete(id); });
 
         data.forEach(r => {
             const tr = document.createElement("tr");
 
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = selected.has(r.id);
+            cb.addEventListener('change', () => { cb.checked ? selected.add(r.id) : selected.delete(r.id); });
+
             const empI = input(r.employee, "w-48");
-            const dateI = input(r.date, "w-32"); dateI.type = "date";
+            const dateI = input(r.date, "w-36"); dateI.type = "date";
             const inI = input(r.in_time || "", "w-24"); inI.type = "time";
             const outI = input(r.out_time || "", "w-24"); outI.type = "time";
             const shiftS = select(["General", "Morning", "Night"], r.shift);
@@ -169,28 +260,47 @@
             const statusS = select(["Pending", "Approved", "Rejected", "Corrected"], r.status);
             const noteT = textArea(r.admin_note || "");
 
+            // anomaly badge
+            const warn = document.createElement('div');
+            warn.className = "text-xs mt-1";
+            const setAnomaly = () => {
+                warn.textContent = ""; warn.classList.remove('text-amber-600', 'text-rose-600', 'text-emerald-600');
+                const dur = durationMinutes(inI.value, outI.value);
+                if (!inI.value && !outI.value) { warn.textContent = "No punches"; warn.classList.add('text-amber-600'); }
+                else if (inI.value && outI.value && durationMinutes(inI.value, outI.value) < 0) { warn.textContent = "Invalid time"; warn.classList.add('text-rose-600'); }
+                else if (dur != null && dur > 10 * 60) { warn.textContent = "Overtime candidate"; warn.classList.add('text-amber-600'); }
+                else if (r.status === "Corrected") { warn.textContent = "Corrected ✓"; warn.classList.add('text-emerald-600'); }
+            };
+            [inI, outI].forEach(el => el.addEventListener('input', setAnomaly));
+            setAnomaly();
+
             const actions = document.createElement("div");
-            const approveBtn = document.createElement("button");
-            approveBtn.className = "px-2 py-1 mr-2 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700";
-            approveBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Approve';
-            const rejectBtn = document.createElement("button");
-            rejectBtn.className = "px-2 py-1 mr-2 rounded-md bg-rose-600 text-white text-xs hover:bg-rose-700";
-            rejectBtn.innerHTML = '<i class="fa-solid fa-xmark mr-1"></i>Reject';
-            const saveBtn = document.createElement("button");
-            saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900";
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
-            const delBtn = document.createElement("button");
-            delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50";
-            delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
+            const approveBtn = btn('Approve', 'bg-emerald-600 hover:bg-emerald-700 text-white', 'fa-check');
+            const rejectBtn = btn('Reject', 'bg-rose-600 hover:bg-rose-700 text-white', 'fa-xmark');
+            const saveBtn = btn('Save', 'bg-slate-800 hover:bg-slate-900 text-white', 'fa-floppy-disk');
+            const delBtn = btn('Delete', 'border border-slate-300 hover:bg-slate-50', 'fa-trash-can', false);
+
             actions.append(approveBtn, rejectBtn, saveBtn, delBtn);
 
             tr.append(
-                td(empI), td(dateI), td(inI), td(outI),
-                td(shiftS), td(reasonI), td(statusS), td(noteT), td(actions)
+                td(wrap(cb)),
+                td(wrap(empI)),
+                td(wrap(dateI, warn)),
+                td(wrap(inI)),
+                td(wrap(outI)),
+                td(wrap(shiftS)),
+                td(wrap(reasonI)),
+                td(wrap(statusS)),
+                td(wrap(noteT)),
+                td(actions)
             );
             rows.appendChild(tr);
 
             saveBtn.addEventListener("click", () => {
+                if (!dateI.value) return toast('Date required', 'err');
+                const dur = durationMinutes(inI.value, outI.value);
+                if (inI.value && outI.value && dur !== null && dur < 0) return toast('Out time must be after In time', 'err');
+
                 r.employee = empI.value.trim();
                 r.date = dateI.value;
                 r.in_time = inI.value;
@@ -200,30 +310,29 @@
                 r.status = statusS.value;
                 r.admin_note = noteT.value;
                 if (r.status === "Approved" && (inI.value || outI.value)) r.status = "Corrected";
-                persist(); load();
-                listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
-                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+                persist(); addAudit(`Saved record #${r.id} (${r.status})`); renderAll();
             });
-
-            approveBtn.addEventListener("click", () => {
-                r.status = (r.in_time || r.out_time) ? "Corrected" : "Approved";
+            approveBtn.addEventListener('click', () => {
+                r.status = (inI.value || outI.value) ? "Corrected" : "Approved";
                 r.admin_note = (noteT.value || "").trim();
-                persist(); load();
+                persist(); addAudit(`Approved record #${r.id}`); renderAll();
             });
-
-            rejectBtn.addEventListener("click", () => {
+            rejectBtn.addEventListener('click', () => {
                 r.status = "Rejected";
                 r.admin_note = (noteT.value || "").trim() || "Rejected by admin";
-                persist(); load();
+                persist(); addAudit(`Rejected record #${r.id}`); renderAll();
             });
-
-            delBtn.addEventListener("click", () => {
+            delBtn.addEventListener('click', () => {
                 if (!confirm("Delete this record?")) return;
-                STORE = STORE.filter(x => x.id !== r.id); persist(); load();
+                STORE = STORE.filter(x => x.id !== r.id); selected.delete(r.id);
+                persist(); addAudit(`Deleted record #${r.id}`); renderAll();
             });
         });
 
         listMsg.textContent = data.length ? "" : "No records.";
+        updateKPIs();
+        // header checkbox state
+        selAll.checked = data.length > 0 && data.every(r => selected.has(r.id));
     }
 
     /* -------- Create/Correct form (dummy) -------- */
@@ -236,18 +345,128 @@
         const out_time = (fd.get("out_time") || "").toString();
         const reason = (fd.get("reason") || "").toString().trim();
         if (!employee || !date || !reason) { flash(corrMsg, "Missing required fields.", true); return; }
+        const dur = durationMinutes(in_time, out_time);
+        if (in_time && out_time && dur !== null && dur < 0) { flash(corrMsg, "Out time must be after In time.", true); return; }
         const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
         STORE.unshift({ id, employee, date, in_time, out_time, shift: "General", reason, status: "Pending", admin_note: "", created_at: new Date().toISOString() });
-        persist(); corrForm.reset(); flash(corrMsg, "Submitted ✓"); load();
+        persist(); corrForm.reset(); flash(corrMsg, "Submitted ✓"); addAudit(`Created record #${id} (Pending)`); renderAll();
     });
 
-    /* -------- Filters -------- */
-    [qEmp, fFrom, fTo, fStatus, fShift].forEach(el => el.addEventListener("input", load));
+    /* -------- Filters & controls -------- */
+    [qEmp, fFrom, fTo, fStatus, fShift, sortBy].forEach(el => el.addEventListener('input', () => {
+        STATE.q = qEmp.value.trim().toLowerCase();
+        STATE.from = fFrom.value; STATE.to = fTo.value; STATE.status = fStatus.value; STATE.shift = fShift.value;
+        STATE.sort = sortBy.value; saveState(); renderAll(false);
+    }));
+
     clearFilters.addEventListener("click", () => {
-        qEmp.value = ""; fFrom.value = ""; fTo.value = ""; fStatus.value = ""; fShift.value = ""; load();
+        qEmp.value = ""; fFrom.value = ""; fTo.value = ""; fStatus.value = ""; fShift.value = ""; sortBy.value = "created_at|desc";
+        STATE = { q: "", from: "", to: "", status: "", shift: "", sort: "created_at|desc" }; saveState(); renderAll();
     });
 
-    /* -------- Init -------- */
-    load();
+    /* -------- Bulk actions -------- */
+    selAll.addEventListener('change', () => {
+        const ids = filtered().map(x => x.id);
+        if (selAll.checked) ids.forEach(id => selected.add(id)); else ids.forEach(id => selected.delete(id));
+        load();
+    });
+    document.getElementById('bulkApprove').addEventListener('click', () => {
+        if (!selected.size) return toast('Select rows first', 'info');
+        STORE.forEach(r => { if (selected.has(r.id)) r.status = (r.in_time || r.out_time) ? "Corrected" : "Approved"; });
+        persist(); addAudit(`Bulk approved ${selected.size} record(s)`); renderAll();
+    });
+    document.getElementById('bulkReject').addEventListener('click', () => {
+        if (!selected.size) return toast('Select rows first', 'info');
+        STORE.forEach(r => { if (selected.has(r.id)) r.status = "Rejected"; });
+        persist(); addAudit(`Bulk rejected ${selected.size} record(s)`); renderAll();
+    });
+    document.getElementById('bulkDelete').addEventListener('click', () => {
+        if (!selected.size) return toast('Select rows first', 'info');
+        if (!confirm(`Delete ${selected.size} selected record(s)?`)) return;
+        STORE = STORE.filter(r => !selected.has(r.id));
+        selected.clear(); persist(); addAudit(`Bulk deleted records`); renderAll();
+    });
+
+    /* -------- CSV Export/Import -------- */
+    document.getElementById('exportCsv').addEventListener('click', () => {
+        const data = filtered();
+        const header = ['id', 'employee', 'date', 'in_time', 'out_time', 'shift', 'reason', 'status', 'admin_note', 'created_at'];
+        const body = data.map(r => header.map(k => csv(r[k] ?? '')).join(','));
+        const blob = new Blob([header.join(',') + '\n' + body.join('\n')], { type: 'text/csv' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'attendance_export.csv'; a.click(); URL.revokeObjectURL(a.href);
+    });
+    document.getElementById('importCsv').addEventListener('change', (e) => {
+        const f = e.target.files[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const lines = reader.result.split(/\r?\n/).filter(Boolean);
+            const header = lines.shift().split(',');
+            const idx = (k) => header.indexOf(k);
+            let added = 0;
+            lines.forEach(line => {
+                const cols = parseCsvLine(line);
+                const r = {
+                    id: Math.max(0, ...STORE.map(x => x.id)) + 1,
+                    employee: cols[idx('employee')] || '',
+                    date: cols[idx('date')] || '',
+                    in_time: cols[idx('in_time')] || '',
+                    out_time: cols[idx('out_time')] || '',
+                    shift: cols[idx('shift')] || 'General',
+                    reason: cols[idx('reason')] || '',
+                    status: cols[idx('status')] || 'Pending',
+                    admin_note: cols[idx('admin_note')] || '',
+                    created_at: cols[idx('created_at')] || new Date().toISOString()
+                };
+                if (r.employee && r.date) { STORE.unshift(r); added++; }
+            });
+            persist(); addAudit(`Imported ${added} record(s) from CSV`); renderAll();
+            e.target.value = "";
+        };
+        reader.readAsText(f);
+    });
+
+    /* -------- Keyboard shortcuts -------- */
+    document.addEventListener('keydown', (ev) => {
+        if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA' || ev.target.isContentEditable) return;
+        if (ev.key === 'a') { document.getElementById('bulkApprove').click(); }
+        if (ev.key === 'r') { document.getElementById('bulkReject').click(); }
+        if (ev.key === 'Delete') { document.getElementById('bulkDelete').click(); }
+    });
+
+    /* -------- Init (restore state) -------- */
+    (function boot() {
+        qEmp.value = STATE.q; fFrom.value = STATE.from; fTo.value = STATE.to; fStatus.value = STATE.status; fShift.value = STATE.shift; sortBy.value = STATE.sort;
+        renderAll();
+    })();
+
+    /* -------- Render all -------- */
+    function renderAll(resetSel = true) {
+        if (resetSel) selected.clear();
+        load();
+    }
+
+    /* -------- Utils -------- */
+    function btn(label, cls, icon, filled = true) {
+        const b = document.createElement('button');
+        b.className = `px-2 py-1 mr-2 rounded-md text-xs ${cls}`;
+        b.innerHTML = `<i class="fa-solid ${icon} mr-1"></i>${label}`;
+        return b;
+    }
+    function wrap(...nodes) { const d = document.createElement('div'); nodes.forEach(n => d.appendChild(n)); return d; }
+    function toast(msg, kind = 'ok') {
+        const prefix = kind === 'err' ? '❌' : kind === 'info' ? 'ℹ️' : '✅';
+        alert(prefix + ' ' + msg);
+    }
+    function csv(v) { return `"${String(v).replace(/"/g, '""')}"`; }
+    function parseCsvLine(line) {
+        const out = []; let cur = ''; let quoted = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') { if (quoted && line[i + 1] === '"') { cur += '"'; i++; } else { quoted = !quoted; } }
+            else if (ch === ',' && !quoted) { out.push(cur); cur = ''; }
+            else cur += ch;
+        }
+        out.push(cur); return out;
+    }
 </script>
 {% endblock %}

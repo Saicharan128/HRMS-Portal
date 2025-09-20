@@ -1,25 +1,37 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Expense reports
             </h1>
             <p class="text-slate-600 text-sm">Department/BU summaries.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm text-center">
             <i class="fa-solid fa-arrow-left mr-1"></i> Back
         </a>
     </div>
 
     <!-- Add Expense (Dummy) -->
     <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">
-            <i class="fa-solid fa-plus-square mr-2"></i> Add Expense (Dummy)
-        </h2>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-slate-800">
+                <i class="fa-solid fa-plus-square mr-2"></i> Add Expense (Dummy)
+            </h2>
+            <div class="flex items-center gap-2">
+                <button id="approveAllBtn"
+                    class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                    <i class="fa-solid fa-check-double mr-1"></i> Approve all pending
+                </button>
+                <button id="exportCSVBtn"
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                </button>
+            </div>
+        </div>
         <form id="expForm" class="grid grid-cols-1 md:grid-cols-8 gap-4">
             <div class="md:col-span-2">
                 <label class="block text-sm text-slate-600 mb-1">Employee *</label>
@@ -77,9 +89,16 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-7 gap-2">
-        <input id="q" placeholder="Search employee / notes…"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+    <div class="mb-3 grid grid-cols-1 md:grid-cols-7 gap-2">
+        <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input id="q" placeholder="Search employee / notes…"
+                class="pl-9 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm w-full">
+            <button id="clearQ"
+                class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
         <input id="fDept" placeholder="Department"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fBU" placeholder="BU" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
@@ -91,7 +110,13 @@
             <option>Rejected</option>
         </select>
         <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fTo" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <div class="flex items-center gap-2">
+            <input id="fTo" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <button id="resetFilters"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                Reset
+            </button>
+        </div>
     </div>
 
     <!-- KPIs -->
@@ -120,8 +145,8 @@
 
     <!-- Reports Table -->
     <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white mb-6">
-        <table class="min-w-full text-sm text-left text-slate-700">
-            <thead class="bg-slate-50 text-slate-600">
+        <table class="min-w-[980px] w-full text-sm text-left text-slate-700">
+            <thead class="sticky top-0 bg-slate-50 text-slate-600 border-b z-10">
                 <tr>
                     <th class="px-4 py-2">Employee</th>
                     <th class="px-4 py-2">Dept</th>
@@ -137,6 +162,13 @@
                 </tr>
             </thead>
             <tbody id="rows" class="divide-y divide-slate-200"></tbody>
+            <tfoot id="totalsFoot" class="bg-slate-50 text-slate-700">
+                <tr>
+                    <td class="px-4 py-2 font-medium" colspan="5">Totals (filtered)</td>
+                    <td id="footAmount" class="px-4 py-2 font-semibold">—</td>
+                    <td class="px-4 py-2" colspan="5"></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 
@@ -144,8 +176,8 @@
     <div class="rounded-2xl border border-slate-200 bg-white p-4 mb-4">
         <h3 class="text-slate-800 font-semibold mb-3"><i class="fa-solid fa-building mr-2"></i> Department Summary</h3>
         <div class="overflow-x-auto">
-            <table class="min-w-full text-sm text-left text-slate-700">
-                <thead class="bg-slate-50 text-slate-600">
+            <table class="min-w-[820px] w-full text-sm text-left text-slate-700">
+                <thead class="sticky top-0 bg-slate-50 text-slate-600 border-b z-10">
                     <tr>
                         <th class="px-4 py-2">Department</th>
                         <th class="px-4 py-2">Reports</th>
@@ -165,8 +197,8 @@
     <div class="rounded-2xl border border-slate-200 bg-white p-4">
         <h3 class="text-slate-800 font-semibold mb-3"><i class="fa-solid fa-sitemap mr-2"></i> BU Summary</h3>
         <div class="overflow-x-auto">
-            <table class="min-w-full text-sm text-left text-slate-700">
-                <thead class="bg-slate-50 text-slate-600">
+            <table class="min-w-[820px] w-full text-sm text-left text-slate-700">
+                <thead class="sticky top-0 bg-slate-50 text-slate-600 border-b z-10">
                     <tr>
                         <th class="px-4 py-2">BU</th>
                         <th class="px-4 py-2">Reports</th>
@@ -201,17 +233,21 @@
     const deptRows = document.getElementById("deptRows");
     const buRows = document.getElementById("buRows");
     const listMsg = document.getElementById("listMsg");
+    const totalsFoot = document.getElementById("totalsFoot");
+    const footAmount = document.getElementById("footAmount");
 
     const expForm = document.getElementById("expForm");
     const formMsg = document.getElementById("formMsg");
 
     const q = document.getElementById("q");
+    const clearQ = document.getElementById("clearQ");
     const fDept = document.getElementById("fDept");
     const fBU = document.getElementById("fBU");
     const fCat = document.getElementById("fCat");
     const fStatus = document.getElementById("fStatus");
     const fFrom = document.getElementById("fFrom");
     const fTo = document.getElementById("fTo");
+    const resetFiltersBtn = document.getElementById("resetFilters");
 
     const kpiTotal = document.getElementById("kpiTotal");
     const kpiReimb = document.getElementById("kpiReimb");
@@ -219,18 +255,25 @@
     const kpiPending = document.getElementById("kpiPending");
     const kpiAvgEmp = document.getElementById("kpiAvgEmp");
 
+    const exportCSVBtn = document.getElementById("exportCSVBtn");
+    const approveAllBtn = document.getElementById("approveAllBtn");
+
     /* ---------- Helpers ---------- */
-    function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2"; c.appendChild(el); return c; }
+    function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2 align-top"; c.appendChild(el); return c; }
     function input(v, cls = "w-32") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
     function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 1; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
     function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
     function money(n, cur) { const v = Number(n || 0); return (cur || "INR") + " " + v.toLocaleString(undefined, { maximumFractionDigits: 2 }); }
+    function parseDateSafe(d) { const x = new Date(d); return isNaN(x) ? null : x; }
     function withinDate(d) {
-        const v = new Date(d).setHours(0, 0, 0, 0);
-        const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null;
-        const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null;
-        if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true;
+        const v = parseDateSafe(d); if (!v) return false;
+        const f1 = fFrom.value ? parseDateSafe(fFrom.value) : null;
+        const f2 = fTo.value ? parseDateSafe(fTo.value) : null;
+        if (f1 && v < new Date(f1.setHours(0, 0, 0, 0))) return false;
+        if (f2 && v > new Date(f2.setHours(23, 59, 59, 999))) return false;
+        return true;
     }
+    const debounce = (fn, wait = 300) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); } };
 
     /* ---------- Filtering ---------- */
     function filtered() {
@@ -259,7 +302,8 @@
         const pend = data.filter(r => r.status === "Pending").length;
         const byEmp = {};
         data.forEach(r => { byEmp[r.employee] = (byEmp[r.employee] || 0) + Number(r.amount || 0); });
-        const avg = Object.keys(byEmp).length ? (Object.values(byEmp).reduce((a, b) => a + b, 0) / Object.keys(byEmp).length) : 0;
+        const empCount = Object.keys(byEmp).length;
+        const avg = empCount ? (Object.values(byEmp).reduce((a, b) => a + b, 0) / empCount) : 0;
 
         const cur = data[0]?.currency || "INR";
         kpiTotal.textContent = money(tot, cur);
@@ -267,6 +311,9 @@
         kpiNonReimb.textContent = money(non, cur);
         kpiPending.textContent = String(pend);
         kpiAvgEmp.textContent = money(avg, cur);
+
+        // Footer total
+        footAmount.textContent = money(tot, cur);
     }
 
     /* ---------- Summaries ---------- */
@@ -312,7 +359,7 @@
             const empI = input(r.employee, "w-44");
             const depI = input(r.department, "w-36");
             const buI = input(r.bu, "w-36");
-            const dateI = input(r.date, "w-32"); dateI.type = "date";
+            const dateI = input(r.date, "w-36"); dateI.type = "date";
             const catI = input(r.category, "w-32");
             const amtI = input(r.amount, "w-28"); amtI.type = "number"; amtI.step = "0.01"; amtI.min = 0;
             const curI = input(r.currency || cur, "w-20");
@@ -353,8 +400,7 @@
                 r.status = statusS.value;
                 r.notes = notesT.value;
                 persist(); refresh();
-                listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
-                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+                listFlash("Saved ✓", true);
             }
             saveBtn.addEventListener("click", save);
             approveBtn.addEventListener("click", () => { statusS.value = "Approved"; save(); });
@@ -367,8 +413,14 @@
         renderSummary(buRows, buildSummary(data, "bu"), cur);
 
         listMsg.textContent = data.length ? "" : "No expenses.";
+        totalsFoot.style.display = data.length ? "" : "none";
     }
     function refresh() { load(); }
+    function listFlash(msg, ok = true) {
+        listMsg.textContent = msg;
+        listMsg.className = "mt-3 text-sm " + (ok ? "text-emerald-700" : "text-rose-700");
+        setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+    }
 
     /* ---------- Create (dummy) ---------- */
     expForm.addEventListener("submit", (e) => {
@@ -394,8 +446,75 @@
         setTimeout(() => { formMsg.textContent = ""; formMsg.className = "text-sm text-slate-600"; }, 1500);
     }
 
-    /* ---------- Live filters + init ---------- */
-    [q, fDept, fBU, fCat, fStatus, fFrom, fTo].forEach(el => el.addEventListener("input", load));
+    /* ---------- Toolbar actions ---------- */
+    approveAllBtn.addEventListener("click", () => {
+        let changed = 0;
+        STORE.forEach(r => { if (r.status === "Pending") { r.status = "Approved"; changed++; } });
+        persist(); refresh();
+        listFlash(changed ? `Approved ${changed} pending report(s) ✓` : "No pending items", !!changed);
+    });
+
+    exportCSVBtn.addEventListener("click", () => {
+        const data = filtered();
+        const cur = data[0]?.currency || "INR";
+        // Main items
+        downloadCSV("expenses.csv", [
+            ["Employee", "Department", "BU", "Date", "Category", "Amount", "Currency", "Reimbursable", "Status", "Notes"],
+            ...data.map(r => [r.employee, r.department, r.bu, r.date, r.category, String(r.amount), r.currency, r.reimb ? "Yes" : "No", r.status, (r.notes || "")])
+        ]);
+        // Dept summary
+        const dsum = buildSummary(data, "department");
+        downloadCSV("expenses_by_department.csv", [
+            ["Department", "Reports", "Total", "Reimbursable", "Non-reimb.", "Approved", "Pending"],
+            ...Object.entries(dsum).map(([k, v]) => [k, v.count, v.total, v.reimb, v.non, v.approved, v.pending])
+        ]);
+        // BU summary
+        const bsum = buildSummary(data, "bu");
+        downloadCSV("expenses_by_bu.csv", [
+            ["BU", "Reports", "Total", "Reimbursable", "Non-reimb.", "Approved", "Pending"],
+            ...Object.entries(bsum).map(([k, v]) => [k, v.count, v.total, v.reimb, v.non, v.approved, v.pending])
+        ]);
+        listFlash(`Exported CSVs (currency ${cur}) ✓`, true);
+    });
+
+    function downloadCSV(filename, rows) {
+        const escape = (v) => {
+            const s = String(v ?? "");
+            return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const csv = rows.map(r => r.map(escape).join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    /* ---------- Search, filters, init ---------- */
+    const debouncedLoad = debounce(load, 250);
+    [fDept, fBU, fCat, fStatus, fFrom, fTo].forEach(el => el.addEventListener("input", load));
+    q.addEventListener("input", () => { clearQ.classList.toggle("hidden", !q.value.trim()); debouncedLoad(); });
+    clearQ.addEventListener("click", () => { q.value = ""; clearQ.classList.add("hidden"); load(); });
+    resetFiltersBtn.addEventListener("click", () => {
+        q.value = ""; clearQ.classList.add("hidden");
+        fDept.value = ""; fBU.value = ""; fCat.value = ""; fStatus.value = "";
+        fFrom.value = ""; fTo.value = "";
+        load();
+    });
+
     load();
 </script>
+
+<style>
+    /* compact rows for density */
+    #rows td,
+    #deptRows td,
+    #buRows td {
+        padding-top: .55rem;
+        padding-bottom: .55rem;
+    }
+
+    thead.sticky {
+        box-shadow: 0 1px 0 0 rgba(15, 23, 42, .06);
+    }
+</style>
 {% endblock %}

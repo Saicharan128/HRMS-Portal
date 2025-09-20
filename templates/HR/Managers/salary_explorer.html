@@ -1,15 +1,17 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-money-bill-trend-up mr-2"></i> Salary Explorer
             </h1>
-            <p class="text-slate-600 text-sm">Compare salary benchmarks and analyze pay structures.</p>
+            <p class="text-slate-600 text-xs sm:text-sm">Compare salary benchmarks and analyze pay structures.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <button id="exportAnalysisBtn"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-download mr-1"></i> Export Analysis
@@ -19,39 +21,41 @@
                 <i class="fa-solid fa-chart-line mr-1"></i> Benchmark Tool
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
     </div>
 
     <!-- Key Metrics Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="text-sm text-slate-500"><i class="fa-solid fa-dollar-sign mr-1"></i> Avg Salary</div>
-            <div id="avgSalary" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div class="text-xs sm:text-sm text-slate-500"><i class="fa-solid fa-dollar-sign mr-1"></i> Avg Salary</div>
+            <div id="avgSalary" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">-</div>
             <div class="text-xs text-green-600 mt-1">↑ 5.2% vs market</div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="text-sm text-slate-500"><i class="fa-solid fa-chart-line mr-1"></i> Median Salary</div>
-            <div id="medianSalary" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div class="text-xs sm:text-sm text-slate-500"><i class="fa-solid fa-chart-line mr-1"></i> Median Salary
+            </div>
+            <div id="medianSalary" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">-</div>
             <div class="text-xs text-blue-600 mt-1">Market aligned</div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="text-sm text-slate-500"><i class="fa-solid fa-balance-scale mr-1"></i> Pay Equity Score</div>
-            <div id="equityScore" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div class="text-xs sm:text-sm text-slate-500"><i class="fa-solid fa-balance-scale mr-1"></i> Pay Equity
+                Score</div>
+            <div id="equityScore" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">-</div>
             <div class="text-xs text-green-600 mt-1">Within range</div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <div class="text-sm text-slate-500"><i class="fa-solid fa-trophy mr-1"></i> Top Quartile</div>
-            <div id="topQuartile" class="mt-1 text-2xl font-semibold text-slate-800">-</div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div class="text-xs sm:text-sm text-slate-500"><i class="fa-solid fa-trophy mr-1"></i> Top Quartile</div>
+            <div id="topQuartile" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">-</div>
             <div class="text-xs text-slate-600 mt-1">High performers</div>
         </div>
     </div>
 
     <!-- Analysis Controls -->
     <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
-        <div class="flex flex-wrap items-center gap-4">
+        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-slate-700">Analysis Type:</label>
                 <select id="analysisType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
@@ -95,18 +99,19 @@
                     <option value="remote">Remote</option>
                 </select>
             </div>
-            <button id="refreshAnalysis" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+            <button id="refreshAnalysis"
+                class="ml-auto px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
                 <i class="fa-solid fa-rotate mr-1"></i> Refresh
             </button>
         </div>
     </div>
 
     <!-- Main Analysis Dashboard -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
         <!-- Salary Distribution Chart -->
-        <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">
+        <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-chart-bar mr-2"></i> Salary Distribution
                 </h3>
                 <div class="flex items-center gap-2">
@@ -120,17 +125,17 @@
                     </button>
                 </div>
             </div>
-            <div class="relative h-80">
+            <div class="relative h-64 sm:h-80">
                 <canvas id="salaryChart"></canvas>
             </div>
         </div>
 
         <!-- Market Comparison -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                 <i class="fa-solid fa-bullseye mr-2"></i> Market Position
             </h3>
-            <div class="space-y-4">
+            <div class="space-y-3 sm:space-y-4">
                 <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
                     <div>
                         <div class="text-sm font-medium text-slate-800">25th Percentile</div>
@@ -164,23 +169,21 @@
     </div>
 
     <!-- Department Comparison & Pay Equity -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
         <!-- Department Comparison -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                 <i class="fa-solid fa-building mr-2"></i> Department Analysis
             </h3>
-            <div class="space-y-3" id="departmentAnalysis">
-                <!-- Department data will be populated here -->
-            </div>
+            <div class="space-y-2 sm:space-y-3" id="departmentAnalysis"></div>
         </div>
 
         <!-- Pay Equity Analysis -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                 <i class="fa-solid fa-balance-scale mr-2"></i> Pay Equity Analysis
             </h3>
-            <div class="space-y-4">
+            <div class="space-y-3 sm:space-y-4">
                 <div class="p-3 rounded-lg bg-green-50">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm font-medium text-slate-800">Gender Pay Gap</span>
@@ -189,63 +192,64 @@
                     <div class="w-full bg-green-200 rounded-full h-2">
                         <div class="bg-green-500 h-2 rounded-full" style="width: 97.7%"></div>
                     </div>
-                    <div class="text-xs text-slate-600 mt-1">Within acceptable range (< 5%)</div>
-                    </div>
+                    <div class="text-[11px] sm:text-xs text-slate-600 mt-1">Within acceptable range (&lt; 5%)</div>
+                </div>
 
-                    <div class="p-3 rounded-lg bg-yellow-50">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-slate-800">Experience Gap</span>
-                            <span class="text-sm font-bold text-yellow-600">7.1%</span>
-                        </div>
-                        <div class="w-full bg-yellow-200 rounded-full h-2">
-                            <div class="bg-yellow-500 h-2 rounded-full" style="width: 92.9%"></div>
-                        </div>
-                        <div class="text-xs text-slate-600 mt-1">Review recommended</div>
+                <div class="p-3 rounded-lg bg-yellow-50">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-slate-800">Experience Gap</span>
+                        <span class="text-sm font-bold text-yellow-600">7.1%</span>
                     </div>
+                    <div class="w-full bg-yellow-200 rounded-full h-2">
+                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 92.9%"></div>
+                    </div>
+                    <div class="text-[11px] sm:text-xs text-slate-600 mt-1">Review recommended</div>
+                </div>
 
-                    <div class="p-3 rounded-lg bg-blue-50">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-slate-800">Department Variance</span>
-                            <span class="text-sm font-bold text-blue-600">4.8%</span>
-                        </div>
-                        <div class="w-full bg-blue-200 rounded-full h-2">
-                            <div class="bg-blue-500 h-2 rounded-full" style="width: 95.2%"></div>
-                        </div>
-                        <div class="text-xs text-slate-600 mt-1">Good alignment across teams</div>
+                <div class="p-3 rounded-lg bg-blue-50">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-slate-800">Department Variance</span>
+                        <span class="text-sm font-bold text-blue-600">4.8%</span>
                     </div>
+                    <div class="w-full bg-blue-200 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: 95.2%"></div>
+                    </div>
+                    <div class="text-[11px] sm:text-xs text-slate-600 mt-1">Good alignment across teams</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Benchmarking Table -->
+    <div class="rounded-2xl border border-slate-200 bg-white">
+        <div class="p-4 sm:p-6 border-b border-slate-200">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h2 class="text-base sm:text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-table mr-2"></i> Position Benchmarks
+                </h2>
+                <div class="flex flex-wrap items-center gap-2">
+                    <input id="searchPositions" type="text" placeholder="Search positions..."
+                        class="w-full sm:w-auto rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                    <select id="benchmarkView" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <option value="all">All Positions</option>
+                        <option value="outdated">Need Review</option>
+                        <option value="competitive">Competitive</option>
+                        <option value="below-market">Below Market</option>
+                    </select>
                 </div>
             </div>
         </div>
 
-        <!-- Salary Benchmarking Table -->
-        <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="p-6 border-b border-slate-200">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        <i class="fa-solid fa-table mr-2"></i> Position Benchmarks
-                    </h2>
-                    <div class="flex items-center gap-2">
-                        <input id="searchPositions" type="text" placeholder="Search positions..."
-                            class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-                        <select id="benchmarkView" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                            <option value="all">All Positions</option>
-                            <option value="outdated">Need Review</option>
-                            <option value="competitive">Competitive</option>
-                            <option value="below-market">Below Market</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+        <!-- Loading State -->
+        <div id="benchmarkLoadingState" class="p-8 text-center">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
+            <p class="mt-2 text-sm text-slate-600">Loading benchmark data...</p>
+        </div>
 
-            <!-- Loading State -->
-            <div id="benchmarkLoadingState" class="p-8 text-center">
-                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
-                <p class="mt-2 text-sm text-slate-600">Loading benchmark data...</p>
-            </div>
-
-            <!-- Benchmarks Table -->
-            <div id="benchmarksTable" class="hidden">
-                <div class="overflow-x-auto">
+        <!-- Benchmarks Table -->
+        <div id="benchmarksTable" class="hidden">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
+                <div class="min-w-[920px] sm:min-w-0 px-3 sm:px-0">
                     <table class="min-w-full text-sm">
                         <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
@@ -259,9 +263,7 @@
                                 <th class="px-6 py-3 text-left font-medium text-slate-700">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="benchmarksTableBody" class="divide-y divide-slate-200">
-                            <!-- Rows will be populated here -->
-                        </tbody>
+                        <tbody id="benchmarksTableBody" class="divide-y divide-slate-200"></tbody>
                     </table>
                 </div>
             </div>
@@ -271,11 +273,11 @@
     <!-- Benchmark Tool Modal -->
     <div id="benchmarkToolModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
         <div class="fixed inset-0 overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4">
+            <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
                 <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <div class="p-6 border-b border-slate-200">
+                    <div class="p-4 sm:p-6 border-b border-slate-200">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-slate-800">
+                            <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                                 <i class="fa-solid fa-chart-line mr-2"></i> Salary Benchmark Tool
                             </h3>
                             <button id="closeBenchmarkModal" class="text-slate-400 hover:text-slate-600">
@@ -284,8 +286,8 @@
                         </div>
                     </div>
 
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="p-4 sm:p-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             <!-- Position Details -->
                             <div class="space-y-4">
                                 <h4 class="font-medium text-slate-800">Position Details</h4>
@@ -296,7 +298,7 @@
                                         class="w-full rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">Department</label>
                                         <select id="benchmarkDepartment"
@@ -323,7 +325,7 @@
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
                                         <select id="benchmarkLocation"
@@ -365,16 +367,16 @@
                                     <!-- Salary Range Card -->
                                     <div class="p-4 rounded-lg border border-slate-200 bg-slate-50">
                                         <h5 class="font-medium text-slate-800 mb-3">Recommended Salary Range</h5>
-                                        <div class="grid grid-cols-2 gap-4 text-center">
+                                        <div class="grid grid-cols-2 gap-3 text-center">
                                             <div class="p-3 rounded bg-white">
-                                                <div class="text-xs text-slate-500 mb-1">Minimum</div>
-                                                <div id="benchmarkMin" class="text-lg font-bold text-slate-800">$75,000
-                                                </div>
+                                                <div class="text-[11px] sm:text-xs text-slate-500 mb-1">Minimum</div>
+                                                <div id="benchmarkMin"
+                                                    class="text-base sm:text-lg font-bold text-slate-800">$75,000</div>
                                             </div>
                                             <div class="p-3 rounded bg-white">
-                                                <div class="text-xs text-slate-500 mb-1">Maximum</div>
-                                                <div id="benchmarkMax" class="text-lg font-bold text-slate-800">$95,000
-                                                </div>
+                                                <div class="text-[11px] sm:text-xs text-slate-500 mb-1">Maximum</div>
+                                                <div id="benchmarkMax"
+                                                    class="text-base sm:text-lg font-bold text-slate-800">$95,000</div>
                                             </div>
                                         </div>
                                     </div>
@@ -383,21 +385,17 @@
                                     <div class="p-4 rounded-lg border border-slate-200">
                                         <h5 class="font-medium text-slate-800 mb-3">Market Percentiles</h5>
                                         <div class="space-y-2">
-                                            <div class="flex justify-between">
-                                                <span class="text-sm">25th Percentile:</span>
-                                                <span class="font-medium">$68,000</span>
+                                            <div class="flex justify-between text-sm">
+                                                <span>25th Percentile:</span><span class="font-medium">$68,000</span>
                                             </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-sm">50th Percentile:</span>
-                                                <span class="font-medium">$82,000</span>
+                                            <div class="flex justify-between text-sm">
+                                                <span>50th Percentile:</span><span class="font-medium">$82,000</span>
                                             </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-sm">75th Percentile:</span>
-                                                <span class="font-medium">$98,000</span>
+                                            <div class="flex justify-between text-sm">
+                                                <span>75th Percentile:</span><span class="font-medium">$98,000</span>
                                             </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-sm">90th Percentile:</span>
-                                                <span class="font-medium">$115,000</span>
+                                            <div class="flex justify-between text-sm">
+                                                <span>90th Percentile:</span><span class="font-medium">$115,000</span>
                                             </div>
                                         </div>
                                     </div>
@@ -406,27 +404,23 @@
                                     <div class="p-4 rounded-lg border border-slate-200">
                                         <h5 class="font-medium text-slate-800 mb-3">Data Sources</h5>
                                         <div class="space-y-2 text-sm">
-                                            <div class="flex items-center gap-2">
-                                                <i class="fa-solid fa-check text-green-500"></i>
-                                                <span>Glassdoor (1,247 data points)</span>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <i class="fa-solid fa-check text-green-500"></i>
-                                                <span>PayScale (892 data points)</span>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <i class="fa-solid fa-check text-green-500"></i>
-                                                <span>Indeed (543 data points)</span>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <i class="fa-solid fa-check text-green-500"></i>
-                                                <span>LinkedIn (376 data points)</span>
-                                            </div>
+                                            <div class="flex items-center gap-2"><i
+                                                    class="fa-solid fa-check text-green-500"></i><span>Glassdoor (1,247
+                                                    data points)</span></div>
+                                            <div class="flex items-center gap-2"><i
+                                                    class="fa-solid fa-check text-green-500"></i><span>PayScale (892
+                                                    data points)</span></div>
+                                            <div class="flex items-center gap-2"><i
+                                                    class="fa-solid fa-check text-green-500"></i><span>Indeed (543 data
+                                                    points)</span></div>
+                                            <div class="flex items-center gap-2"><i
+                                                    class="fa-solid fa-check text-green-500"></i><span>LinkedIn (376
+                                                    data points)</span></div>
                                         </div>
                                     </div>
 
                                     <!-- Action Buttons -->
-                                    <div class="flex gap-3">
+                                    <div class="flex flex-col sm:flex-row gap-3">
                                         <button id="saveBenchmarkBtn"
                                             class="flex-1 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">
                                             <i class="fa-solid fa-save mr-1"></i> Save Analysis
@@ -455,7 +449,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> <!-- /modal card -->
             </div>
         </div>
     </div>
@@ -935,4 +929,4 @@
             document.head.appendChild(script);
         }
     </script>
-    {% endblock %}
+{% endblock %}

@@ -305,7 +305,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ----  Data ----
+    // ---- Data ----
     const SECTIONS = [
         { id: 1, name: 'Section 80C', code: '80C', limit: 150000, carryover: 'No', proof: 'Investment Receipts', status: 'active' },
         { id: 2, name: 'Section 80D (Self)', code: '80D', limit: 25000, carryover: 'No', proof: 'Health Insurance', status: 'active' },
@@ -364,6 +364,7 @@
         document.getElementById('btnSync').addEventListener('click', () => alert('🔁 Payroll recomputed ()'));
         document.getElementById('btnRollback').addEventListener('click', () => alert('↩️ Rolled back ()'));
         document.getElementById('stSave').addEventListener('click', () => alert('✅ Settings saved'));
+        document.getElementById('fyPicker').addEventListener('change', () => alert('🔁 Switched FY ()'));
 
         document.getElementById('secSearch').addEventListener('input', renderSections);
         document.getElementById('secStatus').addEventListener('change', renderSections);
@@ -381,6 +382,7 @@
         const withLimits = SECTIONS.filter(x => x.limit !== 'Rule-based').length;
         const proofs = PROOFS.length;
         const inactive = SECTIONS.filter(x => x.status === 'inactive').length + PROOFS.filter(x => x.status === 'inactive').length;
+
         document.getElementById('kpiSections').textContent = sections;
         document.getElementById('kpiLimits').textContent = withLimits;
         document.getElementById('kpiProofs').textContent = proofs;
@@ -399,9 +401,22 @@
             type: 'bar',
             data: {
                 labels: ['Sections', 'With Limits', 'Proof Types', 'Inactive'],
-                datasets: [{ label: 'Count', data: [SECTIONS.length, SECTIONS.filter(x => x.limit !== 'Rule-based').length, PROOFS.length, Number(document.getElementById('kpiInactive').textContent) || 0] }]
+                datasets: [{
+                    label: 'Count',
+                    data: [
+                        SECTIONS.length,
+                        SECTIONS.filter(x => x.limit !== 'Rule-based').length,
+                        PROOFS.length,
+                        Number(document.getElementById('kpiInactive').textContent || 0)
+                    ]
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                animation: false,
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
         });
 
         const counts = {
@@ -409,14 +424,19 @@
             inactive: SECTIONS.filter(x => x.status === 'inactive').length + PROOFS.filter(x => x.status === 'inactive').length
         };
         const ctx2 = document.getElementById('mixChart').getContext('2d');
-        if (_mixChart) _mixChart.destroy();
+        if (_mixChart) _kpiChart && _mixChart.destroy();
         _mixChart = new Chart(ctx2, {
             type: 'doughnut',
             data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts) }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } }, animation: false }
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '65%',
+                plugins: { legend: { display: false } }, animation: false
+            }
         });
         document.getElementById('mixLegend').innerHTML =
-            Object.entries(counts).map(([k, v]) => `<div class="flex items-center justify-between text-sm"><span class="capitalize">${k}</span><span>${v}</span></div>`).join('');
+            Object.entries(counts).map(([k, v]) =>
+                `<div class="flex items-center justify-between text-sm"><span class="capitalize">${k}</span><span>${v}</span></div>`
+            ).join('');
     }
 
     // ---- Sections ----
@@ -430,26 +450,26 @@
         document.getElementById('secRows').innerHTML = rows.map(rowSection).join('') || emptyRow(7);
     }
     function rowSection(r) {
-        const limit = typeof r.limit === 'number' ? `₹${(r.limit).toLocaleString('en-IN')}` : r.limit;
+        const limit = typeof r.limit === 'number' ? `₹${Number(r.limit).toLocaleString('en-IN')}` : r.limit;
         return `<tr class="border-b last:border-0">
-    <td class="py-2 pr-4">${r.name}</td>
-    <td class="py-2 pr-4">${r.code}</td>
-    <td class="py-2 pr-4">${limit}</td>
-    <td class="py-2 pr-4">${r.carryover}</td>
-    <td class="py-2 pr-4">${r.proof}</td>
-    <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
-    <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.code} ()')">
-        <i class="fa-solid fa-pen mr-1"></i> Edit
-      </button>
-    </td>
-  </tr>`;
+      <td class="py-2 pr-4">${r.name}</td>
+      <td class="py-2 pr-4">${r.code}</td>
+      <td class="py-2 pr-4">${limit}</td>
+      <td class="py-2 pr-4">${r.carryover}</td>
+      <td class="py-2 pr-4">${r.proof}</td>
+      <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
+      <td class="py-2 pr-4">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.code} ()')">
+          <i class="fa-solid fa-pen mr-1"></i> Edit
+        </button>
+      </td>
+    </tr>`;
     }
 
     // ---- Proof Types ----
     function renderProofs() {
         const q = (document.getElementById('proofSearch').value || '').toLowerCase();
-        const st = document.getElementById('proofStatus').value;
+        const st = document.getElementById('proofStatus').value; // all | mandatory | optional | inactive
         const rows = PROOFS
             .filter(r => st === 'all' ? true : (st === 'inactive' ? r.status === 'inactive' : r.req.toLowerCase() === st))
             .filter(r => r.name.toLowerCase().includes(q) || (r.mime || '').toLowerCase().includes(q))
@@ -458,91 +478,101 @@
     }
     function rowProof(r) {
         return `<tr class="border-b last:border-0">
-    <td class="py-2 pr-4">${r.name}</td>
-    <td class="py-2 pr-4">${r.mime}</td>
-    <td class="py-2 pr-4">${r.max}</td>
-    <td class="py-2 pr-4">${r.validity}</td>
-    <td class="py-2 pr-4">${badgeLite(r.req)}</td>
-    <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
-    <td class="py-2 pr-4">
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} ()')">
-        <i class="fa-solid fa-pen mr-1"></i> Edit
-      </button>
-    </td>
-  </tr>`;
+      <td class="py-2 pr-4">${r.name}</td>
+      <td class="py-2 pr-4">${r.mime}</td>
+      <td class="py-2 pr-4">${r.max}</td>
+      <td class="py-2 pr-4">${r.validity}</td>
+      <td class="py-2 pr-4">${badgeLite(r.req)}</td>
+      <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
+      <td class="py-2 pr-4">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} ()')">
+          <i class="fa-solid fa-pen mr-1"></i> Edit
+        </button>
+      </td>
+    </tr>`;
     }
 
     // ---- History ----
     function renderHistory() {
         document.getElementById('histRows').innerHTML = HISTORY.map(h => `
-    <tr class="border-b last:border-0">
-      <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
-      <td class="py-2 pr-4">${h.type}</td>
-      <td class="py-2 pr-4">${h.name}</td>
-      <td class="py-2 pr-4">${h.action}</td>
-      <td class="py-2 pr-4">${h.by}</td>
-    </tr>`).join('');
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+        <td class="py-2 pr-4">${h.type}</td>
+        <td class="py-2 pr-4">${h.name}</td>
+        <td class="py-2 pr-4">${h.action}</td>
+        <td class="py-2 pr-4">${h.by}</td>
+      </tr>`).join('');
     }
 
-    // ---- Modal helpers ( only) ----
+    // ---- Modal helpers ----
     function openModal(title, body) {
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('modalBody').innerHTML = body;
         document.getElementById('editModal').classList.remove('hidden');
     }
-    function closeModal() { document.getElementById('editModal').classList.add('hidden'); }
+    function closeModal() {
+        document.getElementById('editModal').classList.add('hidden');
+    }
 
     function sectionForm() {
         return `
-    <label class="block">Section Name
-      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Section 80C">
-    </label>
-    <label class="block mt-2">Code
-      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="80C">
-    </label>
-    <label class="block mt-2">Annual Limit
-      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., 150000 or Rule-based">
-    </label>
-    <label class="block mt-2">Carryover
-      <select class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
-        <option>No</option><option>Yes (policy)</option>
-      </select>
-    </label>
-    <label class="block mt-2">Default Proof Type
-      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Investment Receipts">
-    </label>
-    <div class="mt-2"><label class="flex items-center gap-2"><input type="checkbox" checked> Active</label></div>`;
+      <label class="block">Section Name
+        <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Section 80C">
+      </label>
+      <label class="block mt-2">Code
+        <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="80C">
+      </label>
+      <label class="block mt-2">Annual Limit
+        <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., 150000 or Rule-based">
+      </label>
+      <label class="block mt-2">Carryover
+        <select class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option>No</option><option>Yes (policy)</option>
+        </select>
+      </label>
+      <label class="block mt-2">Default Proof Type
+        <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Investment Receipts">
+      </label>
+      <div class="mt-2"><label class="flex items-center gap-2"><input type="checkbox" checked> Active</label></div>`;
     }
     function proofForm() {
         return `
-    <label class="block">Proof Name
-      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Rent Receipts">
-    </label>
-    <label class="block mt-2">Allowed File Types
-      <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder=".pdf,.jpg,.png">
-    </label>
-    <label class="block mt-2">Max Size (MB)
-      <input type="number" min="1" value="5" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
-    </label>
-    <label class="block mt-2">Validity
-      <select class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
-        <option>Monthly</option><option>Quarterly</option><option>Annual</option>
-      </select>
-    </label>
-    <label class="block mt-2">Requirement
-      <select class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
-        <option>Mandatory</option><option>Optional</option>
-      </select>
-    </label>
-    <div class="mt-2"><label class="flex items-center gap-2"><input type="checkbox" checked> Active</label></div>`;
+      <label class="block">Proof Name
+        <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., Rent Receipts">
+      </label>
+      <label class="block mt-2">Allowed File Types
+        <input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder=".pdf,.jpg,.png">
+      </label>
+      <label class="block mt-2">Max Size (MB)
+        <input type="number" min="1" value="5" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+      </label>
+      <label class="block mt-2">Validity
+        <select class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option>Monthly</option><option>Quarterly</option><option>Annual</option>
+        </select>
+      </label>
+      <label class="block mt-2">Requirement
+        <select class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option>Mandatory</option><option>Optional</option>
+        </select>
+      </label>
+      <div class="mt-2"><label class="flex items-center gap-2"><input type="checkbox" checked> Active</label></div>`;
     }
 
     // ---- Utils ----
     function badgeStatus(s) {
-        return `<span class="px-2 py-0.5 rounded-full ${s === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'} text-xs">${s.charAt(0).toUpperCase() + s.slice(1)}</span>`;
+        const k = (s || '').toLowerCase();
+        const cls = k === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700';
+        const label = k ? k.charAt(0).toUpperCase() + k.slice(1) : '—';
+        return `<span class="px-2 py-0.5 rounded-full ${cls} text-xs">${label}</span>`;
     }
-    function badgeLite(s) { return `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs">${s}</span>`; }
-    function emptyRow(colspan) { return `<tr><td colspan="${colspan}" class="py-6 text-center text-slate-500">No records.</td></tr>`; }
+    function badgeLite(s) {
+        const label = s || '—';
+        return `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs">${label}</span>`;
+    }
+    function emptyRow(colspan) {
+        return `<tr><td colspan="${Number(colspan) || 1}" class="py-6 text-center text-slate-500">No records.</td></tr>`;
+    }
 </script>
 
 <style>

@@ -13,6 +13,10 @@
             <button id="exportBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-download mr-1"></i> Export
             </button>
+            <button id="copyLinkBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-link mr-1"></i> Copy View
+            </button>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
@@ -37,6 +41,10 @@
                 <option value="finance">Finance</option>
                 <option value="operations">Operations</option>
             </select>
+            <label class="inline-flex items-center gap-2 text-sm text-slate-700 ml-1">
+                <input id="includePTO" type="checkbox" class="rounded border-slate-300" checked>
+                Include PTO in planned hours
+            </label>
         </div>
         <div class="relative w-full md:w-96">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -121,11 +129,22 @@
     <div class="rounded-2xl border border-slate-200 bg-white mt-6">
         <div class="flex items-center justify-between p-4 border-b border-slate-200">
             <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-people-group mr-2"></i> Squads</h3>
-            <div class="flex items-center gap-2 text-sm">
+            <div class="flex items-center gap-3 text-sm">
                 <span class="text-slate-600">Color key:</span>
                 <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Under</span>
                 <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Balanced</span>
                 <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700">Over</span>
+                <div class="hidden md:flex items-center gap-2 ml-4">
+                    <label class="text-slate-600">Sort:</label>
+                    <select id="sortSelect" class="rounded-lg border border-slate-300 px-2 py-1 text-sm">
+                        <option value="name.asc">Name ↑</option>
+                        <option value="name.desc">Name ↓</option>
+                        <option value="util.desc" selected>Utilization ↓</option>
+                        <option value="util.asc">Utilization ↑</option>
+                        <option value="capacity.desc">Capacity ↓</option>
+                        <option value="capacity.asc">Capacity ↑</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="overflow-x-auto">
@@ -139,12 +158,10 @@
                         <th class="py-2 px-4">Capacity (hrs)</th>
                         <th class="py-2 px-4">Planned (hrs)</th>
                         <th class="py-2 px-4">Utilization</th>
-                        <th class="py-2 px-4 w-24"></th>
+                        <th class="py-2 px-4 w-28"></th>
                     </tr>
                 </thead>
-                <tbody id="squadRows" class="text-slate-800">
-                    <!-- injected -->
-                </tbody>
+                <tbody id="squadRows" class="text-slate-800"><!-- injected --></tbody>
             </table>
         </div>
     </div>
@@ -168,6 +185,29 @@
     </div>
 </div>
 
+<!-- Squad details modal -->
+<div id="squadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl">
+                <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-circle-info mr-2"></i> Squad
+                        Details</h3>
+                    <button id="closeSquadModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div id="squadModalBody" class="p-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toasts -->
+<div id="toast" class="fixed top-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg z-50 hidden"></div>
+
+<!-- Charts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <script>
     /* ----- Mock data ----- */
     const PEOPLE = [
@@ -190,9 +230,9 @@
         { id: 205, name: 'FinOps', manager: 'Sana M', dept: 'finance', hc: 2, capacity: 320, planned: 300 },
     ];
     const PTO = [
-        { who: 'Kai Ng', from: '2025-09-18', to: '2025-09-22' },
-        { who: 'Maya Singh', from: '2025-09-25', to: '2025-09-27' },
-        { who: 'Noah Kim', from: '2025-10-02', to: '2025-10-05' },
+        { who: 'Kai Ng', from: '2025-09-18', to: '2025-09-22', hours: 24 },
+        { who: 'Maya Singh', from: '2025-09-25', to: '2025-09-27', hours: 16 },
+        { who: 'Noah Kim', from: '2025-10-02', to: '2025-10-05', hours: 24 },
     ];
     const OPEN_ROLES = 4;
     const TTF_DAYS = 26;
@@ -204,27 +244,44 @@
 
     /* ----- State/Elements ----- */
     let filters = { period: 'this_q', dept: 'all', q: '' };
+    let sortPref = 'util.desc';
     const $ = (id) => document.getElementById(id);
 
     /* ----- Init ----- */
     document.addEventListener('DOMContentLoaded', () => {
         // Controls
-        $('periodSelect').addEventListener('change', e => { filters.period = e.target.value; renderAll(); });
-        $('deptSelect').addEventListener('change', e => { filters.dept = e.target.value; renderAll(); });
+        $('periodSelect').addEventListener('change', e => { filters.period = e.target.value; renderAll(); persistView(); });
+        $('deptSelect').addEventListener('change', e => { filters.dept = e.target.value; renderAll(); persistView(); });
+        $('includePTO').addEventListener('change', () => { renderKPIs(); drawUtil(); renderSquads(); });
+        $('sortSelect').addEventListener('change', e => { sortPref = e.target.value; renderSquads(); });
 
+        // Search
         const search = $('searchInput'), clearBtn = $('clearSearch');
-        search.addEventListener('input', debounce(() => { filters.q = search.value.trim().toLowerCase(); clearBtn.classList.toggle('hidden', !filters.q); renderSquads(); }, 250));
-        clearBtn.addEventListener('click', () => { search.value = ''; filters.q = ''; clearBtn.classList.add('hidden'); renderSquads(); });
+        search.addEventListener('input', debounce(() => {
+            filters.q = search.value.trim().toLowerCase();
+            clearBtn.classList.toggle('hidden', !filters.q);
+            renderSquads();
+            persistView();
+        }, 250));
+        clearBtn.addEventListener('click', () => {
+            search.value = ''; filters.q = ''; clearBtn.classList.add('hidden'); renderSquads(); persistView();
+        });
 
-        $('exportBtn').addEventListener('click', () => alert('✅ Export queued'));
+        // Export & copy link
+        $('exportBtn').addEventListener('click', exportCSV);
+        $('copyLinkBtn').addEventListener('click', copyViewLink);
+
+        // Modal close
+        $('closeSquadModal').addEventListener('click', closeSquadModal);
+        window.addEventListener('click', (e) => { const m = $('squadModal'); if (e.target === m) closeSquadModal(); });
 
         // Render
+        hydrateFromURL();
         renderKPIs();
         renderCharts();
         renderSquads();
         renderSidePanels();
 
-        // Load Chart.js if needed
         if (typeof Chart === 'undefined') {
             const s = document.createElement('script');
             s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
@@ -245,8 +302,9 @@
         $('kpiHCTrend').textContent = '+0%';
         $('kpiUtil').textContent = utilAvg.toFixed(0) + '%';
         $('kpiBuffer').textContent = buffer.toFixed(0) + '%';
-        $('kpiBufferBadge').textContent = utilAvg > 90 ? 'Tight' : utilAvg < 70 ? 'Under' : 'Balanced';
-        $('kpiBufferBadge').className = 'text-xs px-2 py-0.5 rounded-full ' + (utilAvg > 90 ? 'bg-red-50 text-red-700' : utilAvg < 70 ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700');
+        const tight = utilAvg > 90, under = utilAvg < 70;
+        $('kpiBufferBadge').textContent = tight ? 'Tight' : under ? 'Under' : 'Balanced';
+        $('kpiBufferBadge').className = 'text-xs px-2 py-0.5 rounded-full ' + (tight ? 'bg-red-50 text-red-700' : under ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700');
         $('kpiOpen').textContent = OPEN_ROLES;
         $('kpiTTF').textContent = TTF_DAYS + 'd';
     }
@@ -271,34 +329,34 @@
                     backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
                 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } } }
+            options: { plugins: { legend: { display: false } } }
         });
         $('compLegend').innerHTML = labels.map((l, i) => `<span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">${l} • ${values[i]}</span>`).join(' ');
     }
-
     function drawSeniority() {
         const ctx = $('seniorityChart').getContext('2d');
         const levels = ['entry', 'mid', 'senior', 'lead'];
         const byDept = groupBy(applyDept(PEOPLE), 'dept');
         const depts = Object.keys(byDept).map(capitalize);
-        const datasets = levels.map((lvl, idx) => ({
-            label: lvl,
+        const colors = ['#c7d2fe', '#93c5fd', '#86efac', '#fbcfe8'];
+        const datasets = levels.map((lvl, i) => ({
+            label: capitalize(lvl),
             data: Object.values(byDept).map(list => list.filter(p => p.level === lvl).length),
-            backgroundColor: ['#c7d2fe', '#93c5fd', '#86efac', '#fbcfe8'][idx],
-            borderWidth: 0
+            backgroundColor: colors[i]
         }));
         seniorityChart && seniorityChart.destroy();
         seniorityChart = new Chart(ctx, {
-            type: 'bar', data: { labels: depts, datasets },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+            type: 'bar',
+            data: { labels: depts, datasets },
+            options: { plugins: { legend: { position: 'bottom' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
         });
     }
-
     function drawUtil() {
         const ctx = $('utilChart').getContext('2d');
         const items = applyDeptSquads(SQUADS).slice().sort((a, b) => a.name.localeCompare(b.name));
         const labels = items.map(s => s.name);
-        const planned = items.map(s => s.planned);
+        const ptoAdj = $('includePTO').checked ? PTOHoursByDept(filters.dept) : 0;
+        const planned = items.map(s => s.planned + Math.round(ptoAdj * (s.capacity / totalCapacity(items))));
         const capacity = items.map(s => s.capacity);
         utilChart && utilChart.destroy();
         utilChart = new Chart(ctx, {
@@ -309,19 +367,33 @@
                     { label: 'Capacity', data: capacity, backgroundColor: '#10b981' }
                 ]
             },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+            options: { plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
         });
     }
 
     /* ----- Squads table ----- */
     function renderSquads() {
         const q = (filters.q || '').toLowerCase();
-        const rows = applyDeptSquads(SQUADS)
+        let list = applyDeptSquads(SQUADS)
             .filter(s => !q || s.name.toLowerCase().includes(q) || s.manager.toLowerCase().includes(q))
             .map(s => {
-                const util = Math.round((s.planned / Math.max(1, s.capacity)) * 100);
-                const pill = util > 90 ? 'bg-red-50 text-red-700' : util < 70 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
-                return `
+                const pct = Math.round((s.planned / Math.max(1, s.capacity)) * 100);
+                return { ...s, util: pct };
+            });
+
+        // sort
+        const [key, dir] = sortPref.split('.');
+        list.sort((a, b) => {
+            const av = key === 'util' ? a.util : key === 'capacity' ? a.capacity : a.name.toLowerCase();
+            const bv = key === 'util' ? b.util : key === 'capacity' ? b.capacity : b.name.toLowerCase();
+            if (av < bv) return dir === 'asc' ? -1 : 1;
+            if (av > bv) return dir === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        const rows = list.map(s => {
+            const pill = s.util > 90 ? 'bg-red-50 text-red-700' : s.util < 70 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
+            return `
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${s.name}</td>
         <td class="py-2 px-4">${s.manager}</td>
@@ -329,12 +401,22 @@
         <td class="py-2 px-4">${s.hc}</td>
         <td class="py-2 px-4">${s.capacity}</td>
         <td class="py-2 px-4">${s.planned}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${util}%</span></td>
+        <td class="py-2 px-4">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full text-xs ${pill}">${s.util}%</span>
+            <span class="h-2 w-24 bg-slate-200 rounded overflow-hidden">
+              <span class="h-2 block ${s.util > 90 ? 'bg-red-500' : s.util < 70 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width:${Math.min(100, s.util)}%"></span>
+            </span>
+          </div>
+        </td>
         <td class="py-2 px-4 text-right">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Squad details coming soon')"><i class="fa-solid fa-circle-info mr-1"></i> Details</button>
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openSquadModal(${s.id})">
+            <i class="fa-solid fa-circle-info mr-1"></i> Details
+          </button>
         </td>
       </tr>`;
-            }).join('');
+        }).join('');
+
         $('squadRows').innerHTML = rows || `<tr><td colspan="8" class="py-6 text-center text-slate-500">No squads match your filters</td></tr>`;
     }
 
@@ -363,6 +445,73 @@
         $('notesFeed').innerHTML = NOTES.map(n => `<li>${n}</li>`).join('');
     }
 
+    /* ----- Modal ----- */
+    function openSquadModal(id) {
+        const s = SQUADS.find(x => x.id === id); if (!s) return;
+        const members = sampleMembersForDept(s.dept, s.hc);
+        const body = `
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="rounded-lg bg-slate-50 p-3">
+        <div class="text-sm text-slate-600">Squad</div>
+        <div class="font-semibold text-slate-800">${s.name}</div>
+      </div>
+      <div class="rounded-lg bg-slate-50 p-3">
+        <div class="text-sm text-slate-600">Manager</div>
+        <div class="font-semibold text-slate-800">${s.manager}</div>
+      </div>
+      <div class="rounded-lg bg-slate-50 p-3">
+        <div class="text-sm text-slate-600">Capacity</div>
+        <div class="font-semibold text-slate-800">${s.capacity} hrs</div>
+      </div>
+      <div class="rounded-lg bg-slate-50 p-3">
+        <div class="text-sm text-slate-600">Planned</div>
+        <div class="font-semibold text-slate-800">${s.planned} hrs</div>
+      </div>
+    </div>
+    <div class="mt-4">
+      <div class="mb-2 font-medium text-slate-800">Members (${members.length})</div>
+      <ul class="space-y-2">
+        ${members.map(m => `<li class="flex items-center justify-between rounded border border-slate-200 p-2">
+          <span>${m.name} • <span class="text-slate-500 text-xs">${capitalize(m.level)}</span></span>
+          <span class="text-xs ${statusTone(m.status)} px-2 py-0.5 rounded-full">${labelStatus(m.status)}</span>
+        </li>`).join('')}
+      </ul>
+    </div>`;
+        $('squadModalBody').innerHTML = body;
+        $('squadModal').classList.remove('hidden');
+    }
+    function closeSquadModal() { $('squadModal').classList.add('hidden'); }
+
+    /* ----- Export / Link ----- */
+    function exportCSV() {
+        // Export visible squad rows + KPI summary at top
+        const list = Array.from(document.querySelectorAll('#squadRows tr')).length ? applyFiltersToSquads() : [];
+        const kpi = [
+            ['Headcount', $('kpiHeadcount').textContent],
+            ['Utilization Avg', $('kpiUtil').textContent],
+            ['Capacity Buffer', $('kpiBuffer').textContent],
+            ['Open Roles', $('kpiOpen').textContent]
+        ];
+        const header = 'Metric,Value\n' + kpi.map(r => r.map(csvCell).join(',')).join('\n') + '\n\n';
+        const cols = ['Squad', 'Manager', 'Dept', 'Headcount', 'Capacity', 'Planned', 'Utilization'];
+        const rows = list.map(s => [s.name, s.manager, capitalize(s.dept), s.hc, s.capacity, s.planned, s.util + '%'].map(csvCell).join(',')).join('\n');
+        const blob = new Blob([header + cols.join(',') + '\n' + rows], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `team-overview-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 300);
+        toast('Export generated');
+    }
+    function copyViewLink() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('dept', filters.dept);
+        url.searchParams.set('period', filters.period);
+        url.searchParams.set('q', filters.q || '');
+        url.searchParams.set('sort', sortPref);
+        navigator.clipboard.writeText(url.toString()).then(() => toast('View link copied')).catch(() => toast('Copy failed'));
+    }
+
     /* ----- Helpers ----- */
     function applyDept(list) { return filters.dept === 'all' ? list.slice() : list.filter(x => x.dept === filters.dept); }
     function applyDeptSquads(list) { return filters.dept === 'all' ? list.slice() : list.filter(x => x.dept === filters.dept); }
@@ -371,7 +520,8 @@
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     function labelPeriod(p) { return ({ this_q: 'This Quarter', next_q: 'Next Quarter', this_m: 'This Month' })[p] || 'This Quarter'; }
     function labelStatus(s) { return ({ active: 'Active', on_leave: 'On Leave', inactive: 'Inactive' })[s] || s; }
-    function daysFromNow(dateStr) { const d = new Date(dateStr), now = new Date(); return Math.max(0, Math.ceil((d - now) / (1000 * 60 * 60 * 24))); }
+    function statusTone(s) { return ({ active: 'bg-emerald-50 text-emerald-700', on_leave: 'bg-amber-50 text-amber-700', inactive: 'bg-slate-100 text-slate-700' })[s] || 'bg-slate-100 text-slate-700'; }
+    function daysFromNow(dateStr) { const d = new Date(dateStr), now = new Date(); return Math.max(0, Math.ceil((d - now) / 86400000)); }
     function avgUtil() {
         const items = applyDeptSquads(SQUADS);
         if (!items.length) return 0;
@@ -379,6 +529,53 @@
         return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
     function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
-</script>
+    function PTOHoursByDept(dept) {
+        const total = PTO.reduce((a, p) => a + (p.hours || 8), 0);
+        if (dept === 'all') return total;
+        // crude split: assume dept gets proportional PTO by headcount share
+        const hcAll = PEOPLE.length;
+        const hcDept = PEOPLE.filter(p => p.dept === dept).length || 1;
+        return Math.round(total * (hcDept / hcAll));
+    }
+    function totalCapacity(items) { return items.reduce((a, s) => a + s.capacity, 0) || 1; }
+    function sampleMembersForDept(dept, n) {
+        const pool = PEOPLE.filter(p => dept === 'all' ? true : p.dept === dept);
+        const out = [];
+        for (let i = 0; i < Math.min(n, pool.length); i++) out.push(pool[i]);
+        return out;
+    }
+    function csvCell(v) { return `"${String(v).replace(/"/g, '""')}"`; }
+    function toast(msg) {
+        const t = $('toast'); t.textContent = msg; t.classList.remove('hidden'); t.style.opacity = 1;
+        setTimeout(() => { t.style.opacity = 0; setTimeout(() => t.classList.add('hidden'), 300); }, 1800);
+    }
+    function applyFiltersToSquads() {
+        const q = (filters.q || '').toLowerCase();
+        let list = applyDeptSquads(SQUADS)
+            .filter(s => !q || s.name.toLowerCase().includes(q) || s.manager.toLowerCase().includes(q))
+            .map(s => ({ ...s, util: Math.round((s.planned / Math.max(1, s.capacity)) * 100) }));
+        return list;
+    }
 
+    /* ----- Persist / hydrate view via URL ----- */
+    function persistView() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('dept', filters.dept);
+        url.searchParams.set('period', filters.period);
+        url.searchParams.set('q', filters.q || '');
+        url.searchParams.set('sort', sortPref);
+        history.replaceState(null, '', url.toString());
+    }
+    function hydrateFromURL() {
+        const url = new URL(window.location.href);
+        const dept = url.searchParams.get('dept');
+        const period = url.searchParams.get('period');
+        const q = url.searchParams.get('q');
+        const sort = url.searchParams.get('sort');
+        if (dept) { filters.dept = dept; $('deptSelect').value = dept; }
+        if (period) { filters.period = period; $('periodSelect').value = period; }
+        if (q) { filters.q = q; $('searchInput').value = q; $('clearSearch').classList.toggle('hidden', !q); }
+        if (sort) { sortPref = sort; $('sortSelect').value = sort; }
+    }
+</script>
 {% endblock %}

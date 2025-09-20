@@ -1,54 +1,59 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
-                <i class="fa-solid fa-layer-group mr-2"></i> Pay Components & Deductions
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-layer-group"></i> <span class="truncate">Pay Components & Deductions</span>
             </h1>
-            <p class="text-slate-600 text-sm">Define earnings, deduction heads, and policies.</p>
+            <p class="text-slate-600 text-xs sm:text-sm">Define earnings, deduction heads, and policies.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="btnNewEarn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+            <button id="btnNewEarn"
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-plus mr-1"></i> New Earning
             </button>
-            <button id="btnNewDed" class="px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm">
+            <button id="btnNewDed"
+                class="px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-minus mr-1"></i> New Deduction
             </button>
-            <button id="btnNewPol" class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+            <button id="btnNewPol"
+                class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-scale-balanced mr-1"></i> New Policy
             </button>
             <button id="btnExport"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
                 <i class="fa-solid fa-file-arrow-down mr-1"></i> Export
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
     </div>
 
     <!-- Tabs -->
-    <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="overviewTab" class="pcd-tab active px-4 py-2 rounded-lg text-sm font-medium">
+    <div class="mb-4 sm:mb-6">
+        <div class="flex overflow-x-auto no-scrollbar space-x-1 bg-slate-100 p-1 rounded-xl">
+            <button id="overviewTab"
+                class="pcd-tab active px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-gauge-high mr-1"></i> Overview
             </button>
-            <button id="earningsTab" class="pcd-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="earningsTab" class="pcd-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-arrow-trend-up mr-1"></i> Earnings
             </button>
-            <button id="deductionsTab" class="pcd-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="deductionsTab"
+                class="pcd-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-arrow-trend-down mr-1"></i> Deductions
             </button>
-            <button id="policiesTab" class="pcd-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="policiesTab" class="pcd-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-scale-balanced mr-1"></i> Policies
             </button>
-            <button id="historyTab" class="pcd-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="historyTab" class="pcd-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-clock-rotate-left mr-1"></i> History
             </button>
-            <button id="settingsTab" class="pcd-tab px-4 py-2 rounded-lg text-sm font-medium">
+            <button id="settingsTab" class="pcd-tab px-3 sm:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 <i class="fa-solid fa-gear mr-1"></i> Settings
             </button>
         </div>
@@ -56,37 +61,37 @@
 
     <!-- Overview -->
     <section id="overviewPanel" class="pcd-panel">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- KPIs -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-slate-800">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-clipboard-list mr-2"></i> Catalog
                     </h3>
                     <span id="catalogBadge" class="px-2 py-1 text-xs rounded bg-amber-50 text-amber-700">Draft</span>
                 </div>
-                <div class="grid grid-cols-4 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Earnings</div>
-                        <div id="kpiEarn" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kpiEarn" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Deductions</div>
-                        <div id="kpiDed" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kpiDed" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Policies</div>
-                        <div id="kpiPol" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kpiPol" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Inactive</div>
-                        <div id="kpiInactive" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kpiInactive" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                 </div>
-                <div class="relative h-40 mt-4">
+                <div class="relative h-40 sm:h-48 mt-4">
                     <canvas id="overviewChart" class="absolute inset-0 w-full h-full"></canvas>
                 </div>
-                <div class="mt-4 flex items-center gap-2">
+                <div class="mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
                     <button id="btnValidate"
                         class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
                         <i class="fa-solid fa-spell-check mr-1"></i> Validate Catalog
@@ -99,24 +104,24 @@
             </div>
 
             <!-- Mix -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-slate-800">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-chart-pie mr-2"></i> Status Mix
                     </h3>
                 </div>
-                <div class="relative h-40">
+                <div class="relative h-40 sm:h-48">
                     <canvas id="mixChart" class="absolute inset-0 w-full h-full"></canvas>
                 </div>
-                <div id="mixLegend" class="mt-3 text-sm text-slate-700"></div>
+                <div id="mixLegend" class="mt-3 text-sm text-slate-700 grid grid-cols-2 gap-1 sm:block"></div>
             </div>
 
             <!-- Quick Actions -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-3">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3">
                     <i class="fa-solid fa-bolt mr-2"></i> Quick Actions
                 </h3>
-                <div class="space-y-3">
+                <div class="space-y-2 sm:space-y-3">
                     <button id="btnPreviewSlip"
                         class="w-full px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-left">
                         <i class="fa-solid fa-eye mr-2"></i> Preview sample payslip impact
@@ -136,31 +141,32 @@
 
     <!-- Earnings -->
     <section id="earningsPanel" class="pcd-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">
+        <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-arrow-trend-up mr-2"></i> Earnings Heads
                 </h3>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <input id="earnSearch" type="text" placeholder="Search name or code..."
-                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
-                    <select id="earnStatus" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-64">
+                    <select id="earnStatus"
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-auto">
                         <option value="all">All</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="text-left text-slate-500 border-b sticky top-0 bg-white">
                         <tr>
                             <th class="py-2 pr-4">Name</th>
-                            <th class="py-2 pr-4">Code</th>
+                            <th class="py-2 pr-4 hidden sm:table-cell">Code</th>
                             <th class="py-2 pr-4">Calc</th>
-                            <th class="py-2 pr-4">Taxable</th>
-                            <th class="py-2 pr-4">PF</th>
-                            <th class="py-2 pr-4">ESI</th>
+                            <th class="py-2 pr-4 hidden md:table-cell">Taxable</th>
+                            <th class="py-2 pr-4 hidden lg:table-cell">PF</th>
+                            <th class="py-2 pr-4 hidden lg:table-cell">ESI</th>
                             <th class="py-2 pr-4">Status</th>
                             <th class="py-2 pr-4">Actions</th>
                         </tr>
@@ -168,35 +174,37 @@
                     <tbody id="earnRows" class="text-slate-800"></tbody>
                 </table>
             </div>
+            <p class="mt-3 text-xs text-slate-500 md:hidden">Tip: Code/flags are condensed on small screens.</p>
         </div>
     </section>
 
     <!-- Deductions -->
     <section id="deductionsPanel" class="pcd-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">
+        <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-arrow-trend-down mr-2"></i> Deduction Heads
                 </h3>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <input id="dedSearch" type="text" placeholder="Search name or code..."
-                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
-                    <select id="dedStatus" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-64">
+                    <select id="dedStatus"
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-auto">
                         <option value="all">All</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="text-left text-slate-500 border-b sticky top-0 bg-white">
                         <tr>
                             <th class="py-2 pr-4">Name</th>
-                            <th class="py-2 pr-4">Code</th>
+                            <th class="py-2 pr-4 hidden sm:table-cell">Code</th>
                             <th class="py-2 pr-4">Calc</th>
-                            <th class="py-2 pr-4">Pre/Post Tax</th>
-                            <th class="py-2 pr-4">Cap/Limit</th>
+                            <th class="py-2 pr-4 hidden md:table-cell">Pre/Post Tax</th>
+                            <th class="py-2 pr-4 hidden lg:table-cell">Cap/Limit</th>
                             <th class="py-2 pr-4">Status</th>
                             <th class="py-2 pr-4">Actions</th>
                         </tr>
@@ -204,34 +212,36 @@
                     <tbody id="dedRows" class="text-slate-800"></tbody>
                 </table>
             </div>
+            <p class="mt-3 text-xs text-slate-500 md:hidden">Tip: Code/tax/cap are condensed on small screens.</p>
         </div>
     </section>
 
     <!-- Policies -->
     <section id="policiesPanel" class="pcd-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">
+        <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-scale-balanced mr-2"></i> Policies
                 </h3>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <input id="polSearch" type="text" placeholder="Search policy..."
-                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
-                    <select id="polStatus" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-64">
+                    <select id="polStatus"
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm w-full sm:w-auto">
                         <option value="all">All</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
                 </div>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="text-left text-slate-500 border-b sticky top-0 bg-white">
                         <tr>
                             <th class="py-2 pr-4">Policy</th>
-                            <th class="py-2 pr-4">Scope</th>
+                            <th class="py-2 pr-4 hidden sm:table-cell">Scope</th>
                             <th class="py-2 pr-4">Rule</th>
-                            <th class="py-2 pr-4">Effective</th>
+                            <th class="py-2 pr-4 hidden md:table-cell">Effective</th>
                             <th class="py-2 pr-4">Status</th>
                             <th class="py-2 pr-4">Actions</th>
                         </tr>
@@ -239,27 +249,28 @@
                     <tbody id="polRows" class="text-slate-800"></tbody>
                 </table>
             </div>
+            <p class="mt-3 text-xs text-slate-500 sm:hidden">Tip: Scope/Effective are shown inside the Policy cell.</p>
         </div>
     </section>
 
     <!-- History -->
     <section id="historyPanel" class="pcd-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-table mr-2"></i> Change History
                 </h3>
-                <div class="text-sm text-slate-600">Last 10 edits</div>
+                <div class="text-xs sm:text-sm text-slate-600">Last 10 edits</div>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-3 sm:mx-0">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="text-left text-slate-500 border-b sticky top-0 bg-white">
                         <tr>
                             <th class="py-2 pr-4">Time</th>
                             <th class="py-2 pr-4">Type</th>
                             <th class="py-2 pr-4">Name</th>
                             <th class="py-2 pr-4">Action</th>
-                            <th class="py-2 pr-4">By</th>
+                            <th class="py-2 pr-4 hidden sm:table-cell">By</th>
                         </tr>
                     </thead>
                     <tbody id="histRows" class="text-slate-800"></tbody>
@@ -270,35 +281,35 @@
 
     <!-- Settings -->
     <section id="settingsPanel" class="pcd-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-lock mr-2"></i> Defaults
                 </h3>
                 <div class="space-y-2 text-sm">
-                    <label class="flex items-center gap-2"><input id="stRound" type="checkbox" checked> Round to nearest
-                        ₹1</label>
-                    <label class="flex items-center gap-2"><input id="stProrate" type="checkbox" checked> Prorate by
-                        DOJ/DOL</label>
-                    <label class="flex items-center gap-2"><input id="stBackpay" type="checkbox"> Allow backpay
-                        adjustments</label>
+                    <label class="flex items-center gap-2"><input id="stRound" type="checkbox" checked class="h-4 w-4">
+                        Round to nearest ₹1</label>
+                    <label class="flex items-center gap-2"><input id="stProrate" type="checkbox" checked
+                            class="h-4 w-4"> Prorate by DOJ/DOL</label>
+                    <label class="flex items-center gap-2"><input id="stBackpay" type="checkbox" class="h-4 w-4"> Allow
+                        backpay adjustments</label>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-shield-halved mr-2"></i> Compliance
                 </h3>
                 <div class="space-y-2 text-sm">
-                    <label class="flex items-center gap-2"><input id="stPF" type="checkbox" checked> Enforce PF
-                        statutory limits</label>
-                    <label class="flex items-center gap-2"><input id="stESI" type="checkbox" checked> Enforce ESI
-                        thresholds</label>
-                    <label class="flex items-center gap-2"><input id="stPT" type="checkbox"> Enable Professional
-                        Tax</label>
+                    <label class="flex items-center gap-2"><input id="stPF" type="checkbox" checked class="h-4 w-4">
+                        Enforce PF statutory limits</label>
+                    <label class="flex items-center gap-2"><input id="stESI" type="checkbox" checked class="h-4 w-4">
+                        Enforce ESI thresholds</label>
+                    <label class="flex items-center gap-2"><input id="stPT" type="checkbox" class="h-4 w-4"> Enable
+                        Professional Tax</label>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4">
                     <i class="fa-solid fa-clock mr-2"></i> Versioning
                 </h3>
                 <div class="space-y-2 text-sm">
@@ -306,7 +317,7 @@
                         <input id="stEff" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
                     </label>
                     <button id="stSave"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm mt-2">
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm mt-2 w-full sm:w-auto">
                         <i class="fa-solid fa-floppy-disk mr-1"></i> Save
                     </button>
                 </div>
@@ -315,24 +326,23 @@
     </section>
 </div>
 
-<!-- Modal (New Head/Policy) -  -->
-<div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<!-- Modal (New Head/Policy) -->
+<div id="editModal" class="fixed inset-0 bg-black/50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
-                    <h3 id="modalTitle" class="text-lg font-semibold text-slate-800">New</h3>
-                    <button id="closeModal" class="text-slate-400 hover:text-slate-600">
-                        <i class="fa-solid fa-times text-xl"></i>
+        <div class="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
+            <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-w-none">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="modalTitle" class="text-base sm:text-lg font-semibold text-slate-800">New</h3>
+                    <button id="closeModal" class="text-slate-400 hover:text-slate-600 p-2 -mr-2 sm:mr-0">
+                        <i class="fa-solid fa-times text-lg sm:text-xl"></i>
                     </button>
                 </div>
-                <div class="p-6 space-y-4 text-sm" id="modalBody">
-                    <!-- dynamic form content -->
-                </div>
-                <div class="px-6 pb-6 flex items-center justify-end gap-2">
+                <div class="p-4 sm:p-6 space-y-3 sm:space-y-4 text-sm" id="modalBody"></div>
+                <div class="px-4 sm:px-6 pb-4 sm:pb-6 flex flex-col sm:flex-row sm:items-center justify-end gap-2">
                     <button id="cancelEdit"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                    <button id="saveEdit" class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 w-full sm:w-auto">Cancel</button>
+                    <button id="saveEdit"
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 w-full sm:w-auto">
                         <i class="fa-solid fa-check mr-1"></i> Save
                     </button>
                 </div>
@@ -432,7 +442,9 @@
         const earn = EARNINGS.length;
         const ded = DEDUCTIONS.length;
         const pol = POLICIES.length;
-        const inactive = EARNINGS.filter(x => x.status === 'inactive').length + DEDUCTIONS.filter(x => x.status === 'inactive').length + POLICIES.filter(x => x.status === 'inactive').length;
+        const inactive = EARNINGS.filter(x => x.status === 'inactive').length
+            + DEDUCTIONS.filter(x => x.status === 'inactive').length
+            + POLICIES.filter(x => x.status === 'inactive').length;
         document.getElementById('kpiEarn').textContent = earn;
         document.getElementById('kpiDed').textContent = ded;
         document.getElementById('kpiPol').textContent = pol;
@@ -444,17 +456,27 @@
     }
 
     function drawCharts() {
+        const inactiveCount =
+            EARNINGS.filter(x => x.status === 'inactive').length
+            + DEDUCTIONS.filter(x => x.status === 'inactive').length
+            + POLICIES.filter(x => x.status === 'inactive').length;
+
         const ctx1 = document.getElementById('overviewChart').getContext('2d');
         if (_overviewChart) _overviewChart.destroy();
         _overviewChart = new Chart(ctx1, {
             type: 'bar',
-            data: { labels: ['Earnings', 'Deductions', 'Policies', 'Inactive'], datasets: [{ label: 'Count', data: [EARNINGS.length, DEDUCTIONS.length, POLICIES.length, document.getElementById('kpiInactive').textContent | 0] }] },
+            data: {
+                labels: ['Earnings', 'Deductions', 'Policies', 'Inactive'],
+                datasets: [{ label: 'Count', data: [EARNINGS.length, DEDUCTIONS.length, POLICIES.length, inactiveCount] }]
+            },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
 
         const counts = {
-            active: EARNINGS.filter(x => x.status === 'active').length + DEDUCTIONS.filter(x => x.status === 'active').length + POLICIES.filter(x => x.status === 'active').length,
-            inactive: EARNINGS.filter(x => x.status === 'inactive').length + DEDUCTIONS.filter(x => x.status === 'inactive').length + POLICIES.filter(x => x.status === 'inactive').length
+            active: EARNINGS.filter(x => x.status === 'active').length
+                + DEDUCTIONS.filter(x => x.status === 'active').length
+                + POLICIES.filter(x => x.status === 'active').length,
+            inactive: inactiveCount
         };
         const ctx2 = document.getElementById('mixChart').getContext('2d');
         if (_mixChart) _mixChart.destroy();
@@ -464,7 +486,8 @@
             options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } }, animation: false }
         });
         document.getElementById('mixLegend').innerHTML =
-            Object.entries(counts).map(([k, v]) => `<div class="flex items-center justify-between text-sm"><span class="capitalize">${k}</span><span>${v}</span></div>`).join('');
+            Object.entries(counts).map(([k, v]) =>
+                `<div class="flex items-center justify-between text-sm"><span class="capitalize">${k}</span><span>${v}</span></div>`).join('');
     }
 
     /* ---- Earnings ---- */
@@ -478,13 +501,17 @@
         document.getElementById('earnRows').innerHTML = rows.map(rowEarn).join('') || emptyRow(8);
     }
     function rowEarn(r) {
+        const flags = `${r.taxable ? 'Tax' : 'NoTax'} • ${r.pf ? 'PF' : 'NoPF'} • ${r.esi ? 'ESI' : 'NoESI'}`;
         return `<tr class="border-b last:border-0">
-    <td class="py-2 pr-4">${r.name}</td>
-    <td class="py-2 pr-4">${r.code}</td>
+    <td class="py-2 pr-4">
+      <div class="font-medium">${r.name}</div>
+      <div class="text-xs text-slate-500 sm:hidden">${r.code} • ${flags}</div>
+    </td>
+    <td class="py-2 pr-4 hidden sm:table-cell">${r.code}</td>
     <td class="py-2 pr-4">${r.calc}</td>
-    <td class="py-2 pr-4">${badgePlain(r.taxable ? 'Yes' : 'No')}</td>
-    <td class="py-2 pr-4">${badgePlain(r.pf ? 'Yes' : 'No')}</td>
-    <td class="py-2 pr-4">${badgePlain(r.esi ? 'Yes' : 'No')}</td>
+    <td class="py-2 pr-4 hidden md:table-cell">${badgePlain(r.taxable ? 'Yes' : 'No')}</td>
+    <td class="py-2 pr-4 hidden lg:table-cell">${badgePlain(r.pf ? 'Yes' : 'No')}</td>
+    <td class="py-2 pr-4 hidden lg:table-cell">${badgePlain(r.esi ? 'Yes' : 'No')}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
       <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} ()')">
@@ -505,12 +532,16 @@
         document.getElementById('dedRows').innerHTML = rows.map(rowDed).join('') || emptyRow(7);
     }
     function rowDed(r) {
+        const sub = `${r.code} • ${r.pretax}${r.cap ? ' • ' + r.cap : ''}`;
         return `<tr class="border-b last:border-0">
-    <td class="py-2 pr-4">${r.name}</td>
-    <td class="py-2 pr-4">${r.code}</td>
+    <td class="py-2 pr-4">
+      <div class="font-medium">${r.name}</div>
+      <div class="text-xs text-slate-500 sm:hidden">${sub}</div>
+    </td>
+    <td class="py-2 pr-4 hidden sm:table-cell">${r.code}</td>
     <td class="py-2 pr-4">${r.calc}</td>
-    <td class="py-2 pr-4">${r.pretax}</td>
-    <td class="py-2 pr-4">${r.cap}</td>
+    <td class="py-2 pr-4 hidden md:table-cell">${r.pretax}</td>
+    <td class="py-2 pr-4 hidden lg:table-cell">${r.cap}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
       <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.name} ()')">
@@ -532,10 +563,13 @@
     }
     function rowPol(r) {
         return `<tr class="border-b last:border-0">
-    <td class="py-2 pr-4">${r.policy}</td>
-    <td class="py-2 pr-4">${r.scope}</td>
+    <td class="py-2 pr-4">
+      <div class="font-medium">${r.policy}</div>
+      <div class="text-xs text-slate-500 sm:hidden">${r.scope} • Eff ${r.eff}</div>
+    </td>
+    <td class="py-2 pr-4 hidden sm:table-cell">${r.scope}</td>
     <td class="py-2 pr-4">${r.rule}</td>
-    <td class="py-2 pr-4">${r.eff}</td>
+    <td class="py-2 pr-4 hidden md:table-cell">${r.eff}</td>
     <td class="py-2 pr-4">${badgeStatus(r.status)}</td>
     <td class="py-2 pr-4">
       <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('✏️ Edit ${r.policy} ()')">
@@ -553,17 +587,21 @@
       <td class="py-2 pr-4">${h.type}</td>
       <td class="py-2 pr-4">${h.name}</td>
       <td class="py-2 pr-4">${h.action}</td>
-      <td class="py-2 pr-4">${h.by}</td>
+      <td class="py-2 pr-4 hidden sm:table-cell">${h.by}</td>
     </tr>`).join('');
     }
 
-    /* ---- Modal helpers ( only) ---- */
+    /* ---- Modal helpers ---- */
     function openModal(title, bodyHTML) {
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('modalBody').innerHTML = bodyHTML;
         document.getElementById('editModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
     }
-    function closeModal() { document.getElementById('editModal').classList.add('hidden'); }
+    function closeModal() {
+        document.getElementById('editModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
 
     function earningForm() {
         return `
@@ -575,9 +613,9 @@
       </select>
     </label>
     <div class="mt-2 space-y-2">
-      <label class="flex items-center gap-2"><input type="checkbox" checked> Taxable</label>
-      <label class="flex items-center gap-2"><input type="checkbox" checked> Include in PF</label>
-      <label class="flex items-center gap-2"><input type="checkbox"> Include in ESI</label>
+      <label class="flex items-center gap-2"><input type="checkbox" checked class="h-4 w-4"> Taxable</label>
+      <label class="flex items-center gap-2"><input type="checkbox" checked class="h-4 w-4"> Include in PF</label>
+      <label class="flex items-center gap-2"><input type="checkbox" class="h-4 w-4"> Include in ESI</label>
     </div>`;
     }
     function deductionForm() {
@@ -602,7 +640,7 @@
     <label class="block mt-2">Scope<input class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="Org-wide / Dept / Grade"></label>
     <label class="block mt-2">Rule<textarea class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" rows="3" placeholder="DSL or description"></textarea></label>
     <label class="block mt-2">Effective<input type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
-    <div class="mt-2"><label class="flex items-center gap-2"><input type="checkbox" checked> Active</label></div>`;
+    <div class="mt-2"><label class="flex items-center gap-2"><input type="checkbox" checked class="h-4 w-4"> Active</label></div>`;
     }
 
     /* ---- Utils ---- */
@@ -628,6 +666,15 @@
     .pcd-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 </style>
 {% endblock %}

@@ -78,7 +78,7 @@
                     class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                 <button id="refreshBtn"
                     class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-rotate mr-1"></i> Refresh
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
                 </button>
             </div>
         </div>
@@ -127,9 +127,7 @@
         </div>
 
         <!-- Cards View -->
-        <div id="cardsView" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Cards will be populated here -->
-        </div>
+        <div id="cardsView" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
         <!-- List View -->
         <div id="listView" class="hidden">
@@ -149,9 +147,7 @@
                             <th class="px-6 py-3 text-left font-medium text-slate-700">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="reviewsTableBody" class="divide-y divide-slate-200">
-                        <!-- Rows will be populated here -->
-                    </tbody>
+                    <tbody id="reviewsTableBody" class="divide-y divide-slate-200"></tbody>
                 </table>
             </div>
         </div>
@@ -167,9 +163,7 @@
                 disabled>
                 Previous
             </button>
-            <div id="pageNumbers" class="flex items-center gap-1">
-                <!-- Page numbers will be populated here -->
-            </div>
+            <div id="pageNumbers" class="flex items-center gap-1"></div>
             <button id="nextPageBtn" class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50"
                 disabled>
                 Next
@@ -271,146 +265,103 @@
                     </div>
                 </div>
 
-                <div id="reviewDetailsContent" class="p-6">
-                    <!-- Review details will be loaded here -->
-                </div>
+                <div id="reviewDetailsContent" class="p-6"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Initialize performance management
-    document.addEventListener('DOMContentLoaded', function () {
-        initializePerformance();
-    });
+    document.addEventListener('DOMContentLoaded', () => { initializePerformance(); });
 
-    // Global state
+    /* ---------- State ---------- */
     let currentView = 'cards';
     let currentPage = 1;
     let totalPages = 1;
+    const ITEMS_PER_PAGE = 10;
+
     let reviews = [];
     let filteredReviews = [];
 
+    /* ---------- Init / Data ---------- */
     async function initializePerformance() {
         await loadPerformanceData();
         setupEventListeners();
-        renderReviews();
+        applyFilters(); // sets filteredReviews & renders
     }
 
     async function loadPerformanceData() {
         try {
             document.getElementById('loadingState').classList.remove('hidden');
-
-            // Simulate API call - replace with actual API endpoints
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Mock data - replace with actual API calls
-            const mockReviews = [
-                {
-                    id: 1,
-                    employee_name: "John Smith",
-                    employee_id: "EMP001",
-                    position: "Senior Developer",
-                    department: "Engineering",
-                    review_period: "Q4 2024",
-                    status: "completed",
-                    overall_rating: 4.5,
-                    due_date: "2024-01-15",
-                    created_date: "2023-12-01",
-                    goals_achieved: 8,
-                    total_goals: 10
-                },
-                {
-                    id: 2,
-                    employee_name: "Sarah Johnson",
-                    employee_id: "EMP002",
-                    position: "Marketing Manager",
-                    department: "Marketing",
-                    review_period: "Q4 2024",
-                    status: "in-progress",
-                    overall_rating: null,
-                    due_date: "2024-01-20",
-                    created_date: "2023-12-01",
-                    goals_achieved: 6,
-                    total_goals: 8
-                },
-                {
-                    id: 3,
-                    employee_name: "Mike Davis",
-                    employee_id: "EMP003",
-                    position: "Sales Representative",
-                    department: "Sales",
-                    review_period: "Q4 2024",
-                    status: "pending-approval",
-                    overall_rating: 4.2,
-                    due_date: "2024-01-18",
-                    created_date: "2023-12-01",
-                    goals_achieved: 9,
-                    total_goals: 10
-                }
+            await new Promise(r => setTimeout(r, 400)); // simulate API
+            reviews = [
+                { id: 1, employee_name: "John Smith", employee_id: "EMP001", position: "Senior Developer", department: "Engineering", review_period: "Q4 2024", status: "completed", overall_rating: 4.5, due_date: "2024-01-15", created_date: "2023-12-01", goals_achieved: 8, total_goals: 10 },
+                { id: 2, employee_name: "Sarah Johnson", employee_id: "EMP002", position: "Marketing Manager", department: "Marketing", review_period: "Q4 2024", status: "in-progress", overall_rating: null, due_date: "2024-01-20", created_date: "2023-12-01", goals_achieved: 6, total_goals: 8 },
+                { id: 3, employee_name: "Mike Davis", employee_id: "EMP003", position: "Sales Representative", department: "Sales", review_period: "Q4 2024", status: "pending-approval", overall_rating: 4.2, due_date: "2024-01-18", created_date: "2023-12-01", goals_achieved: 9, total_goals: 10 }
             ];
-
-            reviews = mockReviews;
             filteredReviews = [...reviews];
-
-            // Update summary cards
             updateSummaryCards();
-
-            document.getElementById('loadingState').classList.add('hidden');
-
-        } catch (error) {
-            console.error('Error loading performance data:', error);
-            document.getElementById('loadingState').classList.add('hidden');
+        } catch (e) {
+            console.error(e);
             showError('Failed to load performance data');
+        } finally {
+            document.getElementById('loadingState').classList.add('hidden');
         }
     }
 
+    /* ---------- KPIs ---------- */
     function updateSummaryCards() {
         const activeReviews = reviews.filter(r => r.status === 'in-progress').length;
         const pendingReviews = reviews.filter(r => r.status === 'pending-approval').length;
-        const completedReviews = reviews.filter(r => r.status === 'completed' && r.overall_rating);
-        const avgRating = completedReviews.length > 0
-            ? (completedReviews.reduce((sum, r) => sum + r.overall_rating, 0) / completedReviews.length).toFixed(1)
-            : 0;
-        const totalGoalsAchieved = reviews.reduce((sum, r) => sum + (r.goals_achieved || 0), 0);
+        const completed = reviews.filter(r => r.status === 'completed' && r.overall_rating);
+        const avgRating = completed.length ? (completed.reduce((s, r) => s + r.overall_rating, 0) / completed.length).toFixed(1) : 0;
+        const totalGoals = reviews.reduce((s, r) => s + (r.goals_achieved || 0), 0);
 
         document.getElementById('activeReviews').textContent = activeReviews;
         document.getElementById('pendingReviews').textContent = pendingReviews;
         document.getElementById('avgPerformance').textContent = avgRating + '/5';
-        document.getElementById('goalsAchieved').textContent = totalGoalsAchieved;
+        document.getElementById('goalsAchieved').textContent = totalGoals;
     }
 
+    /* ---------- Events ---------- */
     function setupEventListeners() {
-        // View toggle buttons
         document.getElementById('cardViewBtn').addEventListener('click', () => switchView('cards'));
         document.getElementById('listViewBtn').addEventListener('click', () => switchView('list'));
 
-        // Modal controls
-        document.getElementById('newReviewBtn').addEventListener('click', () => openNewReviewModal());
+        document.getElementById('newReviewBtn').addEventListener('click', openNewReviewModal);
         document.getElementById('closeModalBtn').addEventListener('click', () => closeModal('newReviewModal'));
         document.getElementById('cancelBtn').addEventListener('click', () => closeModal('newReviewModal'));
         document.getElementById('closeDetailsModalBtn').addEventListener('click', () => closeModal('reviewDetailsModal'));
 
-        // Form submission
         document.getElementById('newReviewForm').addEventListener('submit', handleNewReviewSubmit);
 
-        // Filters
         ['periodFilter', 'departmentFilter', 'statusFilter'].forEach(id => {
             document.getElementById(id).addEventListener('change', applyFilters);
         });
-
         document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
-        document.getElementById('refreshBtn').addEventListener('click', loadPerformanceData);
+        document.getElementById('refreshBtn').addEventListener('click', async () => {
+            await loadPerformanceData();
+            applyFilters();
+        });
 
-        // Select all checkbox
         document.getElementById('selectAll').addEventListener('change', toggleSelectAll);
+
+        // Pagination buttons
+        document.getElementById('prevPageBtn').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderReviews(); } });
+        document.getElementById('nextPageBtn').addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderReviews(); } });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (evt) => {
+            ['newReviewModal', 'reviewDetailsModal'].forEach(id => {
+                const modal = document.getElementById(id);
+                if (evt.target === modal) closeModal(id);
+            });
+        });
     }
 
+    /* ---------- View toggling ---------- */
     function switchView(view) {
         currentView = view;
-
-        // Update button states
         document.getElementById('cardViewBtn').className = view === 'cards'
             ? 'px-2 py-1 rounded text-sm bg-slate-800 text-white'
             : 'px-2 py-1 rounded text-sm text-slate-600 hover:bg-slate-100';
@@ -418,42 +369,96 @@
             ? 'px-2 py-1 rounded text-sm bg-slate-800 text-white'
             : 'px-2 py-1 rounded text-sm text-slate-600 hover:bg-slate-100';
 
-        // Show/hide views
         document.getElementById('cardsView').classList.toggle('hidden', view !== 'cards');
         document.getElementById('listView').classList.toggle('hidden', view !== 'list');
-
         renderReviews();
     }
 
+    /* ---------- Filters + Pagination ---------- */
+    function applyFilters() {
+        const period = document.getElementById('periodFilter').value;
+        const dept = document.getElementById('departmentFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        const search = (document.getElementById('searchInput').value || '').toLowerCase();
+
+        filteredReviews = reviews.filter(r => {
+            const matchesPeriod =
+                period === 'all' || !period ||
+                (period === 'current' && String(r.review_period).includes('Q4 2024')) ||
+                (period === 'last' && String(r.review_period).includes('Q3 2024')) ||
+                (period === 'ytd' && String(r.review_period).includes('2024'));
+
+            const matchesDept = !dept || String(r.department || '').toLowerCase() === dept;
+            const matchesStatus = !status || r.status === status;
+
+            const name = String(r.employee_name || '').toLowerCase();
+            const pos = String(r.position || '').toLowerCase();
+            const eid = String(r.employee_id || '').toLowerCase();
+            const matchesSearch = !search || name.includes(search) || pos.includes(search) || eid.includes(search);
+
+            return matchesPeriod && matchesDept && matchesStatus && matchesSearch;
+        });
+
+        currentPage = 1;
+        renderReviews();
+    }
+
+    function getPageItems() {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
+        return filteredReviews.slice(start, end);
+    }
+
+    function updatePagination() {
+        totalPages = Math.ceil(filteredReviews.length / ITEMS_PER_PAGE) || 1;
+
+        if (filteredReviews.length <= ITEMS_PER_PAGE) {
+            document.getElementById('paginationContainer').classList.add('hidden');
+            return;
+        }
+        document.getElementById('paginationContainer').classList.remove('hidden');
+
+        const start = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+        const end = Math.min(currentPage * ITEMS_PER_PAGE, filteredReviews.length);
+        document.getElementById('pageInfo').textContent = `${start}-${end} of ${filteredReviews.length}`;
+
+        const prev = document.getElementById('prevPageBtn');
+        const next = document.getElementById('nextPageBtn');
+        prev.disabled = currentPage === 1;
+        next.disabled = currentPage === totalPages;
+
+        // page numbers
+        const holder = document.getElementById('pageNumbers');
+        holder.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'px-2 py-1 rounded border text-sm ' + (i === currentPage ? 'bg-slate-800 text-white' : 'border-slate-300 hover:bg-slate-50');
+            btn.textContent = i;
+            btn.addEventListener('click', () => { currentPage = i; renderReviews(); });
+            holder.appendChild(btn);
+        }
+    }
+
+    /* ---------- Rendering ---------- */
     function renderReviews() {
-        if (filteredReviews.length === 0) {
-            document.getElementById('emptyState').classList.remove('hidden');
+        const none = filteredReviews.length === 0;
+        document.getElementById('emptyState').classList.toggle('hidden', !none);
+        if (none) {
             document.getElementById('cardsView').classList.add('hidden');
             document.getElementById('listView').classList.add('hidden');
             document.getElementById('paginationContainer').classList.add('hidden');
             return;
         }
 
-        document.getElementById('emptyState').classList.add('hidden');
-
-        if (currentView === 'cards') {
-            renderCardsView();
-        } else {
-            renderListView();
-        }
-
+        if (currentView === 'cards') renderCardsView(); else renderListView();
         updatePagination();
     }
 
     function renderCardsView() {
         const container = document.getElementById('cardsView');
         container.innerHTML = '';
-
-        filteredReviews.forEach(review => {
-            const card = createReviewCard(review);
-            container.appendChild(card);
-        });
-
+        const pageItems = getPageItems();
+        pageItems.forEach(r => container.appendChild(createReviewCard(r)));
         container.classList.remove('hidden');
     }
 
@@ -461,6 +466,13 @@
         const card = document.createElement('div');
         card.className = 'rounded-xl border border-slate-200 bg-white p-5 hover:shadow-md transition-shadow cursor-pointer';
         card.onclick = () => openReviewDetails(review.id);
+
+        const ratingLine = review.overall_rating
+            ? `<div class="flex justify-between text-sm">
+               <span class="text-slate-600">Rating:</span>
+               <span class="text-slate-800">${renderStars(review.overall_rating)} ${review.overall_rating}/5</span>
+           </div>`
+            : '';
 
         card.innerHTML = `
         <div class="flex items-start justify-between mb-3">
@@ -472,62 +484,34 @@
                 ${formatStatus(review.status)}
             </span>
         </div>
-        
         <div class="space-y-2 mb-4">
-            <div class="flex justify-between text-sm">
-                <span class="text-slate-600">Period:</span>
-                <span class="text-slate-800">${review.review_period}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-                <span class="text-slate-600">Due Date:</span>
-                <span class="text-slate-800">${formatDate(review.due_date)}</span>
-            </div>
-            ${review.overall_rating ? `
-            <div class="flex justify-between text-sm">
-                <span class="text-slate-600">Rating:</span>
-                <span class="text-slate-800">${renderStars(review.overall_rating)} ${review.overall_rating}/5</span>
-            </div>
-            ` : ''}
-            <div class="flex justify-between text-sm">
-                <span class="text-slate-600">Goals:</span>
-                <span class="text-slate-800">${review.goals_achieved}/${review.total_goals}</span>
-            </div>
+            <div class="flex justify-between text-sm"><span class="text-slate-600">Period:</span><span class="text-slate-800">${review.review_period}</span></div>
+            <div class="flex justify-between text-sm"><span class="text-slate-600">Due Date:</span><span class="text-slate-800">${formatDate(review.due_date)}</span></div>
+            ${ratingLine}
+            <div class="flex justify-between text-sm"><span class="text-slate-600">Goals:</span><span class="text-slate-800">${review.goals_achieved}/${review.total_goals}</span></div>
         </div>
-        
         <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-            <div class="text-xs text-slate-500">
-                <i class="fa-solid fa-calendar mr-1"></i>
-                Created ${formatDate(review.created_date)}
-            </div>
+            <div class="text-xs text-slate-500"><i class="fa-solid fa-calendar mr-1"></i> Created ${formatDate(review.created_date)}</div>
             <div class="flex items-center gap-2">
-                <button onclick="event.stopPropagation(); editReview(${review.id})" 
-                    class="text-xs text-blue-600 hover:text-blue-800">
-                    <i class="fa-solid fa-edit"></i>
-                </button>
-                <button onclick="event.stopPropagation(); deleteReview(${review.id})"
-                    class="text-xs text-red-600 hover:text-red-800">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+                <button onclick="event.stopPropagation(); editReview(${review.id})" class="text-xs text-blue-600 hover:text-blue-800"><i class="fa-solid fa-edit"></i></button>
+                <button onclick="event.stopPropagation(); deleteReview(${review.id})" class="text-xs text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
             </div>
-        </div>
-    `;
-
+        </div>`;
         return card;
     }
 
     function renderListView() {
         const tbody = document.getElementById('reviewsTableBody');
         tbody.innerHTML = '';
+        const pageItems = getPageItems();
 
-        filteredReviews.forEach(review => {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-slate-50 cursor-pointer';
-            row.onclick = () => openReviewDetails(review.id);
-
-            row.innerHTML = `
+        pageItems.forEach(review => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50 cursor-pointer';
+            tr.onclick = () => openReviewDetails(review.id);
+            tr.innerHTML = `
             <td class="px-6 py-4">
-                <input type="checkbox" class="rounded border-slate-300 review-checkbox" 
-                    data-id="${review.id}" onclick="event.stopPropagation()">
+                <input type="checkbox" class="rounded border-slate-300 review-checkbox" data-id="${review.id}" onclick="event.stopPropagation()">
             </td>
             <td class="px-6 py-4">
                 <div>
@@ -538,419 +522,164 @@
             <td class="px-6 py-4 text-slate-800">${review.position}</td>
             <td class="px-6 py-4 text-slate-800">${review.review_period}</td>
             <td class="px-6 py-4">
-                <span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(review.status)}">
-                    ${formatStatus(review.status)}
-                </span>
+                <span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(review.status)}">${formatStatus(review.status)}</span>
             </td>
-            <td class="px-6 py-4">
-                ${review.overall_rating ? renderStars(review.overall_rating) + ' ' + review.overall_rating + '/5' : 'N/A'}
-            </td>
+            <td class="px-6 py-4">${review.overall_rating ? renderStars(review.overall_rating) + ' ' + review.overall_rating + '/5' : 'N/A'}</td>
             <td class="px-6 py-4 text-slate-800">${formatDate(review.due_date)}</td>
             <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
-                    <button onclick="event.stopPropagation(); editReview(${review.id})" 
-                        class="text-blue-600 hover:text-blue-800">
-                        <i class="fa-solid fa-edit"></i>
-                    </button>
-                    <button onclick="event.stopPropagation(); deleteReview(${review.id})"
-                        class="text-red-600 hover:text-red-800">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                    <button onclick="event.stopPropagation(); editReview(${review.id})" class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-edit"></i></button>
+                    <button onclick="event.stopPropagation(); deleteReview(${review.id})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
                 </div>
-            </td>
-        `;
+            </td>`;
+            tbody.appendChild(tr);
+        });
 
-            tbody.appendChild(row);
+        // wire bulk-selection on this page
+        document.querySelectorAll('.review-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateBulkActionsButton);
         });
 
         document.getElementById('listView').classList.remove('hidden');
     }
 
-    function getStatusBadgeClass(status) {
-        const classes = {
-            'draft': 'bg-slate-100 text-slate-700',
-            'in-progress': 'bg-blue-100 text-blue-700',
-            'pending-approval': 'bg-yellow-100 text-yellow-700',
-            'completed': 'bg-green-100 text-green-700'
-        };
-        return classes[status] || 'bg-slate-100 text-slate-700';
-    }
-
-    function formatStatus(status) {
-        return status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-    }
-
-    function renderStars(rating) {
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating % 1 !== 0;
-        let stars = '';
-
-        for (let i = 0; i < fullStars; i++) {
-            stars += '<i class="fa-solid fa-star text-yellow-400"></i>';
-        }
-
-        if (hasHalfStar) {
-            stars += '<i class="fa-solid fa-star-half-stroke text-yellow-400"></i>';
-        }
-
-        const emptyStars = 5 - Math.ceil(rating);
-        for (let i = 0; i < emptyStars; i++) {
-            stars += '<i class="fa-regular fa-star text-yellow-400"></i>';
-        }
-
-        return stars;
-    }
-
-    function applyFilters() {
-        const period = document.getElementById('periodFilter').value;
-        const department = document.getElementById('departmentFilter').value;
-        const status = document.getElementById('statusFilter').value;
-        const search = document.getElementById('searchInput').value.toLowerCase();
-
-        filteredReviews = reviews.filter(review => {
-            const matchesPeriod = !period || period === 'all' ||
-                (period === 'current' && review.review_period.includes('Q4 2024')) ||
-                (period === 'last' && review.review_period.includes('Q3 2024')) ||
-                (period === 'ytd' && review.review_period.includes('2024'));
-
-            const matchesDepartment = !department || review.department.toLowerCase() === department;
-            const matchesStatus = !status || review.status === status;
-            const matchesSearch = !search ||
-                review.employee_name.toLowerCase().includes(search) ||
-                review.position.toLowerCase().includes(search) ||
-                review.employee_id.toLowerCase().includes(search);
-
-            return matchesPeriod && matchesDepartment && matchesStatus && matchesSearch;
-        });
-
-        currentPage = 1;
-        renderReviews();
-    }
-
-    function updatePagination() {
-        const itemsPerPage = 10;
-        totalPages = Math.ceil(filteredReviews.length / itemsPerPage);
-
-        if (totalPages <= 1) {
-            document.getElementById('paginationContainer').classList.add('hidden');
-            return;
-        }
-
-        document.getElementById('paginationContainer').classList.remove('hidden');
-
-        const start = (currentPage - 1) * itemsPerPage + 1;
-        const end = Math.min(currentPage * itemsPerPage, filteredReviews.length);
-        document.getElementById('pageInfo').textContent = `${start}-${end} of ${filteredReviews.length}`;
-
-        document.getElementById('prevPageBtn').disabled = currentPage === 1;
-        document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
-    }
-
-    function openNewReviewModal() {
-        // Load employees for dropdown
-        loadEmployeesForModal();
-        document.getElementById('newReviewModal').classList.remove('hidden');
-    }
-
-    async function loadEmployeesForModal() {
-        try {
-            // Mock employees - replace with actual API call
-            const mockEmployees = [
-                { id: 'EMP001', name: 'John Smith', position: 'Senior Developer' },
-                { id: 'EMP002', name: 'Sarah Johnson', position: 'Marketing Manager' },
-                { id: 'EMP003', name: 'Mike Davis', position: 'Sales Representative' },
-                { id: 'EMP004', name: 'Lisa Brown', position: 'UI/UX Designer' },
-                { id: 'EMP005', name: 'Tom Wilson', position: 'Product Manager' }
-            ];
-
-            const select = document.querySelector('select[name="employee_id"]');
-            select.innerHTML = '<option value="">Select Employee</option>';
-
-            mockEmployees.forEach(emp => {
-                const option = document.createElement('option');
-                option.value = emp.id;
-                option.textContent = `${emp.name} - ${emp.position}`;
-                select.appendChild(option);
-            });
-
-        } catch (error) {
-            console.error('Error loading employees:', error);
-        }
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
-        if (modalId === 'newReviewModal') {
-            document.getElementById('newReviewForm').reset();
-        }
-    }
-
-    async function handleNewReviewSubmit(e) {
-        e.preventDefault();
-
-        try {
-            const formData = new FormData(e.target);
-            const reviewData = Object.fromEntries(formData.entries());
-
-            // Simulate API call
-            console.log('Creating new review:', reviewData);
-
-            // Show success message
-            showSuccess('Performance review created successfully!');
-
-            // Close modal and reload data
-            closeModal('newReviewModal');
-            await loadPerformanceData();
-
-        } catch (error) {
-            console.error('Error creating review:', error);
-            showError('Failed to create performance review');
-        }
-    }
-
-    function toggleSelectAll() {
-        const selectAll = document.getElementById('selectAll');
-        const checkboxes = document.querySelectorAll('.review-checkbox');
-
-        checkboxes.forEach(cb => {
-            cb.checked = selectAll.checked;
-        });
-
-        updateBulkActionsButton();
-    }
-
-    function updateBulkActionsButton() {
-        const checkedBoxes = document.querySelectorAll('.review-checkbox:checked');
-        const bulkBtn = document.getElementById('bulkActionsBtn');
-
-        bulkBtn.disabled = checkedBoxes.length === 0;
-        bulkBtn.textContent = checkedBoxes.length > 0
-            ? `Bulk Actions (${checkedBoxes.length})`
-            : 'Bulk Actions';
-    }
-
+    /* ---------- Details Modal ---------- */
     function openReviewDetails(reviewId) {
         const review = reviews.find(r => r.id === reviewId);
         if (!review) return;
-
-        const modal = document.getElementById('reviewDetailsModal');
-        const content = document.getElementById('reviewDetailsContent');
-
-        content.innerHTML = `
+        const pct = review.total_goals ? Math.round((review.goals_achieved / review.total_goals) * 100) : 0;
+        const content = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Employee Info -->
             <div class="lg:col-span-1">
                 <div class="rounded-xl border border-slate-200 p-4">
                     <h4 class="font-medium text-slate-800 mb-3">Employee Information</h4>
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Name:</span>
-                            <span class="text-slate-800">${review.employee_name}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">ID:</span>
-                            <span class="text-slate-800">${review.employee_id}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Position:</span>
-                            <span class="text-slate-800">${review.position}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Department:</span>
-                            <span class="text-slate-800">${review.department}</span>
-                        </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-600">Name:</span><span class="text-slate-800">${review.employee_name}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">ID:</span><span class="text-slate-800">${review.employee_id}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Position:</span><span class="text-slate-800">${review.position}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Department:</span><span class="text-slate-800">${review.department}</span></div>
                     </div>
                 </div>
-                
                 <div class="rounded-xl border border-slate-200 p-4 mt-4">
                     <h4 class="font-medium text-slate-800 mb-3">Review Summary</h4>
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Period:</span>
-                            <span class="text-slate-800">${review.review_period}</span>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-600">Period:</span><span class="text-slate-800">${review.review_period}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Status:</span>
+                            <span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(review.status)}">${formatStatus(review.status)}</span>
                         </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Status:</span>
-                            <span class="px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(review.status)}">
-                                ${formatStatus(review.status)}
-                            </span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Due Date:</span>
-                            <span class="text-slate-800">${formatDate(review.due_date)}</span>
-                        </div>
-                        ${review.overall_rating ? `
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Overall Rating:</span>
-                            <span class="text-slate-800">${renderStars(review.overall_rating)} ${review.overall_rating}/5</span>
-                        </div>
-                        ` : ''}
+                        <div class="flex justify-between"><span class="text-slate-600">Due Date:</span><span class="text-slate-800">${formatDate(review.due_date)}</span></div>
+                        ${review.overall_rating ? `<div class="flex justify-between"><span class="text-slate-600">Overall Rating:</span><span class="text-slate-800">${renderStars(review.overall_rating)} ${review.overall_rating}/5</span></div>` : ''}
                     </div>
                 </div>
             </div>
-            
-            <!-- Review Content -->
             <div class="lg:col-span-2">
                 <div class="rounded-xl border border-slate-200 p-4">
                     <h4 class="font-medium text-slate-800 mb-4">Performance Review</h4>
-                    
-                    <!-- Goals Progress -->
                     <div class="mb-6">
                         <h5 class="text-sm font-medium text-slate-700 mb-3">Goals Achievement</h5>
                         <div class="flex items-center gap-4">
                             <div class="flex-1">
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span>Progress</span>
-                                    <span>${Math.round((review.goals_achieved / review.total_goals) * 100)}%</span>
-                                </div>
+                                <div class="flex justify-between text-sm mb-1"><span>Progress</span><span>${pct}%</span></div>
                                 <div class="w-full bg-slate-200 rounded-full h-2">
-                                    <div class="bg-blue-500 h-2 rounded-full" 
-                                        style="width: ${(review.goals_achieved / review.total_goals) * 100}%"></div>
+                                    <div class="bg-blue-500 h-2 rounded-full" style="width:${pct}%"></div>
                                 </div>
                             </div>
-                            <div class="text-sm text-slate-600">
-                                ${review.goals_achieved}/${review.total_goals} goals
-                            </div>
+                            <div class="text-sm text-slate-600">${review.goals_achieved}/${review.total_goals} goals</div>
                         </div>
                     </div>
-                    
-                    <!-- Performance Areas -->
                     <div class="space-y-4">
-                        <div>
-                            <h5 class="text-sm font-medium text-slate-700 mb-2">Technical Skills</h5>
-                            <div class="flex items-center gap-2">
-                                ${renderStars(4.2)} <span class="text-sm text-slate-600">4.2/5</span>
-                            </div>
-                            <p class="text-sm text-slate-600 mt-1">nstrates strong technical expertise and continues to learn new technologies.</p>
-                        </div>
-                        
-                        <div>
-                            <h5 class="text-sm font-medium text-slate-700 mb-2">Communication</h5>
-                            <div class="flex items-center gap-2">
-                                ${renderStars(4.5)} <span class="text-sm text-slate-600">4.5/5</span>
-                            </div>
-                            <p class="text-sm text-slate-600 mt-1">Excellent communication skills both with team members and stakeholders.</p>
-                        </div>
-                        
-                        <div>
-                            <h5 class="text-sm font-medium text-slate-700 mb-2">Leadership</h5>
-                            <div class="flex items-center gap-2">
-                                ${renderStars(3.8)} <span class="text-sm text-slate-600">3.8/5</span>
-                            </div>
-                            <p class="text-sm text-slate-600 mt-1">Shows potential for leadership roles. Recommended for leadership training.</p>
-                        </div>
-                        
-                        <div>
-                            <h5 class="text-sm font-medium text-slate-700 mb-2">Problem Solving</h5>
-                            <div class="flex items-center gap-2">
-                                ${renderStars(4.3)} <span class="text-sm text-slate-600">4.3/5</span>
-                            </div>
-                            <p class="text-sm text-slate-600 mt-1">Consistently finds creative solutions to complex problems.</p>
-                        </div>
+                        <div><h5 class="text-sm font-medium text-slate-700 mb-2">Technical Skills</h5><div class="flex items-center gap-2">${renderStars(4.2)} <span class="text-sm text-slate-600">4.2/5</span></div><p class="text-sm text-slate-600 mt-1">Demonstrates strong technical expertise and continues to learn new technologies.</p></div>
+                        <div><h5 class="text-sm font-medium text-slate-700 mb-2">Communication</h5><div class="flex items-center gap-2">${renderStars(4.5)} <span class="text-sm text-slate-600">4.5/5</span></div><p class="text-sm text-slate-600 mt-1">Excellent communication skills both with team members and stakeholders.</p></div>
+                        <div><h5 class="text-sm font-medium text-slate-700 mb-2">Leadership</h5><div class="flex items-center gap-2">${renderStars(3.8)} <span class="text-sm text-slate-600">3.8/5</span></div><p class="text-sm text-slate-600 mt-1">Shows potential for leadership roles. Recommended for leadership training.</p></div>
+                        <div><h5 class="text-sm font-medium text-slate-700 mb-2">Problem Solving</h5><div class="flex items-center gap-2">${renderStars(4.3)} <span class="text-sm text-slate-600">4.3/5</span></div><p class="text-sm text-slate-600 mt-1">Consistently finds creative solutions to complex problems.</p></div>
                     </div>
-                    
-                    <!-- Action Items -->
                     <div class="mt-6 pt-4 border-t border-slate-200">
                         <h5 class="text-sm font-medium text-slate-700 mb-3">Action Items & Development Areas</h5>
                         <ul class="space-y-2 text-sm text-slate-600">
-                            <li class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-check text-green-500 mt-0.5"></i>
-                                Enroll in advanced leadership workshop by Q1 2024
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle-check text-green-500 mt-0.5"></i>
-                                Take on mentorship role for junior developers
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <i class="fa-solid fa-circle text-slate-400 mt-0.5"></i>
-                                Complete certification in cloud architecture
-                            </li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-green-500 mt-0.5"></i>Enroll in advanced leadership workshop by Q1 2024</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-green-500 mt-0.5"></i>Take on mentorship role for junior developers</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle text-slate-400 mt-0.5"></i>Complete certification in cloud architecture</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Action Buttons -->
         <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-200">
-            <button onclick="exportReview(${reviewId})" 
-                class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
-                <i class="fa-solid fa-download mr-1"></i> Export PDF
-            </button>
-            <button onclick="editReview(${reviewId})" 
-                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-                <i class="fa-solid fa-edit mr-1"></i> Edit Review
-            </button>
+            <button onclick="exportReview(${reviewId})" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-download mr-1"></i> Export PDF</button>
+            <button onclick="editReview(${reviewId})" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i class="fa-solid fa-edit mr-1"></i> Edit Review</button>
         </div>
     `;
-
-        modal.classList.remove('hidden');
+        document.getElementById('reviewDetailsContent').innerHTML = content;
+        document.getElementById('reviewDetailsModal').classList.remove('hidden');
     }
 
-    function editReview(reviewId) {
-        // Implementation for editing review
-        console.log('Edit review:', reviewId);
-        showInfo('Edit review functionality would be implemented here');
+    /* ---------- Actions ---------- */
+    function editReview(id) { console.log('Edit review', id); showInfo('Edit review functionality would be implemented here'); }
+    function deleteReview(id) { if (confirm('Are you sure you want to delete this performance review?')) { console.log('Delete review', id); showSuccess('Review deleted successfully'); loadPerformanceData().then(applyFilters); } }
+    function exportReview(id) { console.log('Export review', id); showInfo('Export functionality would be implemented here'); }
+
+    /* ---------- Modal + Create ---------- */
+    function openNewReviewModal() { loadEmployeesForModal(); document.getElementById('newReviewModal').classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); if (id === 'newReviewModal') { document.getElementById('newReviewForm').reset(); } }
+
+    async function loadEmployeesForModal() {
+        const list = [
+            { id: 'EMP001', name: 'John Smith', position: 'Senior Developer' },
+            { id: 'EMP002', name: 'Sarah Johnson', position: 'Marketing Manager' },
+            { id: 'EMP003', name: 'Mike Davis', position: 'Sales Representative' },
+            { id: 'EMP004', name: 'Lisa Brown', position: 'UI/UX Designer' },
+            { id: 'EMP005', name: 'Tom Wilson', position: 'Product Manager' }
+        ];
+        const sel = document.querySelector('select[name="employee_id"]');
+        sel.innerHTML = '<option value="">Select Employee</option>';
+        list.forEach(e => { const o = document.createElement('option'); o.value = e.id; o.textContent = `${e.name} - ${e.position}`; sel.appendChild(o); });
     }
 
-    function deleteReview(reviewId) {
-        if (confirm('Are you sure you want to delete this performance review?')) {
-            console.log('Delete review:', reviewId);
-            showSuccess('Review deleted successfully');
-            loadPerformanceData();
-        }
+    async function handleNewReviewSubmit(e) {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        console.log('Creating new review:', data);
+        showSuccess('Performance review created successfully!');
+        closeModal('newReviewModal');
+        await loadPerformanceData();
+        applyFilters();
     }
 
-    function exportReview(reviewId) {
-        console.log('Export review:', reviewId);
-        showInfo('Export functionality would be implemented here');
+    /* ---------- Selection / Bulk ---------- */
+    function toggleSelectAll() {
+        const checked = document.getElementById('selectAll').checked;
+        document.querySelectorAll('.review-checkbox').forEach(cb => { cb.checked = checked; });
+        updateBulkActionsButton();
+    }
+    function updateBulkActionsButton() {
+        const n = document.querySelectorAll('.review-checkbox:checked').length;
+        const btn = document.getElementById('bulkActionsBtn');
+        btn.disabled = n === 0;
+        btn.textContent = n ? `Bulk Actions (${n})` : 'Bulk Actions';
     }
 
-    // Utility functions
+    /* ---------- Utils ---------- */
+    function getStatusBadgeClass(s) {
+        const map = { 'draft': 'bg-slate-100 text-slate-700', 'in-progress': 'bg-blue-100 text-blue-700', 'pending-approval': 'bg-yellow-100 text-yellow-700', 'completed': 'bg-green-100 text-green-700' };
+        return map[s] || 'bg-slate-100 text-slate-700';
+    }
+    function formatStatus(s) { return String(s || '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); }
+
+    function renderStars(r) {
+        const full = Math.floor(r || 0), half = (r || 0) % 1 !== 0, empty = 5 - Math.ceil(r || 0);
+        return `${'★'.repeat(full).split('').map(() => '<i class="fa-solid fa-star text-yellow-400"></i>').join('')}${half ? '<i class="fa-solid fa-star-half-stroke text-yellow-400"></i>' : ''}${'☆'.repeat(empty).split('').map(() => '<i class="fa-regular fa-star text-yellow-400"></i>').join('')}`;
+    }
+
     function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+        if (!dateString) return '—';
+        const d = new Date(dateString);
+        if (isNaN(d.getTime())) return '—';
+        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
-    function showSuccess(message) {
-        // Implementation for success toast/notification
-        console.log('Success:', message);
-    }
-
-    function showError(message) {
-        // Implementation for error toast/notification
-        console.log('Error:', message);
-    }
-
-    function showInfo(message) {
-        // Implementation for info toast/notification
-        console.log('Info:', message);
-    }
-
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    // Close modals when clicking outside
-    window.addEventListener('click', function (event) {
-        const modals = ['newReviewModal', 'reviewDetailsModal'];
-        modals.forEach(modalId => {
-            const modal = document.getElementById(modalId);
-            if (event.target === modal) {
-                closeModal(modalId);
-            }
-        });
-    });
+    function showSuccess(m) { console.log('Success:', m); }
+    function showError(m) { console.log('Error:', m); }
+    function showInfo(m) { console.log('Info:', m); }
+    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
 </script>
 {% endblock %}

@@ -13,6 +13,15 @@
             <button id="newWorkflowBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> New Workflow
             </button>
+            <button id="exportWorkflowBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export
+            </button>
+            <label
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-import mr-1"></i> Import
+                <input id="importWorkflowInput" type="file" accept="application/json" class="hidden">
+            </label>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
@@ -39,7 +48,7 @@
     <!-- Builder -->
     <section id="builderPanel" class="wf-panel">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left: Triggers + Steps -->
+            <!-- Left: Palette -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-bolt mr-2"></i> Triggers
                 </h3>
@@ -70,6 +79,11 @@
                     <button class="wf-chip" data-type="step" data-key="approval"><i
                             class="fa-solid fa-thumbs-up mr-1"></i> Approval</button>
                 </div>
+
+                <div class="mt-6 space-y-2 text-xs text-slate-600">
+                    <div>Tip: Exactly one Trigger must be first. Steps follow.</div>
+                    <div id="validationMsg" class="text-rose-600"></div>
+                </div>
             </div>
 
             <!-- Middle: Canvas -->
@@ -78,19 +92,26 @@
                     <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-layer-group mr-2"></i> Canvas
                     </h3>
                     <div class="flex items-center gap-2">
+                        <button id="undoBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"
+                            disabled>Undo</button>
+                        <button id="redoBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"
+                            disabled>Redo</button>
                         <button id="clearCanvas"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
                         <button id="saveWorkflow"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
                                 class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        <button id="simulateBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                                class="fa-solid fa-vial mr-1"></i> Test Run</button>
                         <button id="publishWorkflow"
                             class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"><i
                                 class="fa-solid fa-rocket mr-1"></i> Publish</button>
                     </div>
                 </div>
-                <ul id="canvas" class="space-y-2 text-sm min-h-[120px]">
-                    <!-- items injected -->
-                </ul>
+                <ul id="canvas" class="space-y-2 text-sm min-h-[140px]"></ul>
             </div>
 
             <!-- Right: Inspector -->
@@ -110,13 +131,17 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-box-archive mr-2"></i> Templates
                 </h3>
-                <button id="newTemplate"
-                    class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
-                        class="fa-solid fa-plus mr-1"></i> New</button>
+                <div class="flex items-center gap-2">
+                    <button id="newTemplate"
+                        class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
+                            class="fa-solid fa-plus mr-1"></i> New</button>
+                    <button id="exportTemplatesBtn"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-file-export mr-1"></i> Export All
+                    </button>
+                </div>
             </div>
-            <div id="templateList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- injected -->
-            </div>
+            <div id="templateList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
     </section>
 
@@ -125,11 +150,15 @@
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-play mr-2"></i> Recent Runs</h3>
-                <select id="runFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
-                    <option value="all">All</option>
-                    <option value="success">Success</option>
-                    <option value="failed">Failed</option>
-                </select>
+                <div class="flex items-center gap-2">
+                    <select id="runFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">All</option>
+                        <option value="success">Success</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                    <button id="clearRuns"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
@@ -142,7 +171,7 @@
                             <th class="py-2 px-4 w-24"></th>
                         </tr>
                     </thead>
-                    <tbody id="runRows" class="text-slate-800"><!-- injected --></tbody>
+                    <tbody id="runRows" class="text-slate-800"></tbody>
                 </table>
             </div>
         </div>
@@ -170,55 +199,96 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-plug mr-2"></i> Integrations
                 </h3>
-                <div class="space-y-3 text-sm" id="intList"><!-- injected --></div>
+                <div class="space-y-3 text-sm" id="intList"></div>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-lock mr-2"></i> Permissions
                 </h3>
                 <div class="space-y-2 text-sm">
-                    <label class="flex items-center gap-2"><input type="checkbox" checked> Allow Managers to run</label>
-                    <label class="flex items-center gap-2"><input type="checkbox" checked> Allow HR to edit</label>
-                    <label class="flex items-center gap-2"><input type="checkbox"> Require approval to publish</label>
+                    <label class="flex items-center gap-2"><input id="permRunManagers" type="checkbox" checked> Allow
+                        Managers to run</label>
+                    <label class="flex items-center gap-2"><input id="permHREdit" type="checkbox" checked> Allow HR to
+                        edit</label>
+                    <label class="flex items-center gap-2"><input id="permApproveToPublish" type="checkbox"> Require
+                        approval to publish</label>
                 </div>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-shield-halved mr-2"></i>
                     Safety Checks</h3>
                 <div class="space-y-2 text-sm">
-                    <label class="flex items-center gap-2"><input type="checkbox" checked> Validate PII usage</label>
-                    <label class="flex items-center gap-2"><input type="checkbox" checked> Require 2nd approver for
-                        terminations</label>
-                    <label class="flex items-center gap-2"><input type="checkbox"> Block external webhooks</label>
+                    <label class="flex items-center gap-2"><input id="safetyPII" type="checkbox" checked> Validate PII
+                        usage</label>
+                    <label class="flex items-center gap-2"><input id="safety2ndApprover" type="checkbox" checked>
+                        Require 2nd approver for terminations</label>
+                    <label class="flex items-center gap-2"><input id="safetyBlockWebhooks" type="checkbox"> Block
+                        external webhooks</label>
                 </div>
             </div>
         </div>
     </section>
 </div>
 
+<!-- Preview / Log Modal -->
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl">
+                <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="modalTitle" class="text-lg font-semibold text-slate-800">Preview</h3>
+                    <button id="modalClose" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <pre id="modalBody" class="p-4 text-xs overflow-x-auto whitespace-pre-wrap"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg z-50 hidden"></div>
+
 <script>
-    /* ------------ Mock Data ------------ */
-    let CANVAS = []; // [{type:'trigger'|'step', key:'send_email', cfg:{...}}]
+    /* -------------------- Persistence Keys -------------------- */
+    const LS_CANVAS = 'wf_canvas_v1';
+    const LS_TEMPLATES = 'wf_templates_v1';
+    const LS_RUNS = 'wf_runs_v1';
+    const LS_SETTINGS = 'wf_settings_v1';
+
+    /* -------------------- Mock / State -------------------- */
+    let CANVAS = JSON.parse(localStorage.getItem(LS_CANVAS) || 'null') || [];
     let SELECTED = null;
-
-    let TEMPLATES = [
-        { id: 1, name: 'Onboarding • Remote', nodes: [{ type: 'trigger', key: 'new_hire' }, { type: 'step', key: 'create_ticket' }, { type: 'step', key: 'send_email' }, { type: 'step', key: 'assign_task' }] },
-        { id: 2, name: 'Offboarding • Standard', nodes: [{ type: 'trigger', key: 'termination' }, { type: 'step', key: 'revoke_access' }, { type: 'step', key: 'update_hris' }, { type: 'step', key: 'webhook' }] }
+    let TEMPLATES = JSON.parse(localStorage.getItem(LS_TEMPLATES) || 'null') || [
+        {
+            id: 1, name: 'Onboarding • Remote', nodes: [
+                { type: 'trigger', key: 'new_hire' }, { type: 'step', key: 'create_ticket' },
+                { type: 'step', key: 'send_email' }, { type: 'step', key: 'assign_task' }
+            ]
+        },
+        {
+            id: 2, name: 'Offboarding • Standard', nodes: [
+                { type: 'trigger', key: 'termination' }, { type: 'step', key: 'revoke_access' },
+                { type: 'step', key: 'update_hris' }, { type: 'step', key: 'webhook' }
+            ]
+        }
     ];
-
-    let RUNS = [
-        { id: 11, at: '2025-09-12 10:05', wf: 'Onboarding • Remote', who: 'System', status: 'success' },
-        { id: 12, at: '2025-09-12 11:17', wf: 'Offboarding • Standard', who: 'Priya S', status: 'failed' },
-        { id: 13, at: '2025-09-13 09:40', wf: 'PTO Auto-Approve', who: 'System', status: 'success' }
+    let RUNS = JSON.parse(localStorage.getItem(LS_RUNS) || 'null') || [
+        { id: 11, at: '2025-09-12 10:05', wf: 'Onboarding • Remote', who: 'System', status: 'success', log: 'All steps passed.' },
+        { id: 12, at: '2025-09-12 11:17', wf: 'Offboarding • Standard', who: 'Priya S', status: 'failed', log: 'Webhook blocked by safety policy.' }
     ];
+    let SETTINGS = JSON.parse(localStorage.getItem(LS_SETTINGS) || 'null') || {
+        permRunManagers: true, permHREdit: true, permApproveToPublish: false,
+        safetyPII: true, safety2ndApprover: true, safetyBlockWebhooks: false
+    };
 
-    let INTEGRATIONS = [
-        { name: 'Google Workspace', state: 'Connected' },
-        { name: 'Slack', state: 'Connected' },
-        { name: 'BambooHR', state: 'Pending' },
-        { name: 'Okta', state: 'Connected' }
-    ];
+    /* -------------------- Undo / Redo -------------------- */
+    let UNDO = [], REDO = [];
+    function snapshot() { UNDO.push(JSON.stringify(CANVAS)); if (UNDO.length > 50) UNDO.shift(); REDO.length = 0; syncUndoButtons(); }
+    function undo() { if (!UNDO.length) return; REDO.push(JSON.stringify(CANVAS)); CANVAS = JSON.parse(UNDO.pop()); persist(); renderCanvas(); renderInspector(); syncUndoButtons(); }
+    function redo() { if (!REDO.length) return; UNDO.push(JSON.stringify(CANVAS)); CANVAS = JSON.parse(REDO.pop()); persist(); renderCanvas(); renderInspector(); syncUndoButtons(); }
+    function syncUndoButtons() { $('undoBtn').disabled = UNDO.length === 0; $('redoBtn').disabled = REDO.length === 0; }
 
-    /* ------------ Elements & Init ------------ */
+    /* -------------------- Elements & Init -------------------- */
     const $ = (id) => document.getElementById(id);
     document.addEventListener('DOMContentLoaded', () => {
         // Tabs
@@ -228,45 +298,97 @@
                 e.currentTarget.classList.add('active');
                 const name = e.currentTarget.id.replace('Tab', '');
                 document.querySelectorAll('.wf-panel').forEach(p => p.classList.add('hidden'));
-                document.getElementById(name + 'Panel').classList.remove('hidden');
+                $(name + 'Panel').classList.remove('hidden');
                 if (name === 'analytics') { ensureCharts(); drawCharts(); }
+                if (name === 'library') renderTemplates();
+                if (name === 'runs') renderRuns();
+                if (name === 'settings') hydrateSettingsUI();
             });
         });
 
-        // Builder interactions
+        // Palette
         document.querySelectorAll('.wf-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                addNode({ type: chip.dataset.type, key: chip.dataset.key, cfg: defaultCfg(chip.dataset.key) });
-            });
+            chip.addEventListener('click', () => tryAddNode({ type: chip.dataset.type, key: chip.dataset.key, cfg: defaultCfg(chip.dataset.key) }));
         });
-        $('clearCanvas').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); });
-        $('saveWorkflow').addEventListener('click', () => alert('✅ Workflow saved'));
-        $('publishWorkflow').addEventListener('click', () => alert('🚀 Workflow published'));
-        $('newWorkflowBtn').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); alert('✨ New workflow started'); });
+
+        // Canvas controls
+        $('clearCanvas').addEventListener('click', () => { if (!confirm('Clear canvas?')) return; snapshot(); CANVAS = []; SELECTED = null; persist(); renderCanvas(); renderInspector(); validateCanvas(); });
+        $('saveWorkflow').addEventListener('click', () => { persist(); toast('✅ Workflow saved'); });
+        $('publishWorkflow').addEventListener('click', publishWorkflow);
+        $('simulateBtn').addEventListener('click', simulateRun);
+        $('undoBtn').addEventListener('click', undo);
+        $('redoBtn').addEventListener('click', redo);
+        $('newWorkflowBtn').addEventListener('click', () => { snapshot(); CANVAS = []; SELECTED = null; persist(); renderCanvas(); renderInspector(); toast('✨ New workflow'); });
+
+        // Export / Import
+        $('exportWorkflowBtn').addEventListener('click', exportWorkflowJSON);
+        $('importWorkflowInput').addEventListener('change', importWorkflowJSON);
+        $('exportTemplatesBtn').addEventListener('click', exportTemplatesJSON);
 
         // Library
-        $('newTemplate').addEventListener('click', () => { TEMPLATES.push({ id: Date.now(), name: 'Untitled Template', nodes: [...CANVAS] }); renderTemplates(); alert('✅ Template created'); });
+        $('newTemplate').addEventListener('click', () => {
+            if (!CANVAS.length) { toast('Add nodes first'); return; }
+            const name = prompt('Template name?', 'Untitled Template');
+            if (!name) return;
+            TEMPLATES.unshift({ id: Date.now(), name, nodes: CANVAS.map(n => ({ type: n.type, key: n.key })) });
+            persist(); renderTemplates(); toast('✅ Template created');
+        });
 
         // Runs
         $('runFilter').addEventListener('change', renderRuns);
+        $('clearRuns').addEventListener('click', () => { if (!confirm('Clear run history?')) return; RUNS = []; persist(); renderRuns(); });
 
         // Settings
-        renderIntegrations();
+        hydrateSettingsUI();
+        ['permRunManagers', 'permHREdit', 'permApproveToPublish', 'safetyPII', 'safety2ndApprover', 'safetyBlockWebhooks'].forEach(id => {
+            $(id).addEventListener('change', (e) => { SETTINGS[id] = e.target.checked; persist(); });
+        });
+
+        // Close modal
+        $('modalClose').addEventListener('click', closeModal);
+        window.addEventListener('click', (e) => { if (e.target === $('modal')) closeModal(); });
 
         // Initial renders
-        renderCanvas(); renderInspector(); renderTemplates(); renderRuns();
+        renderCanvas(); renderInspector(); renderTemplates(); renderRuns(); validateCanvas(); syncUndoButtons(); renderIntegrations();
     });
 
-    /* ------------ Builder ------------ */
-    function addNode(n) { CANVAS.push(n); renderCanvas(); }
-    function moveNode(i, d) { const j = i + d; if (j < 0 || j >= CANVAS.length) return;[CANVAS[i], CANVAS[j]] = [CANVAS[j], CANVAS[i]]; renderCanvas(); }
-    function removeNode(i) { CANVAS.splice(i, 1); if (SELECTED === i) SELECTED = null; renderCanvas(); renderInspector(); }
+    /* -------------------- Builder -------------------- */
+    function tryAddNode(n) {
+        // Safety: block webhooks if setting enabled
+        if (SETTINGS.safetyBlockWebhooks && n.key === 'webhook') {
+            toast('🚫 Webhooks are blocked by settings'); return;
+        }
+        // Ensure exactly one trigger at the top
+        if (n.type === 'trigger') {
+            if (CANVAS.find(x => x.type === 'trigger')) { toast('Only one trigger allowed'); return; }
+            if (CANVAS.length > 0) { snapshot(); CANVAS.unshift(n); }
+            else { snapshot(); CANVAS.push(n); }
+        } else {
+            snapshot(); CANVAS.push(n);
+        }
+        persist(); renderCanvas(); validateCanvas();
+    }
+    function addNode(n) { tryAddNode(n); }
+    function moveNode(i, d) { const j = i + d; if (j < 0 || j >= CANVAS.length) return; snapshot();[CANVAS[i], CANVAS[j]] = [CANVAS[j], CANVAS[i]]; persist(); renderCanvas(); }
+    function removeNode(i) { snapshot(); CANVAS.splice(i, 1); if (SELECTED === i) SELECTED = null; persist(); renderCanvas(); renderInspector(); validateCanvas(); }
     function selectNode(i) { SELECTED = i; renderInspector(); }
+    function saveEdit() {
+        const form = document.querySelector('#inspector form');
+        if (!form) { SELECTED = null; renderInspector(); return; }
+        const data = Object.fromEntries(new FormData(form).entries());
+        snapshot();
+        const n = CANVAS[SELECTED]; n.cfg = { ...n.cfg, ...data };
+        persist(); toast('✅ Node updated'); SELECTED = null; renderInspector();
+    }
+    function cancelEdit() { SELECTED = null; renderInspector(); }
 
     function renderCanvas() {
         $('canvas').innerHTML = CANVAS.map((n, i) => `
     <li class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200 ${SELECTED === i ? 'ring-2 ring-blue-200' : ''}">
-      <div class="flex items-center gap-2">${icon(n.key)} <span class="font-medium">${label(n)}</span> ${n.type === 'trigger' ? badge('Trigger', 'amber') : ''}</div>
+      <div class="flex items-center gap-2">${icon(n.key)}
+        <span class="font-medium">${label(n)}</span>
+        ${n.type === 'trigger' ? badge('Trigger', 'amber') : ''}
+      </div>
       <div class="flex items-center gap-2">
         <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},-1)">↑</button>
         <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},1)">↓</button>
@@ -280,8 +402,7 @@
     function renderInspector() {
         const box = $('inspector');
         if (SELECTED === null) { box.innerHTML = '<div class="text-slate-500">Select a node to edit settings.</div>'; return; }
-        const n = CANVAS[SELECTED];
-        const cfg = n.cfg || {};
+        const n = CANVAS[SELECTED]; const cfg = n.cfg || {};
         box.innerHTML = `
     <div class="space-y-3">
       <div class="flex items-center gap-2"><div>${icon(n.key)}</div><div class="font-medium">${label(n)}</div></div>
@@ -292,14 +413,6 @@
       </div>
     </div>
   `;
-    }
-    function cancelEdit() { SELECTED = null; renderInspector(); }
-    function saveEdit() {
-        const form = document.querySelector('#inspector form');
-        if (!form) { SELECTED = null; renderInspector(); return; }
-        const data = Object.fromEntries(new FormData(form).entries());
-        const n = CANVAS[SELECTED]; n.cfg = { ...n.cfg, ...data };
-        alert('✅ Node updated'); SELECTED = null; renderInspector();
     }
 
     function triggerEditor(cfg) {
@@ -318,55 +431,106 @@
       </div>
     </form>`;
     }
+
     function stepEditor(key, cfg) {
-        if (key === 'send_email') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">To</label><input name="to" value="${esc(cfg.to || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="user@company.com"></div>
-        <div><label class="block text-xs text-slate-500 mb-1">Subject</label><input name="subject" value="${esc(cfg.subject || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="Subject"></div>
-      </form>`;
-        }
-        if (key === 'webhook') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">URL</label><input name="url" value="${esc(cfg.url || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="https://api.example.com/hook"></div>
-        <div><label class="block text-xs text-slate-500 mb-1">Method</label>
-          <select name="method" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-            <option ${sel(cfg.method, 'POST')}>POST</option><option ${sel(cfg.method, 'PUT')}>PUT</option>
-          </select>
-        </div>
-      </form>`;
-        }
-        if (key === 'approval') {
-            return `
-      <form class="space-y-3">
-        <div><label class="block text-xs text-slate-500 mb-1">Approver</label><input name="approver" value="${esc(cfg.approver || 'Manager')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        <div><label class="block text-xs text-slate-500 mb-1">SLA (hours)</label><input type="number" name="sla" value="${esc(cfg.sla || 24)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-      </form>`;
-        }
+        if (key === 'send_email') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">To</label><input name="to" value="${esc(cfg.to || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="user@company.com"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">Subject</label><input name="subject" value="${esc(cfg.subject || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="Subject"></div>
+    </form>`;
+        if (key === 'webhook') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">URL</label><input name="url" value="${esc(cfg.url || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="https://api.example.com/hook"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">Method</label>
+        <select name="method" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option ${sel(cfg.method, 'POST')}>POST</option>
+          <option ${sel(cfg.method, 'PUT')}>PUT</option>
+        </select>
+      </div>
+    </form>`;
+        if (key === 'approval') return `
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Approver</label><input name="approver" value="${esc(cfg.approver || 'Manager')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">SLA (hours)</label><input type="number" min="1" name="sla" value="${esc(cfg.sla || 24)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+    </form>`;
         // generic
         return `<form class="space-y-3"><div class="text-slate-500">No configurable fields.</div></form>`;
     }
 
-    /* ------------ Library ------------ */
+    /* -------------------- Validation / Publish -------------------- */
+    function validateCanvas() {
+        const msg = $('validationMsg');
+        if (!CANVAS.length) { msg.textContent = ''; return true; }
+        const first = CANVAS[0];
+        const triggers = CANVAS.filter(n => n.type === 'trigger').length;
+        if (!first || first.type !== 'trigger') { msg.textContent = 'First node must be a Trigger.'; return false; }
+        if (triggers > 1) { msg.textContent = 'Only one Trigger is allowed.'; return false; }
+        msg.textContent = ''; return true;
+    }
+    function publishWorkflow() {
+        if (!validateCanvas()) { toast('❌ Fix validation errors before publishing'); return; }
+        if (SETTINGS.permApproveToPublish) {
+            if (!confirm('This org requires approval to publish. Submit for approval?')) return;
+            toast('📩 Submitted for approval'); return;
+        }
+        toast('🚀 Workflow published');
+    }
+
+    /* -------------------- Simulator -------------------- */
+    function simulateRun() {
+        if (!validateCanvas()) { toast('❌ Invalid workflow'); return; }
+        if (!CANVAS.length) { toast('Add nodes first'); return; }
+        const name = (CANVAS[0]?.key || 'Workflow') + ' • Draft';
+        const log = [];
+        let status = 'success';
+
+        // Safety rule example
+        if (SETTINGS.safety2ndApprover && CANVAS.some(n => n.key === 'termination')) {
+            if (!CANVAS.find(n => n.key === 'approval')) { status = 'failed'; log.push('Missing Approval step for termination.'); }
+        }
+        for (const n of CANVAS) {
+            if (SETTINGS.safetyBlockWebhooks && n.key === 'webhook') { status = 'failed'; log.push('Webhook blocked by safety policy.'); }
+            if (n.key === 'send_email' && SETTINGS.safetyPII && /@/.test(n?.cfg?.to || '')) { log.push('PII check: email ok'); }
+        }
+        if (status === 'success' && log.length === 0) log.push('All steps passed.');
+
+        const entry = { id: Date.now(), at: new Date().toLocaleString(), wf: name, who: 'Test Runner', status, log: log.join('\n') };
+        RUNS.unshift(entry); persist(); renderRuns();
+        openModal('Test Run Result', entry.log);
+    }
+
+    /* -------------------- Library -------------------- */
     function renderTemplates() {
         $('templateList').innerHTML = TEMPLATES.map(t => `
     <div class="rounded-xl border border-slate-200 p-4 flex items-center justify-between">
       <div>
-        <div class="font-medium text-slate-800">${t.name}</div>
+        <div class="font-medium text-slate-800">${esc(t.name)}</div>
         <div class="text-xs text-slate-600">${t.nodes.map(label).join(' • ')}</div>
       </div>
       <div class="flex items-center gap-2">
         <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="loadTemplate(${t.id})"><i class="fa-solid fa-arrow-down mr-1"></i> Load</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="previewTemplate(${t.id})"><i class="fa-solid fa-eye mr-1"></i> View</button>
         <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteTemplate(${t.id})"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
       </div>
     </div>
   `).join('') || `<div class="text-slate-500 text-sm">No templates</div>`;
     }
-    function loadTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; CANVAS = t.nodes.map(n => ({ ...n, cfg: defaultCfg(n.key) })); SELECTED = null; renderCanvas(); renderInspector(); }
-    function deleteTemplate(id) { TEMPLATES = TEMPLATES.filter(t => t.id !== id); renderTemplates(); }
+    function loadTemplate(id) {
+        const t = TEMPLATES.find(x => x.id === id); if (!t) return;
+        snapshot();
+        CANVAS = t.nodes.map(n => ({ ...n, cfg: defaultCfg(n.key) }));
+        SELECTED = null; persist(); renderCanvas(); renderInspector(); validateCanvas(); toast('📥 Template loaded');
+    }
+    function previewTemplate(id) {
+        const t = TEMPLATES.find(x => x.id === id); if (!t) return;
+        openModal('Template JSON', JSON.stringify(t, null, 2));
+    }
+    function deleteTemplate(id) {
+        if (!confirm('Delete template?')) return;
+        TEMPLATES = TEMPLATES.filter(t => t.id !== id); persist(); renderTemplates(); toast('🗑️ Deleted');
+    }
 
-    /* ------------ Runs ------------ */
+    /* -------------------- Runs -------------------- */
     function renderRuns() {
         const f = $('runFilter').value;
         const data = f === 'all' ? RUNS : RUNS.filter(r => r.status === f);
@@ -375,44 +539,119 @@
             return `
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 text-slate-600">${r.at}</td>
-        <td class="py-2 px-4">${r.wf}</td>
-        <td class="py-2 px-4">${r.who}</td>
+        <td class="py-2 px-4">${esc(r.wf)}</td>
+        <td class="py-2 px-4">${esc(r.who)}</td>
         <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${r.status}</span></td>
-        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Run details coming soon')">Details</button></td>
+        <td class="py-2 px-4 text-right">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick='openModal("Run Log", ${JSON.stringify(JSON.stringify(r.log))})'>Log</button>
+        </td>
       </tr>`;
         }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No runs</td></tr>`;
     }
 
-    /* ------------ Analytics ------------ */
+    /* -------------------- Analytics -------------------- */
     let chartsReady = false, ttcC, successC;
     function ensureCharts() {
         if (typeof Chart !== 'undefined') { chartsReady = true; return; }
         if (chartsReady) return;
-        const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        s.onload = () => { chartsReady = true; drawCharts(); };
+        document.head.appendChild(s);
     }
     function drawCharts() {
-        const tctx = document.getElementById('ttcChart').getContext('2d');
-        const sctx = document.getElementById('successChart').getContext('2d');
+        if (!chartsReady) return;
+        const tctx = $('ttcChart').getContext('2d');
+        const sctx = $('successChart').getContext('2d');
+
+        // Simple derived metrics from runs/templates
+        const wfGroups = ['Onboarding', 'Offboarding', 'PTO', 'Change Role'];
+        const medHours = [6, 4, 1, 3];
+
+        const stepKinds = ['Create Ticket', 'Send Email', 'Assign Task', 'Webhook', 'Approval'];
+        const successRates = [98, 96, 93, SETTINGS.safetyBlockWebhooks ? 0 : 88, 84];
+
         ttcC && ttcC.destroy(); successC && successC.destroy();
-        ttcC = new Chart(tctx, { type: 'bar', data: { labels: ['Onboarding', 'Offboarding', 'PTO', 'Change Role'], datasets: [{ label: 'Median Hours', data: [6, 4, 1, 3], backgroundColor: '#3b82f6' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
-        successC = new Chart(sctx, { type: 'pie', data: { labels: ['Create Ticket', 'Send Email', 'Assign Task', 'Webhook', 'Approval'], datasets: [{ data: [98, 96, 93, 88, 84], borderWidth: 2, borderColor: '#fff', backgroundColor: ['#10b981', '#06b6d4', '#f59e0b', '#ef4444', '#8b5cf6'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+        ttcC = new Chart(tctx, {
+            type: 'bar',
+            data: { labels: wfGroups, datasets: [{ label: 'Median Hours', data: medHours, backgroundColor: '#3b82f6' }] },
+            options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+        successC = new Chart(sctx, {
+            type: 'pie',
+            data: {
+                labels: stepKinds, datasets: [{
+                    data: successRates, borderWidth: 2, borderColor: '#fff',
+                    backgroundColor: ['#10b981', '#06b6d4', '#f59e0b', '#ef4444', '#8b5cf6']
+                }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
     }
 
-    /* ------------ Settings ------------ */
+    /* -------------------- Settings / Integrations -------------------- */
+    let INTEGRATIONS = [
+        { name: 'Google Workspace', state: 'Connected' },
+        { name: 'Slack', state: 'Connected' },
+        { name: 'BambooHR', state: 'Pending' },
+        { name: 'Okta', state: 'Connected' }
+    ];
     function renderIntegrations() {
         $('intList').innerHTML = INTEGRATIONS.map(i => `
     <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
       <div class="font-medium text-slate-800">${i.name}</div>
       <div class="flex items-center gap-2">
         <span class="px-2 py-0.5 rounded-full text-xs ${i.state === 'Connected' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${i.state}</span>
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleInt('${i.name}')">${i.state === 'Connected' ? 'Disconnect' : 'Connect'}</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleInt('${i.name}')">
+          ${i.state === 'Connected' ? 'Disconnect' : 'Connect'}
+        </button>
       </div>
     </div>`).join('');
     }
     function toggleInt(name) { INTEGRATIONS = INTEGRATIONS.map(x => x.name === name ? { ...x, state: x.state === 'Connected' ? 'Pending' : 'Connected' } : x); renderIntegrations(); }
+    function hydrateSettingsUI() {
+        $('permRunManagers').checked = !!SETTINGS.permRunManagers;
+        $('permHREdit').checked = !!SETTINGS.permHREdit;
+        $('permApproveToPublish').checked = !!SETTINGS.permApproveToPublish;
+        $('safetyPII').checked = !!SETTINGS.safetyPII;
+        $('safety2ndApprover').checked = !!SETTINGS.safety2ndApprover;
+        $('safetyBlockWebhooks').checked = !!SETTINGS.safetyBlockWebhooks;
+    }
 
-    /* ------------ Helpers ------------ */
+    /* -------------------- Export / Import -------------------- */
+    function exportWorkflowJSON() {
+        const payload = { name: 'Custom Workflow', nodes: CANVAS };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `workflow-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 300);
+        toast('📦 Workflow exported');
+    }
+    function importWorkflowJSON(evt) {
+        const f = evt.target.files?.[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const obj = JSON.parse(reader.result);
+                if (!obj.nodes || !Array.isArray(obj.nodes)) throw new Error('Invalid format');
+                snapshot(); CANVAS = obj.nodes.map(n => ({ type: n.type, key: n.key, cfg: n.cfg || defaultCfg(n.key) }));
+                persist(); renderCanvas(); renderInspector(); validateCanvas(); toast('📥 Workflow imported');
+            } catch (e) { toast('❌ Invalid JSON'); }
+        };
+        reader.readAsText(f);
+        evt.target.value = '';
+    }
+    function exportTemplatesJSON() {
+        const blob = new Blob([JSON.stringify(TEMPLATES, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `workflow-templates-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 300);
+        toast('📦 Templates exported');
+    }
+
+    /* -------------------- Helpers -------------------- */
     function icon(k) {
         const m = {
             new_hire: '<i class="fa-solid fa-user-plus"></i>', termination: '<i class="fa-solid fa-user-xmark"></i>',
@@ -440,6 +679,25 @@
     function badge(txt, tone) { const m = { emerald: 'bg-emerald-50 text-emerald-700', amber: 'bg-amber-50 text-amber-700', slate: 'bg-slate-100 text-slate-700' }; return `<span class="px-2 py-0.5 rounded-full ${m[tone] || m.slate} text-xs">${txt}</span>`; }
     function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c])); }
     function sel(v, exp) { return (String(v || '') === String(exp)) ? 'selected' : ''; }
+    function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.remove('hidden'); t.style.opacity = 1; setTimeout(() => { t.style.opacity = 0; setTimeout(() => t.classList.add('hidden'), 250); }, 1800); }
+    function openModal(title, body) { $('modalTitle').textContent = title; $('modalBody').textContent = body; $('modal').classList.remove('hidden'); }
+    function closeModal() { $('modal').classList.add('hidden'); }
+
+    /* persist all */
+    function persist() {
+        localStorage.setItem(LS_CANVAS, JSON.stringify(CANVAS));
+        localStorage.setItem(LS_TEMPLATES, JSON.stringify(TEMPLATES));
+        localStorage.setItem(LS_RUNS, JSON.stringify(RUNS));
+        localStorage.setItem(LS_SETTINGS, JSON.stringify(SETTINGS));
+    }
+
+    /* expose for inline handlers */
+    window.moveNode = moveNode;
+    window.removeNode = removeNode;
+    window.selectNode = selectNode;
+    window.loadTemplate = loadTemplate;
+    window.previewTemplate = previewTemplate;
+    window.deleteTemplate = deleteTemplate;
 </script>
 
 <style>
