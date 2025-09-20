@@ -129,6 +129,12 @@
                         class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50" type="button">
                         <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
                     </button>
+                    <label
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 cursor-pointer"
+                        title="Import responses CSV">
+                        <i class="fa-solid fa-file-arrow-up mr-1"></i> Import
+                        <input id="importCsv" type="file" accept=".csv" class="hidden">
+                    </label>
                     <span id="respMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
@@ -136,7 +142,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-7 gap-2">
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-9 gap-2">
         <input id="q" placeholder="Search title/desc/comment…"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
@@ -154,11 +160,23 @@
         </select>
         <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fTo" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="sentimentFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="">Any Sentiment</option>
+            <option value="pos">Positive</option>
+            <option value="neu">Neutral</option>
+            <option value="neg">Negative</option>
+        </select>
         <button id="clearFilters"
             class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
+        <div class="flex items-center gap-2">
+            <button id="bulkDelete" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50"><i
+                    class="fa-solid fa-trash mr-1"></i> Delete</button>
+            <button id="bulkTag" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50"><i
+                    class="fa-solid fa-tag mr-1"></i> Tag</button>
+        </div>
     </div>
 
-    <!-- KPIs -->
+    <!-- KPIs + Topics -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Surveys</div>
@@ -182,10 +200,10 @@
         </div>
     </div>
 
-    <!-- Tables -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Surveys -->
-        <div class="rounded-2xl border border-slate-200 bg-white">
+    <!-- Tables + Topics -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Surveys (span 2) -->
+        <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white">
             <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
                     class="fa-solid fa-clipboard-list mr-2"></i> Surveys</div>
             <div class="overflow-x-auto">
@@ -206,25 +224,54 @@
             <div id="svListMsg" class="p-3 text-sm text-slate-600"></div>
         </div>
 
-        <!-- Responses -->
+        <!-- Topics -->
         <div class="rounded-2xl border border-slate-200 bg-white">
             <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
-                    class="fa-solid fa-inbox mr-2"></i> Responses</div>
+                    class="fa-solid fa-hashtag mr-2"></i> Topics (filtered)</div>
+            <div id="topics" class="p-4 text-sm text-slate-700 grid grid-cols-2 gap-2">
+                <!-- chips -->
+            </div>
+        </div>
+
+        <!-- Responses (span 3) -->
+        <div class="lg:col-span-3 rounded-2xl border border-slate-200 bg-white">
+            <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold flex items-center justify-between">
+                <span><i class="fa-solid fa-inbox mr-2"></i> Responses</span>
+                <div class="text-xs text-slate-500" id="pageInfo">Page 1</div>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-left text-slate-700">
                     <thead class="bg-slate-50 text-slate-600">
                         <tr>
+                            <th class="px-4 py-2 w-8"><input id="selAll" type="checkbox"></th>
                             <th class="px-4 py-2">Survey</th>
                             <th class="px-4 py-2">Respondent</th>
                             <th class="px-4 py-2">Dept</th>
                             <th class="px-4 py-2">Rating</th>
                             <th class="px-4 py-2">NPS</th>
                             <th class="px-4 py-2 w-64">Comment</th>
+                            <th class="px-4 py-2">Sent.</th>
                             <th class="px-4 py-2 w-40">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="respRows" class="divide-y divide-slate-200"></tbody>
                 </table>
+            </div>
+            <div class="p-4 border-t border-slate-200 flex items-center justify-between">
+                <div class="text-sm text-slate-600">
+                    <button id="prevPage"
+                        class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50 mr-2">Prev</button>
+                    <button id="nextPage"
+                        class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50">Next</button>
+                </div>
+                <div class="text-sm text-slate-600">
+                    <button id="exportPageCsv"
+                        class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50 mr-2">Export
+                        Page</button>
+                    <button id="exportAllCsv"
+                        class="px-3 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50">Export All
+                        (filtered)</button>
+                </div>
             </div>
             <div id="respListMsg" class="p-3 text-sm text-slate-600"></div>
         </div>
@@ -237,58 +284,57 @@
     let STORE = JSON.parse(localStorage.getItem(KEY) || "null") || {
         surveys: [
             {
-                id: 1, title: "eNPS + Pulse (Q3)", audience: "All", desc: "Quarterly pulse", anon: true, start: "2025-09-10", end: "2025-09-25",
-                status: "Live", questions: [{ id: "q1", type: "nps", text: "How likely are you to recommend our company? (0–10)" },
-                { id: "q2", type: "rating", text: "Work-life balance (1–5)" },
-                { id: "q3", type: "text", text: "One thing to improve" }]
+                id: 1, title: "eNPS + Pulse (Q3)", audience: "All", desc: "Quarterly pulse", anon: true, start: "2025-09-10", end: "2025-09-25", status: "Live",
+                questions: [{ id: "q1", type: "nps", text: "How likely are you to recommend our company? (0–10)" }, { id: "q2", type: "rating", text: "Work-life balance (1–5)" }, { id: "q3", type: "text", text: "One thing to improve" }]
             },
             {
-                id: 2, title: "CSAT - HR tools", audience: "Engineering", desc: "Tooling satisfaction", anon: false, start: "2025-08-01", end: "2025-08-10",
-                status: "Closed", questions: [{ id: "q1", type: "rating", text: "Overall satisfaction (1–5)" },
-                { id: "q2", type: "text", text: "Comments" }]
+                id: 2, title: "CSAT - HR tools", audience: "Engineering", desc: "Tooling satisfaction", anon: false, start: "2025-08-01", end: "2025-08-10", status: "Closed",
+                questions: [{ id: "q1", type: "rating", text: "Overall satisfaction (1–5)" }, { id: "q2", type: "text", text: "Comments" }]
             }
         ],
         responses: [
-            { id: 101, surveyId: 1, respondent: "—", dept: "Engineering", date: "2025-09-12", rating: 5, nps: 9, comment: "Loving the new workflows!" },
-            { id: 102, surveyId: 1, respondent: "—", dept: "Finance", date: "2025-09-12", rating: 4, nps: 7, comment: "Good culture, improve laptops" },
-            { id: 103, surveyId: 2, respondent: "E009 - Arjun", dept: "Engineering", date: "2025-08-05", rating: 3, nps: null, comment: "HR tool is okay" }
+            { id: 101, surveyId: 1, respondent: "—", dept: "Engineering", date: "2025-09-12", rating: 5, nps: 9, comment: "Loving the new workflows!", tags: [] },
+            { id: 102, surveyId: 1, respondent: "—", dept: "Finance", date: "2025-09-12", rating: 4, nps: 7, comment: "Good culture, improve laptops", tags: [] },
+            { id: 103, surveyId: 2, respondent: "E009 - Arjun", dept: "Engineering", date: "2025-08-05", rating: 3, nps: null, comment: "HR tool is okay", tags: ["hr"] }
         ]
     };
     function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); }
 
     /* -------- Elements -------- */
     const svForm = document.getElementById("svForm"), svMsg = document.getElementById("svMsg"), qRows = document.getElementById("qRows"), addQ = document.getElementById("addQ");
-    const respForm = document.getElementById("respForm"), respMsg = document.getElementById("respMsg"), respSurvey = document.getElementById("respSurvey"), exportCsv = document.getElementById("exportCsv");
+    const respForm = document.getElementById("respForm"), respMsg = document.getElementById("respMsg"), respSurvey = document.getElementById("respSurvey"), exportCsvBtn = document.getElementById("exportCsv");
+    const importCsv = document.getElementById("importCsv");
     const svRows = document.getElementById("svRows"), svListMsg = document.getElementById("svListMsg");
     const respRows = document.getElementById("respRows"), respListMsg = document.getElementById("respListMsg");
     const q = document.getElementById("q"), fStatus = document.getElementById("fStatus"), fDept = document.getElementById("fDept"), fAnon = document.getElementById("fAnon"), fFrom = document.getElementById("fFrom"), fTo = document.getElementById("fTo");
+    const sentimentFilter = document.getElementById("sentimentFilter");
     const clearFilters = document.getElementById("clearFilters");
     const kpiSurveys = document.getElementById("kpiSurveys"), kpiResponses = document.getElementById("kpiResponses"), kpiAvg = document.getElementById("kpiAvg"), kpiNps = document.getElementById("kpiNps"), kpiPos = document.getElementById("kpiPos");
+    const topicsBox = document.getElementById("topics");
+    const prevPage = document.getElementById("prevPage"), nextPage = document.getElementById("nextPage"), pageInfo = document.getElementById("pageInfo");
+    const selAll = document.getElementById("selAll");
+    const bulkDelete = document.getElementById("bulkDelete"), bulkTag = document.getElementById("bulkTag");
+    const exportPageCsv = document.getElementById("exportPageCsv"), exportAllCsv = document.getElementById("exportAllCsv");
 
     /* -------- Helpers -------- */
-    function el(tag, cls = "", html = "") { const x = document.createElement(tag); if (cls) x.className = cls; if (html) x.innerHTML = html; return x; }
-    function td(child) { const t = el("td", "px-4 py-2 align-top"); t.appendChild(child); return t; }
+    const el = (t, cls = "", html = "") => { const x = document.createElement(t); if (cls) x.className = cls; if (html) x.innerHTML = html; return x; };
+    const td = child => { const t = el("td", "px-4 py-2 align-top"); t.appendChild(child); return t; };
     function input(v, cls = "w-48") { const i = el("input", `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`); i.value = v ?? ""; return i; }
     function select(opts, cur, cls = "w-40") { const s = el("select", `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`); opts.forEach(o => { const op = el("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
     function flash(elm, msg, ok = true) { elm.textContent = msg; elm.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { elm.textContent = ""; elm.className = "text-sm text-slate-600"; }, 1500); }
-    function withinDate(d) {
-        const v = new Date(d).setHours(0, 0, 0, 0);
-        const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null;
-        const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null;
-        if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true;
-    }
-    const POS = ["love", "great", "good", "awesome", "nice", "happy", "thanks", "improve*not"]; // naive sentiment list
+    function withinDate(d) { const v = new Date(d).setHours(0, 0, 0, 0); const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null; const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null; if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true; }
+    function csvEscape(v) { return `"${String(v ?? "").replace(/"/g, '""')}"`; }
 
-    /* -------- Question row -------- */
-    function addQuestionRow(q = { id: crypto.randomUUID().slice(0, 8), type: "rating", text: "New question" }) {
-        const row = el("div", "rounded-lg border border-slate-200 p-3");
-        const g = el("div", "grid grid-cols-1 md:grid-cols-12 gap-2 items-center");
-        const type = select(["rating", "nps", "text", "mcq"], q.type, "md:col-span-2");
-        const text = input(q.text, "md:col-span-8");
-        const rm = el("button", "md:col-span-2 px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50");
-        rm.innerHTML = '<i class="fa-solid fa-trash-can"></i> Remove';
-        g.append(type, text, rm); row.appendChild(g); qRows.appendChild(row);
-        rm.addEventListener("click", () => row.remove());
+    /* -------- Sentiment (naive) -------- */
+    const POS = ["love", "great", "awesome", "good", "nice", "happy", "thanks", "amazing", "excellent", "helpful"];
+    const NEG = ["bad", "poor", "slow", "bug", "issue", "terrible", "hate", "worst", "frustrating", "delay", "late"];
+    function scoreSentiment(text) {
+        const t = (text || "").toLowerCase();
+        let s = 0; POS.forEach(w => { if (t.includes(w)) s += 1; }); NEG.forEach(w => { if (t.includes(w)) s -= 1; });
+        if (!t.trim()) return { label: "neu", emoji: "😐" };
+        if (s >= 1) return { label: "pos", emoji: "😊" };
+        if (s <= -1) return { label: "neg", emoji: "🙁" };
+        return { label: "neu", emoji: "😐" };
     }
 
     /* -------- Filters -------- */
@@ -302,46 +348,54 @@
             return true;
         });
     }
-    function filteredResponses() {
+    function filteredResponsesRaw() {
         const term = (q.value || "").toLowerCase().trim();
         const dept = (fDept.value || "").toLowerCase().trim();
+        const sf = sentimentFilter.value;
         return STORE.responses.filter(r => {
-            const s = STORE.surveys.find(x => x.id === r.surveyId);
-            if (!s) return false;
+            const s = STORE.surveys.find(x => x.id === r.surveyId); if (!s) return false;
             if (fStatus.value && s.status !== fStatus.value) return false;
             if (fAnon.value && String(s.anon) !== fAnon.value) return false;
             if (dept && !(r.dept || "").toLowerCase().includes(dept)) return false;
             if ((fFrom.value || fTo.value) && !withinDate(r.date)) return false;
             if (term && !(`${s.title} ${r.comment || ""}`.toLowerCase().includes(term))) return false;
+            const sent = scoreSentiment(r.comment).label;
+            if (sf && sent !== sf) return false;
             return true;
         });
     }
 
-    /* -------- KPIs -------- */
+    /* -------- KPIs + Topics -------- */
     function updateKPIs() {
-        const rs = filteredResponses();
+        const rs = filteredResponsesRaw();
         kpiSurveys.textContent = String(filteredSurveys().length);
         kpiResponses.textContent = String(rs.length);
         const ratings = rs.map(r => Number(r.rating)).filter(x => !isNaN(x));
         kpiAvg.textContent = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2) : "—";
-        // NPS: %Promoters(9-10) - %Detractors(0-6)
-        const npsVals = rs.map(r => Number(r.nps)).filter(x => !isNaN(x));
-        if (npsVals.length) {
-            const prom = npsVals.filter(x => x >= 9).length / npsVals.length * 100;
-            const detr = npsVals.filter(x => x <= 6).length / npsVals.length * 100;
+        const nps = rs.map(r => Number(r.nps)).filter(x => !isNaN(x));
+        if (nps.length) {
+            const prom = nps.filter(x => x >= 9).length / nps.length * 100;
+            const detr = nps.filter(x => x <= 6).length / nps.length * 100;
             kpiNps.textContent = Math.round(prom - detr);
         } else kpiNps.textContent = "—";
-        // naive positive %
         if (rs.length) {
-            const pos = rs.filter(r => {
-                const c = (r.comment || "").toLowerCase();
-                return /love|great|awesome|good|nice|happy|thanks/.test(c);
-            }).length / rs.length * 100;
+            const pos = rs.filter(r => scoreSentiment(r.comment).label === "pos").length / rs.length * 100;
             kpiPos.textContent = Math.round(pos) + " %";
         } else kpiPos.textContent = "—";
+
+        // topics (simple keyword freq, stopwords removed)
+        const stop = new Set("the a an to for of and or in on with we our is are be this that it as by at from you your i".split(" "));
+        const freq = {};
+        rs.forEach(r => {
+            (r.comment || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).forEach(w => {
+                if (!w || stop.has(w) || w.length < 3) return; freq[w] = (freq[w] || 0) + 1;
+            });
+        });
+        const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        topicsBox.innerHTML = top.length ? top.map(([w, c]) => `<span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700">${w} <span class="text-slate-500">(${c})</span></span>`).join("") : '<span class="text-slate-500">No topics yet.</span>';
     }
 
-    /* -------- RENDER: Surveys -------- */
+    /* -------- Survey table -------- */
     function loadSurveys() {
         svRows.innerHTML = "";
         const data = filteredSurveys();
@@ -366,18 +420,17 @@
             tr.append(td(titleI), td(audI), td(statusS), td(anonS), td(win), td(actions));
             svRows.appendChild(tr);
 
-            // details (questions)
-            const tr2 = el("tr");
-            const td2 = el("td", "px-4 pb-4"); td2.colSpan = 6;
+            // details row w/ questions + quick NPS for this survey
+            const tr2 = el("tr"); const td2 = el("td", "px-4 pb-4"); td2.colSpan = 6;
             const det = el("details", "rounded-xl border border-slate-200 bg-white p-4");
-            const sum = el("summary", "cursor-pointer text-slate-800 font-medium", "Questions");
+            const sum = el("summary", "cursor-pointer text-slate-800 font-medium", "Questions & Stats");
             const qs = el("div", "space-y-2 mt-3");
-            (s.questions || []).forEach((q, idx) => {
-                const chip = el("div", "rounded-lg border border-slate-200 p-2 text-sm");
-                chip.textContent = `${idx + 1}. [${q.type}] ${q.text}`;
-                qs.appendChild(chip);
-            });
-            det.append(sum, qs); td2.appendChild(det); tr2.appendChild(td2); svRows.appendChild(tr2);
+            (s.questions || []).forEach((q, idx) => { const chip = el("div", "rounded-lg border border-slate-200 p-2 text-sm"); chip.textContent = `${idx + 1}. [${q.type}] ${q.text}`; qs.appendChild(chip); });
+            // per-survey NPS
+            const rs = STORE.responses.filter(r => r.surveyId === s.id && r.nps != null);
+            const nps = rs.length ? Math.round((rs.filter(x => x.nps >= 9).length / rs.length * 100) - (rs.filter(x => x.nps <= 6).length / rs.length * 100)) : "—";
+            const stat = el("div", "mt-3 text-sm text-slate-700", "<b>NPS:</b> " + nps + (nps === "—" ? "" : "") + "");
+            det.append(sum, qs, stat); td2.appendChild(det); tr2.appendChild(td2); svRows.appendChild(tr2);
 
             function save() {
                 s.title = titleI.value.trim(); s.audience = audI.value.trim(); s.status = statusS.value; s.anon = (anonS.value === "true");
@@ -398,29 +451,48 @@
         svListMsg.textContent = data.length ? "" : "No surveys.";
     }
 
-    /* -------- RENDER: Responses -------- */
+    /* -------- Pagination -------- */
+    let page = 1; const pageSize = 10;
+    let selected = new Set();
+    function pageSlice(items) { const start = (page - 1) * pageSize; return items.slice(start, start + pageSize); }
+
+    /* -------- Responses table -------- */
     function loadResponses() {
-        respRows.innerHTML = "";
-        const data = filteredResponses();
+        const all = filteredResponsesRaw();
+        const totalPages = Math.max(1, Math.ceil(all.length / pageSize));
+        if (page > totalPages) page = totalPages;
+
+        respRows.innerHTML = ""; selAll.checked = false;
+        const data = pageSlice(all);
         data.forEach(r => {
             const s = STORE.surveys.find(x => x.id === r.surveyId);
             const tr = el("tr");
+            const cb = el("input"); cb.type = "checkbox"; cb.checked = selected.has(r.id);
+            cb.addEventListener('change', () => { cb.checked ? selected.add(r.id) : selected.delete(r.id); });
+
             const sName = el("span", "", s ? s.title : "(deleted)");
-            const userI = input(s?.anon ? "—" : (r.respondent || "—"), "w-40");
-            userI.disabled = (s && s.anon);
+            const userI = input(s?.anon ? "—" : (r.respondent || "—"), "w-40"); userI.disabled = (s && s.anon);
             const deptI = input(r.dept || "", "w-32");
             const ratingI = input(r.rating ?? "", "w-20"); ratingI.type = "number"; ratingI.min = 1; ratingI.max = 5; ratingI.step = 1;
             const npsI = input(r.nps ?? "", "w-20"); npsI.type = "number"; npsI.min = 0; npsI.max = 10; npsI.step = 1;
             const commentT = input(r.comment || "", "w-64");
+            const sent = scoreSentiment(r.comment); const sentBadge = el("span", `px-2 py-1 rounded text-xs font-medium ${sent.label === 'pos' ? 'bg-green-100 text-green-700' : sent.label === 'neg' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'}`, sent.emoji + " " + sent.label.toUpperCase());
 
             const actions = el("div");
+            const tagBtn = el("button", "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50", "<i class='fa-solid fa-tag mr-1'></i>Tag");
             const saveBtn = el("button", "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900", "<i class='fa-solid fa-floppy-disk mr-1'></i>Save");
             const delBtn = el("button", "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50", "<i class='fa-solid fa-trash-can mr-1'></i>Delete");
-            actions.append(saveBtn, delBtn);
+            actions.append(tagBtn, saveBtn, delBtn);
 
-            tr.append(td(sName), td(userI), td(deptI), td(ratingI), td(npsI), td(commentT), td(actions));
+            tr.append(td(cb), td(sName), td(userI), td(deptI), td(ratingI), td(npsI), td(commentT), td(sentBadge), td(actions));
             respRows.appendChild(tr);
 
+            tagBtn.addEventListener("click", () => {
+                const t = prompt("Add tag (comma to add multiple):", (r.tags || []).join(", "));
+                if (t == null) return;
+                r.tags = t.split(",").map(x => x.trim()).filter(Boolean);
+                persist(); loadAll();
+            });
             saveBtn.addEventListener("click", () => {
                 r.respondent = s?.anon ? "—" : userI.value.trim();
                 r.dept = deptI.value.trim();
@@ -433,26 +505,57 @@
             });
             delBtn.addEventListener("click", () => {
                 if (!confirm("Delete response?")) return;
-                STORE.responses = STORE.responses.filter(x => x !== r);
+                STORE.responses = STORE.responses.filter(x => x !== r); selected.delete(r.id);
                 persist(); loadAll();
             });
         });
-        respListMsg.textContent = data.length ? "" : "No responses.";
+
+        // page info + buttons
+        pageInfo.textContent = `Page ${page} • ${all.length} result(s)`;
+        prevPage.disabled = page <= 1;
+        nextPage.disabled = page >= totalPages;
     }
 
+    /* -------- Bulk actions -------- */
+    selAll.addEventListener('change', () => {
+        const currentIds = pageSlice(filteredResponsesRaw()).map(x => x.id);
+        if (selAll.checked) currentIds.forEach(id => selected.add(id)); else currentIds.forEach(id => selected.delete(id));
+        loadResponses();
+    });
+    bulkDelete.addEventListener('click', () => {
+        if (!selected.size) return alert("Select rows first.");
+        if (!confirm(`Delete ${selected.size} selected response(s)?`)) return;
+        STORE.responses = STORE.responses.filter(r => !selected.has(r.id));
+        selected.clear(); persist(); loadAll();
+    });
+    bulkTag.addEventListener('click', () => {
+        if (!selected.size) return alert("Select rows first.");
+        const t = prompt("Tag to add to selected:");
+        if (!t) return;
+        STORE.responses.forEach(r => { if (selected.has(r.id)) { r.tags = Array.from(new Set([...(r.tags || []), t.trim()])); } });
+        persist(); loadAll();
+    });
+
     /* -------- Create Survey (dummy) -------- */
+    function addQuestionRow(q = { id: crypto.randomUUID().slice(0, 8), type: "rating", text: "New question" }) {
+        const row = el("div", "rounded-lg border border-slate-200 p-3");
+        const g = el("div", "grid grid-cols-1 md:grid-cols-12 gap-2 items-center");
+        const type = select(["rating", "nps", "text", "mcq"], q.type, "md:col-span-2");
+        const textI = input(q.text, "md:col-span-8");
+        const rm = el("button", "md:col-span-2 px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"); rm.innerHTML = '<i class="fa-solid fa-trash-can"></i> Remove';
+        g.append(type, textI, rm); row.appendChild(g); qRows.appendChild(row);
+        rm.addEventListener("click", () => row.remove());
+    }
     addQ.addEventListener("click", () => addQuestionRow());
+
     svForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const fd = new FormData(svForm);
         const title = (fd.get("title") || "").toString().trim();
         if (!title) { flash(svMsg, "Title required", true); return; }
-        // seed questions from template or builder
         let questions = [];
         qRows.querySelectorAll(".rounded-lg").forEach((row, idx) => {
-            const [typeSel, textI] = row.querySelectorAll("select, input");
-            const type = typeSel?.value || "text";
-            const text = textI?.value || `Q${idx + 1}`;
+            const [typeSel, textI] = row.querySelectorAll("select, input"); const type = typeSel?.value || "text"; const text = textI?.value || `Q${idx + 1}`;
             questions.push({ id: crypto.randomUUID().slice(0, 8), type, text });
         });
         const template = (fd.get("template") || "").toString();
@@ -484,36 +587,93 @@
         const id = Math.max(100, ...STORE.responses.map(r => r.id)) + 1;
         const respondent = s?.anon ? "—" : (fd.get("respondent") || "").toString().trim() || "—";
         STORE.responses.unshift({
-            id, surveyId,
-            respondent,
+            id, surveyId, respondent,
             dept: (fd.get("dept") || "").toString().trim(),
             date: new Date().toISOString().slice(0, 10),
             rating: fd.get("rating") ? Number(fd.get("rating")) : null,
             nps: fd.get("nps") ? Number(fd.get("nps")) : null,
-            comment: (fd.get("comment") || "").toString()
+            comment: (fd.get("comment") || "").toString(),
+            tags: []
         });
         persist(); respForm.reset(); flash(respMsg, "Submitted ✓"); loadAll();
     });
 
-    /* -------- Export CSV -------- */
-    exportCsv.addEventListener("click", () => {
-        const rows = [["survey", "respondent", "dept", "date", "rating", "nps", "comment"]];
-        STORE.responses.forEach(r => {
+    /* -------- Export (legacy button) -------- */
+    exportCsvBtn.addEventListener("click", () => exportCsv(STORE.responses));
+
+    /* -------- New export buttons -------- */
+    exportPageCsv.addEventListener("click", () => {
+        const data = pageSlice(filteredResponsesRaw());
+        exportCsv(data);
+    });
+    exportAllCsv.addEventListener("click", () => {
+        exportCsv(filteredResponsesRaw());
+    });
+    function exportCsv(rowsData) {
+        const rows = [["survey", "respondent", "dept", "date", "rating", "nps", "comment", "tags"]];
+        rowsData.forEach(r => {
             const s = STORE.surveys.find(x => x.id === r.surveyId);
-            rows.push([s?.title || "", r.respondent || "", r.dept || "", r.date || "", r.rating ?? "", r.nps ?? "", (r.comment || "").replaceAll('"', '""')]);
+            rows.push([s?.title || "", r.respondent || "", r.dept || "", r.date || "", r.rating ?? "", r.nps ?? "", (r.comment || "").replaceAll('"', '""'), (r.tags || []).join("|")]);
         });
-        const csv = rows.map(r => r.map(v => `"${String(v)}"`).join(",")).join("\n");
+        const csv = rows.map(r => r.map(csvEscape).join(",")).join("\n");
         const blob = new Blob([csv], { type: "text/csv" }); const url = URL.createObjectURL(blob);
         const a = document.createElement("a"); a.href = url; a.download = "feedback_responses.csv"; a.click(); URL.revokeObjectURL(url);
-    });
+    }
 
-    /* -------- Live filters -------- */
-    [q, fStatus, fDept, fAnon, fFrom, fTo].forEach(el => el.addEventListener("input", () => loadAll()));
-    clearFilters.addEventListener("click", () => { q.value = ""; fStatus.value = ""; fDept.value = ""; fAnon.value = ""; fFrom.value = ""; fTo.value = ""; loadAll(); });
+    /* -------- Import CSV (responses) -------- */
+    importCsv.addEventListener("change", (e) => {
+        const f = e.target.files[0]; if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const lines = reader.result.split(/\r?\n/).filter(Boolean);
+            const header = lines.shift().split(",").map(s => s.replace(/^"|"$/g, ""));
+            const idx = k => header.indexOf(k);
+            let added = 0;
+            lines.forEach(line => {
+                const cols = parseCsvLine(line);
+                const surveyTitle = cols[idx("survey")] || "";
+                const survey = STORE.surveys.find(s => s.title === surveyTitle);
+                if (!survey) return;
+                const r = {
+                    id: Math.max(100, ...STORE.responses.map(x => x.id)) + 1,
+                    surveyId: survey.id,
+                    respondent: survey.anon ? "—" : (cols[idx("respondent")] || "—"),
+                    dept: cols[idx("dept")] || "",
+                    date: cols[idx("date")] || new Date().toISOString().slice(0, 10),
+                    rating: cols[idx("rating")] ? Number(cols[idx("rating")]) : null,
+                    nps: cols[idx("nps")] ? Number(cols[idx("nps")]) : null,
+                    comment: cols[idx("comment")] || "",
+                    tags: (cols[idx("tags")] || "").split("|").filter(Boolean)
+                };
+                STORE.responses.unshift(r); added++;
+            });
+            persist(); alert(`Imported ${added} response(s)`); e.target.value = ""; loadAll();
+        };
+        reader.readAsText(f);
+    });
+    function parseCsvLine(line) {
+        const out = []; let cur = ''; let q = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') { if (q && line[i + 1] === '"') { cur += '"'; i++; } else q = !q; }
+            else if (ch === ',' && !q) { out.push(cur); cur = ''; }
+            else cur += ch;
+        }
+        out.push(cur); return out.map(s => s.replace(/^"|"$/g, ""));
+    }
+
+    /* -------- Live filters + pagination controls -------- */
+    [q, fStatus, fDept, fAnon, fFrom, fTo, sentimentFilter].forEach(el => el.addEventListener("input", () => { page = 1; loadAll(); }));
+    clearFilters.addEventListener("click", () => { q.value = ""; fStatus.value = ""; fDept.value = ""; fAnon.value = ""; fFrom.value = ""; fTo.value = ""; sentimentFilter.value = ""; page = 1; loadAll(); });
+    prevPage.addEventListener("click", () => { if (page > 1) { page--; loadResponses(); } });
+    nextPage.addEventListener("click", () => { page++; loadResponses(); });
+
+    /* -------- Question starter -------- */
+    function addQuestionRowStarter() { addQuestionRow({ type: "rating", text: "Overall satisfaction (1–5)" }); }
 
     /* -------- Init -------- */
     function loadAll() { loadSurveys(); loadResponses(); updateKPIs(); }
-    addQuestionRow({ type: "rating", text: "Overall satisfaction (1–5)" }); // starter row
+    addQuestionRowStarter();
     loadAll();
 </script>
 {% endblock %}

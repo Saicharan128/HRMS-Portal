@@ -1,25 +1,26 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 py-4 sm:py-6 gap-4">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-person-walking-arrow-right mr-2"></i> Offboarding
             </h1>
-            <p class="text-slate-600 text-sm">Manage exits smoothly while ensuring compliance and knowledge transfer.
-            </p>
+            <p class="text-slate-600 text-sm mt-1">Manage exits smoothly while ensuring compliance and knowledge
+                transfer.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="newCaseBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button id="newCaseBtn"
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm flex-1 sm:flex-none">
                 <i class="fa-solid fa-plus mr-1"></i> New Case
             </button>
             <button id="exportBtn"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm flex-1 sm:flex-none">
                 <i class="fa-solid fa-file-export mr-1"></i> Export
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm flex-1 sm:flex-none">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
@@ -27,51 +28,58 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="casesTab" class="obf-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+        <div class="flex flex-wrap sm:flex-nowrap space-x-1 bg-slate-100 p-1 rounded-xl gap-y-2">
+            <button id="casesTab"
+                class="obf-tab active px-3 py-2 rounded-lg text-sm font-medium flex-1 sm:flex-none text-center"><i
                     class="fa-solid fa-briefcase mr-1"></i> Cases</button>
-            <button id="checklistsTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="checklistsTab"
+                class="obf-tab px-3 py-2 rounded-lg text-sm font-medium flex-1 sm:flex-none text-center"><i
                     class="fa-solid fa-list-check mr-1"></i> Checklists</button>
-            <button id="assetsTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="assetsTab"
+                class="obf-tab px-3 py-2 rounded-lg text-sm font-medium flex-1 sm:flex-none text-center"><i
                     class="fa-solid fa-computer mr-1"></i> Assets</button>
-            <button id="complianceTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="complianceTab"
+                class="obf-tab px-3 py-2 rounded-lg text-sm font-medium flex-1 sm:flex-none text-center"><i
                     class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
-            <button id="reportsTab" class="obf-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="reportsTab"
+                class="obf-tab px-3 py-2 rounded-lg text-sm font-medium flex-1 sm:flex-none text-center"><i
                     class="fa-solid fa-chart-line mr-1"></i> Reports</button>
         </div>
     </div>
 
     <!-- Cases -->
     <section id="casesPanel" class="obf-panel">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- Left: Summary -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-gauge-high mr-2"></i>
                     Overview</h3>
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Open</div>
-                        <div id="kOpen" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kOpen" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Due ≤7d</div>
-                        <div id="kSoon" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kSoon" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3">
                         <div class="text-xs text-slate-500">Completed</div>
-                        <div id="kDone" class="text-xl font-semibold text-slate-800">0</div>
+                        <div id="kDone" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
                     </div>
                 </div>
                 <div class="mt-5">
                     <div class="text-sm font-medium text-slate-700 mb-2">Filters</div>
-                    <div class="flex items-center gap-2">
-                        <select id="caseStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <select id="caseStatus"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm w-full sm:w-auto">
                             <option value="all">All</option>
                             <option value="pending">Pending</option>
                             <option value="in_progress">In Progress</option>
                             <option value="done">Done</option>
                         </select>
-                        <select id="caseDept" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <select id="caseDept"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm w-full sm:w-auto">
                             <option value="all">All Depts</option>
                             <option value="engineering">Engineering</option>
                             <option value="sales">Sales</option>
@@ -86,12 +94,13 @@
 
             <!-- Right: Cases Table -->
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white">
-                <div class="flex items-center justify-between p-4 border-b border-slate-200">
-                    <div class="relative w-full md:w-96">
+                <div
+                    class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-slate-200 gap-4">
+                    <div class="relative w-full sm:w-80 md:w-96">
                         <i
                             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                         <input id="searchCases" placeholder="Search by name, manager, or reason"
-                            class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
+                            class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200 text-sm">
                         <button id="clearSearch"
                             class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                             <i class="fa-solid fa-xmark"></i>
@@ -104,17 +113,15 @@
                         <thead class="text-left text-slate-500 border-b">
                             <tr>
                                 <th class="py-2 px-4">Employee</th>
-                                <th class="py-2 px-4">Department</th>
-                                <th class="py-2 px-4">Manager</th>
+                                <th class="py-2 px-4 hidden sm:table-cell">Department</th>
+                                <th class="py-2 px-4 hidden sm:table-cell">Manager</th>
                                 <th class="py-2 px-4">Last Day</th>
                                 <th class="py-2 px-4">Status</th>
                                 <th class="py-2 px-4 w-28">Progress</th>
                                 <th class="py-2 px-4 w-28"></th>
                             </tr>
                         </thead>
-                        <tbody id="caseRows" class="text-slate-800">
-                            <!-- injected -->
-                        </tbody>
+                        <tbody id="caseRows" class="text-slate-800"></tbody>
                     </table>
                 </div>
             </div>
@@ -123,22 +130,22 @@
 
     <!-- Checklists -->
     <section id="checklistsPanel" class="obf-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- Builder -->
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
                     <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-list-check mr-2"></i>
                         Checklist Builder</h3>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
                         <button id="saveChecklist"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50 w-full sm:w-auto"><i
                                 class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
                         <button id="publishChecklist"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"><i
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 w-full sm:w-auto"><i
                                 class="fa-solid fa-rocket mr-1"></i> Publish</button>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <!-- Triggers -->
                     <div class="rounded-lg border border-slate-200 p-4">
                         <div class="font-medium text-slate-800 mb-2"><i class="fa-solid fa-bolt mr-1"></i> Triggers
@@ -180,39 +187,40 @@
                         <ul id="checklistCanvas" class="space-y-2 text-sm"></ul>
                         <div class="mt-3">
                             <button id="clearCanvas"
-                                class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
+                                class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50 w-full sm:w-auto">Clear</button>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Templates -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
                     <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-clone mr-2"></i> Templates
                     </h3>
                     <button id="newTemplate"
-                        class="px-3 py-2 rounded-lg text-white bg-purple-600 hover:bg-purple-700 text-sm"><i
+                        class="px-3 py-2 rounded-lg text-white bg-purple-600 hover:bg-purple-700 text-sm w-full sm:w-auto"><i
                             class="fa-solid fa-plus mr-1"></i> New</button>
                 </div>
-                <div id="templatesList" class="space-y-3"><!-- injected --></div>
+                <div id="templatesList" class="space-y-3"></div>
             </div>
         </div>
     </section>
 
     <!-- Assets -->
     <section id="assetsPanel" class="obf-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
                 <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-computer mr-2"></i> Asset
                     Recovery</h3>
-                <div class="flex items-center gap-2">
-                    <select id="assetFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <select id="assetFilter"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm w-full sm:w-auto">
                         <option value="all">All</option>
                         <option value="pending">Pending</option>
                         <option value="returned">Returned</option>
                     </select>
                     <button id="newAsset"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50 w-full sm:w-auto"><i
                             class="fa-solid fa-plus mr-1"></i> Add</button>
                 </div>
             </div>
@@ -221,14 +229,14 @@
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
                             <th class="py-2 px-4">Employee</th>
-                            <th class="py-2 px-4">Item</th>
-                            <th class="py-2 px-4">Serial</th>
+                            <th class="py-2 px-4 hidden sm:table-cell">Item</th>
+                            <th class="py-2 px-4 hidden sm:table-cell">Serial</th>
                             <th class="py-2 px-4">Status</th>
                             <th class="py-2 px-4">Due</th>
                             <th class="py-2 px-4 w-24"></th>
                         </tr>
                     </thead>
-                    <tbody id="assetRows" class="text-slate-800"><!-- injected --></tbody>
+                    <tbody id="assetRows" class="text-slate-800"></tbody>
                 </table>
             </div>
         </div>
@@ -236,38 +244,38 @@
 
     <!-- Compliance -->
     <section id="compliancePanel" class="obf-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-shield mr-2"></i>
                     Compliance Checklist</h3>
-                <div id="compList" class="space-y-3"><!-- injected --></div>
+                <div id="compList" class="space-y-3"></div>
                 <button id="completeAllComp"
-                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm w-full sm:w-auto">
                     <i class="fa-solid fa-check mr-1"></i> Mark All Complete
                 </button>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-user-lock mr-2"></i> Access
                     Revocation Audit</h3>
-                <div id="revocationList" class="space-y-3"><!-- injected --></div>
+                <div id="revocationList" class="space-y-3"></div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-money-bill-wave mr-2"></i>
                     Final Pay</h3>
-                <div id="finalPayPanel" class="space-y-3"><!-- injected --></div>
+                <div id="finalPayPanel" class="space-y-3"></div>
             </div>
         </div>
     </section>
 
     <!-- Reports -->
     <section id="reportsPanel" class="obf-panel hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Exit
                     Reasons</h3>
                 <canvas id="reasonsChart" height="220"></canvas>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-gauge-high mr-2"></i> SLA &
                     Timeliness</h3>
                 <canvas id="slaChart" height="220"></canvas>
@@ -281,16 +289,16 @@
     <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-800">New Offboarding Case</h3>
                     <button id="closeCaseModal" class="text-slate-400 hover:text-slate-600"><i
                             class="fa-solid fa-times text-xl"></i></button>
                 </div>
-                <div class="p-6 space-y-4">
-                    <input id="cName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                <div class="p-4 sm:p-6 space-y-4">
+                    <input id="cName" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="Employee name">
-                    <div class="grid grid-cols-2 gap-4">
-                        <select id="cDept" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <select id="cDept" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                             <option value="engineering">Engineering</option>
                             <option value="sales">Sales</option>
                             <option value="marketing">Marketing</option>
@@ -298,12 +306,13 @@
                             <option value="finance">Finance</option>
                             <option value="operations">Operations</option>
                         </select>
-                        <input id="cManager" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                        <input id="cManager" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                             placeholder="Manager">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input id="cLastDay" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                        <select id="cReason" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input id="cLastDay" type="date"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <select id="cReason" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                             <option>Resignation</option>
                             <option>Termination</option>
                             <option>Contract End</option>
@@ -312,8 +321,9 @@
                     </div>
                     <div class="flex items-center justify-end gap-2 pt-2">
                         <button id="cancelCase"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="saveCase" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">Cancel</button>
+                        <button id="saveCase"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm w-full sm:w-auto"><i
                                 class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
                     </div>
                 </div>
@@ -322,6 +332,71 @@
     </div>
 </div>
 
+<style>
+    .obf-tab.active {
+        background-color: #1e293b;
+        color: white;
+    }
+
+    .obf-tab:not(.active) {
+        color: #64748b;
+    }
+
+    .obf-tab:not(.active):hover {
+        background-color: #f1f5f9;
+        color: #334155;
+    }
+
+    .ck-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .375rem;
+        border: 1px solid rgb(203, 213, 225);
+        background: white;
+        border-radius: .5rem;
+        padding: .375rem .5rem;
+        font-size: .875rem;
+    }
+
+    .ck-chip:hover {
+        background: #f8fafc;
+    }
+
+    @media (max-width: 640px) {
+        .max-w-7xl {
+            max-width: 100%;
+        }
+
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            font-size: 0.75rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem;
+        }
+
+        input,
+        select,
+        button {
+            font-size: 0.875rem;
+        }
+
+        canvas {
+            max-height: 200px;
+        }
+
+        .ck-chip {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
 <script>
     /* ---------- Mock Data ---------- */
     let CASES = [
@@ -329,7 +404,7 @@
         { id: 2, name: 'Noah Kim', dept: 'finance', manager: 'Sana M', last: '2025-10-05', status: 'pending', reason: 'Contract End', progress: 10 },
         { id: 3, name: 'Aarav Mehta', dept: 'engineering', manager: 'Priya S', last: '2025-09-18', status: 'done', reason: 'Other', progress: 100 }
     ];
-    let CHECKLIST = []; // built steps
+    let CHECKLIST = [];
     let TEMPLATES = [
         { id: 11, name: 'Standard • Office', steps: ['revoke_access', 'collect_assets', 'handover_docs', 'exit_interview', 'final_payroll', 'notify_team'] },
         { id: 12, name: 'Standard • Remote', steps: ['revoke_access', 'handover_docs', 'final_payroll', 'notify_team'] }
@@ -419,9 +494,9 @@
             const pill = c.status === 'done' ? 'bg-emerald-50 text-emerald-700' : c.status === 'in_progress' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700';
             return `
       <tr class="border-b last:border-0">
-        <td class="py-2 px-4 font-medium">${c.name}</td>
-        <td class="py-2 px-4">${capitalize(c.dept)}</td>
-        <td class="py-2 px-4">${c.manager}</td>
+        <td class="py-2 px-4 font-medium">${c.name}<br class="sm:hidden"><span class="sm:hidden text-xs text-slate-600">${capitalize(c.dept)} • ${c.manager}</span></td>
+        <td class="py-2 px-4 hidden sm:table-cell">${capitalize(c.dept)}</td>
+        <td class="py-2 px-4 hidden sm:table-cell">${c.manager}</td>
         <td class="py-2 px-4">${c.last} <span class="text-xs text-slate-500">(${daysFromNow(c.last)}d)</span></td>
         <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${labelStatus(c.status)}</span></td>
         <td class="py-2 px-4">
@@ -489,9 +564,9 @@
             const pill = a.status === 'returned' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
             return `
       <tr class="border-b last:border-0">
-        <td class="py-2 px-4">${a.emp}</td>
-        <td class="py-2 px-4">${a.item}</td>
-        <td class="py-2 px-4">${a.serial}</td>
+        <td class="py-2 px-4">${a.emp}<br class="sm:hidden"><span class="sm:hidden text-xs text-slate-600">${a.item} • ${a.serial}</span></td>
+        <td class="py-2 px-4 hidden sm:table-cell">${a.item}</td>
+        <td class="py-2 px-4 hidden sm:table-cell">${a.serial}</td>
         <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(a.status)}</span></td>
         <td class="py-2 px-4">${a.due}</td>
         <td class="py-2 px-4 text-right">
@@ -555,7 +630,6 @@
         reasonsC && reasonsC.destroy(); slaC && slaC.destroy();
         const reasons = { Resignation: 6, Termination: 2, 'Contract End': 3, Other: 1 };
         reasonsC = new Chart(rctx, { type: 'pie', data: { labels: Object.keys(reasons), datasets: [{ data: Object.values(reasons), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
-        // SLA% within 3 days for Access Revoke, Asset Return, Final Pay
         slaC = new Chart(sctx, { type: 'bar', data: { labels: ['Access', 'Assets', 'Final Pay'], datasets: [{ label: 'Within 3 days', data: [96, 82, 88], backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } } });
     }
 
@@ -588,35 +662,4 @@
     function today() { const d = new Date(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${d.getFullYear()}-${m}-${day}`; }
     function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
 </script>
-
-<style>
-    .obf-tab.active {
-        background-color: #1e293b;
-        color: white;
-    }
-
-    .obf-tab:not(.active) {
-        color: #64748b;
-    }
-
-    .obf-tab:not(.active):hover {
-        background-color: #f1f5f9;
-        color: #334155;
-    }
-
-    .ck-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: .375rem;
-        border: 1px solid rgb(203, 213, 225);
-        background: white;
-        border-radius: .5rem;
-        padding: .375rem .5rem;
-        font-size: .875rem;
-    }
-
-    .ck-chip:hover {
-        background: #f8fafc;
-    }
-</style>
 {% endblock %}

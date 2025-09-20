@@ -22,6 +22,8 @@
             </h2>
             <div id="adminBalanceTools" class="hidden flex items-center gap-2">
                 <input id="balUser" placeholder="username" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <input id="balAccrual" type="number" placeholder="+ days (preview)"
+                    class="rounded-xl border border-slate-300 px-3 py-2 text-sm w-36">
                 <button id="balLoad"
                     class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">Load</button>
                 <button id="balSave"
@@ -40,7 +42,7 @@
         <form id="reqForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Type</label>
-                <select name="leave_type" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+                <select name="leave_type" id="leaveType" class="w-full rounded-xl border border-slate-300 px-3 py-2">
                     <option>Annual</option>
                     <option>Sick</option>
                     <option>Casual</option>
@@ -51,16 +53,50 @@
                 <label class="block text-sm text-slate-600 mb-1">Reason</label>
                 <input name="reason" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
             </div>
+
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Start date</label>
-                <input name="start_date" type="date" required
+                <input name="start_date" id="startDate" type="date" required
                     class="w-full rounded-xl border border-slate-300 px-3 py-2" />
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">End date</label>
-                <input name="end_date" type="date" required
+                <input name="end_date" id="endDate" type="date" required
                     class="w-full rounded-xl border border-slate-300 px-3 py-2" />
             </div>
+
+            <div class="flex items-center gap-3">
+                <label class="text-sm text-slate-600">Partial day</label>
+                <select id="partial" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                    <option value="0">No</option>
+                    <option value="0.5">First half</option>
+                    <option value="0.5_end">Second half</option>
+                </select>
+            </div>
+
+            <div id="sickProofWrap" class="hidden">
+                <label class="block text-sm text-slate-600 mb-1">Attachment (optional for Sick)</label>
+                <input id="attachment" type="file" accept=".pdf,.png,.jpg,.jpeg"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+            </div>
+
+            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="rounded-lg bg-slate-50 p-3">
+                    <div class="text-xs text-slate-500">Calculated days</div>
+                    <div id="calcDays" class="text-lg font-semibold text-slate-800">0</div>
+                    <div id="calcNote" class="text-xs text-slate-500">Excludes weekends & org holidays</div>
+                </div>
+                <div class="rounded-lg bg-slate-50 p-3">
+                    <div class="text-xs text-slate-500">Available (type)</div>
+                    <div id="availDays" class="text-lg font-semibold text-slate-800">—</div>
+                    <div id="availWarn" class="text-xs text-rose-600"></div>
+                </div>
+                <div class="rounded-lg bg-slate-50 p-3">
+                    <div class="text-xs text-slate-500">First working day back</div>
+                    <div id="firstBack" class="text-lg font-semibold text-slate-800">—</div>
+                </div>
+            </div>
+
             <div class="md:col-span-2 flex items-center justify-end">
                 <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900"
                     type="submit">Submit</button>
@@ -71,11 +107,13 @@
 
     <!-- My requests -->
     <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <h2 class="text-lg font-semibold text-slate-800">
                 <i class="fa-regular fa-calendar-check mr-2"></i> My requests
             </h2>
             <div class="flex items-center gap-2">
+                <input id="mySearch" placeholder="Search reason/type..."
+                    class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
                 <select id="myStatus" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
                     <option value="">All</option>
                     <option>Pending</option>
@@ -98,11 +136,18 @@
                         <th class="py-2 pr-3">Days</th>
                         <th class="py-2 pr-3">Reason</th>
                         <th class="py-2 pr-3">Status</th>
-                        <th class="py-2 pr-3 w-40">Action</th>
+                        <th class="py-2 pr-3 w-52">Action</th>
                     </tr>
                 </thead>
                 <tbody id="myRows"></tbody>
             </table>
+        </div>
+        <div class="flex items-center justify-end gap-2 mt-3">
+            <button id="pgPrev"
+                class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50">Prev</button>
+            <span id="pgInfo" class="text-xs text-slate-500">—</span>
+            <button id="pgNext"
+                class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50">Next</button>
         </div>
     </div>
 
@@ -126,7 +171,7 @@
                         <th class="py-2 pr-3">Dates</th>
                         <th class="py-2 pr-3">Days</th>
                         <th class="py-2 pr-3">Reason</th>
-                        <th class="py-2 pr-3 w-56">Action</th>
+                        <th class="py-2 pr-3 w-64">Action</th>
                     </tr>
                 </thead>
                 <tbody id="apRows"></tbody>
@@ -138,11 +183,22 @@
 <script>
     const IS_APPROVER = ["HR", "Leaders"].includes("{{ session.get('employee_type') }}");
 
-    // ---- balances ----
+    /* ---------- holidays (fallback if API missing) ---------- */
+    let HOLIDAYS = []; // ISO yyyy-mm-dd
+    async function ensureHolidays() {
+        try {
+            const r = await fetch('/api/holidays');
+            if (r.ok) { HOLIDAYS = await r.json(); }
+            else { HOLIDAYS = []; }
+        } catch { HOLIDAYS = []; }
+    }
+
+    /* ---------- balances ---------- */
     const balancesDiv = document.getElementById("balances");
     const balMsg = document.getElementById("balMsg");
     const adminTools = document.getElementById("adminBalanceTools");
     const balUser = document.getElementById("balUser");
+    const balAccrual = document.getElementById("balAccrual");
     const balLoad = document.getElementById("balLoad");
     const balSave = document.getElementById("balSave");
 
@@ -152,14 +208,18 @@
     function renderBalances() {
         balancesDiv.innerHTML = "";
         BALANCES.forEach(b => {
+            const preview = Number(balAccrual.value || 0);
+            const projected = b.balance_days + (isNaN(preview) ? 0 : preview);
             const card = document.createElement("div");
             card.className = "rounded-xl border border-slate-200 bg-white p-3";
             card.innerHTML = `
       <div class="text-xs text-slate-500">${b.leave_type}</div>
       <div class="text-xl font-semibold text-slate-800 mt-1">
         <input data-type="${b.leave_type}" type="number" min="0" ${IS_APPROVER && CURRENT_BAL_USER ? "" : "readonly"}
-         value="${b.balance_days}" class="w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm text-right">
-      </div>`;
+          value="${b.balance_days}" class="w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm text-right">
+      </div>
+      ${preview ? `<div class="text-[11px] text-slate-500 mt-1">→ ${projected} after accrual</div>` : ""}
+    `;
             balancesDiv.appendChild(card);
         });
     }
@@ -168,85 +228,182 @@
         const q = username ? `?user=${encodeURIComponent(username)}` : "";
         const r = await fetch(`/api/leave/balances${q}`);
         if (!r.ok) { balMsg.className = "mt-2 text-sm text-rose-700"; balMsg.textContent = "Failed to load balances"; return; }
-        BALANCES = await r.json();
-        renderBalances();
-        balMsg.textContent = "";
+        BALANCES = await r.json(); renderBalances(); balMsg.textContent = "";
     }
 
-    // admin tools
     if (IS_APPROVER) { adminTools.classList.remove("hidden"); }
+    balAccrual?.addEventListener('input', renderBalances);
     balLoad?.addEventListener("click", () => { CURRENT_BAL_USER = balUser.value.trim(); loadBalances(CURRENT_BAL_USER); });
     balSave?.addEventListener("click", async () => {
         if (!IS_APPROVER || !CURRENT_BAL_USER) return;
         const payload = { user: CURRENT_BAL_USER, balances: {} };
-        balancesDiv.querySelectorAll("input[data-type]").forEach(inp => {
-            payload.balances[inp.dataset.type] = parseInt(inp.value || 0);
-        });
+        balancesDiv.querySelectorAll("input[data-type]").forEach(inp => payload.balances[inp.dataset.type] = parseInt(inp.value || 0));
         const r = await fetch("/api/leave/balances/set", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         if (r.ok) { balMsg.className = "mt-2 text-sm text-emerald-700"; balMsg.textContent = "Balances saved ✓"; }
         else { balMsg.className = "mt-2 text-sm text-rose-700"; balMsg.textContent = "Save failed"; }
     });
 
-    // ---- request form ----
+    /* ---------- request form ---------- */
     const reqForm = document.getElementById("reqForm");
     const reqMsg = document.getElementById("reqMsg");
+    const leaveType = document.getElementById("leaveType");
+    const startDate = document.getElementById("startDate");
+    const endDate = document.getElementById("endDate");
+    const partial = document.getElementById("partial");
+    const sickProofWrap = document.getElementById("sickProofWrap");
+    const calcDays = document.getElementById("calcDays");
+    const calcNote = document.getElementById("calcNote");
+    const availDays = document.getElementById("availDays");
+    const availWarn = document.getElementById("availWarn");
+    const firstBack = document.getElementById("firstBack");
+
+    function getAvailFor(type) {
+        const row = BALANCES.find(b => (b.leave_type || '').toLowerCase() === type.toLowerCase());
+        return row ? Number(row.balance_days || 0) : 0;
+    }
+    function isWeekend(d) { const x = d.getDay(); return x === 0 || x === 6; }
+    function isHoliday(d) { return HOLIDAYS.includes(d.toISOString().slice(0, 10)); }
+    function addDays(d, n) { const t = new Date(d); t.setDate(t.getDate() + n); return t; }
+    function nextWorking(d) {
+        let t = new Date(d);
+        while (isWeekend(t) || isHoliday(t)) { t = addDays(t, 1); }
+        return t.toISOString().slice(0, 10);
+    }
+    function businessDaysBetween(a, b) {
+        if (!a || !b) return 0;
+        let s = new Date(a), e = new Date(b);
+        if (e < s) return 0;
+        let days = 0;
+        for (let d = new Date(s); d <= e; d = addDays(d, 1)) {
+            if (!isWeekend(d) && !isHoliday(d)) days++;
+        }
+        return days;
+    }
+    function refreshCalc() {
+        const s = startDate.value, e = endDate.value;
+        const base = businessDaysBetween(s, e);
+        const part = partial.value.startsWith('0.5') ? 0.5 : 0;
+        const total = Math.max(0, base - (part > 0 ? 0.5 : 0)); // if partial, subtract half-day
+        calcDays.textContent = total.toFixed(1).replace(/\.0$/, '');
+        const back = e ? nextWorking(addDays(new Date(e), 1)) : '—';
+        firstBack.textContent = back || '—';
+        // availability
+        const avail = getAvailFor(leaveType.value || '');
+        availDays.textContent = isNaN(avail) ? '—' : String(avail);
+        availWarn.textContent = '';
+        if (total > 0 && avail && total > avail) { availWarn.textContent = 'Warning: will overdraw balance'; }
+        if (base > 15) { availWarn.textContent = 'Spans >15 working days — policy review likely'; }
+    }
+    [leaveType, startDate, endDate, partial].forEach(el => el.addEventListener('change', refreshCalc));
+    leaveType.addEventListener('input', () => {
+        sickProofWrap.classList.toggle('hidden', leaveType.value !== 'Sick');
+        refreshCalc();
+    });
+
     reqForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         reqMsg.textContent = "Submitting…";
         const payload = Object.fromEntries(new FormData(reqForm).entries());
+        // augment: days + partial flag
+        payload.days = Number(calcDays.textContent || 0);
+        payload.partial = partial.value;
+        // quick client validations
+        if (!payload.start_date || !payload.end_date) { reqMsg.className = "mt-2 text-sm text-rose-700"; reqMsg.textContent = "Select start and end dates"; return; }
+        if (new Date(payload.end_date) < new Date(payload.start_date)) { reqMsg.className = "mt-2 text-sm text-rose-700"; reqMsg.textContent = "End date before start date"; return; }
+        if (payload.days <= 0) { reqMsg.className = "mt-2 text-sm text-rose-700"; reqMsg.textContent = "No working days in range"; return; }
+
         const r = await fetch("/api/leaves", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         if (r.ok) {
             reqMsg.className = "mt-2 text-sm text-emerald-700"; reqMsg.textContent = "Request submitted ✓";
-            reqForm.reset(); loadMy(); loadBalances(); // refresh
+            reqForm.reset(); partial.value = "0"; sickProofWrap.classList.add('hidden');
+            await Promise.all([loadMy(), loadBalances()]);
         } else {
             const t = await r.text(); reqMsg.className = "mt-2 text-sm text-rose-700"; reqMsg.textContent = t || "Failed";
         }
     });
 
-    // ---- my requests ----
+    /* ---------- my requests ---------- */
     const myRows = document.getElementById("myRows");
     const myStatus = document.getElementById("myStatus");
     const myReload = document.getElementById("myReload");
+    const mySearch = document.getElementById("mySearch");
+    const pgPrev = document.getElementById("pgPrev");
+    const pgNext = document.getElementById("pgNext");
+    const pgInfo = document.getElementById("pgInfo");
 
-    async function loadMy() {
-        const params = new URLSearchParams();
-        if (myStatus.value) params.set("status", myStatus.value);
-        const r = await fetch(`/api/leaves${params.toString() ? `?${params.toString()}` : ""}`);
-        if (!r.ok) return;
-        const rows = await r.json();
+    let MY_CACHE = []; let pg = 1, per = 10;
+
+    const statusPill = (st) => {
+        const m = { Pending: 'bg-amber-50 text-amber-700', Approved: 'bg-emerald-50 text-emerald-700', Rejected: 'bg-rose-50 text-rose-700', Cancelled: 'bg-slate-100 text-slate-700' };
+        return `<span class="px-2 py-0.5 rounded-full text-xs ${m[st] || 'bg-slate-100 text-slate-700'}">${st}</span>`;
+    };
+    function matchesSearch(x, q) {
+        q = q.toLowerCase(); return !q || (x.reason || '').toLowerCase().includes(q) || (x.leave_type || '').toLowerCase().includes(q);
+    }
+    function renderMy() {
+        const q = mySearch.value || '';
+        let rows = MY_CACHE.filter(x => (!myStatus.value || x.status === myStatus.value) && matchesSearch(x, q));
+        const total = rows.length, pages = Math.max(1, Math.ceil(total / per));
+        pg = Math.min(pg, pages);
+        const start = (pg - 1) * per, end = Math.min(total, start + per);
+        const slice = rows.slice(start, end);
+
         myRows.innerHTML = "";
-        rows.forEach(x => {
-            const tr = document.createElement("tr");
+        slice.forEach(x => {
             const cancelBtn = (x.status === "Pending")
-                ? `<button data-id="${x.id}" class="px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50">Cancel</button>`
-                : "";
-            tr.innerHTML = `
-      <td class="py-2 pr-3">${x.leave_type}</td>
-      <td class="py-2 pr-3">${x.start_date} → ${x.end_date}</td>
-      <td class="py-2 pr-3">${x.days}</td>
-      <td class="py-2 pr-3">${x.reason || "—"}</td>
-      <td class="py-2 pr-3">${x.status}${x.approver ? ` <span class="text-xs text-slate-500">(by ${x.approver})</span>` : ""}</td>
-      <td class="py-2 pr-3">${cancelBtn}</td>`;
-            myRows.appendChild(tr);
+                ? `<button data-id="${x.id}" data-act="cancel" class="px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50">Cancel</button>` : "";
+            const icsBtn = (x.status === "Approved")
+                ? `<button data-id="${x.id}" data-act="ics" class="px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900">ICS</button>` : "";
+            myRows.insertAdjacentHTML('beforeend', `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-3">${x.leave_type}</td>
+        <td class="py-2 pr-3">${x.start_date} → ${x.end_date}</td>
+        <td class="py-2 pr-3">${x.days}</td>
+        <td class="py-2 pr-3">${x.reason || "—"}</td>
+        <td class="py-2 pr-3">${statusPill(x.status)} ${x.approver ? `<span class="text-xs text-slate-500">(by ${x.approver})</span>` : ""}</td>
+        <td class="py-2 pr-3 flex gap-2">${cancelBtn}${icsBtn}</td>
+      </tr>
+    `);
         });
-        // wire cancel
+        // wire actions
         myRows.querySelectorAll("button[data-id]").forEach(btn => {
             btn.addEventListener("click", async () => {
-                const id = btn.dataset.id;
-                const r = await fetch(`/api/leaves/${id}/cancel`, { method: "POST" });
-                if (r.ok) { loadMy(); } else { alert("Cancel failed"); }
+                const id = btn.dataset.id, act = btn.dataset.act;
+                if (act === 'cancel') {
+                    btn.disabled = true;
+                    const r = await fetch(`/api/leaves/${id}/cancel`, { method: "POST" });
+                    btn.disabled = false;
+                    if (r.ok) { await loadMy(true); } else { alert("Cancel failed"); }
+                } else if (act === 'ics') {
+                    const r = await fetch(`/api/leaves/${id}/ics`);
+                    if (r.ok) { const text = await r.text(); const blob = new Blob([text], { type: 'text/calendar' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `leave_${id}.ics`; a.click(); URL.revokeObjectURL(url); }
+                    else { alert('Could not generate ICS'); }
+                }
             });
         });
+
+        pgInfo.textContent = `${total ? start + 1 : 0}-${end} of ${total}`;
+        pgPrev.disabled = pg <= 1; pgNext.disabled = pg >= pages;
     }
 
+    async function loadMy(keepPage = false) {
+        const params = new URLSearchParams(); if (myStatus.value) params.set("status", myStatus.value);
+        const r = await fetch(`/api/leaves${params.toString() ? `?${params.toString()}` : ""}`);
+        if (!r.ok) return;
+        MY_CACHE = await r.json();
+        if (!keepPage) pg = 1;
+        renderMy();
+    }
     myReload.addEventListener("click", () => loadMy().catch(console.error));
     myStatus.addEventListener("change", () => loadMy().catch(console.error));
+    mySearch.addEventListener("input", () => renderMy());
+    pgPrev.addEventListener("click", () => { if (pg > 1) { pg--; renderMy(); } });
+    pgNext.addEventListener("click", () => { pg++; renderMy(); });
 
-    // ---- approvals ----
+    /* ---------- approvals ---------- */
     const approvalsBlock = document.getElementById("approvalsBlock");
     const apRows = document.getElementById("apRows");
     const apReload = document.getElementById("apReload");
-
     if (IS_APPROVER) { approvalsBlock.classList.remove("hidden"); }
 
     async function loadApprovals() {
@@ -256,32 +413,42 @@
         const rows = await r.json();
         apRows.innerHTML = "";
         rows.forEach(x => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-      <td class="py-2 pr-3 font-medium">${x.username}</td>
-      <td class="py-2 pr-3">${x.leave_type}</td>
-      <td class="py-2 pr-3">${x.start_date} → ${x.end_date}</td>
-      <td class="py-2 pr-3">${x.days}</td>
-      <td class="py-2 pr-3">${x.reason || "—"}</td>
-      <td class="py-2 pr-3">
-        <button data-id="${x.id}" data-a="approve" class="px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900">Approve</button>
-        <button data-id="${x.id}" data-a="reject" class="px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50">Reject</button>
-      </td>`;
-            apRows.appendChild(tr);
+            apRows.insertAdjacentHTML('beforeend', `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-3 font-medium">${x.username}</td>
+        <td class="py-2 pr-3">${x.leave_type}</td>
+        <td class="py-2 pr-3">${x.start_date} → ${x.end_date}</td>
+        <td class="py-2 pr-3">${x.days}</td>
+        <td class="py-2 pr-3">${x.reason || "—"}</td>
+        <td class="py-2 pr-3">
+          <div class="flex flex-wrap gap-2">
+            <button data-id="${x.id}" data-a="approve" class="px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900">Approve</button>
+            <button data-id="${x.id}" data-a="reject" class="px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50">Reject</button>
+            <button data-id="${x.id}" data-a="docs" class="px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50">Request Docs</button>
+          </div>
+          <div class="mt-2">
+            <input data-id="${x.id}" placeholder="(optional) reason…" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs"/>
+          </div>
+        </td>
+      </tr>
+    `);
         });
-
         apRows.querySelectorAll("button[data-id]").forEach(btn => {
             btn.addEventListener("click", async () => {
                 const id = btn.dataset.id, action = btn.dataset.a;
-                const r = await fetch(`/api/leaves/${id}/decision`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action }) });
-                if (r.ok) { loadApprovals(); } else { alert("Action failed"); }
+                const reason = apRows.querySelector(`input[data-id="${id}"]`)?.value || '';
+                let url = `/api/leaves/${id}/decision`, body = { action, reason };
+                if (action === 'docs') { url = `/api/leaves/${id}/request-docs`; body = { message: reason || 'Please upload supporting documents' }; }
+                btn.disabled = true;
+                const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                btn.disabled = false;
+                if (r.ok) { await loadApprovals(); } else { alert("Action failed"); }
             });
         });
     }
-
     apReload.addEventListener("click", () => loadApprovals().catch(console.error));
 
-    // boot
-    Promise.all([loadBalances(), loadMy(), loadApprovals()]).catch(console.error);
+    /* ---------- boot ---------- */
+    Promise.all([ensureHolidays(), loadBalances(), loadMy(), loadApprovals()]).then(refreshCalc).catch(console.error);
 </script>
 {% endblock %}

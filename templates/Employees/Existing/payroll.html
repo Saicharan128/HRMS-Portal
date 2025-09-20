@@ -49,9 +49,15 @@
                     </select>
                     <input id="periodInput" type="month" class="px-3 py-2 rounded-lg border border-slate-300 text-sm">
                 </div>
-                <div class="text-sm text-slate-600">
-                    <span id="kpiNet">Net: —</span> • <span id="kpiTax">Taxes: —</span> • <span id="kpiHeadcount">HC:
-                        —</span>
+                <div class="flex items-center gap-2">
+                    <button id="exportRunsBtn"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-file-csv mr-1"></i> Export Runs
+                    </button>
+                    <div class="text-sm text-slate-600">
+                        <span id="kpiNet">Net: —</span> • <span id="kpiTax">Taxes: —</span> • <span
+                            id="kpiHeadcount">HC: —</span>
+                    </div>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -64,10 +70,10 @@
                             <th class="py-2 px-4">Gross</th>
                             <th class="py-2 px-4">Taxes</th>
                             <th class="py-2 px-4">Net</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 w-36">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="runRows" class="text-slate-800"><!-- injected --></tbody>
+                    <tbody id="runRows" class="text-slate-800"></tbody>
                 </table>
             </div>
         </div>
@@ -79,9 +85,14 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-users mr-2"></i> Employees</h3>
                 <div class="flex items-center gap-2">
+                    <button id="exportEmpBtn"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                    </button>
                     <button id="addEmpBtn"
-                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
-                            class="fa-solid fa-plus mr-1"></i> Add</button>
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                        <i class="fa-solid fa-plus mr-1"></i> Add
+                    </button>
                     <select id="empFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
                         <option value="active">Active</option>
@@ -99,10 +110,10 @@
                             <th class="py-2 px-4">Allowance</th>
                             <th class="py-2 px-4">Deductions</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 w-40">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="empRows" class="text-slate-800"><!-- injected --></tbody>
+                    <tbody id="empRows" class="text-slate-800"></tbody>
                 </table>
             </div>
         </div>
@@ -116,15 +127,14 @@
                     <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-calculator mr-2"></i>
                         Calculator</h3>
                     <button id="recalcBtn"
-                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
-                            class="fa-solid fa-rotate mr-1"></i> Recalculate</button>
+                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                        <i class="fa-solid fa-rotate mr-1"></i> Recalculate
+                    </button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs text-slate-500 mb-1">Employee</label>
-                        <select id="calcEmp" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                            <!-- injected -->
-                        </select>
+                        <select id="calcEmp" class="w-full rounded-lg border border-slate-300 px-3 py-2"></select>
                     </div>
                     <div>
                         <label class="block text-xs text-slate-500 mb-1">Basic Pay</label>
@@ -171,7 +181,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-gear mr-2"></i> Rules</h3>
                 <div class="space-y-3 text-sm">
@@ -192,20 +201,21 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-receipt mr-2"></i> Statutory
                     Checklist</h3>
-                <div id="compList" class="space-y-3"><!-- injected --></div>
+                <div id="compList" class="space-y-3"></div>
                 <button id="markAllComp"
-                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
-                        class="fa-solid fa-check mr-1"></i> Mark All Complete</button>
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                    <i class="fa-solid fa-check mr-1"></i> Mark All Complete
+                </button>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i
                         class="fa-solid fa-file-invoice-dollar mr-2"></i> Tax Summary</h3>
-                <ul id="taxSummary" class="space-y-2 text-sm"><!-- injected --></ul>
+                <ul id="taxSummary" class="space-y-2 text-sm"></ul>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-shield-halved mr-2"></i>
                     Audit Log</h3>
-                <ul id="auditLog" class="space-y-2 text-xs text-slate-600"><!-- injected --></ul>
+                <ul id="auditLog" class="space-y-2 text-xs text-slate-600"></ul>
             </div>
         </div>
     </section>
@@ -222,9 +232,9 @@
                         <option value="queued">Queued</option>
                         <option value="sent">Sent</option>
                     </select>
-                    <button id="genNeft"
-                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
-                            class="fa-solid fa-file-arrow-down mr-1"></i> Generate File</button>
+                    <button id="genNeft" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                        <i class="fa-solid fa-file-arrow-down mr-1"></i> Generate NEFT CSV
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -239,7 +249,7 @@
                             <th class="py-2 px-4 w-24"></th>
                         </tr>
                     </thead>
-                    <tbody id="batchRows" class="text-slate-800"><!-- injected --></tbody>
+                    <tbody id="batchRows" class="text-slate-800"></tbody>
                 </table>
             </div>
         </div>
@@ -292,8 +302,39 @@
                     <div class="flex items-center justify-end gap-2 pt-2">
                         <button id="cancelEmp"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="saveEmp" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
-                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        <button id="saveEmp" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Run Wizard Modal -->
+<div id="runModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Run Payroll — Preview</h3>
+                    <button id="closeRunModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-3">
+                    <div id="runSummary" class="rounded-lg bg-slate-50 p-3 text-sm"></div>
+                    <div class="rounded-lg border border-slate-200 p-3">
+                        <div class="text-sm font-medium text-slate-700 mb-2">Pre-checks</div>
+                        <ul id="precheckList" class="list-disc pl-5 text-sm text-slate-700 space-y-1"></ul>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="cancelRun"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="confirmRun"
+                            class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                            <i class="fa-solid fa-play mr-1"></i> Confirm & Create Draft
+                        </button>
                     </div>
                 </div>
             </div>
@@ -302,35 +343,43 @@
 </div>
 
 <script>
-    /* ------ Mock Data ------ */
-    let EMP = [
+    /* ------ Persistence helpers ------ */
+    const LS = {
+        get(k, fallback) { try { return JSON.parse(localStorage.getItem(k)) ?? fallback } catch { return fallback } },
+        set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+    };
+    const K_EMP = 'py_emp', K_RUNS = 'py_runs', K_CHECKS = 'py_checks', K_TAX = 'py_tax', K_BATCH = 'py_batches', K_AUD = 'py_audit';
+
+    /* ------ Mock Data (seed if absent) ------ */
+    let EMP = LS.get(K_EMP, [
         { id: 1, name: 'Aarav Mehta', role: 'SWE I', base: 80000, allow: 10000, ded: 2000, status: 'active' },
         { id: 2, name: 'Riya Patel', role: 'Marketing Analyst', base: 60000, allow: 8000, ded: 1500, status: 'active' },
         { id: 3, name: 'Noah Kim', role: 'Finance Assoc', base: 65000, allow: 7000, ded: 2000, status: 'inactive' }
-    ]; // monthly figures (INR/USD-agnostic)
-
-    let RUNS = [
+    ]);
+    let RUNS = LS.get(K_RUNS, [
         { id: 'PY-2025-08', period: '2025-08', status: 'posted', gross: 210000, tax: 31500, net: 173500 },
         { id: 'PY-2025-09', period: '2025-09', status: 'draft', gross: 0, tax: 0, net: 0 }
-    ];
-
-    let CHECKS = [
+    ]);
+    let CHECKS = LS.get(K_CHECKS, [
         { id: 201, text: 'EPF/401k filings prepared', done: true },
         { id: 202, text: 'ESIC/Health contributions computed', done: false },
         { id: 203, text: 'TDS/Withholding summaries exported', done: false },
         { id: 204, text: 'Payslips generated & distributed', done: true }
-    ];
-
-    let TAX_LINES = [
+    ]);
+    let TAX_LINES = LS.get(K_TAX, [
         { name: 'Income Tax (TDS/Withholding)', amount: 31500 },
         { name: 'PF/401k Employer', amount: 8400 },
         { name: 'ESIC/Health Employer', amount: 6300 }
-    ];
-
-    let BATCHES = [
+    ]);
+    let BATCHES = LS.get(K_BATCH, [
         { id: 'B-2301', period: '2025-08', count: 18, amount: 173500, status: 'sent' },
         { id: 'B-2302', period: '2025-09', count: 20, amount: 0, status: 'queued' }
-    ];
+    ]);
+    let AUDIT = LS.get(K_AUD, [
+        '2025-09-12 10:05 • Payroll policy updated',
+        '2025-09-12 11:02 • Run PY-2025-08 posted by Finance',
+        '2025-09-13 09:10 • Employee base updated (Aarav)'
+    ]);
 
     /* ------ Elements & Init ------ */
     const $ = (id) => document.getElementById(id);
@@ -342,15 +391,16 @@
                 e.currentTarget.classList.add('active');
                 const name = e.currentTarget.id.replace('Tab', '');
                 document.querySelectorAll('.py-panel').forEach(p => p.classList.add('hidden'));
-                document.getElementById(name + 'Panel').classList.remove('hidden');
+                $(name + 'Panel').classList.remove('hidden');
                 if (name === 'reports') { ensureCharts(); drawCharts(); }
             });
         });
 
         // Runs
-        $('runPayrollBtn').addEventListener('click', simulateRun);
+        $('runPayrollBtn').addEventListener('click', openRunWizard);
         $('cycleSelect').addEventListener('change', renderRuns);
         $('periodInput').addEventListener('change', renderRuns);
+        $('exportRunsBtn').addEventListener('click', exportRunsCsv);
 
         // Employees
         $('empFilter').addEventListener('change', renderEmp);
@@ -358,26 +408,40 @@
         $('closeEmpModal').addEventListener('click', closeEmpModal);
         $('cancelEmp').addEventListener('click', closeEmpModal);
         $('saveEmp').addEventListener('click', saveEmp);
+        $('exportEmpBtn').addEventListener('click', exportEmpCsv);
 
         // Calc
         $('recalcBtn').addEventListener('click', recalc);
 
         // Compliance
-        $('markAllComp').addEventListener('click', () => { CHECKS = CHECKS.map(c => ({ ...c, done: true })); renderCompliance(); });
+        $('markAllComp').addEventListener('click', () => { CHECKS = CHECKS.map(c => ({ ...c, done: true })); persist(); renderCompliance(); });
 
         // Disbursements
         $('bankFilter').addEventListener('change', renderBatches);
-        $('genNeft').addEventListener('click', () => alert('✅ Bank file generated'));
+        $('genNeft').addEventListener('click', generateNeftCsv);
+
+        // Run wizard modal events
+        $('closeRunModal').addEventListener('click', closeRunWizard);
+        $('cancelRun').addEventListener('click', closeRunWizard);
+        $('confirmRun').addEventListener('click', confirmRunWizard);
 
         // Initial renders
         $('periodInput').value = new Date().toISOString().slice(0, 7);
         renderRuns(); renderEmp(); fillCalcEmployees(); renderCompliance(); renderTax(); renderAudit(); renderBatches();
     });
 
+    /* ------ Persist ------ */
+    function persist() {
+        LS.set(K_EMP, EMP); LS.set(K_RUNS, RUNS); LS.set(K_CHECKS, CHECKS);
+        LS.set(K_TAX, TAX_LINES); LS.set(K_BATCH, BATCHES); LS.set(K_AUD, AUDIT);
+    }
+
     /* ------ Runs ------ */
     function renderRuns() {
         const rows = RUNS.map(r => {
-            const pill = r.status === 'posted' ? 'bg-emerald-50 text-emerald-700' : r.status === 'draft' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700';
+            const pill = r.status === 'posted' ? 'bg-emerald-50 text-emerald-700'
+                : r.status === 'draft' ? 'bg-amber-50 text-amber-700'
+                    : 'bg-slate-100 text-slate-700';
             return `
     <tr class="border-b last:border-0">
       <td class="py-2 px-4 font-medium">${r.id}</td>
@@ -386,26 +450,56 @@
       <td class="py-2 px-4">${fmt(r.gross)}</td>
       <td class="py-2 px-4">${fmt(r.tax)}</td>
       <td class="py-2 px-4">${fmt(r.net)}</td>
-      <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="postRun('${r.id}')">Post</button></td>
+      <td class="py-2 px-4 text-right">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="postRun('${r.id}')">Post</button>
+        <button class="px-2 py-1 rounded border border-rose-300 text-rose-700 text-xs hover:bg-rose-50" onclick="delRun('${r.id}')">Delete</button>
+      </td>
     </tr>`;
         }).join('');
         $('runRows').innerHTML = rows || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No runs</td></tr>`;
-
-        // KPIs (latest)
         const latest = RUNS[RUNS.length - 1] || { gross: 0, tax: 0, net: 0 };
         $('kpiNet').textContent = 'Net: ' + fmt(latest.net);
         $('kpiTax').textContent = 'Taxes: ' + fmt(latest.tax);
         $('kpiHeadcount').textContent = 'HC: ' + EMP.filter(e => e.status === 'active').length;
     }
-    function simulateRun() {
+    function delRun(id) { RUNS = RUNS.filter(x => x.id !== id); persist(); renderRuns(); }
+    function postRun(id) { const r = RUNS.find(x => x.id === id); if (!r) return; r.status = 'posted'; AUDIT.push(`${stamp()} • Run ${r.id} posted`); persist(); renderRuns(); }
+
+    /* ------ Run wizard ------ */
+    function openRunWizard() {
+        // quick pre-checks
+        const active = EMP.filter(e => e.status === 'active');
+        const missing = active.filter(e => !e.base || e.base <= 0);
+        const unchecks = CHECKS.filter(c => !c.done).map(c => `❗ ${c.text}`);
         const period = $('periodInput').value || new Date().toISOString().slice(0, 7);
-        const gross = EMP.filter(e => e.status === 'active').reduce((s, e) => s + e.base + e.allow, 0);
-        const tax = Math.round(gross * 0.15);
-        const net = gross - tax - EMP.reduce((s, e) => s + (e.ded || 0), 0);
-        RUNS.push({ id: `PY-${period}`, period, status: 'draft', gross, tax, net });
-        renderRuns(); alert('🧮 Draft payroll created');
+
+        $('runSummary').innerHTML = `
+    <div><b>Period:</b> ${period}</div>
+    <div><b>Active headcount:</b> ${active.length}</div>
+    <div><b>Warnings:</b> ${missing.length ? `${missing.length} employee(s) with zero base` : 'None'}</div>`;
+
+        $('precheckList').innerHTML = (unchecks.length
+            ? unchecks.map(t => `<li>${t}</li>`).join('')
+            : '<li>✅ All compliance checks marked complete.</li>');
+
+        $('runModal').classList.remove('hidden');
     }
-    function postRun(id) { const r = RUNS.find(x => x.id === id); if (!r) return; r.status = 'posted'; renderRuns(); }
+    function closeRunWizard() { $('runModal').classList.add('hidden'); }
+    function confirmRunWizard() {
+        const period = $('periodInput').value || new Date().toISOString().slice(0, 7);
+        // simulate payroll
+        const gross = EMP.filter(e => e.status === 'active').reduce((s, e) => s + (e.base || 0) + (e.allow || 0), 0);
+        const tax = Math.round(gross * 0.15);
+        const otherDeds = EMP.reduce((s, e) => s + (e.ded || 0), 0);
+        const net = Math.max(0, gross - tax - otherDeds);
+        const id = `PY-${period}`;
+        RUNS.push({ id, period, status: 'draft', gross, tax, net });
+        AUDIT.push(`${stamp()} • Draft run ${id} created`);
+        // Update queued batch (if exists) for the period
+        const b = BATCHES.find(x => x.period === period && x.status === 'queued');
+        if (b) { b.amount = net; b.count = EMP.filter(e => e.status === 'active').length; }
+        persist(); renderRuns(); renderBatches(); closeRunWizard(); alert('🧮 Draft payroll created');
+    }
 
     /* ------ Employees ------ */
     function renderEmp() {
@@ -422,7 +516,8 @@
       <td class="py-2 px-4">${fmt(e.ded || 0)}</td>
       <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(e.status)}</span></td>
       <td class="py-2 px-4 text-right">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="editEmp(${e.id})">Edit</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="quickEditEmp(${e.id})">Edit</button>
+        <button class="px-2 py-1 rounded border border-rose-300 text-rose-700 text-xs hover:bg-rose-50" onclick="delEmp(${e.id})">Delete</button>
       </td>
     </tr>`;
         }).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No employees</td></tr>`;
@@ -431,26 +526,31 @@
     function closeEmpModal() { $('empModal').classList.add('hidden'); }
     function saveEmp() {
         const name = val('eName'); if (!name) return alert('Name required');
-        EMP.push({ id: Date.now(), name, role: val('eRole') || 'TBD', base: num('eBase'), allow: num('eAllow'), ded: 0, status: val('eStatus') });
-        closeEmpModal(); renderEmp();
+        const emp = { id: Date.now(), name, role: val('eRole') || 'TBD', base: num('eBase'), allow: num('eAllow'), ded: 0, status: val('eStatus') };
+        EMP.push(emp); persist(); closeEmpModal(); renderEmp(); fillCalcEmployees();
+        AUDIT.push(`${stamp()} • Employee added (${emp.name})`); persist();
     }
-    function editEmp(id) {
+    function quickEditEmp(id) {
         const e = EMP.find(x => x.id === id); if (!e) return;
         const base = prompt('Base', e.base); if (base === null) return;
-        e.base = Number(base) || e.base; renderEmp();
+        const allow = prompt('Allowance', e.allow); if (allow === null) return;
+        e.base = Number(base) || e.base; e.allow = Number(allow) || e.allow;
+        persist(); renderEmp(); fillCalcEmployees();
+        AUDIT.push(`${stamp()} • Employee updated (${e.name})`); persist();
     }
+    function delEmp(id) { if (!confirm('Delete employee?')) return; EMP = EMP.filter(x => x.id !== id); persist(); renderEmp(); fillCalcEmployees(); }
+
+    /* ------ Calculator ------ */
     function fillCalcEmployees() {
         $('calcEmp').innerHTML = EMP.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
         if (EMP.length) { $('calcEmp').value = EMP[0].id; seedCalcFromEmp(EMP[0].id); }
-        $('calcEmp').addEventListener('change', e => seedCalcFromEmp(Number(e.target.value)));
+        $('calcEmp').onchange = (e) => seedCalcFromEmp(Number(e.target.value));
     }
     function seedCalcFromEmp(id) {
         const e = EMP.find(x => x.id === id); if (!e) return;
         $('calcBasic').value = e.base; $('calcAllow').value = e.allow; $('calcDedPre').value = e.ded || 0; $('calcDedPost').value = 0; $('calcTax').value = 15;
         recalc();
     }
-
-    /* ------ Calculator ------ */
     function recalc() {
         const basic = num('calcBasic'), allow = num('calcAllow'), pre = num('calcDedPre'), post = num('calcDedPost'), rate = Number(val('calcTax')) || 0;
         const bonus = $('ruleBonus').checked ? (basic + allow) * 0.10 : 0;
@@ -458,12 +558,8 @@
         const taxes = Math.max(0, gross * (rate / 100));
         const erPF = $('rulePF').checked ? (basic * 0.04) : 0;
         const erESIC = $('ruleESIC').checked ? (basic * 0.03) : 0;
-        const net = gross - taxes - post;
-        const er = erPF + erESIC;
-        $('outGross').textContent = fmt(gross);
-        $('outTax').textContent = fmt(taxes);
-        $('outNet').textContent = fmt(net);
-        $('outEr').textContent = fmt(er);
+        const net = gross - taxes - post, er = erPF + erESIC;
+        $('outGross').textContent = fmt(gross); $('outTax').textContent = fmt(taxes); $('outNet').textContent = fmt(net); $('outEr').textContent = fmt(er);
     }
 
     /* ------ Compliance ------ */
@@ -476,21 +572,14 @@
       ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
     </div>`).join('');
     }
-    function toggleCheck(id, on) { const x = CHECKS.find(c => c.id === id); if (x) { x.done = on; renderCompliance(); } }
+    function toggleCheck(id, on) { const x = CHECKS.find(c => c.id === id); if (x) { x.done = on; persist(); renderCompliance(); } }
     function renderTax() {
         $('taxSummary').innerHTML = TAX_LINES.map(t => `
     <li class="flex items-center justify-between">
       <span>${t.name}</span><span class="font-medium">${fmt(t.amount)}</span>
     </li>`).join('');
     }
-    function renderAudit() {
-        const events = [
-            '2025-09-12 10:05 • Payroll policy updated',
-            '2025-09-12 11:02 • Run PY-2025-08 posted by Finance',
-            '2025-09-13 09:10 • Employee base updated (Aarav)'
-        ];
-        $('auditLog').innerHTML = events.map(e => `<li>${e}</li>`).join('');
-    }
+    function renderAudit() { $('auditLog').innerHTML = AUDIT.map(e => `<li>${e}</li>`).join(''); }
 
     /* ------ Disbursements ------ */
     function renderBatches() {
@@ -505,9 +594,37 @@
       <td class="py-2 px-4">${b.count}</td>
       <td class="py-2 px-4">${fmt(b.amount)}</td>
       <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(b.status)}</span></td>
-      <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button></td>
+      <td class="py-2 px-4 text-right">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button>
+      </td>
     </tr>`;
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No batches</td></tr>`;
+    }
+    function generateNeftCsv() {
+        // minimal NEFT (demo) — BeneficiaryName, Amount, Period, BatchId
+        const queued = BATCHES.filter(b => b.status === 'queued');
+        if (!queued.length) { alert('No queued batches.'); return; }
+        const lines = [['BeneficiaryName', 'Amount', 'Period', 'BatchId']]
+            .concat(queued.map(b => [`Payroll Batch`, b.amount, b.period, b.id]));
+        downloadCsv(lines, `neft-${new Date().toISOString().slice(0, 10)}.csv`);
+    }
+
+    /* ------ Exports ------ */
+    function exportRunsCsv() {
+        const rows = [['Run ID', 'Period', 'Status', 'Gross', 'Tax', 'Net']]
+            .concat(RUNS.map(r => [r.id, r.period, r.status, r.gross, r.tax, r.net]));
+        downloadCsv(rows, 'runs.csv');
+    }
+    function exportEmpCsv() {
+        const rows = [['Id', 'Name', 'Role', 'Base', 'Allowance', 'Deductions', 'Status']]
+            .concat(EMP.map(e => [e.id, e.name, e.role, e.base, e.allow, e.ded || 0, e.status]));
+        downloadCsv(rows, 'employees.csv');
+    }
+    function downloadCsv(rows, name) {
+        const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url);
     }
 
     /* ------ Reports (Charts) ------ */
@@ -521,17 +638,17 @@
         document.head.appendChild(s);
     }
     function drawCharts() {
-        const c1 = document.getElementById('costChart').getContext('2d');
-        const c2 = document.getElementById('slaChart').getContext('2d');
+        const c1 = $('costChart').getContext('2d'); const c2 = $('slaChart').getContext('2d');
         costC && costC.destroy(); slaC && slaC.destroy();
+        const latest = RUNS[RUNS.length - 1] || { net: 0, tax: 0 };
         costC = new Chart(c1, {
-            type: 'pie', data: {
-                labels: ['Net Pay', 'Taxes', 'Employer Cost'],
-                datasets: [{ data: [173500, 31500, 14700], borderWidth: 2, borderColor: '#fff', backgroundColor: ['#10b981', '#ef4444', '#3b82f6'] }]
-            }, options: { plugins: { legend: { position: 'bottom' } } }
+            type: 'pie',
+            data: { labels: ['Net Pay', 'Taxes', 'Employer Cost'], datasets: [{ data: [latest.net, latest.tax, Math.round((latest.net + latest.tax) * 0.08)], borderWidth: 2, borderColor: '#fff', backgroundColor: ['#10b981', '#ef4444', '#3b82f6'] }] },
+            options: { plugins: { legend: { position: 'bottom' } } }
         });
         slaC = new Chart(c2, {
-            type: 'bar', data: { labels: ['Compute', 'Approve', 'Disburse'], datasets: [{ label: 'Hours (median)', data: [2, 8, 4], backgroundColor: '#06b6d4' }] },
+            type: 'bar',
+            data: { labels: ['Compute', 'Approve', 'Disburse'], datasets: [{ label: 'Hours (median)', data: [2, 8, 4], backgroundColor: '#06b6d4' }] },
             options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
         });
     }
@@ -541,6 +658,7 @@
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     function val(id) { return $(id).value; }
     function num(id) { return Number(val(id) || 0); }
+    function stamp() { return new Date().toISOString().slice(0, 16).replace('T', ' '); }
 </script>
 
 <style>

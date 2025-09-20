@@ -5,9 +5,9 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-semibold text-slate-800">
-                <i class="fa-solid fa-sitemap mr-2"></i> Organizational Flow Chart
+                <i class="fa-solid fa-sitemap mr-2"></i> Organization Chart
             </h1>
-            <p class="text-slate-600 text-sm">Top-down flow layout with connectors, pan & zoom.</p>
+            <p class="text-slate-600 text-sm">Hierarchical tree with connectors, pan & zoom, expand/collapse.</p>
         </div>
         <div class="flex items-center gap-2">
             <button id="editModeBtn"
@@ -21,19 +21,19 @@
         </div>
     </div>
 
-    <!-- View Controls -->
+    <!-- Controls -->
     <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
         <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-slate-700">View:</label>
                 <select id="viewType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                    <option value="flow" selected>Flow View</option>
+                    <option value="flow" selected>Hierarchy</option>
                     <option value="departments">Department View</option>
                     <option value="list">List View</option>
                 </select>
             </div>
             <div class="flex items-center gap-2">
-                <label class="text-sm font-medium text-slate-700">Filter by:</label>
+                <label class="text-sm font-medium text-slate-700">Filter:</label>
                 <select id="departmentFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option value="">All Departments</option>
                 </select>
@@ -41,11 +41,11 @@
             <div class="flex items-center gap-2">
                 <button id="expandAllBtn"
                     class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-expand mr-1"></i> Expand All
+                    <i class="fa-solid fa-plus mr-1"></i> Expand All
                 </button>
                 <button id="collapseAllBtn"
                     class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-compress mr-1"></i> Collapse All
+                    <i class="fa-solid fa-minus mr-1"></i> Collapse All
                 </button>
             </div>
         </div>
@@ -71,30 +71,33 @@
         </div>
     </div>
 
-    <!-- Main Container -->
+    <!-- Main -->
     <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
         <div id="loadingState" class="text-center py-12">
             <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
             <p class="text-slate-600">Loading organizational structure...</p>
         </div>
 
-        <!-- FLOW VIEW (SVG) -->
+        <!-- HIERARCHY VIEW -->
         <div id="flowView" class="hidden">
-            <div id="flowWrapper" class="relative h-[70vh]">
-                <!-- Pan & Zoom viewport -->
+            <div id="flowWrapper" class="relative h-[72vh]">
                 <div id="pzContainer" class="absolute inset-0 overflow-hidden bg-slate-50">
-                    <div id="pzContent" class="origin-top-left" style="transform: translate(40px,40px) scale(1);">
-                        <svg id="flowSvg" width="2000" height="1200" class="block">
-                            <defs>
-                                <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6"
-                                    markerHeight="6" orient="auto-start-reverse">
-                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#cbd5e1"></path>
-                                </marker>
-                            </defs>
+                    <svg id="flowSvg" width="2400" height="1400" class="block">
+                        <defs>
+                            <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6"
+                                orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#cbd5e1"></path>
+                            </marker>
+                            <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0f172a"
+                                    flood-opacity="0.12" />
+                            </filter>
+                        </defs>
+                        <g id="pzContent" transform="translate(80,80) scale(1)">
                             <g id="edges"></g>
                             <g id="nodes"></g>
-                        </svg>
-                    </div>
+                        </g>
+                    </svg>
                 </div>
             </div>
         </div>
@@ -135,7 +138,6 @@
                         <i class="fa-solid fa-times"></i>
                     </button>
                 </div>
-
                 <form id="editForm">
                     <div class="space-y-4">
                         <div>
@@ -164,97 +166,69 @@
 </div>
 
 <style>
-    /* Cards used inside SVG (foreignObject) fallbacks use rect+text */
-    .node-card {
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        background: white;
-        padding: 12px 14px;
-        width: 220px;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    .node-circle {
+        filter: url(#softShadow);
     }
 
-    .node-title {
+    .node-name {
         font-weight: 600;
-        color: #0f172a;
-        line-height: 1.2;
+        fill: #0f172a;
     }
 
-    .node-sub {
+    .node-role {
         font-size: 12px;
-        color: #475569;
+        fill: #475569;
     }
 
-    .node-meta {
+    .node-dept {
         font-size: 11px;
-        color: #64748b;
-        margin-top: 6px;
+        fill: #64748b;
     }
 
-    .node-cxo {
-        border-color: #dc2626;
-        background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
-    }
-
-    .node-leader {
-        border-color: #2563eb;
-        background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-    }
-
-    .node-hr {
-        border-color: #059669;
-        background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
-    }
-
-    .node-emp {
-        border-color: #7c3aed;
-        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    .handle {
+        cursor: pointer;
     }
 </style>
 
 <script>
-    // -------- Globals
-    let orgData = [];   // roots
+    /* ======= Globals ======= */
+    let orgData = [];   // roots (kept for list/dept views)
     let allUsers = [];
     let editMode = false;
+    let expandedSet = new Set();
 
-    // -------- Utils
-    async function fetchJSON(url) {
-        const r = await fetch(url);
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-    }
-    async function postJSON(url, data) {
-        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-    }
-    function getInitials(name) { return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
-    function typeClass(t) {
-        const s = (t || '').toLowerCase();
-        if (s === 'cxos') return 'node-cxo';
-        if (s === 'leaders') return 'node-leader';
-        if (s === 'hr') return 'node-hr';
-        return 'node-emp';
-    }
-    function lerp(a, b, t) { return a + (b - a) * t; }
+    /* Rank order: HIGH → LOW */
+    const RANKS = [
+        'CXOs',
+        'Leaders',
+        'HR',
+        'Employees',
+        'Contractors / Remote staff'
+    ];
 
-    // -------- Data build
+    /* ======= Utils ======= */
+    async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }
+    async function postJSON(url, data) { const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }
+    function getInitials(name) { return (name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
+
+    const PALETTE = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#84cc16', '#f97316', '#06b6d4'];
+    function colorForKey(k) { if (!k) return '#3b82f6'; const i = Math.abs(hashCode(String(k))) % PALETTE.length; return PALETTE[i]; }
+    function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; } return h; }
+
+    /* ======= Data ======= */
     async function loadOrgData() {
-        try {
-            allUsers = await fetchJSON('/api/org/structure');
-        } catch (e) {
-            // Fallback  data (if API not available)
+        try { allUsers = await fetchJSON('/api/org/structure'); }
+        catch (e) {
+            // Fallback
             allUsers = [
-                { id: 1, name: 'Aarav Patel', email: 'aarav@acme.com', employee_type: 'CXOs', subposition: 'CEO', designation: 'Chief Executive Officer' },
+                { id: 1, name: 'Aarav Patel', email: 'aarav@acme.com', employee_type: 'CXOs', subposition: 'Executive', designation: 'CEO' },
                 { id: 2, name: 'Meera Iyer', email: 'meera@acme.com', employee_type: 'Leaders', subposition: 'Engineering', designation: 'VP Engineering', manager_id: 1 },
                 { id: 3, name: 'Rahul Das', email: 'rahul@acme.com', employee_type: 'Leaders', subposition: 'Sales', designation: 'VP Sales', manager_id: 1 },
                 { id: 4, name: 'Sara Khan', email: 'sara@acme.com', employee_type: 'HR', subposition: 'HR', designation: 'Head of HR', manager_id: 1 },
                 { id: 5, name: 'Charan', email: 'charan@acme.com', employee_type: 'Employees', subposition: 'Engineering', designation: 'Full-stack Dev', manager_id: 2 },
                 { id: 6, name: 'Anil', email: 'anil@acme.com', employee_type: 'Employees', subposition: 'Engineering', designation: 'Backend Dev', manager_id: 2 },
                 { id: 7, name: 'Priya', email: 'priya@acme.com', employee_type: 'Employees', subposition: 'Sales', designation: 'AE', manager_id: 3 },
-                { id: 8, name: 'Elena', email: 'elena@acme.com', employee_type: 'Employees', subposition: 'HR', designation: 'HRBP', manager_id: 4 },
+                { id: 8, name: 'Elena', email: 'elena@acme.com', employee_type: 'Employees', subposition: 'HR', designation: 'HRBP', manager_id: 4 }
             ];
         }
         processOrgStructure();
@@ -262,26 +236,24 @@
         populateFilters();
     }
 
+    /* Keep tree for list/dept views */
     function processOrgStructure() {
-        const map = {};
-        allUsers.forEach(u => map[u.id] = { ...u, children: [] });
-        const roots = [];
-        allUsers.forEach(u => {
+        const map = {}; allUsers.forEach(u => map[u.id] = { ...u, children: [] });
+        const roots = []; allUsers.forEach(u => {
             if (u.manager_id && map[u.manager_id]) map[u.manager_id].children.push(map[u.id]);
             else roots.push(map[u.id]);
         });
         orgData = roots;
+        expandedSet = new Set(allUsers.map(u => u.id)); // default expanded
     }
 
+    /* ======= UI helpers ======= */
     function populateFilters() {
         const sel = document.getElementById('departmentFilter');
         const depts = [...new Set(allUsers.map(u => u.subposition).filter(Boolean))].sort();
         sel.innerHTML = '<option value="">All Departments</option>';
-        depts.forEach(d => {
-            const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o);
-        });
+        depts.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o); });
     }
-
     function updateStatistics() {
         document.getElementById('totalEmployees').textContent = allUsers.length;
         const leadership = allUsers.filter(u => ['Leaders', 'CXOs', 'HR'].includes(u.employee_type || '')).length;
@@ -289,11 +261,11 @@
         const departments = new Set(allUsers.map(u => u.subposition).filter(Boolean));
         document.getElementById('departmentCount').textContent = departments.size;
         const mgrs = new Set(allUsers.filter(u => allUsers.some(v => v.manager_id === u.id)).map(u => u.id));
-        document.getElementById('avgTeamSize').textContent = mgrs.size ? Math.round((allUsers.length - rootsCount()) / mgrs.size + 1) : 0;
-        function rootsCount() { return allUsers.filter(u => !u.manager_id).length; }
+        const rootsCount = allUsers.filter(u => !u.manager_id).length;
+        document.getElementById('avgTeamSize').textContent = mgrs.size ? Math.round((allUsers.length - rootsCount) / mgrs.size + 1) : 0;
     }
 
-    // -------- Views
+    /* ======= Views switch ======= */
     function renderCurrentView() {
         const v = document.getElementById('viewType').value;
         document.getElementById('flowView').classList.toggle('hidden', v !== 'flow');
@@ -304,185 +276,161 @@
         if (v === 'list') renderListView();
     }
 
-    // -------- FLOW LAYOUT (top-down)
-    // Simple tree layout: assign x by leaf order, y by depth
+    /* ======= RANKED HIERARCHY VIEW (HIGH → LOW) ======= */
     function renderFlowView() {
-        const svg = document.getElementById('flowSvg');
         const gEdges = document.getElementById('edges');
         const gNodes = document.getElementById('nodes');
         gEdges.innerHTML = ''; gNodes.innerHTML = '';
 
-        // Filter by department if selected
-        const dept = document.getElementById('departmentFilter').value;
-        const filtered = dept
-            ? allUsers.filter(u => (u.subposition || '') === dept || isAncestorInDept(u, dept))
+        const deptFilter = document.getElementById('departmentFilter').value;
+        const filteredUsers = deptFilter
+            ? allUsers.filter(u => (u.subposition || '') === deptFilter)
             : allUsers.slice();
 
-        // Build map + tree for filtered
-        const map = {}; filtered.forEach(u => map[u.id] = { ...u, children: [] });
-        const roots = [];
-        filtered.forEach(u => {
-            if (u.manager_id && map[u.manager_id]) map[u.manager_id].children.push(map[u.id]);
-            else roots.push(map[u.id]);
-        });
+        // Build groups by rank in required order
+        const groups = RANKS.map(rank => ({
+            id: `grp_${rank}`,
+            name: rank,
+            employee_type: rank,
+            designation: rank,
+            isGroup: true,
+            children: filteredUsers.filter(u => (u.employee_type || '') === rank).map(u => ({ ...u, children: [] }))
+        })).filter(g => g.children.length > 0);
 
-        // Collapse/expand state (simple: expand all by default)
-        const expanded = new Set(filtered.map(u => u.id));
+        if (groups.length === 0) return;
 
-        // Layout parameters
-        const nodeW = 220, nodeH = 86, hGap = 48, vGap = 80, corner = 10;
+        // Link groups top->down
+        for (let i = 0; i < groups.length - 1; i++) {
+            groups[i].children.push(groups[i + 1]); // chain group nodes so connectors show HIGH→LOW
+        }
 
-        // Compute layout
-        let xCounter = 0;
+        // layout params
+        const nodeR = 28, hGap = 70, vGap = 140, labelDy = 14;
+
+        // Tidy-like layout: group node centered above its members; chain goes downward.
+        let nextX = 0;
         function assignLayout(node, depth) {
             node.depth = depth;
-            if (!node.children || node.children.length === 0) {
-                node.x = xCounter * (nodeW + hGap);
-                xCounter += 1;
+            const kids = node.children || [];
+            if (kids.length === 0) {
+                node.x = nextX;
+                nextX += (nodeR * 2) + hGap;
             } else {
-                node.children.forEach(c => assignLayout(c, depth + 1));
-                // center parent above children
-                const minX = Math.min(...node.children.map(c => c.x));
-                const maxX = Math.max(...node.children.map(c => c.x));
+                kids.forEach(c => assignLayout(c, depth + 1));
+                const memberKids = kids.filter(c => !c.isGroup); // only real people define width
+                const span = memberKids.length ? memberKids : kids; // fall back to group-to-group chain
+                const minX = Math.min(...span.map(c => c.x));
+                const maxX = Math.max(...span.map(c => c.x));
                 node.x = (minX + maxX) / 2;
             }
-            node.y = depth * (nodeH + vGap);
+            node.y = depth * vGap;
         }
-        roots.forEach(r => assignLayout(r, 0));
+        assignLayout(groups[0], 0); // root is highest rank group
 
-        // Draw edges (curved)
-        function drawEdge(px, py, cx, cy) {
+        // collect for centering
+        const all = [];
+        (function collect(n) { all.push(n); (n.children || []).forEach(collect); })(groups[0]);
+        const minX = Math.min(...all.map(n => n.x));
+        const offsetX = -minX + 40, offsetY = 0;
+
+        function drawEdge(p, c) {
+            const startX = p.x + offsetX, startY = p.y + offsetY + nodeR;
+            const endX = c.x + offsetX, endY = c.y + offsetY - nodeR;
+            const midY = (startY + endY) / 2;
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            const startX = px + nodeW / 2, startY = py + nodeH;
-            const endX = cx + nodeW / 2, endY = cy;
-            const midY = lerp(startY, endY, 0.5);
             const d = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
             path.setAttribute('d', d);
             path.setAttribute('fill', 'none');
-            path.setAttribute('stroke', '#cbd5e1');
+            path.setAttribute('stroke', '#d1d5db');
             path.setAttribute('stroke-width', '2');
-            path.setAttribute('marker-end', 'url(#arrow)');
             gEdges.appendChild(path);
         }
 
-        // DFS to render
         function renderNode(node) {
-            // Edges
-            (node.children || []).forEach(c => {
-                if (expanded.has(node.id)) drawEdge(node.x, node.y, c.x, c.y);
-            });
+            const cx = node.x + offsetX, cy = node.y + offsetY;
 
-            // Node group
+            // edges
+            (node.children || []).forEach(ch => drawEdge(node, ch));
+
+            // group (rank) nodes are bigger circles + label; members are standard
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            g.setAttribute('transform', `translate(${node.x},${node.y})`);
+            g.setAttribute('transform', `translate(${cx},${cy})`);
             gNodes.appendChild(g);
 
-            // Card
-            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('rx', corner); rect.setAttribute('ry', corner);
-            rect.setAttribute('width', nodeW); rect.setAttribute('height', nodeH);
-            rect.setAttribute('fill', '#fff');
-            rect.setAttribute('stroke', borderColor(node.employee_type));
-            rect.setAttribute('stroke-width', '2');
-            rect.style.filter = 'drop-shadow(0 2px 4px rgba(15, 23, 42, 0.06))';
-            g.appendChild(rect);
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('r', node.isGroup ? nodeR + 6 : nodeR);
+            circle.setAttribute('class', 'node-circle');
+            circle.setAttribute('fill', colorForKey(node.employee_type || node.subposition || ''));
+            circle.setAttribute('stroke', '#ffffff'); circle.setAttribute('stroke-width', '3');
+            g.appendChild(circle);
 
-            // Title
-            svgText(g, node.name || '-', 14, 16, '#0f172a', '600');
-            // Sub + dept
-            svgText(g, (node.designation || node.subposition || '-'), 12, 36, '#475569', '500');
-            // Meta
-            svgText(g, (node.email || ''), 11, 56, '#64748b', '400');
+            const initials = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            initials.setAttribute('text-anchor', 'middle');
+            initials.setAttribute('dominant-baseline', 'central');
+            initials.setAttribute('font-size', node.isGroup ? '12' : '14');
+            initials.setAttribute('font-weight', '700');
+            initials.setAttribute('fill', '#ffffff');
+            initials.textContent = node.isGroup ? node.name.split(' ').map(w => w[0]).join('').slice(0, 3).toUpperCase()
+                : getInitials(node.name || '');
+            g.appendChild(initials);
 
-            // Collapse/expand handle
-            if ((node.children || []).length) {
-                const cx = nodeW / 2, cy = nodeH - 10, r = 9;
-                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
-                circle.setAttribute('fill', '#f1f5f9'); circle.setAttribute('stroke', '#cbd5e1');
-                g.appendChild(circle);
+            const name = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            name.setAttribute('y', (node.isGroup ? nodeR + 6 : nodeR) + labelDy);
+            name.setAttribute('text-anchor', 'middle');
+            name.setAttribute('class', 'node-name');
+            name.setAttribute('font-size', '13');
+            name.textContent = node.isGroup ? node.name : (node.name || '-');
+            g.appendChild(name);
 
-                const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                icon.setAttribute('x', cx); icon.setAttribute('y', cy + 3); icon.setAttribute('text-anchor', 'middle');
-                icon.setAttribute('font-size', '12'); icon.setAttribute('fill', '#475569');
-                icon.textContent = expanded.has(node.id) ? '−' : '+';
-                g.appendChild(icon);
+            const role = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            role.setAttribute('y', (node.isGroup ? nodeR + 6 : nodeR) + labelDy + 16);
+            role.setAttribute('text-anchor', 'middle');
+            role.setAttribute('class', 'node-role');
+            role.textContent = node.isGroup ? 'Rank' : (node.designation || node.subposition || '');
+            g.appendChild(role);
 
-                circle.style.cursor = 'pointer'; icon.style.cursor = 'pointer';
-                const toggle = () => {
-                    if (expanded.has(node.id)) expanded.delete(node.id); else expanded.add(node.id);
-                    renderFlowView(); // simple re-render
-                };
-                circle.addEventListener('click', toggle);
-                icon.addEventListener('click', toggle);
+            if (!node.isGroup) {
+                const dept = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                dept.setAttribute('y', nodeR + labelDy + 32);
+                dept.setAttribute('text-anchor', 'middle');
+                dept.setAttribute('class', 'node-dept');
+                dept.textContent = node.email || '';
+                g.appendChild(dept);
             }
 
-            if (expanded.has(node.id)) (node.children || []).forEach(renderNode);
+            (node.children || []).forEach(renderNode);
         }
 
-        roots.forEach(renderNode);
-
-        function svgText(parent, text, x, y, fill, weight) {
-            const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            t.setAttribute('x', 12); t.setAttribute('y', y);
-            t.setAttribute('fill', fill); t.setAttribute('font-size', x);
-            t.setAttribute('font-weight', weight);
-            t.textContent = text;
-            parent.appendChild(t);
-        }
-        function borderColor(t) {
-            const s = (t || '').toLowerCase();
-            if (s === 'cxos') return '#dc2626';
-            if (s === 'leaders') return '#2563eb';
-            if (s === 'hr') return '#059669';
-            return '#7c3aed';
-        }
+        renderNode(groups[0]);
     }
 
-    function isAncestorInDept(u, dept) {
-        // include a manager outside the dept if they manage someone in dept (keeps path)
-        const map = new Map(allUsers.map(x => [x.id, x]));
-        let cur = u;
-        while (cur && cur.manager_id) {
-            cur = map.get(cur.manager_id);
-            if (cur && (cur.subposition || '') === dept) return true;
-        }
-        return false;
-    }
-
-    // -------- Department view
+    /* ======= Department View ======= */
     function renderDepartmentView() {
-        const container = document.getElementById('departmentGrid');
-        container.innerHTML = '';
-        const groups = {};
-        allUsers.forEach(u => {
-            const d = u.subposition || 'Unassigned';
-            (groups[d] || (groups[d] = [])).push(u);
-        });
+        const container = document.getElementById('departmentGrid'); container.innerHTML = '';
+        const groups = {}; allUsers.forEach(u => { const d = u.subposition || 'Unassigned'; (groups[d] || (groups[d] = [])).push(u); });
         Object.entries(groups).forEach(([dept, users]) => {
             const managers = users.filter(u => users.some(v => v.manager_id === u.id));
             const card = document.createElement('div');
-            card.className = 'department-card';
+            card.className = 'rounded-xl border border-slate-200 p-5 bg-white';
             card.innerHTML = `
-        <div class="flex items-center mb-4">
-          <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
-            <i class="fa-solid fa-building text-slate-600"></i>
-          </div>
-          <div>
-            <h3 class="font-semibold text-slate-800">${dept}</h3>
-            <p class="text-sm text-slate-600">${users.length} employee${users.length !== 1 ? 's' : ''}</p>
-          </div>
+      <div class="flex items-center mb-4">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mr-3" style="background:${colorForKey(dept)}20">
+          <i class="fa-solid fa-building text-slate-700"></i>
         </div>
-        <div class="text-sm space-y-1">
-          <div class="flex justify-between"><span class="text-slate-600">Managers:</span><span class="font-medium">${managers.length}</span></div>
-          <div class="flex justify-between"><span class="text-slate-600">ICs:</span><span class="font-medium">${users.length - managers.length}</span></div>
+        <div>
+          <h3 class="font-semibold text-slate-800">${dept}</h3>
+          <p class="text-sm text-slate-600">${users.length} employee${users.length !== 1 ? 's' : ''}</p>
         </div>
-      `;
+      </div>
+      <div class="text-sm space-y-1">
+        <div class="flex justify-between"><span class="text-slate-600">Managers:</span><span class="font-medium">${managers.length}</span></div>
+        <div class="flex justify-between"><span class="text-slate-600">ICs:</span><span class="font-medium">${users.length - managers.length}</span></div>
+      </div>`;
             container.appendChild(card);
         });
     }
 
-    // -------- List view
+    /* ======= List View ======= */
     function renderListView() {
         const tbody = document.getElementById('listTableBody'); tbody.innerHTML = '';
         allUsers.forEach(u => {
@@ -490,36 +438,33 @@
             const drCount = allUsers.filter(x => x.manager_id === u.id).length;
             const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50';
             tr.innerHTML = `
-        <td class="px-4 py-3">
-          <div class="flex items-center">
-            <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center mr-3 text-sm">${getInitials(u.name)}</div>
-            <div>
-              <div class="font-medium text-slate-800">${u.name}</div>
-              <div class="text-sm text-slate-500">${u.email || ''}</div>
-            </div>
+      <td class="px-4 py-3">
+        <div class="flex items-center">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 text-xs text-white" style="background:${colorForKey(u.subposition)}">${getInitials(u.name)}</div>
+          <div>
+            <div class="font-medium text-slate-800">${u.name}</div>
+            <div class="text-sm text-slate-500">${u.email || ''}</div>
           </div>
-        </td>
-        <td class="px-4 py-3 text-sm text-slate-600">${u.designation || u.subposition || '-'}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${u.subposition || '-'}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${mgr ? mgr.name : 'None'}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${drCount}</td>
-        <td class="px-4 py-3"><button onclick="editEmployee(${u.id})" class="text-slate-600 hover:text-slate-800"><i class="fa-solid fa-edit"></i></button></td>
-      `;
+        </div>
+      </td>
+      <td class="px-4 py-3 text-sm text-slate-600">${u.designation || u.subposition || '-'}</td>
+      <td class="px-4 py-3 text-sm text-slate-600">${u.subposition || '-'}</td>
+      <td class="px-4 py-3 text-sm text-slate-600">${mgr ? mgr.name : 'None'}</td>
+      <td class="px-4 py-3 text-sm text-slate-600">${drCount}</td>
+      <td class="px-4 py-3"><button onclick="editEmployee(${u.id})" class="text-slate-600 hover:text-slate-800"><i class="fa-solid fa-edit"></i></button></td>`;
             tbody.appendChild(tr);
         });
     }
 
-    // -------- Edit helpers
+    /* ======= Edit helpers ======= */
     function editEmployee(userId) {
         const user = allUsers.find(u => u.id === userId); if (!user) return;
-        // employee select
         const eSel = document.getElementById('employeeSelect'); eSel.innerHTML = '';
         allUsers.forEach(u => {
             const o = document.createElement('option');
             o.value = u.id; o.textContent = `${u.name} (${u.subposition || u.employee_type})`;
             if (u.id === userId) o.selected = true; eSel.appendChild(o);
         });
-        // manager select
         const mSel = document.getElementById('managerSelect'); mSel.innerHTML = '<option value="">No Manager (Top Level)</option>';
         allUsers.forEach(u => {
             if (u.id !== userId) {
@@ -540,51 +485,33 @@
         } catch (e) { alert('Error: Failed to update reporting structure'); }
     }
 
-    // -------- Pan & Zoom
+    /* ======= Pan & Zoom (SVG) ======= */
     function setupPanZoom() {
-        const container = document.getElementById('pzContainer');
-        const content = document.getElementById('pzContent');
+        const svg = document.getElementById('flowSvg');
+        const g = document.getElementById('pzContent');
         let scale = 1, min = 0.5, max = 2;
-        let isPanning = false, start = { x: 0, y: 0 }, offset = { x: 40, y: 40 };
-
-        container.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const rect = content.getBoundingClientRect();
-            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-            const dir = e.deltaY > 0 ? -1 : 1;
-            const factor = 1 + dir * 0.1;
-            const newScale = Math.min(max, Math.max(min, scale * factor));
-            const k = newScale / scale;
-            // Zoom to mouse position
-            offset.x = mx - k * (mx - offset.x);
-            offset.y = my - k * (my - offset.y);
-            scale = newScale;
-            apply();
-        }, { passive: false });
-
-        container.addEventListener('mousedown', (e) => {
-            isPanning = true; start.x = e.clientX; start.y = e.clientY; container.style.cursor = 'grabbing';
-        });
-        window.addEventListener('mousemove', (e) => {
-            if (!isPanning) return;
-            offset.x += e.clientX - start.x; offset.y += e.clientY - start.y;
-            start.x = e.clientX; start.y = e.clientY; apply();
-        });
-        window.addEventListener('mouseup', () => { isPanning = false; container.style.cursor = 'default'; });
-        function apply() { content.style.transform = `translate(${offset.x}px,${offset.y}px) scale(${scale})`; }
+        let isPanning = false, start = { x: 0, y: 0 }, translate = { x: 80, y: 80 };
+        function apply() { g.setAttribute('transform', `translate(${translate.x},${translate.y}) scale(${scale})`); }
+        svg.addEventListener('wheel', (e) => { e.preventDefault(); const dir = e.deltaY > 0 ? -1 : 1; const ns = Math.min(max, Math.max(min, scale * (1 + dir * 0.1))); scale = ns; apply(); }, { passive: false });
+        svg.addEventListener('mousedown', (e) => { isPanning = true; start.x = e.clientX; start.y = e.clientY; svg.style.cursor = 'grabbing'; });
+        window.addEventListener('mousemove', (e) => { if (!isPanning) return; translate.x += (e.clientX - start.x); translate.y += (e.clientY - start.y); start.x = e.clientX; start.y = e.clientY; apply(); });
+        window.addEventListener('mouseup', () => { isPanning = false; svg.style.cursor = 'default'; });
+        apply();
     }
 
-    // -------- Events
+    /* ======= Events ======= */
     function setupEventListeners() {
         document.getElementById('viewType').addEventListener('change', renderCurrentView);
         document.getElementById('departmentFilter').addEventListener('change', renderCurrentView);
 
-        document.getElementById('expandAllBtn').addEventListener('click', () => { renderFlowView(); });
-        document.getElementById('collapseAllBtn').addEventListener('click', () => { /* minimal: user toggles per node */ });
+        document.getElementById('expandAllBtn').addEventListener('click', () => { expandedSet = new Set(allUsers.map(u => u.id)); renderFlowView(); });
+        document.getElementById('collapseAllBtn').addEventListener('click', () => {
+            // collapse members under groups (chain remains)
+            expandedSet = new Set(); renderFlowView();
+        });
 
         document.getElementById('editModeBtn').addEventListener('click', () => {
-            editMode = !editMode;
-            const btn = document.getElementById('editModeBtn');
+            editMode = !editMode; const btn = document.getElementById('editModeBtn');
             if (editMode) { btn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i> View Mode'; btn.classList.add('bg-slate-800', 'text-white'); }
             else { btn.innerHTML = '<i class="fa-solid fa-edit mr-1"></i> Edit Structure'; btn.classList.remove('bg-slate-800', 'text-white'); }
         });
@@ -596,63 +523,7 @@
         setupPanZoom();
     }
 
-    // -------- Department & List renderers (reuse from your version)
-    function getInitialsNode(name) { return getInitials(name); }
-    function renderDepartmentView() {
-        const container = document.getElementById('departmentGrid'); container.innerHTML = '';
-        const departments = {};
-        allUsers.forEach(user => {
-            const dept = user.subposition || 'Unassigned';
-            (departments[dept] || (departments[dept] = [])).push(user);
-        });
-        Object.entries(departments).forEach(([deptName, users]) => {
-            const managers = users.filter(u => users.some(v => v.manager_id === u.id));
-            const card = document.createElement('div'); card.className = 'department-card';
-            card.innerHTML = `
-        <div class="flex items-center mb-4">
-          <div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-3">
-            <i class="fa-solid fa-building text-slate-600"></i>
-          </div>
-          <div>
-            <h3 class="font-semibold text-slate-800">${deptName}</h3>
-            <p class="text-sm text-slate-600">${users.length} employee${users.length !== 1 ? 's' : ''}</p>
-          </div>
-        </div>
-        <div class="text-sm space-y-1">
-          <div class="flex justify-between"><span class="text-slate-600">Managers:</span><span class="font-medium">${managers.length}</span></div>
-          <div class="flex justify-between"><span class="text-slate-600">ICs:</span><span class="font-medium">${users.length - managers.length}</span></div>
-        </div>`;
-            container.appendChild(card);
-        });
-    }
-
-    function renderListView() {
-        const tbody = document.getElementById('listTableBody'); tbody.innerHTML = '';
-        allUsers.forEach(user => {
-            const manager = allUsers.find(u => u.id === user.manager_id);
-            const directReports = allUsers.filter(u => u.manager_id === user.id).length;
-            const row = document.createElement('tr'); row.className = 'hover:bg-slate-50';
-            row.innerHTML = `
-        <td class="px-4 py-3">
-          <div class="flex items-center">
-            <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center mr-3 text-sm">${getInitials(user.name)}</div>
-            <div>
-              <div class="font-medium text-slate-800">${user.name}</div>
-              <div class="text-sm text-slate-500">${user.email || ''}</div>
-            </div>
-          </div>
-        </td>
-        <td class="px-4 py-3 text-sm text-slate-600">${user.designation || user.subposition || '-'}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${user.subposition || '-'}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${manager ? manager.name : 'None'}</td>
-        <td class="px-4 py-3 text-sm text-slate-600">${directReports}</td>
-        <td class="px-4 py-3"><button onclick="editEmployee(${user.id})" class="text-slate-600 hover:text-slate-800"><i class="fa-solid fa-edit"></i></button></td>
-      `;
-            tbody.appendChild(row);
-        });
-    }
-
-    // -------- Init
+    /* ======= Init ======= */
     async function initializePage() {
         document.getElementById('loadingState').classList.remove('hidden');
         try {
@@ -663,11 +534,11 @@
             renderCurrentView();
         } catch (e) {
             document.getElementById('loadingState').innerHTML = `
-        <div class="text-center py-12">
-          <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
-          <p class="text-red-600 mb-4">Failed to load organizational chart</p>
-          <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
-        </div>`;
+      <div class="text-center py-12">
+        <i class="fa-solid fa-exclamation-triangle text-red-400 text-3xl mb-4"></i>
+        <p class="text-red-600 mb-4">Failed to load organizational chart</p>
+        <button onclick="initializePage()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
+      </div>`;
         }
     }
     document.addEventListener('DOMContentLoaded', initializePage);

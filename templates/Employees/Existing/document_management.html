@@ -10,6 +10,10 @@
             <p class="text-slate-600 text-sm">Securely store, share, and manage HR documents.</p>
         </div>
         <div class="flex items-center gap-2">
+            <button id="exportCsvBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+            </button>
             <button id="uploadDocBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-upload mr-1"></i> Upload
             </button>
@@ -22,49 +26,108 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="allDocsTab" class="dm-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-file-alt mr-1"></i> All Documents</button>
-            <button id="policiesTab" class="dm-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-scale-balanced mr-1"></i> Policies</button>
-            <button id="contractsTab" class="dm-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-file-signature mr-1"></i> Contracts</button>
-            <button id="confidentialTab" class="dm-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-user-lock mr-1"></i> Confidential</button>
-            <button id="archivesTab" class="dm-tab px-4 py-2 rounded-lg text-sm font-medium"><i
-                    class="fa-solid fa-box-archive mr-1"></i> Archives</button>
+        <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl">
+            <button id="allDocsTab" class="dm-tab active px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-file-alt mr-1"></i> All Documents
+            </button>
+            <button id="policiesTab" class="dm-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-scale-balanced mr-1"></i> Policies
+            </button>
+            <button id="contractsTab" class="dm-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-file-signature mr-1"></i> Contracts
+            </button>
+            <button id="confidentialTab" class="dm-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-user-lock mr-1"></i> Confidential
+            </button>
+            <button id="archivesTab" class="dm-tab px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fa-solid fa-box-archive mr-1"></i> Archives
+            </button>
         </div>
     </div>
 
     <!-- All Documents -->
     <section id="allDocsPanel" class="dm-panel">
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between p-4 border-b border-slate-200">
-                <div class="relative w-full md:w-96">
+            <div class="flex flex-wrap gap-3 items-center justify-between p-4 border-b border-slate-200">
+                <div class="flex-1 min-w-[260px] md:min-w-[420px] relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input id="searchDocs" placeholder="Search by title, type, or owner"
+                    <input id="searchDocs" placeholder="Search by title, type, owner or tag"
                         class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
                     <button id="clearSearch"
                         class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
+                <div class="flex gap-2">
+                    <select id="filterType" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="">All Types</option>
+                        <option>Policy</option>
+                        <option>Contract</option>
+                        <option>Confidential</option>
+                        <option>Archive</option>
+                    </select>
+                    <select id="filterOwner" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="">Any Owner</option>
+                        <option>HR</option>
+                        <option>Finance</option>
+                        <option>Legal</option>
+                        <option>Operations</option>
+                        <option>IT</option>
+                    </select>
+                    <select id="filterStatus" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="">Any Status</option>
+                        <option>Active</option>
+                        <option>Signed</option>
+                        <option>Restricted</option>
+                        <option>Archived</option>
+                    </select>
+                </div>
                 <div class="text-sm text-slate-600"><span id="docCount">0</span> documents</div>
             </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
-                            <th class="py-2 px-4">Title</th>
-                            <th class="py-2 px-4">Type</th>
-                            <th class="py-2 px-4">Owner</th>
-                            <th class="py-2 px-4">Last Modified</th>
-                            <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 w-8">
+                                <input id="selectAll" type="checkbox" class="rounded border-slate-300">
+                            </th>
+                            <th data-sort="title" class="sortable py-2 px-4 cursor-pointer">Title <i
+                                    class="fa-solid fa-sort ml-1 text-slate-400"></i></th>
+                            <th data-sort="type" class="sortable py-2 px-4 cursor-pointer">Type <i
+                                    class="fa-solid fa-sort ml-1 text-slate-400"></i></th>
+                            <th data-sort="owner" class="sortable py-2 px-4 cursor-pointer">Owner <i
+                                    class="fa-solid fa-sort ml-1 text-slate-400"></i></th>
+                            <th data-sort="last" class="sortable py-2 px-4 cursor-pointer">Last Modified <i
+                                    class="fa-solid fa-sort ml-1 text-slate-400"></i></th>
+                            <th data-sort="status" class="sortable py-2 px-4 cursor-pointer">Status <i
+                                    class="fa-solid fa-sort ml-1 text-slate-400"></i></th>
+                            <th class="py-2 px-4">Tags</th>
+                            <th class="py-2 px-4 w-44 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button id="bulkArchiveBtn"
+                                        class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50"><i
+                                            class="fa-solid fa-box-archive mr-1"></i> Archive</button>
+                                    <button id="bulkDeleteBtn"
+                                        class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50"><i
+                                            class="fa-solid fa-trash-can mr-1"></i> Delete</button>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="docRows" class="text-slate-800"><!-- injected --></tbody>
                 </table>
+            </div>
+
+            <!-- Pagination (simple) -->
+            <div class="flex items-center justify-between p-4 border-t border-slate-200 text-sm">
+                <div id="pageInfo" class="text-slate-600"></div>
+                <div class="flex gap-2">
+                    <button id="prevPage"
+                        class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50">Previous</button>
+                    <button id="nextPage"
+                        class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50">Next</button>
+                </div>
             </div>
         </div>
     </section>
@@ -106,18 +169,134 @@
     </section>
 </div>
 
-<script>
-    /* ------------ Mock Data ------------ */
-    let DOCS = [
-        { id: 1, title: "Employee Handbook", type: "Policy", owner: "HR", last: "2025-09-01", status: "Active" },
-        { id: 2, title: "NDA - John Doe", type: "Contract", owner: "Legal", last: "2025-08-18", status: "Signed" },
-        { id: 3, title: "Salary Records", type: "Confidential", owner: "Finance", last: "2025-08-25", status: "Restricted" },
-        { id: 4, title: "Work From Home Policy", type: "Policy", owner: "HR", last: "2025-07-15", status: "Active" },
-        { id: 5, title: "Former Employee Files", type: "Archive", owner: "HR", last: "2024-12-31", status: "Archived" }
-    ];
+<!-- Upload/Edit Modal -->
+<div id="docModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="docModalTitle" class="text-lg font-semibold text-slate-800">Upload Document</h3>
+                    <button id="closeDocModal" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <form id="docForm" class="p-6 space-y-3 text-sm">
+                    <input type="hidden" name="id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block mb-1 text-slate-600">Title *</label>
+                            <input name="title" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                placeholder="Policy / Contract / etc.">
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-slate-600">Type *</label>
+                            <select name="type" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option>Policy</option>
+                                <option>Contract</option>
+                                <option>Confidential</option>
+                                <option>Archive</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-slate-600">Owner *</label>
+                            <select name="owner" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option>HR</option>
+                                <option>Finance</option>
+                                <option>Legal</option>
+                                <option>Operations</option>
+                                <option>IT</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-slate-600">Status *</label>
+                            <select name="status" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                                <option>Active</option>
+                                <option>Signed</option>
+                                <option>Restricted</option>
+                                <option>Archived</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-slate-600">Tags (comma-separated)</label>
+                        <input name="tags" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="policy, onboarding, payroll">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-slate-600">Attach File (dummy)</label>
+                        <input name="file" type="file" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <p class="text-xs text-slate-500 mt-1">This demo doesn’t upload; it stores metadata locally.</p>
+                    </div>
+                    <div class="flex items-center justify-between pt-2">
+                        <div class="text-xs text-slate-500">Version: <span id="docVersion">1</span></div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="cancelDocBtn"
+                                class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                            <button type="submit"
+                                class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900"><i
+                                    class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-    /* ------------ Elements & Init ------------ */
+<!-- Preview Modal -->
+<div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="pvTitle" class="text-lg font-semibold text-slate-800">Document</h3>
+                    <button id="closePreview" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-3 text-sm">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div><b>Type:</b> <span id="pvType"></span></div>
+                        <div><b>Owner:</b> <span id="pvOwner"></span></div>
+                        <div><b>Status:</b> <span id="pvStatus"></span></div>
+                        <div><b>Last Modified:</b> <span id="pvLast"></span></div>
+                        <div><b>Version:</b> <span id="pvVer"></span></div>
+                        <div><b>Tags:</b> <span id="pvTags"></span></div>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="pvEditBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50"><i
+                                class="fa-solid fa-pen mr-1"></i> Edit</button>
+                        <button id="pvArchiveBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50"><i
+                                class="fa-solid fa-box-archive mr-1"></i> Archive</button>
+                        <button id="pvDeleteBtn"
+                            class="px-3 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700"><i
+                                class="fa-solid fa-trash mr-1"></i> Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ------------ Persistence ------------ */
+    const KEY = "dm_docs_v1";
+    let DOCS = JSON.parse(localStorage.getItem(KEY) || "null") || [
+        { id: 1, title: "Employee Handbook", type: "Policy", owner: "HR", last: "2025-09-01", status: "Active", tags: ["onboarding"], version: 1 },
+        { id: 2, title: "NDA - John Doe", type: "Contract", owner: "Legal", last: "2025-08-18", status: "Signed", tags: ["nda", "legal"], version: 2 },
+        { id: 3, title: "Salary Records", type: "Confidential", owner: "Finance", last: "2025-08-25", status: "Restricted", tags: ["payroll"], version: 5 },
+        { id: 4, title: "Work From Home Policy", type: "Policy", owner: "HR", last: "2025-07-15", status: "Active", tags: ["policy", "remote"], version: 3 },
+        { id: 5, title: "Former Employee Files", type: "Archive", owner: "HR", last: "2024-12-31", status: "Archived", tags: ["archive"], version: 1 }
+    ];
+    function persist() { localStorage.setItem(KEY, JSON.stringify(DOCS)); }
+
+    /* ------------ Elements & State ------------ */
     const $ = (id) => document.getElementById(id);
+    let sortKey = "last", sortDir = "desc";
+    let page = 1, pageSize = 8;
+    let selected = new Set();
+    let previewDocId = null;
+
     document.addEventListener('DOMContentLoaded', () => {
         // Tabs
         document.querySelectorAll('.dm-tab').forEach(b => {
@@ -127,71 +306,261 @@
                 const name = e.currentTarget.id.replace('Tab', '');
                 document.querySelectorAll('.dm-panel').forEach(p => p.classList.add('hidden'));
                 document.getElementById(name + 'Panel').classList.remove('hidden');
+                // keep lists fresh
+                if (name !== 'allDocs') { renderLists(); }
             });
         });
 
-        // Search
+        // Search + filters
         const s = $('searchDocs'), clr = $('clearSearch');
-        s.addEventListener('input', () => { clr.classList.toggle('hidden', !s.value.trim()); renderDocs(); });
-        clr.addEventListener('click', () => { s.value = ''; clr.classList.add('hidden'); renderDocs(); });
+        s.addEventListener('input', debounce(() => { clr.classList.toggle('hidden', !s.value.trim()); page = 1; renderDocs(); }, 200));
+        clr.addEventListener('click', () => { s.value = ''; clr.classList.add('hidden'); page = 1; renderDocs(); });
+        ['filterType', 'filterOwner', 'filterStatus'].forEach(id => $(id).addEventListener('change', () => { page = 1; renderDocs(); }));
 
-        // Upload
-        $('uploadDocBtn').addEventListener('click', () => alert('📂 Upload modal would appear here'));
+        // Sorting
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const k = th.dataset.sort;
+                if (sortKey === k) { sortDir = (sortDir === 'asc') ? 'desc' : 'asc'; } else { sortKey = k; sortDir = 'asc'; }
+                renderDocs();
+            });
+        });
+
+        // Bulk + pagination
+        $('selectAll').addEventListener('change', (e) => { toggleSelectAll(e.target.checked); });
+        $('bulkArchiveBtn').addEventListener('click', bulkArchive);
+        $('bulkDeleteBtn').addEventListener('click', bulkDelete);
+        $('prevPage').addEventListener('click', () => { if (page > 1) { page--; renderDocs(); } });
+        $('nextPage').addEventListener('click', () => { if ((page * pageSize) < filteredDocs().length) { page++; renderDocs(); } });
+
+        // Export
+        $('exportCsvBtn').addEventListener('click', exportCsv);
+
+        // Upload/Edit modal
+        $('uploadDocBtn').addEventListener('click', () => openDocModal());
+        $('closeDocModal').addEventListener('click', closeDocModal);
+        $('cancelDocBtn').addEventListener('click', closeDocModal);
+        $('docForm').addEventListener('submit', saveDoc);
+
+        // Preview modal
+        $('closePreview').addEventListener('click', closePreview);
+        $('pvEditBtn').addEventListener('click', () => { closePreview(); openDocModal(previewDocId); });
+        $('pvArchiveBtn').addEventListener('click', () => { if (!previewDocId) return; archiveDoc(previewDocId); closePreview(); });
+        $('pvDeleteBtn').addEventListener('click', () => { if (!previewDocId) return; deleteDoc(previewDocId); closePreview(); });
 
         // Initial renders
         renderDocs(); renderLists();
     });
 
-    /* ------------ All Docs ------------ */
-    function renderDocs() {
+    /* ------------ Render All Docs ------------ */
+    function filteredDocs() {
         const q = ($('searchDocs').value || '').toLowerCase();
-        const data = DOCS.filter(d => !q || d.title.toLowerCase().includes(q) || d.type.toLowerCase().includes(q) || d.owner.toLowerCase().includes(q));
-        $('docCount').textContent = data.length;
-        $('docRows').innerHTML = data.map(d => {
-            const pill = d.status === 'Active' ? 'bg-emerald-50 text-emerald-700' :
-                d.status === 'Signed' ? 'bg-blue-50 text-blue-700' :
-                    d.status === 'Restricted' ? 'bg-red-50 text-red-700' :
-                        'bg-slate-100 text-slate-700';
-            return `
-      <tr class="border-b last:border-0">
-        <td class="py-2 px-4 font-medium">${d.title}</td>
-        <td class="py-2 px-4">${d.type}</td>
-        <td class="py-2 px-4">${d.owner}</td>
-        <td class="py-2 px-4">${d.last}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${d.status}</span></td>
-        <td class="py-2 px-4 text-right">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Previewing ${d.title}')"><i class="fa-solid fa-eye mr-1"></i> View</button>
-        </td>
-      </tr>
-    `;
-        }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No documents</td></tr>`;
+        const t = $('filterType').value, o = $('filterOwner').value, st = $('filterStatus').value;
+        return DOCS.filter(d => {
+            if (t && d.type !== t) return false;
+            if (o && d.owner !== o) return false;
+            if (st && d.status !== st) return false;
+            const inText = `${d.title} ${d.type} ${d.owner} ${(d.tags || []).join(' ')}`.toLowerCase();
+            if (q && !inText.includes(q)) return false;
+            return true;
+        });
+    }
+    function renderDocs() {
+        const data = filteredDocs().slice().sort((a, b) => {
+            const va = (a[sortKey] ?? '').toString().toLowerCase();
+            const vb = (b[sortKey] ?? '').toString().toLowerCase();
+            if (va < vb) return (sortDir === 'asc') ? -1 : 1;
+            if (va > vb) return (sortDir === 'asc') ? 1 : -1;
+            return 0;
+        });
+        const total = data.length;
+        $('docCount').textContent = total;
+
+        // pagination slice
+        const start = (page - 1) * pageSize;
+        const pageData = data.slice(start, start + pageSize);
+        $('pageInfo').textContent = total ? `Showing ${start + 1}-${Math.min(start + pageSize, total)} of ${total}` : 'No results';
+        $('prevPage').disabled = page === 1;
+        $('nextPage').disabled = (page * pageSize) >= total;
+
+        const rows = pageData.map(row).join('');
+        $('docRows').innerHTML = rows || `<tr><td colspan="8" class="py-6 text-center text-slate-500">No documents</td></tr>`;
+        // reset select all checkbox visual
+        $('selectAll').checked = pageData.length && pageData.every(d => selected.has(d.id));
+    }
+    function row(d) {
+        const pill = d.status === 'Active' ? 'bg-emerald-50 text-emerald-700'
+            : d.status === 'Signed' ? 'bg-blue-50 text-blue-700'
+                : d.status === 'Restricted' ? 'bg-red-50 text-red-700'
+                    : 'bg-slate-100 text-slate-700';
+        const lock = d.type === 'Confidential' || d.status === 'Restricted';
+        const tags = (d.tags || []).map(t => `<span class="px-2 py-0.5 mr-1 rounded-full bg-slate-100 text-slate-700">${escapeHtml(t)}</span>`).join('');
+        const title = `${lock ? '<i class="fa-solid fa-lock mr-1 text-amber-600"></i>' : ''}${escapeHtml(d.title)}`;
+        return `
+  <tr class="border-b last:border-0">
+    <td class="py-2 px-4">
+      <input type="checkbox" class="rowSel rounded border-slate-300" data-id="${d.id}" ${selected.has(d.id) ? 'checked' : ''}>
+    </td>
+    <td class="py-2 px-4 font-medium">
+      <button class="hover:underline text-left" onclick="openPreview(${d.id})">${title}</button>
+      <div class="text-xs text-slate-500">v${d.version || 1}</div>
+    </td>
+    <td class="py-2 px-4">${d.type}</td>
+    <td class="py-2 px-4">${d.owner}</td>
+    <td class="py-2 px-4">${d.last}</td>
+    <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${d.status}</span></td>
+    <td class="py-2 px-4">${tags || '<span class="text-slate-400">—</span>'}</td>
+    <td class="py-2 px-4 text-right">
+      <div class="inline-flex gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openPreview(${d.id})"><i class="fa-solid fa-eye mr-1"></i> View</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openDocModal(${d.id})"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
+      </div>
+    </td>
+  </tr>`;
     }
 
-    /* ------------ Category Lists ------------ */
+    /* row selection */
+    document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('rowSel')) {
+            const id = Number(e.target.dataset.id);
+            if (e.target.checked) selected.add(id); else selected.delete(id);
+        }
+    });
+
+    /* bulk actions */
+    function toggleSelectAll(checked) {
+        const data = filteredDocs().slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize);
+        data.forEach(d => { if (checked) selected.add(d.id); else selected.delete(d.id); });
+        renderDocs();
+    }
+    function bulkArchive() {
+        if (!selected.size) return alert('Select at least one doc.');
+        DOCS.forEach(d => { if (selected.has(d.id)) d.status = 'Archived'; });
+        persist(); renderDocs(); renderLists();
+    }
+    function bulkDelete() {
+        if (!selected.size) return alert('Select at least one doc.');
+        if (!confirm('Delete selected documents?')) return;
+        DOCS = DOCS.filter(d => !selected.has(d.id));
+        selected.clear(); persist(); renderDocs(); renderLists();
+    }
+
+    /* ------------ Category Panels ------------ */
     function renderLists() {
-        $('policyList').innerHTML = DOCS.filter(d => d.type === 'Policy').map(docItem).join('') || `<li class="text-slate-500">No policies</li>`;
-        $('contractList').innerHTML = DOCS.filter(d => d.type === 'Contract').map(docItem).join('') || `<li class="text-slate-500">No contracts</li>`;
-        $('confidentialList').innerHTML = DOCS.filter(d => d.type === 'Confidential').map(docItem).join('') || `<li class="text-slate-500">No confidential docs</li>`;
-        $('archiveList').innerHTML = DOCS.filter(d => d.type === 'Archive').map(docItem).join('') || `<li class="text-slate-500">No archives</li>`;
+        $('policyList').innerHTML = DOCS.filter(d => d.type === 'Policy').map(card).join('') || emptyLi('No policies');
+        $('contractList').innerHTML = DOCS.filter(d => d.type === 'Contract').map(card).join('') || emptyLi('No contracts');
+        $('confidentialList').innerHTML = DOCS.filter(d => d.type === 'Confidential').map(card).join('') || emptyLi('No confidential docs');
+        $('archiveList').innerHTML = DOCS.filter(d => d.type === 'Archive').map(card).join('') || emptyLi('No archives');
     }
-
-    function docItem(d) {
+    function card(d) {
+        const lock = d.type === 'Confidential' || d.status === 'Restricted';
         return `
     <li class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
       <div>
-        <div class="font-medium text-slate-800">${d.title}</div>
-        <div class="text-xs text-slate-600">${d.owner} • ${d.last}</div>
+        <div class="font-medium text-slate-800">${lock ? '<i class="fa-solid fa-lock mr-1 text-amber-600"></i>' : ''}${escapeHtml(d.title)}</div>
+        <div class="text-xs text-slate-600">${d.owner} • ${d.last} • v${d.version || 1}</div>
       </div>
-      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Opening ${d.title}')"><i class="fa-solid fa-eye mr-1"></i> Open</button>
-    </li>
-  `;
+      <div class="flex gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openPreview(${d.id})"><i class="fa-solid fa-eye mr-1"></i> Open</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openDocModal(${d.id})"><i class="fa-solid fa-pen mr-1"></i> Edit</button>
+      </div>
+    </li>`;
     }
+    function emptyLi(txt) { return `<li class="text-slate-500">${txt}</li>`; }
+
+    /* ------------ Preview ------------ */
+    function openPreview(id) {
+        const d = DOCS.find(x => x.id === id); if (!d) return;
+        previewDocId = id;
+        $('pvTitle').innerHTML = `${(d.type === 'Confidential' || d.status === 'Restricted') ? '<i class="fa-solid fa-lock mr-1 text-amber-600"></i>' : ''}${escapeHtml(d.title)}`;
+        $('pvType').textContent = d.type;
+        $('pvOwner').textContent = d.owner;
+        $('pvStatus').textContent = d.status;
+        $('pvLast').textContent = d.last;
+        $('pvVer').textContent = `v${d.version || 1}`;
+        $('pvTags').innerHTML = (d.tags || []).map(t => `<span class="px-2 py-0.5 mr-1 rounded-full bg-slate-100 text-slate-700">${escapeHtml(t)}</span>`).join('') || '—';
+        $('previewModal').classList.remove('hidden');
+    }
+    function closePreview() { $('previewModal').classList.add('hidden'); previewDocId = null; }
+    function archiveDoc(id) {
+        const d = DOCS.find(x => x.id === id); if (!d) return;
+        d.status = 'Archived'; d.type = (d.type === 'Confidential') ? 'Confidential' : d.type; d.last = today();
+        persist(); renderDocs(); renderLists();
+    }
+    function deleteDoc(id) {
+        if (!confirm('Delete this document?')) return;
+        DOCS = DOCS.filter(x => x.id !== id); persist(); renderDocs(); renderLists();
+    }
+
+    /* ------------ Upload / Edit ------------ */
+    function openDocModal(id = null) {
+        const form = $('docForm'); form.reset();
+        $('docModalTitle').textContent = id ? 'Edit Document' : 'Upload Document';
+        $('docVersion').textContent = id ? (DOCS.find(d => d.id === id).version || 1) : 1;
+        form.id.value = id || '';
+        if (id) {
+            const d = DOCS.find(x => x.id === id); if (!d) return;
+            form.title.value = d.title;
+            form.type.value = d.type;
+            form.owner.value = d.owner;
+            form.status.value = d.status;
+            form.tags.value = (d.tags || []).join(', ');
+        }
+        $('docModal').classList.remove('hidden');
+    }
+    function closeDocModal() { $('docModal').classList.add('hidden'); }
+    function saveDoc(e) {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const id = Number(fd.get('id')) || null;
+        const payload = {
+            title: (fd.get('title') || '').toString().trim(),
+            type: fd.get('type'),
+            owner: fd.get('owner'),
+            status: fd.get('status'),
+            tags: (fd.get('tags') || '').toString().split(',').map(t => t.trim()).filter(Boolean),
+        };
+        if (!payload.title) return alert('Title required');
+
+        if (id) {
+            const d = DOCS.find(x => x.id === id); if (!d) return;
+            d.title = payload.title;
+            d.type = payload.type;
+            d.owner = payload.owner;
+            d.status = payload.status;
+            d.tags = payload.tags;
+            d.version = (d.version || 1) + 1;
+            d.last = today();
+        } else {
+            const newId = Math.max(0, ...DOCS.map(x => x.id)) + 1;
+            DOCS.unshift({ id: newId, ...payload, last: today(), version: 1 });
+        }
+        persist(); closeDocModal(); renderDocs(); renderLists();
+    }
+
+    /* ------------ CSV Export ------------ */
+    function exportCsv() {
+        const header = ['id', 'title', 'type', 'owner', 'last_modified', 'status', 'version', 'tags'];
+        const rows = [header].concat(DOCS.map(d => [
+            d.id, d.title, d.type, d.owner, d.last, d.status, d.version || 1, (d.tags || []).join('|')
+        ]));
+        const csv = rows.map(r => r.map(csvEscape).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'documents.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    /* ------------ Utils ------------ */
+    function today() { return new Date().toISOString().slice(0, 10); }
+    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+    function csvEscape(v) { return `"${String(v ?? '').replace(/"/g, '""')}"`; }
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
 </script>
 
 <style>
     .dm-tab.active {
         background-color: #1e293b;
-        color: white;
+        color: #fff;
     }
 
     .dm-tab:not(.active) {
@@ -201,6 +570,10 @@
     .dm-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    th.sortable:hover {
+        background: #f8fafc;
     }
 </style>
 {% endblock %}

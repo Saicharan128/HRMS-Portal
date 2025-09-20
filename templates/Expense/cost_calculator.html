@@ -1,25 +1,25 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-calculator mr-2"></i> Cost Calculator
             </h1>
             <p class="text-slate-600 text-sm">Estimate workforce costs with advanced budgeting tools.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <button id="saveScenarioBtn"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full xs:w-auto">
                 <i class="fa-solid fa-save mr-1"></i> Save Scenario
             </button>
             <button id="exportBudgetBtn"
-                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm w-full xs:w-auto">
                 <i class="fa-solid fa-download mr-1"></i> Export Budget
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full xs:w-auto text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
@@ -27,18 +27,22 @@
 
     <!-- Calculator Type Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+        <div
+            class="flex space-x-1 bg-slate-100 p-1 rounded-xl overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-slate-300">
             <button id="positionTab"
-                class="calculator-tab active px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                class="calculator-tab active px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0">
                 <i class="fa-solid fa-user mr-1"></i> Position Calculator
             </button>
-            <button id="teamTab" class="calculator-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <button id="teamTab"
+                class="calculator-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0">
                 <i class="fa-solid fa-users mr-1"></i> Team Calculator
             </button>
-            <button id="budgetTab" class="calculator-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <button id="budgetTab"
+                class="calculator-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0">
                 <i class="fa-solid fa-chart-pie mr-1"></i> Budget Planner
             </button>
-            <button id="scenarioTab" class="calculator-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <button id="scenarioTab"
+                class="calculator-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0">
                 <i class="fa-solid fa-flask mr-1"></i> Scenario Analysis
             </button>
         </div>
@@ -48,8 +52,8 @@
     <div id="positionCalculator" class="calculator-panel">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Input Form -->
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">
                     <i class="fa-solid fa-user-plus mr-2"></i> Position Details
                 </h3>
 
@@ -102,8 +106,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Base Salary *</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="baseSalary" required min="0" step="1000"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -117,8 +120,7 @@
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Equity Value
                                     (Annual)</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="equityValue" min="0" step="1000"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -141,8 +143,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Health Insurance</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="healthInsurance" min="0" step="100" placeholder="Monthly"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -156,8 +157,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Equipment & Setup</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="equipment" min="0" step="100" placeholder="One-time"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -166,8 +166,7 @@
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Training &
                                     Development</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="training" min="0" step="100" placeholder="Annual"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -175,8 +174,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Office Space</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="officeSpace" min="0" step="100" placeholder="Monthly"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -184,8 +182,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Other Benefits</label>
                                 <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                     <input type="number" id="otherBenefits" min="0" step="100" placeholder="Monthly"
                                         class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                                 </div>
@@ -223,8 +220,8 @@
             </div>
 
             <!-- Results Panel -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">
                     <i class="fa-solid fa-chart-line mr-2"></i> Cost Breakdown
                 </h3>
 
@@ -281,9 +278,9 @@
     <div id="teamCalculator" class="calculator-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Team Builder -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-users mr-2"></i> Team Builder
                     </h3>
                     <button id="addTeamMember"
@@ -305,8 +302,8 @@
             </div>
 
             <!-- Team Results -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">
                     <i class="fa-solid fa-chart-pie mr-2"></i> Team Cost Analysis
                 </h3>
 
@@ -324,8 +321,8 @@
     <div id="budgetPlanner" class="calculator-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Budget Controls -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4">
                     <i class="fa-solid fa-cog mr-2"></i> Budget Parameters
                 </h3>
 
@@ -342,7 +339,7 @@
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Total Budget</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                             <input type="number" id="totalBudget" min="0" step="10000"
                                 class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                         </div>
@@ -374,9 +371,9 @@
             </div>
 
             <!-- Budget Allocation -->
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-pie-chart mr-2"></i> Budget Allocation
                     </h3>
                     <div class="text-sm text-slate-600">
@@ -384,8 +381,8 @@
                     </div>
                 </div>
 
-                <div id="budgetChart" class="mb-6">
-                    <canvas id="budgetPieChart" height="300"></canvas>
+                <div id="budgetChart" class="mb-6 h-64 sm:h-72">
+                    <canvas id="budgetPieChart"></canvas>
                 </div>
 
                 <div id="budgetBreakdown" class="space-y-3"></div>
@@ -395,9 +392,9 @@
 
     <!-- Scenario Analysis -->
     <div id="scenarioAnalysis" class="calculator-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-slate-800">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-flask mr-2"></i> Scenario Comparison
                 </h3>
                 <button id="addScenario"
@@ -411,7 +408,9 @@
             <div class="mt-6">
                 <div class="rounded-lg border border-slate-200 p-4">
                     <h4 class="font-medium text-slate-800 mb-3">Scenario Comparison Chart</h4>
-                    <canvas id="scenarioChart" height="200"></canvas>
+                    <div class="h-56 sm:h-64">
+                        <canvas id="scenarioChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -421,24 +420,24 @@
 <!-- Add Team Member Modal -->
 <div id="addMemberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
-                <div class="p-6 border-b border-slate-200">
+        <div class="flex min-h-full items-end sm:items-center justify-center p-2 sm:p-4">
+            <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md">
+                <div class="p-4 sm:p-6 border-b border-slate-200">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-slate-800">Add Team Member</h3>
-                        <button id="closeAddMemberModal" class="text-slate-400 hover:text-slate-600">
+                        <button id="closeAddMemberModal" class="text-slate-400 hover:text-slate-600" aria-label="Close">
                             <i class="fa-solid fa-times text-xl"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="p-6 space-y-4">
+                <div class="p-4 sm:p-6 space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Role Title</label>
                         <input type="text" id="memberRole" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
                             <select id="memberLevel" class="w-full rounded-lg border border-slate-300 px-3 py-2">
@@ -458,19 +457,20 @@
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Annual Salary</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                             <input type="number" id="memberSalary" min="0" step="1000"
                                 class="w-full pl-8 rounded-lg border border-slate-300 px-3 py-2">
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center justify-end gap-3 pt-4 border-t border-slate-200">
                         <button id="cancelAddMember"
-                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
+                            class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 w-full sm:w-auto">
                             Cancel
                         </button>
                         <button id="confirmAddMember"
-                            class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">
+                            class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 w-full sm:w-auto">
                             <i class="fa-solid fa-plus mr-1"></i> Add Member
                         </button>
                     </div>
@@ -676,7 +676,7 @@
                         <div class="font-medium text-slate-800">${formatCurrency(m.salary)}</div>
                         <div class="text-xs text-slate-600">per person</div>
                     </div>
-                    <button onclick="removeTeamMember(${m.id})" class="text-red-600 hover:text-red-800 p-1">
+                    <button onclick="removeTeamMember(${m.id})" class="text-red-600 hover:text-red-800 p-1" aria-label="Remove">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
@@ -815,7 +815,7 @@
                 <div class="flex items-center justify-between mb-3">
                     <input type="text" value="${s.name}" onchange="updateScenarioName(${s.id}, this.value)"
                         class="font-medium text-slate-800 bg-transparent border-none p-0 focus:ring-0">
-                    <button onclick="removeScenario(${s.id})" class="text-red-600 hover:text-red-800">
+                    <button onclick="removeScenario(${s.id})" class="text-red-600 hover:text-red-800" aria-label="Remove">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
@@ -919,6 +919,16 @@
     .calculator-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    /* Minimal horizontal scrollbar styling for tabs (optional) */
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

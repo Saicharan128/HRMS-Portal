@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 py-4 sm:py-6 gap-4">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-diagram-next mr-2"></i> Dependencies
             </h1>
-            <p class="text-slate-600 text-sm">Visualize process/task dependencies.</p>
+            <p class="text-slate-600 text-sm mt-1">Visualize process/task dependencies.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
             class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
@@ -16,48 +16,50 @@
     </div>
 
     <!-- Add Task / Link (Dummy) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
             <h2 class="text-lg font-semibold text-slate-800 mb-4">
                 <i class="fa-solid fa-plus mr-2"></i> Add Task (Dummy)
             </h2>
-            <form id="taskForm" class="grid grid-cols-1 md:grid-cols-6 gap-3">
-                <div class="md:col-span-2">
+            <form id="taskForm" class="grid grid-cols-1 sm:grid-cols-6 gap-3">
+                <div class="sm:col-span-2">
                     <label class="block text-sm text-slate-600 mb-1">Key *</label>
-                    <input name="key" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="key" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="T-101">
                 </div>
-                <div class="md:col-span-3">
+                <div class="sm:col-span-3">
                     <label class="block text-sm text-slate-600 mb-1">Title *</label>
-                    <input name="title" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="title" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="Design DB schema">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Owner</label>
-                    <input name="owner" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="owner" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="Charan">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Duration (d)</label>
                     <input name="dur" type="number" min="0" value="1"
-                        class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Status</label>
-                    <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <select name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                         <option>Planned</option>
                         <option>In Progress</option>
                         <option>Blocked</option>
                         <option>Done</option>
                     </select>
                 </div>
-                <div class="md:col-span-6">
+                <div class="sm:col-span-6">
                     <label class="block text-sm text-slate-600 mb-1">Notes</label>
-                    <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="Optional">
                 </div>
-                <div class="md:col-span-6 flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                <div class="sm:col-span-6 flex items-center gap-3">
+                    <button
+                        class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"
+                        type="submit">
                         <i class="fa-solid fa-plus mr-1"></i> Add
                     </button>
                     <span id="taskMsg" class="text-sm text-slate-600"></span>
@@ -65,35 +67,37 @@
             </form>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
             <h2 class="text-lg font-semibold text-slate-800 mb-4">
                 <i class="fa-solid fa-link mr-2"></i> Add Dependency (A → B)
             </h2>
-            <form id="depForm" class="grid grid-cols-1 md:grid-cols-6 gap-3">
-                <div class="md:col-span-3">
+            <form id="depForm" class="grid grid-cols-1 sm:grid-cols-6 gap-3">
+                <div class="sm:col-span-3">
                     <label class="block text-sm text-slate-600 mb-1">Predecessor (A) *</label>
-                    <input name="from" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="from" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="T-101">
                 </div>
-                <div class="md:col-span-3">
+                <div class="sm:col-span-3">
                     <label class="block text-sm text-slate-600 mb-1">Successor (B) *</label>
-                    <input name="to" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="to" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="T-102">
                 </div>
-                <div class="md:col-span-6 flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                <div class="sm:col-span-6 flex flex-wrap items-center gap-3">
+                    <button
+                        class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"
+                        type="submit">
                         <i class="fa-solid fa-link mr-1"></i> Link
                     </button>
                     <button id="btnLayout" type="button"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
                         <i class="fa-solid fa-border-all mr-1"></i> Auto layout
                     </button>
                     <button id="btnDetect" type="button"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
                         <i class="fa-solid fa-arrows-rotate mr-1"></i> Detect cycles
                     </button>
                     <button id="btnExport" type="button"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
                         <i class="fa-solid fa-file-export mr-1"></i> Export JSON
                     </button>
                     <span id="depMsg" class="text-sm text-slate-600"></span>
@@ -103,50 +107,53 @@
     </div>
 
     <!-- Filters & KPIs -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+    <div class="mb-4 grid grid-cols-1 sm:grid-cols-6 gap-2">
         <input id="q" placeholder="Search key/title/owner…"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm sm:col-span-2">
+        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm sm:col-span-2">
             <option value="">Any Status</option>
             <option>Planned</option>
             <option>In Progress</option>
             <option>Blocked</option>
             <option>Done</option>
         </select>
-        <input id="fOwner" placeholder="Owner" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fOwner" placeholder="Owner"
+            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm sm:col-span-1">
         <button id="btnClear"
-            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
+            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm sm:col-span-1">Clear</button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Tasks</div>
-            <div id="kpiTasks" class="text-xl font-semibold text-slate-800">0</div>
+            <div id="kpiTasks" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Links</div>
-            <div id="kpiLinks" class="text-xl font-semibold text-slate-800">0</div>
+            <div id="kpiLinks" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Critical Path (days)</div>
-            <div id="kpiCP" class="text-xl font-semibold text-slate-800">0</div>
+            <div id="kpiCP" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Cycles</div>
-            <div id="kpiCycles" class="text-xl font-semibold text-slate-800">0</div>
+            <div id="kpiCycles" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
         </div>
     </div>
 
     <!-- Graph + List -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <!-- Graph -->
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between p-4 border-b border-slate-200">
+            <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-slate-200">
                 <div class="text-slate-800 font-semibold"><i class="fa-solid fa-project-diagram mr-2"></i> Graph</div>
-                <div class="text-xs text-slate-500">Drag nodes • Zoom: Ctrl + wheel</div>
+                <div class="text-xs text-slate-500 mt-2 sm:mt-0">Drag nodes • Zoom: Ctrl + wheel</div>
             </div>
             <div class="p-2">
-                <svg id="graph" class="w-full h-[460px] bg-slate-50 rounded-xl border border-slate-200"></svg>
+                <svg id="graph"
+                    class="w-full h-[400px] sm:h-[460px] bg-slate-50 rounded-xl border border-slate-200"></svg>
             </div>
         </div>
 
@@ -159,12 +166,12 @@
                     <thead class="bg-slate-50 text-slate-600">
                         <tr>
                             <th class="px-4 py-2">Key</th>
-                            <th class="px-4 py-2">Title</th>
-                            <th class="px-4 py-2">Owner</th>
-                            <th class="px-4 py-2">Dur</th>
+                            <th class="px-4 py-2 hidden sm:table-cell">Title</th>
+                            <th class="px-4 py-2 hidden sm:table-cell">Owner</th>
+                            <th class="px-4 py-2 hidden sm:table-cell">Dur</th>
                             <th class="px-4 py-2">Status</th>
-                            <th class="px-4 py-2">Depends On</th>
-                            <th class="px-4 py-2 w-48">Actions</th>
+                            <th class="px-4 py-2 hidden sm:table-cell">Depends On</th>
+                            <th class="px-4 py-2 w-40 sm:w-48">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="rows" class="divide-y divide-slate-200"></tbody>
@@ -174,6 +181,37 @@
         </div>
     </div>
 </div>
+
+<style>
+    @media (max-width: 640px) {
+        .max-w-7xl {
+            max-width: 100%;
+        }
+
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            font-size: 0.75rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem;
+        }
+
+        #graph {
+            height: 300px;
+        }
+
+        input,
+        select,
+        button {
+            font-size: 0.875rem;
+        }
+    }
+</style>
 
 <script>
     /* ---------------- Dummy Store ---------------- */
@@ -216,10 +254,10 @@
 
     /* ---------------- Helpers ---------------- */
     function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
-    function td(el) { const x = document.createElement("td"); x.className = "px-4 py-2"; x.appendChild(el); return x; }
-    function input(v, cls = "w-36") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
+    function td(el) { const x = document.createElement("td"); x.className = "px-2 sm:px-4 py-2"; x.appendChild(el); return x; }
+    function input(v, cls = "w-28 sm:w-36") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
     function select(opts, cur) {
-        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm";
+        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm w-28 sm:w-36";
         opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s;
     }
 
@@ -323,12 +361,11 @@
         tasks.forEach(k => { indeg[k] = 0; adj[k] = []; });
         STORE.links.forEach(e => { if (indeg[e.to] != null) { indeg[e.to]++; adj[e.from].push(e.to); } });
         const q = []; Object.keys(indeg).forEach(k => { if (indeg[k] === 0) q.push(k); });
-        const order = []; while (q.length) { const k = q.shift(); order.push(k); adj[k].forEach(v => { if (--indeg[v] === 0) q.push(v); }); }
+        const order = []; while (q.length) { const k = q.shift(); order.push(k); adj[k].forEach(v => { if (--indeg[v] === 0) q.push(v); }); });
         const hasCycle = order.length !== tasks.length;
         return { order, hasCycle };
     }
     function criticalPathDays() {
-        // Longest path (sum of durations) in DAG using topo order; if cycle, ignore it and return best effort.
         const { order } = topoSort(); const byKey = buildIndex();
         const dur = {}; STORE.tasks.forEach(t => dur[t.key] = Number(t.dur || 0));
         const dist = {}; STORE.tasks.forEach(t => dist[t.key] = dur[t.key]);
@@ -365,19 +402,28 @@
         const byKey = buildIndex();
         data.forEach(t => {
             const tr = document.createElement("tr");
-            const keyI = input(t.key, "w-28");
-            const titleI = input(t.title, "w-56");
-            const ownerI = input(t.owner || "", "w-32");
-            const durI = input(t.dur || 0, "w-20"); durI.type = "number"; durI.min = 0;
+            const keyI = input(t.key, "w-20 sm:w-28");
+            const titleI = input(t.title, "w-40 sm:w-56");
+            const ownerI = input(t.owner || "", "w-24 sm:w-32");
+            const durI = input(t.dur || 0, "w-16 sm:w-20"); durI.type = "number"; durI.min = 0;
             const statusS = select(["Planned", "In Progress", "Blocked", "Done"], t.status || "Planned");
             const depsSpan = document.createElement("span"); depsSpan.textContent = depsOf(t.key).join(", ") || "—";
+            depsSpan.className = "text-xs sm:text-sm";
 
             const actions = document.createElement("div");
             const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
             const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
             actions.append(saveBtn, delBtn);
 
-            tr.append(td(keyI), td(titleI), td(ownerI), td(durI), td(statusS), td(depsSpan), td(actions));
+            tr.append(
+                td(keyI),
+                td(titleI),
+                td(ownerI),
+                td(durI),
+                td(statusS),
+                td(depsSpan),
+                td(actions)
+            );
             rows.appendChild(tr);
 
             function save() {
@@ -409,8 +455,8 @@
         const fd = new FormData(taskForm);
         const key = (fd.get("key") || "").toString().trim();
         const title = (fd.get("title") || "").toString().trim();
-        if (!key || !title) { flash(taskMsg, "Key and Title required", true); return; }
-        if (STORE.tasks.find(t => t.key === key)) { flash(taskMsg, "Key already exists", true); return; }
+        if (!key || !title) { flash(taskMsg, "Key and Title required", false); return; }
+        if (STORE.tasks.find(t => t.key === key)) { flash(taskMsg, "Key already exists", false); return; }
         STORE.tasks.unshift({
             key, title,
             owner: (fd.get("owner") || "").toString().trim(),
@@ -425,9 +471,9 @@
         const fd = new FormData(depForm);
         const from = (fd.get("from") || "").toString().trim();
         const to = (fd.get("to") || "").toString().trim();
-        if (!from || !to || from === to) { flash(depMsg, "Invalid link", true); return; }
-        if (!STORE.tasks.find(t => t.key === from) || !STORE.tasks.find(t => t.key === to)) { flash(depMsg, "Task not found", true); return; }
-        if (STORE.links.find(e => e.from === from && e.to === to)) { flash(depMsg, "Already linked", true); return; }
+        if (!from || !to || from === to) { flash(depMsg, "Invalid link", false); return; }
+        if (!STORE.tasks.find(t => t.key === from) || !STORE.tasks.find(t => t.key === to)) { flash(depMsg, "Task not found", false); return; }
+        if (STORE.links.find(e => e.from === from && e.to === to)) { flash(depMsg, "Already linked", false); return; }
         STORE.links.push({ from, to }); persist(); flash(depMsg, "Linked ✓"); draw(); updateKPIs(); loadList();
     });
 

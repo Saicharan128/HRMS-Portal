@@ -9,10 +9,16 @@
             </h1>
             <p class="text-slate-600 text-sm">Get a snapshot of team composition, capacity, and status.</p>
         </div>
-        <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-            <i class="fa-solid fa-arrow-left mr-1"></i> Back
-        </a>
+        <div class="flex items-center gap-2">
+            <button id="exportCsvBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-download mr-1"></i> Export CSV
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
     </div>
 
     <!-- Summary cards -->
@@ -68,9 +74,12 @@
                     <option value="CXOs">CXOs</option>
                     <option value="Contractors / Remote staff">Contractors</option>
                 </select>
+                <select id="deptFilter" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+                    <option value="">All Departments</option>
+                </select>
                 <button id="refreshBtn"
                     class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-refresh mr-1"></i> Refresh
+                    <i class="fa-solid fa-rotate mr-1"></i> Refresh
                 </button>
             </div>
         </div>
@@ -86,28 +95,44 @@
             <table class="min-w-full">
                 <thead class="bg-slate-50">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                            Employee ID</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                            Position</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                            Designation</th>
+                        <th class="th-sort px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                            data-key="name">Name <i class="fa-solid fa-sort ms-1 text-slate-400"></i></th>
+                        <th class="th-sort px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                            data-key="employee_id">Employee ID <i class="fa-solid fa-sort ms-1 text-slate-400"></i></th>
+                        <th class="th-sort px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                            data-key="employee_type">Type <i class="fa-solid fa-sort ms-1 text-slate-400"></i></th>
+                        <th class="th-sort px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                            data-key="subposition">Position <i class="fa-solid fa-sort ms-1 text-slate-400"></i></th>
+                        <th class="th-sort px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                            data-key="designation">Designation <i class="fa-solid fa-sort ms-1 text-slate-400"></i></th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                             Email</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                            Joined</th>
+                        <th class="th-sort px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                            data-key="created_at">Joined <i class="fa-solid fa-sort ms-1 text-slate-400"></i></th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                             Status</th>
                     </tr>
                 </thead>
-                <tbody id="teamTableBody" class="bg-white divide-y divide-slate-200">
-                    <!-- Dynamic rows will be inserted here -->
-                </tbody>
+                <tbody id="teamTableBody" class="bg-white divide-y divide-slate-200"></tbody>
             </table>
+
+            <!-- Pagination -->
+            <div class="flex items-center justify-between mt-4 text-sm">
+                <div class="text-slate-600">Showing <span id="pageInfo">0–0</span> of <span id="totalCount">0</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="prevPage" class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50"
+                        disabled>Prev</button>
+                    <span id="pageNum" class="min-w-[3rem] text-center"></span>
+                    <button id="nextPage" class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50"
+                        disabled>Next</button>
+                    <select id="pageSize" class="ml-2 rounded border border-slate-300 px-2 py-1">
+                        <option>10</option>
+                        <option>25</option>
+                        <option>50</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <!-- Empty State -->
@@ -123,304 +148,344 @@
         <h2 class="text-lg font-semibold text-slate-800 mb-4">
             <i class="fa-solid fa-clock-rotate-left mr-2"></i> Recent Activity
         </h2>
-        <div id="recentActivity" class="space-y-4">
-            <!-- Activity items will be loaded here -->
-        </div>
+        <div id="recentActivity" class="space-y-4"></div>
     </div>
 </div>
 
 <script>
-    // Global variables
+    /* ---------------- State ---------------- */
     let teamData = [];
     let jobsData = [];
     let candidatesData = [];
 
-    // Utility functions
-    async function fetchJSON(url) {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
+    /* Pagination & sort */
+    let SORT = { key: 'name', dir: 'asc' };
+    let PAGE = { size: 10, index: 1 };
+
+    /* ---------------- Utilities ---------------- */
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    async function fetchJSON(url, { retries = 1, delay = 500 } = {}) {
+        try {
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return await res.json();
+        } catch (e) {
+            if (retries > 0) { await sleep(delay); return fetchJSON(url, { retries: retries - 1, delay }); }
+            throw e;
+        }
     }
 
-    function formatDate(dateString) {
-        if (!dateString) return '-';
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+    function formatDate(d) {
+        if (!d) return '-';
+        return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    function relTime(d) {
+        if (!d) return '';
+        const diff = (Date.now() - new Date(d)) / 86400000;
+        if (diff < 1) return 'today';
+        if (diff < 7) return Math.floor(diff) + 'd ago';
+        return formatDate(d);
     }
 
     function getEmployeeStatus(createdAt) {
         const created = new Date(createdAt);
-        const now = new Date();
-        const daysDiff = Math.floor((now - created) / (1000 * 60 * 60 * 24));
-
-        if (daysDiff <= 30) return { text: 'New', class: 'bg-green-100 text-green-800' };
-        if (daysDiff <= 90) return { text: 'Recent', class: 'bg-blue-100 text-blue-800' };
+        const days = Math.floor((Date.now() - created) / 86400000);
+        if (isNaN(days)) return { text: '—', class: 'bg-slate-100 text-slate-700' };
+        if (days <= 30) return { text: 'New', class: 'bg-emerald-50 text-emerald-700' };
+        if (days <= 90) return { text: 'Recent', class: 'bg-blue-50 text-blue-700' };
         return { text: 'Active', class: 'bg-slate-100 text-slate-800' };
     }
 
-    function createProgressBar(current, total, label) {
-        const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
+    function initials(name = '') {
+        const parts = String(name).trim().split(/\s+/).slice(0, 2);
+        return parts.map(p => p[0]?.toUpperCase() || '').join('') || '•';
+    }
+
+    function groupCount(arr, key) {
+        return arr.reduce((m, x) => { const k = (x[key] || 'Unknown'); m[k] = (m[k] || 0) + 1; return m; }, {});
+    }
+
+    function renderProgressRow(label, count, total) {
+        const pct = total ? Math.round((count / total) * 100) : 0;
         return `
-        <div class="flex items-center justify-between mb-1">
-            <span class="text-sm font-medium text-slate-600">${label}</span>
-            <span class="text-sm text-slate-600">${current}/${total}</span>
-        </div>
-        <div class="w-full bg-slate-200 rounded-full h-2">
-            <div class="bg-slate-600 h-2 rounded-full transition-all duration-300" style="width: ${percentage}%"></div>
-        </div>
-    `;
+    <div class="py-1.5">
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-slate-700">${label}</span>
+        <span class="text-slate-600">${count} <span class="text-slate-400">(${pct}%)</span></span>
+      </div>
+      <div class="w-full bg-slate-200 rounded-full h-2 mt-1">
+        <div class="bg-slate-600 h-2 rounded-full" style="width:${pct}%"></div>
+      </div>
+    </div>`;
     }
 
-    // Data loading functions
+    /* ---------------- Data loaders ---------------- */
     async function loadTeamData() {
-        try {
-            teamData = await fetchJSON('/api/users');
-            updateSummaryCards();
-            updateComposition();
-            renderTeamTable();
-        } catch (error) {
-            console.error('Error loading team data:', error);
-            showError('Failed to load team data');
-        }
+        teamData = await fetchJSON('/api/users', { retries: 1 });
+        updateSummaryCards();
+        updateCompositions();
+        hydrateDeptFilter();
+        renderTable();
     }
-
     async function loadJobsData() {
-        try {
-            jobsData = await fetchJSON('/api/jobs');
-            const openJobs = jobsData.filter(job => job.status === 'Open').length;
-            document.getElementById('openJobs').textContent = openJobs;
-        } catch (error) {
-            console.error('Error loading jobs data:', error);
-            document.getElementById('openJobs').textContent = '0';
-        }
+        jobsData = await fetchJSON('/api/jobs', { retries: 1 });
+        const openJobs = jobsData.filter(j => j.status === 'Open').length;
+        document.getElementById('openJobs').textContent = openJobs;
     }
-
     async function loadCandidatesData() {
-        try {
-            candidatesData = await fetchJSON('/api/candidates');
-            const inPipeline = candidatesData.filter(c =>
-                !['Rejected', 'Onboarding'].includes(c.stage)
-            ).length;
-            const recentHires = candidatesData.filter(c =>
-                c.stage === 'Onboarding' && c.created_at
-            ).length;
-
-            document.getElementById('pipeline').textContent = inPipeline;
-            document.getElementById('recentHires').textContent = recentHires;
-        } catch (error) {
-            console.error('Error loading candidates data:', error);
-            document.getElementById('pipeline').textContent = '0';
-            document.getElementById('recentHires').textContent = '0';
-        }
+        candidatesData = await fetchJSON('/api/candidates', { retries: 1 });
+        const inPipeline = candidatesData.filter(c => !['Rejected', 'Onboarding'].includes(c.stage)).length;
+        const recentHires = candidatesData.filter(c => c.stage === 'Onboarding' && c.created_at).length;
+        document.getElementById('pipeline').textContent = inPipeline;
+        document.getElementById('recentHires').textContent = recentHires;
     }
 
-    // UI update functions
+    /* ---------------- UI: Summary & Composition ---------------- */
     function updateSummaryCards() {
         document.getElementById('headcount').textContent = teamData.length;
     }
 
-    function updateComposition() {
-        // By Employee Type
-        const typeComposition = {};
-        const deptComposition = {};
+    function updateCompositions() {
+        const typeMap = groupCount(teamData, 'employee_type');
+        const deptMap = groupCount(teamData, 'subposition');
 
-        teamData.forEach(member => {
-            // Type composition
-            const type = member.employee_type || 'Unknown';
-            typeComposition[type] = (typeComposition[type] || 0) + 1;
+        const total = teamData.length || 1;
+        document.getElementById('typeComposition').innerHTML =
+            Object.entries(typeMap).sort((a, b) => b[1] - a[1]).map(([k, v]) => renderProgressRow(k, v, total)).join('') ||
+            `<div class="text-sm text-slate-500">No data</div>`;
 
-            // Department composition (using subposition as department)
-            const dept = member.subposition || 'Unassigned';
-            deptComposition[dept] = (deptComposition[dept] || 0) + 1;
+        document.getElementById('deptComposition').innerHTML =
+            Object.entries(deptMap).sort((a, b) => b[1] - a[1]).map(([k, v]) => renderProgressRow(k || 'Unassigned', v, total)).join('') ||
+            `<div class="text-sm text-slate-500">No data</div>`;
+    }
+
+    function hydrateDeptFilter() {
+        const s = document.getElementById('deptFilter');
+        const values = Array.from(new Set(teamData.map(x => x.subposition).filter(Boolean))).sort();
+        s.innerHTML = `<option value="">All Departments</option>` + values.map(v => `<option>${v}</option>`).join('');
+    }
+
+    /* ---------------- Table render ---------------- */
+    function getFilters() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const t = document.getElementById('typeFilter').value;
+        const d = document.getElementById('deptFilter').value;
+        return { q, t, d };
+    }
+
+    function filterSortData() {
+        const { q, t, d } = getFilters();
+
+        let data = teamData.filter(m => {
+            const matchesQ = !q ||
+                String(m.name || '').toLowerCase().includes(q) ||
+                String(m.email || '').toLowerCase().includes(q) ||
+                String(m.employee_id || '').toLowerCase().includes(q) ||
+                String(m.username || '').toLowerCase().includes(q);
+            const matchesT = !t || m.employee_type === t;
+            const matchesD = !d || m.subposition === d;
+            return matchesQ && matchesT && matchesD;
         });
 
-        renderComposition('typeComposition', typeComposition);
-        renderComposition('deptComposition', deptComposition);
+        // sort
+        const { key, dir } = SORT;
+        data.sort((a, b) => {
+            const av = (a[key] ?? '').toString().toLowerCase();
+            const bv = (b[key] ?? '').toString().toLowerCase();
+            if (key === 'created_at') { return dir === 'asc' ? new Date(a[key]) - new Date(b[key]) : new Date(b[key]) - new Date(a[key]); }
+            if (av < bv) return dir === 'asc' ? -1 : 1;
+            if (av > bv) return dir === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        return data;
     }
 
-    function renderComposition(elementId, data) {
-        const container = document.getElementById(elementId);
-        const total = Object.values(data).reduce((sum, count) => sum + count, 0);
-
-        container.innerHTML = Object.entries(data)
-            .sort(([, a], [, b]) => b - a)
-            .map(([key, count]) => {
-                const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
-                return `
-                <div class="flex items-center justify-between py-2">
-                    <div class="flex items-center">
-                        <div class="w-3 h-3 rounded-full bg-slate-400 mr-3"></div>
-                        <span class="text-sm font-medium text-slate-700">${key}</span>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-sm font-semibold text-slate-800">${count}</div>
-                        <div class="text-xs text-slate-500">${percentage}%</div>
-                    </div>
-                </div>
-            `;
-            }).join('');
-    }
-
-    function renderTeamTable() {
+    function renderTable() {
+        const container = document.getElementById('tableContainer');
+        const empty = document.getElementById('emptyState');
         const tbody = document.getElementById('teamTableBody');
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const typeFilter = document.getElementById('typeFilter').value;
 
-        // Filter data
-        let filteredData = teamData.filter(member => {
-            const matchesSearch = !searchTerm ||
-                (member.name || '').toLowerCase().includes(searchTerm) ||
-                (member.email || '').toLowerCase().includes(searchTerm) ||
-                (member.employee_id || '').toLowerCase().includes(searchTerm) ||
-                (member.username || '').toLowerCase().includes(searchTerm);
+        const data = filterSortData();
+        const total = data.length;
+        document.getElementById('totalCount').textContent = total;
 
-            const matchesType = !typeFilter || member.employee_type === typeFilter;
-
-            return matchesSearch && matchesType;
-        });
-
-        // Show/hide states
-        if (filteredData.length === 0) {
-            document.getElementById('tableContainer').classList.add('hidden');
-            document.getElementById('emptyState').classList.remove('hidden');
+        if (total === 0) {
+            container.classList.add('hidden');
+            empty.classList.remove('hidden');
             return;
         }
+        container.classList.remove('hidden');
+        empty.classList.add('hidden');
 
-        document.getElementById('tableContainer').classList.remove('hidden');
-        document.getElementById('emptyState').classList.add('hidden');
+        // pagination
+        const size = PAGE.size;
+        const pages = Math.max(1, Math.ceil(total / size));
+        PAGE.index = Math.min(PAGE.index, pages);
+        const start = (PAGE.index - 1) * size;
+        const slice = data.slice(start, start + size);
 
-        // Render rows
-        tbody.innerHTML = filteredData.map(member => {
-            const status = getEmployeeStatus(member.created_at);
+        tbody.innerHTML = slice.map(m => {
+            const status = getEmployeeStatus(m.created_at);
+            const mail = m.email || '-';
             return `
-            <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center mr-3">
-                            <i class="fa-solid fa-user text-slate-500 text-sm"></i>
-                        </div>
-                        <div>
-                            <div class="font-medium text-slate-800">${member.name || '-'}</div>
-                            <div class="text-sm text-slate-500">@${member.username || '-'}</div>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-4 py-3 text-sm text-slate-600">${member.employee_id || '-'}</td>
-                <td class="px-4 py-3 text-sm text-slate-600">${member.employee_type || '-'}</td>
-                <td class="px-4 py-3 text-sm text-slate-600">${member.subposition || '-'}</td>
-                <td class="px-4 py-3 text-sm text-slate-600">${member.designation || '-'}</td>
-                <td class="px-4 py-3 text-sm text-slate-600">${member.email || '-'}</td>
-                <td class="px-4 py-3 text-sm text-slate-600">${formatDate(member.created_at)}</td>
-                <td class="px-4 py-3">
-                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${status.class}">
-                        ${status.text}
-                    </span>
-                </td>
-            </tr>
-        `;
+      <tr class="hover:bg-slate-50">
+        <td class="px-4 py-3">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center mr-3 text-[11px] font-medium text-slate-700">${initials(m.name)}</div>
+            <div>
+              <div class="font-medium text-slate-800">${m.name || '-'}</div>
+              <div class="text-sm text-slate-500">@${m.username || '-'}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-3 text-sm text-slate-600">${m.employee_id || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${m.employee_type || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${m.subposition || '-'}</td>
+        <td class="px-4 py-3 text-sm text-slate-600">${m.designation || '-'}</td>
+        <td class="px-4 py-3 text-sm">
+          <button class="text-slate-600 hover:text-slate-800 underline decoration-dotted" title="Copy email" onclick="navigator.clipboard.writeText('${mail}').then(()=>showToast('Copied'))">${mail}</button>
+        </td>
+        <td class="px-4 py-3 text-sm text-slate-600" title="${formatDate(m.created_at)}">${relTime(m.created_at)}</td>
+        <td class="px-4 py-3">
+          <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${status.class}">${status.text}</span>
+        </td>
+      </tr>`;
         }).join('');
+
+        // footer
+        document.getElementById('pageInfo').textContent = `${Math.min(total, start + 1)}–${Math.min(total, start + slice.length)}`;
+        document.getElementById('pageNum').textContent = `Page ${PAGE.index}/${Math.max(1, Math.ceil(total / size))}`;
+        const prev = document.getElementById('prevPage');
+        const next = document.getElementById('nextPage');
+        prev.disabled = PAGE.index <= 1;
+        next.disabled = PAGE.index >= Math.ceil(total / size);
     }
 
+    /* ---------------- Recent Activity ---------------- */
     function loadRecentActivity() {
         const activityContainer = document.getElementById('recentActivity');
+        const items = [];
 
-        // Generate some sample recent activity
-        const activities = [];
-
-        // Recent hires
         const recentHires = teamData
-            .filter(member => {
-                const created = new Date(member.created_at);
-                const daysAgo = Math.floor((new Date() - created) / (1000 * 60 * 60 * 24));
-                return daysAgo <= 30;
+            .filter(m => {
+                const days = Math.floor((Date.now() - new Date(m.created_at)) / 86400000);
+                return days >= 0 && days <= 30;
             })
-            .slice(0, 3);
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(0, 5);
 
-        recentHires.forEach(hire => {
-            activities.push({
-                type: 'hire',
-                icon: 'fa-user-plus',
-                iconClass: 'text-green-600 bg-green-100',
-                title: `${hire.name} joined as ${hire.subposition}`,
-                time: formatDate(hire.created_at),
-                description: `New ${hire.employee_type} team member`
-            });
-        });
+        recentHires.forEach(h => items.push({
+            icon: 'fa-user-plus', tone: 'text-green-600 bg-green-100',
+            title: `${h.name} joined as ${h.subposition || h.designation || '—'}`,
+            desc: `${h.employee_type || 'Employee'}`, time: relTime(h.created_at)
+        }));
 
-        // If no recent activity, show message
-        if (activities.length === 0) {
-            activityContainer.innerHTML = `
-            <div class="text-center py-6">
-                <i class="fa-solid fa-clock text-slate-300 text-2xl mb-2"></i>
-                <p class="text-slate-500">No recent activity to display</p>
-            </div>
-        `;
-            return;
-        }
-
-        activityContainer.innerHTML = activities.map(activity => `
-        <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-slate-50">
-            <div class="flex-shrink-0">
-                <div class="w-8 h-8 rounded-full ${activity.iconClass} flex items-center justify-center">
-                    <i class="fa-solid ${activity.icon} text-sm"></i>
-                </div>
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="text-sm font-medium text-slate-800">${activity.title}</div>
-                <div class="text-sm text-slate-500">${activity.description}</div>
-                <div class="text-xs text-slate-400 mt-1">${activity.time}</div>
-            </div>
+        activityContainer.innerHTML = items.length
+            ? items.map(x => `
+      <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-slate-50">
+        <div class="w-8 h-8 rounded-full ${x.tone} flex items-center justify-center"><i class="fa-solid ${x.icon} text-sm"></i></div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium text-slate-800">${x.title}</div>
+          <div class="text-sm text-slate-500">${x.desc}</div>
+          <div class="text-xs text-slate-400 mt-1">${x.time}</div>
         </div>
-    `).join('');
+      </div>`).join('')
+            : `<div class="text-center py-6"><i class="fa-solid fa-clock text-slate-300 text-2xl mb-2"></i><p class="text-slate-500">No recent activity to display</p></div>`;
     }
 
-    function showError(message) {
-        // Simple error display - you can enhance this with toast notifications
-        console.error(message);
-        // You could add a toast notification system here
+    /* ---------------- CSV export ---------------- */
+    function exportCSV(rows) {
+        const headers = ['Name', 'Employee ID', 'Type', 'Position', 'Designation', 'Email', 'Joined', 'Status'];
+        const data = rows.map(m => [
+            m.name || '', m.employee_id || '', m.employee_type || '', m.subposition || '',
+            m.designation || '', m.email || '', formatDate(m.created_at), getEmployeeStatus(m.created_at).text
+        ]);
+        const csv = [headers, ...data].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'team_overview.csv'; a.click(); URL.revokeObjectURL(url);
     }
 
+    /* ---------------- Toaster (minimal) ---------------- */
+    let toastTimer;
+    function showToast(msg = 'Done') {
+        const id = 'miniToast';
+        let t = document.getElementById(id);
+        if (!t) {
+            t = document.createElement('div');
+            t.id = id;
+            t.className = 'fixed bottom-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg text-sm';
+            document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.style.opacity = '1';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 1500);
+    }
+
+    /* ---------------- Init & events ---------------- */
     async function initializePage() {
-        // Show loading state
         document.getElementById('loadingState').classList.remove('hidden');
-
         try {
-            // Load all data in parallel
-            await Promise.all([
-                loadTeamData(),
-                loadJobsData(),
-                loadCandidatesData()
-            ]);
-
-            // Load recent activity
+            await Promise.all([loadTeamData(), loadJobsData(), loadCandidatesData()]);
             loadRecentActivity();
-
-            // Hide loading state
             document.getElementById('loadingState').classList.add('hidden');
-        } catch (error) {
-            console.error('Error initializing page:', error);
+            document.getElementById('tableContainer').classList.toggle('hidden', teamData.length === 0);
+        } catch (e) {
+            console.error(e);
             document.getElementById('loadingState').innerHTML = `
-            <div class="text-center py-8">
-                <i class="fa-solid fa-exclamation-triangle text-red-400 text-2xl mb-2"></i>
-                <p class="text-red-600">Failed to load team overview data</p>
-                <button onclick="initializePage()" class="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                    Try Again
-                </button>
-            </div>
-        `;
+      <div class="text-center py-8">
+        <i class="fa-solid fa-exclamation-triangle text-red-400 text-2xl mb-2"></i>
+        <p class="text-red-600">Failed to load team overview data</p>
+        <button onclick="initializePage()" class="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Try Again</button>
+      </div>`;
         }
     }
 
-    // Event listeners
-    document.getElementById('searchInput').addEventListener('input', renderTeamTable);
-    document.getElementById('typeFilter').addEventListener('change', renderTeamTable);
+    /* Debounced search */
+    let searchTimer;
+    document.getElementById('searchInput').addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => { PAGE.index = 1; renderTable(); }, 250);
+    });
+    document.getElementById('typeFilter').addEventListener('change', () => { PAGE.index = 1; renderTable(); });
+    document.getElementById('deptFilter').addEventListener('change', () => { PAGE.index = 1; renderTable(); });
     document.getElementById('refreshBtn').addEventListener('click', initializePage);
 
-    // Initialize page when DOM is loaded
+    document.getElementById('prevPage').addEventListener('click', () => { if (PAGE.index > 1) { PAGE.index--; renderTable(); } });
+    document.getElementById('nextPage').addEventListener('click', () => { PAGE.index++; renderTable(); });
+    document.getElementById('pageSize').addEventListener('change', (e) => { PAGE.size = +e.target.value; PAGE.index = 1; renderTable(); });
+
+    /* Sorting */
+    document.querySelectorAll('.th-sort').forEach(th => {
+        th.style.cursor = 'pointer';
+        th.addEventListener('click', () => {
+            const key = th.dataset.key;
+            SORT = { key, dir: (SORT.key === key && SORT.dir === 'asc') ? 'desc' : 'asc' };
+            PAGE.index = 1;
+            renderTable();
+        });
+    });
+
+    /* Export */
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+        const rows = filterSortData();
+        exportCSV(rows);
+    });
+
+    /* Kick off */
     document.addEventListener('DOMContentLoaded', initializePage);
 </script>
 
+<style>
+    .th-sort i {
+        opacity: .6;
+    }
+
+    .th-sort:hover i {
+        opacity: 1;
+    }
+</style>
 {% endblock %}

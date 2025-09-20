@@ -92,6 +92,7 @@
                             <label class="block text-slate-700 mb-1">Old: 80C + 80CCD(1B) (₹)</label>
                             <input id="inp80C" type="number" min="0"
                                 class="w-full rounded-lg border border-slate-300 px-3 py-2" value="200000">
+                            <div class="text-xs text-slate-500 mt-1">Cap considered: ₹1,50,000 + ₹50,000</div>
                         </div>
                         <div>
                             <label class="block text-slate-700 mb-1">Old: 80D (₹)</label>
@@ -109,6 +110,7 @@
                             <label class="block text-slate-700 mb-1">New: Employer NPS 80CCD(2) (₹)</label>
                             <input id="inpCCD2" type="number" min="0"
                                 class="w-full rounded-lg border border-slate-300 px-3 py-2" value="60000">
+                            <div class="text-xs text-slate-500 mt-1">Capped @ 10% of salary</div>
                         </div>
                     </div>
                     <div class="flex items-center justify-end gap-2">
@@ -123,14 +125,14 @@
             <!-- Notes -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-3">
-                    <i class="fa-solid fa-circle-info mr-2"></i> Assumptions ()
+                    <i class="fa-solid fa-circle-info mr-2"></i> Assumptions (FY 2025–26 style)
                 </h3>
                 <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
-                    <li>Financial year: FY 2025–26 ( slabs).</li>
-                    <li>Standard deduction ₹50,000 for salary in both regimes.</li>
-                    <li>Health &amp; education cess @ 4% on tax.</li>
-                    <li>Old regime allows typical deductions (80C/80D/HRA etc.).</li>
-                    <li>New regime allows employer NPS u/s 80CCD(2) ( input).</li>
+                    <li>Old slabs: 0–2.5L: 0%, 2.5–5L: 5%, 5–10L: 20%, >10L: 30%.</li>
+                    <li>New slabs: 0–3L: 0%, 3–6L: 5%, 6–9L: 10%, 9–12L: 15%, 12–15L: 20%, >15L: 30%.</li>
+                    <li>Standard deduction ₹50,000 (salary) in both regimes. Cess @ 4%.</li>
+                    <li>87A rebate applied: Old ≤ ₹5L → zero tax; New ≤ ₹7L → zero tax.</li>
+                    <li>No surcharge / marginal relief modeled. Informational only.</li>
                 </ul>
             </div>
         </div>
@@ -139,69 +141,44 @@
     <!-- Calculator -->
     <section id="calculatorPanel" class="trc-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Old regime form -->
+            <!-- Old -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-3">
-                    <i class="fa-solid fa-landmark mr-2"></i> Old Regime
-                </h3>
+                <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-landmark mr-2"></i> Old
+                    Regime</h3>
                 <div class="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                        <label class="block text-slate-700 mb-1">Gross (₹)</label>
-                        <input id="oldGross" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <div><label class="block text-slate-700 mb-1">Gross (₹)</label><input id="oldGross" type="number"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+                    <div><label class="block text-slate-700 mb-1">Std Deduction (₹)</label><input id="oldStd"
+                            type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2" value="50000">
                     </div>
-                    <div>
-                        <label class="block text-slate-700 mb-1">Std Deduction (₹)</label>
-                        <input id="oldStd" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                            value="50000">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 mb-1">80C + 80CCD(1B) (₹)</label>
-                        <input id="old80C" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 mb-1">80D (₹)</label>
-                        <input id="old80D" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 mb-1">HRA Exempt (₹)</label>
-                        <input id="oldHRA" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 mb-1">Other (₹)</label>
-                        <input id="oldOther" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                            value="0">
-                    </div>
+                    <div><label class="block text-slate-700 mb-1">80C + 80CCD(1B) (₹)</label><input id="old80C"
+                            type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+                    <div><label class="block text-slate-700 mb-1">80D (₹)</label><input id="old80D" type="number"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+                    <div><label class="block text-slate-700 mb-1">HRA Exempt (₹)</label><input id="oldHRA" type="number"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+                    <div><label class="block text-slate-700 mb-1">Other (₹)</label><input id="oldOther" type="number"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2" value="0"></div>
                 </div>
                 <div class="mt-4 text-sm">
                     <div>Taxable Income: <b id="oldTaxable">₹0</b></div>
                     <div>Tax + Cess: <b id="oldOut">₹0</b></div>
                 </div>
             </div>
-
-            <!-- New regime form -->
+            <!-- New -->
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-3">
-                    <i class="fa-solid fa-sun mr-2"></i> New Regime
+                <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-sun mr-2"></i> New Regime
                 </h3>
                 <div class="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                        <label class="block text-slate-700 mb-1">Gross (₹)</label>
-                        <input id="newGross" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    <div><label class="block text-slate-700 mb-1">Gross (₹)</label><input id="newGross" type="number"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+                    <div><label class="block text-slate-700 mb-1">Std Deduction (₹)</label><input id="newStd"
+                            type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2" value="50000">
                     </div>
-                    <div>
-                        <label class="block text-slate-700 mb-1">Std Deduction (₹)</label>
-                        <input id="newStd" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                            value="50000">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 mb-1">Employer NPS 80CCD(2) (₹)</label>
-                        <input id="newCCD2" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 mb-1">Other (₹)</label>
-                        <input id="newOther" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                            value="0">
-                    </div>
+                    <div><label class="block text-slate-700 mb-1">Employer NPS 80CCD(2) (₹)</label><input id="newCCD2"
+                            type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+                    <div><label class="block text-slate-700 mb-1">Other (₹)</label><input id="newOther" type="number"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2" value="0"></div>
                 </div>
                 <div class="mt-4 text-sm">
                     <div>Taxable Income: <b id="newTaxable">₹0</b></div>
@@ -212,9 +189,8 @@
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 mt-6">
             <div class="flex items-center justify-between mb-3">
-                <h3 class="text-lg font-semibold text-slate-800">
-                    <i class="fa-solid fa-chart-column mr-2"></i> Slab Impact
-                </h3>
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-chart-column mr-2"></i> Slab
+                    Impact</h3>
             </div>
             <div class="relative h-48">
                 <canvas id="slabChart" class="absolute inset-0 w-full h-full"></canvas>
@@ -230,20 +206,14 @@
                     <h3 class="text-lg font-semibold text-slate-800 mb-3"><i
                             class="fa-solid fa-wand-magic-sparkles mr-2"></i> Tweak Inputs</h3>
                     <div class="space-y-3 text-sm">
-                        <div>
-                            <label class="block text-slate-700 mb-1">Increase 80C by (₹)</label>
-                            <input id="wi80C" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                                value="0">
+                        <div><label class="block text-slate-700 mb-1">Increase 80C by (₹)</label><input id="wi80C"
+                                type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2" value="0">
                         </div>
-                        <div>
-                            <label class="block text-slate-700 mb-1">Add Rent (HRA) (₹)</label>
-                            <input id="wiHRA" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                                value="0">
+                        <div><label class="block text-slate-700 mb-1">Add Rent (HRA) (₹)</label><input id="wiHRA"
+                                type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2" value="0">
                         </div>
-                        <div>
-                            <label class="block text-slate-700 mb-1">Employer NPS Add (₹)</label>
-                            <input id="wiCCD2" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                                value="0">
+                        <div><label class="block text-slate-700 mb-1">Employer NPS Add (₹)</label><input id="wiCCD2"
+                                type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2" value="0">
                         </div>
                         <button id="runWhatIf"
                             class="w-full px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700">
@@ -268,9 +238,8 @@
                             <div id="wiBest" class="text-xl font-semibold text-slate-800">—</div>
                         </div>
                     </div>
-                    <div class="relative h-48 mt-4">
-                        <canvas id="whatIfChart" class="absolute inset-0 w-full h-full"></canvas>
-                    </div>
+                    <div class="relative h-48 mt-4"><canvas id="whatIfChart"
+                            class="absolute inset-0 w-full h-full"></canvas></div>
                 </div>
             </div>
         </div>
@@ -280,13 +249,17 @@
     <section id="historyPanel" class="trc-panel hidden">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
             <div class="flex items-center justify-between mb-3">
-                <h3 class="text-lg font-semibold text-slate-800">
-                    <i class="fa-solid fa-table mr-2"></i> Saved Runs
-                </h3>
-                <button id="saveRunBtn"
-                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-                    <i class="fa-solid fa-bookmark mr-1"></i> Save current
-                </button>
+                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-table mr-2"></i> Saved Runs</h3>
+                <div class="flex items-center gap-2">
+                    <button id="saveRunBtn"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-bookmark mr-1"></i> Save current
+                    </button>
+                    <button id="clearRunsBtn"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        <i class="fa-solid fa-trash mr-1"></i> Clear
+                    </button>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
@@ -317,27 +290,25 @@
                 </details>
                 <details class="rounded-lg bg-slate-50 p-3">
                     <summary class="font-medium cursor-pointer">Are slabs exact?</summary>
-                    <p class="mt-2">These are  slabs/assumptions. Verify against the current rules before filing.
-                    </p>
+                    <p class="mt-2">These are reasonable FY25–26 style slabs & assumptions. Please verify against the
+                        latest rules before filing.</p>
                 </details>
             </div>
         </div>
     </section>
 </div>
 
-<!-- Chart.js CDN -->
+<!-- Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ----  slab config (FY25-26 style) ----
-    // Old: 0-2.5L:0%, 2.5-5:5%, 5-10:20%, >10:30%
+    /* ---------------- Slabs (FY25–26 style) ---------------- */
     const OLD_SLABS = [
         { up: 250000, rate: 0.00 },
         { up: 500000, rate: 0.05 },
         { up: 1000000, rate: 0.20 },
         { up: Infinity, rate: 0.30 }
     ];
-    // New: 0-3:0%, 3-6:5%, 6-9:10%, 9-12:15%, 12-15:20%, >15:30%
     const NEW_SLABS = [
         { up: 300000, rate: 0.00 },
         { up: 600000, rate: 0.05 },
@@ -348,12 +319,16 @@
     ];
     const CESS = 0.04;
 
-    // ---- State ----
+    /* ---------------- Local storage keys ---------------- */
+    const LS_INPUTS = 'trc_inputs_v1';
+    const LS_RUNS = 'trc_runs_v1';
+
+    /* ---------------- Charts refs ---------------- */
     let _barChart, _slabChart, _whatIfChart;
 
-    // ---- Helpers ----
-    function clamp(n) { return Math.max(0, Number(n || 0)); }
-    function fmt(n) { return (Math.round(n) || 0).toLocaleString('en-IN'); }
+    /* ---------------- Helpers ---------------- */
+    const clamp = n => Math.max(0, Number(n || 0));
+    const fmt = n => (Math.round(n) || 0).toLocaleString('en-IN');
 
     function slabTax(taxable, slabs) {
         let rem = Math.max(0, taxable), prev = 0, tax = 0;
@@ -365,25 +340,34 @@
         }
         return tax;
     }
-
-    function oldRegimeTax(gross, std, _80c, _80d, hra, other) {
-        const cap80C = Math.min(_80c, 200000); // : 80C+1B capped at 2L here
-        const cap80D = Math.min(_80d, 50000);
-        const totalDed = clamp(std) + clamp(cap80C) + clamp(cap80D) + clamp(hra) + clamp(other);
-        const taxable = Math.max(0, clamp(gross) - totalDed);
-        const base = slabTax(taxable, OLD_SLABS);
-        return { taxable, tax: base + base * CESS };
+    function applyRebate(baseTax, taxable, regime) {
+        // Old 87A: taxable <= 5L → tax = 0; New 87A: taxable <= 7L → tax = 0
+        if (regime === 'old' && taxable <= 500000) return 0;
+        if (regime === 'new' && taxable <= 700000) return 0;
+        return baseTax;
     }
-
+    function oldRegimeTax(gross, std, c80c1b, c80d, hra, other) {
+        const cap80C1B = Math.min(clamp(c80c1b), 150000 + 50000); // 80C + 80CCD(1B) = 2,00,000 cap
+        const cap80D = Math.min(clamp(c80d), 50000);           // simplified cap
+        const totalDed = clamp(std) + cap80C1B + cap80D + clamp(hra) + clamp(other);
+        const taxable = Math.max(0, clamp(gross) - totalDed);
+        let base = slabTax(taxable, OLD_SLABS);
+        base = applyRebate(base, taxable, 'old');
+        const total = base + base * CESS;
+        return { taxable, tax: total };
+    }
     function newRegimeTax(gross, std, ccd2, other) {
-        const ccd2Cap = Math.min(clamp(ccd2), Math.round(clamp(gross) * 0.10)); //  cap 10% of salary
-        const totalDed = clamp(std) + clamp(ccd2Cap) + clamp(other);
+        // Employer NPS 80CCD(2) cap 10% of salary
+        const ccd2Cap = Math.min(clamp(ccd2), Math.round(clamp(gross) * 0.10));
+        const totalDed = clamp(std) + ccd2Cap + clamp(other);
         const taxable = Math.max(0, clamp(gross) - totalDed);
-        const base = slabTax(taxable, NEW_SLABS);
-        return { taxable, tax: base + base * CESS };
+        let base = slabTax(taxable, NEW_SLABS);
+        base = applyRebate(base, taxable, 'new');
+        const total = base + base * CESS;
+        return { taxable, tax: total };
     }
 
-    // ---- Wire & init ----
+    /* ---------------- Panels ---------------- */
     const panels = {
         overview: document.getElementById('overviewPanel'),
         calculator: document.getElementById('calculatorPanel'),
@@ -392,16 +376,20 @@
         faq: document.getElementById('faqPanel')
     };
 
-    const HIST = []; // saved runs
+    /* ---------------- History (saved runs) ---------------- */
+    let RUNS = JSON.parse(localStorage.getItem(LS_RUNS) || '[]');
 
+    /* ---------------- Init ---------------- */
     document.addEventListener('DOMContentLoaded', () => {
         setupTabs();
         wireButtons();
+        restoreInputs();
         seedInputsFromQuick();
         computeAll();
         renderHistory();
     });
 
+    /* ---------------- Tabs ---------------- */
     function setupTabs() {
         document.querySelectorAll('.trc-tab').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -414,21 +402,66 @@
         });
     }
 
+    /* ---------------- UI wiring ---------------- */
     function wireButtons() {
-        const ids = ['inpGross', 'inp80C', 'inp80D', 'inpHRA', 'inpCCD2'];
-        ids.forEach(id => document.getElementById(id).addEventListener('input', computeAll));
+        ['inpGross', 'inp80C', 'inp80D', 'inpHRA', 'inpCCD2'].forEach(id =>
+            document.getElementById(id).addEventListener('input', () => { computeAll(); persistInputs(); })
+        );
         document.getElementById('recalcBtn').addEventListener('click', computeAll);
         document.getElementById('resetBtn').addEventListener('click', resetAll);
-        document.getElementById('exportBtn').addEventListener('click', () => alert('📄 Summary downloaded ()'));
+        document.getElementById('exportBtn').addEventListener('click', exportSummary);
+
+        ['oldGross', 'oldStd', 'old80C', 'old80D', 'oldHRA', 'oldOther', 'newGross', 'newStd', 'newCCD2', 'newOther']
+            .forEach(id => document.getElementById(id).addEventListener('input', () => { computeDetailed(); persistInputs(); }));
+
         document.getElementById('runWhatIf').addEventListener('click', runWhatIf);
         document.getElementById('saveRunBtn').addEventListener('click', saveRun);
-
-        ['oldGross', 'oldStd', 'old80C', 'old80D', 'oldHRA', 'oldOther',
-            'newGross', 'newStd', 'newCCD2', 'newOther'].forEach(id => {
-                document.getElementById(id).addEventListener('input', computeDetailed);
-            });
+        document.getElementById('clearRunsBtn').addEventListener('click', clearRuns);
     }
 
+    /* ---------------- Persistence ---------------- */
+    function persistInputs() {
+        const data = {
+            inpGross: +document.getElementById('inpGross').value,
+            inp80C: +document.getElementById('inp80C').value,
+            inp80D: +document.getElementById('inp80D').value,
+            inpHRA: +document.getElementById('inpHRA').value,
+            inpCCD2: +document.getElementById('inpCCD2').value,
+            old: {
+                g: +document.getElementById('oldGross').value, std: +document.getElementById('oldStd').value,
+                c: +document.getElementById('old80C').value, d: +document.getElementById('old80D').value,
+                h: +document.getElementById('oldHRA').value, o: +document.getElementById('oldOther').value
+            },
+            nw: {
+                g: +document.getElementById('newGross').value, std: +document.getElementById('newStd').value,
+                c2: +document.getElementById('newCCD2').value, o: +document.getElementById('newOther').value
+            }
+        };
+        localStorage.setItem(LS_INPUTS, JSON.stringify(data));
+    }
+    function restoreInputs() {
+        const data = JSON.parse(localStorage.getItem(LS_INPUTS) || 'null');
+        if (!data) return;
+        document.getElementById('inpGross').value = data.inpGross ?? 1500000;
+        document.getElementById('inp80C').value = data.inp80C ?? 200000;
+        document.getElementById('inp80D').value = data.inp80D ?? 25000;
+        document.getElementById('inpHRA').value = data.inpHRA ?? 180000;
+        document.getElementById('inpCCD2').value = data.inpCCD2 ?? 60000;
+
+        document.getElementById('oldGross').value = data.old?.g ?? data.inpGross ?? 1500000;
+        document.getElementById('oldStd').value = data.old?.std ?? 50000;
+        document.getElementById('old80C').value = data.old?.c ?? data.inp80C ?? 200000;
+        document.getElementById('old80D').value = data.old?.d ?? data.inp80D ?? 25000;
+        document.getElementById('oldHRA').value = data.old?.h ?? data.inpHRA ?? 180000;
+        document.getElementById('oldOther').value = data.old?.o ?? 0;
+
+        document.getElementById('newGross').value = data.nw?.g ?? data.inpGross ?? 1500000;
+        document.getElementById('newStd').value = data.nw?.std ?? 50000;
+        document.getElementById('newCCD2').value = data.nw?.c2 ?? data.inpCCD2 ?? 60000;
+        document.getElementById('newOther').value = data.nw?.o ?? 0;
+    }
+
+    /* ---------------- Seeding quick → detailed ---------------- */
     function seedInputsFromQuick() {
         const g = clamp(document.getElementById('inpGross').value);
         document.getElementById('oldGross').value = g;
@@ -439,12 +472,8 @@
         document.getElementById('newCCD2').value = clamp(document.getElementById('inpCCD2').value);
     }
 
-    // ---- Main compute ----
-    function computeAll() {
-        seedInputsFromQuick();
-        computeDetailed();
-    }
-
+    /* ---------------- Compute ---------------- */
+    function computeAll() { seedInputsFromQuick(); computeDetailed(); }
     function computeDetailed() {
         const o = oldRegimeTax(
             clamp(document.getElementById('oldGross').value),
@@ -461,16 +490,16 @@
             clamp(document.getElementById('newOther').value)
         );
 
-        // Overview tiles
+        // Overview
         document.getElementById('oldTax').textContent = fmt(o.tax);
         document.getElementById('newTax').textContent = fmt(n.tax);
         document.getElementById('youSave').textContent = fmt(Math.abs(o.tax - n.tax));
-        const badge = document.getElementById('bestBadge');
         const newWins = n.tax < o.tax;
+        const badge = document.getElementById('bestBadge');
         badge.textContent = newWins ? 'New Regime wins' : 'Old Regime wins';
         badge.className = 'px-2 py-1 text-xs rounded ' + (newWins ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700');
 
-        // Calculator tiles
+        // Detail tiles
         document.getElementById('oldTaxable').textContent = '₹' + fmt(o.taxable);
         document.getElementById('oldOut').textContent = '₹' + fmt(o.tax);
         document.getElementById('newTaxable').textContent = '₹' + fmt(n.taxable);
@@ -480,20 +509,19 @@
         drawSlab(o.taxable, n.taxable);
     }
 
-    // ---- Charts ----
+    /* ---------------- Charts ---------------- */
     function drawBars(oldVal, newVal) {
         const ctx = document.getElementById('barChart').getContext('2d');
-        if (_barChart) _barChart.destroy();
+        _barChart && _barChart.destroy();
         _barChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: ['Old', 'New'], datasets: [{ label: 'Tax (₹)', data: [oldVal, newVal] }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
         });
     }
-
     function drawSlab(oldTaxable, newTaxable) {
         const ctx = document.getElementById('slabChart').getContext('2d');
-        if (_slabChart) _slabChart.destroy();
+        _slabChart && _slabChart.destroy();
         _slabChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -507,7 +535,7 @@
         });
     }
 
-    // ---- What-if ----
+    /* ---------------- What-if ---------------- */
     function runWhatIf() {
         const base = {
             g: clamp(document.getElementById('inpGross').value),
@@ -529,7 +557,7 @@
         document.getElementById('wiBest').textContent = n.tax < o.tax ? 'New' : 'Old';
 
         const ctx = document.getElementById('whatIfChart').getContext('2d');
-        if (_whatIfChart) _whatIfChart.destroy();
+        _whatIfChart && _whatIfChart.destroy();
         _whatIfChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: ['Old', 'New'], datasets: [{ label: 'Tax (₹)', data: [o.tax, n.tax] }] },
@@ -537,34 +565,78 @@
         });
     }
 
-    // ---- History ----
+    /* ---------------- History ---------------- */
     function saveRun() {
         const g = clamp(document.getElementById('inpGross').value);
-        const oldV = document.getElementById('oldOut').textContent.replace(/[^\d]/g, '') * 1;
-        const newV = document.getElementById('newOut').textContent.replace(/[^\d]/g, '') * 1;
-        HIST.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), g, old: oldV, nw: newV, choice: newV < oldV ? 'New' : 'Old' });
+        const oldV = +document.getElementById('oldOut').textContent.replace(/[^\d]/g, '');
+        const newV = +document.getElementById('newOut').textContent.replace(/[^\d]/g, '');
+        RUNS.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), g, old: oldV, nw: newV, choice: newV < oldV ? 'New' : 'Old' });
+        localStorage.setItem(LS_RUNS, JSON.stringify(RUNS));
         renderHistory();
     }
     function renderHistory() {
-        document.getElementById('histRows').innerHTML = HIST.map(h => `
-      <tr class="border-b last:border-0">
-        <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
-        <td class="py-2 pr-4">₹${fmt(h.g)}</td>
-        <td class="py-2 pr-4">₹${fmt(h.old)}</td>
-        <td class="py-2 pr-4">₹${fmt(h.nw)}</td>
-        <td class="py-2 pr-4"><span class="px-2 py-0.5 rounded-full ${h.choice === 'New' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'} text-xs">${h.choice}</span></td>
-      </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No saved runs yet.</td></tr>`;
+        document.getElementById('histRows').innerHTML = RUNS.map(h => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+      <td class="py-2 pr-4">₹${fmt(h.g)}</td>
+      <td class="py-2 pr-4">₹${fmt(h.old)}</td>
+      <td class="py-2 pr-4">₹${fmt(h.nw)}</td>
+      <td class="py-2 pr-4"><span class="px-2 py-0.5 rounded-full ${h.choice === 'New' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'} text-xs">${h.choice}</span></td>
+    </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No saved runs yet.</td></tr>`;
+    }
+    function clearRuns() {
+        RUNS = [];
+        localStorage.setItem(LS_RUNS, JSON.stringify(RUNS));
+        renderHistory();
     }
 
-    // ---- Reset ----
+    /* ---------------- Reset & Export ---------------- */
     function resetAll() {
         document.getElementById('inpGross').value = 1500000;
         document.getElementById('inp80C').value = 200000;
         document.getElementById('inp80D').value = 25000;
         document.getElementById('inpHRA').value = 180000;
         document.getElementById('inpCCD2').value = 60000;
-        seedInputsFromQuick(); computeAll();
+        seedInputsFromQuick(); computeAll(); persistInputs();
     }
+    function exportSummary() {
+        const g = clamp(document.getElementById('inpGross').value);
+        const oldV = document.getElementById('oldOut').textContent;
+        const newV = document.getElementById('newOut').textContent;
+        const best = (+oldV.replace(/[^\d]/g, '') > +newV.replace(/[^\d]/g, '')) ? 'New' : 'Old';
+
+        // CSV
+        const csv = [
+            ['Metric', 'Value'],
+            ['Gross', g],
+            ['Old Tax', oldV.replace(/[^\d]/g, '')],
+            ['New Tax', newV.replace(/[^\d]/g, '')],
+            ['Choice', best]
+        ].map(r => r.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tax_regime_summary.csv'; a.click(); URL.revokeObjectURL(a.href);
+
+        // Print/PDF (lightweight)
+        const html = `
+  <html><head><title>Tax Regime Summary</title>
+  <style>body{font-family:system-ui; padding:24px; color:#0f172a} h1{font-size:20px;margin:0 0 8px}
+  table{border-collapse:collapse;width:100%;font-size:12px} th,td{border:1px solid #e2e8f0;padding:6px;text-align:left}</style></head>
+  <body>
+    <h1>Tax Regime Summary (Demo)</h1>
+    <div>Date: ${new Date().toLocaleString()}</div>
+    <table style="margin-top:12px">
+      <tr><th>Gross</th><td>₹${fmt(g)}</td></tr>
+      <tr><th>Old Tax</th><td>${oldV}</td></tr>
+      <tr><th>New Tax</th><td>${newV}</td></tr>
+      <tr><th>Choice</th><td>${best}</td></tr>
+    </table>
+    <p style="margin-top:12px;color:#64748b">Tip: Use the History tab to track multiple scenarios.</p>
+    <script>window.print();</script>
+</body>
+
+</html>`;
+const w = window.open('', '_blank'); w.document.write(html); w.document.close();
+}
 </script>
 
 <style>

@@ -1,50 +1,50 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 py-4 sm:py-6 gap-4">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-clock mr-2"></i> Timesheets
             </h1>
-            <p class="text-slate-600 text-sm">Capture, approve, and process employee work logs.</p>
+            <p class="text-slate-600 text-sm mt-1">Capture, approve, and process employee work logs.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
             <button id="newEntryBtn"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm flex-1 sm:flex-none">
                 <i class="fa-solid fa-plus mr-1"></i> New Entry
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm flex-1 sm:flex-none">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
-        <div class="flex flex-wrap items-center gap-4">
-            <div class="flex items-center gap-2">
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
                 <label class="text-sm font-medium text-slate-700">View:</label>
-                <select id="viewType" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <select id="viewType" class="w-full sm:w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option value="dashboard">Dashboard</option>
                     <option value="entries">Entries</option>
                     <option value="approvals">Approvals</option>
                     <option value="payroll">Payroll</option>
                 </select>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
                 <label class="text-sm font-medium text-slate-700">Period:</label>
-                <select id="periodSelect" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <select id="periodSelect" class="w-full sm:w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option value="current">Current Week</option>
                     <option value="prev">Previous Week</option>
                     <option value="month">This Month</option>
                     <option value="custom">Custom…</option>
                 </select>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
                 <label class="text-sm font-medium text-slate-700">Department:</label>
-                <select id="deptFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <select id="deptFilter" class="w-full sm:w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option value="">All</option>
                     <option value="Engineering">Engineering</option>
                     <option value="Marketing">Marketing</option>
@@ -53,22 +53,22 @@
                     <option value="Finance">Finance</option>
                 </select>
             </div>
-            <div class="relative">
+            <div class="relative w-full sm:w-64">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
-                <input id="searchBox" class="rounded-lg border border-slate-300 pl-8 pr-3 py-2 text-sm w-64"
+                <input id="searchBox" class="w-full rounded-lg border border-slate-300 pl-8 pr-3 py-2 text-sm"
                     placeholder="Search employee, project…" />
             </div>
-            <div class="ml-auto flex items-center gap-2">
+            <div class="flex items-center gap-2 w-full sm:ml-auto">
                 <button id="importBtn"
-                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm flex-1 sm:flex-none">
                     <i class="fa-solid fa-file-import mr-1"></i> Import CSV
                 </button>
                 <button id="exportBtn"
-                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm flex-1 sm:flex-none">
                     <i class="fa-solid fa-file-export mr-1"></i> Export CSV
                 </button>
                 <button id="refreshBtn"
-                    class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm flex-1 sm:flex-none">
                     <i class="fa-solid fa-rotate mr-1"></i> Refresh
                 </button>
             </div>
@@ -77,27 +77,27 @@
 
     <!-- Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-hourglass-half mr-1"></i> Logged Hours</div>
-            <div id="loggedHours" class="mt-1 text-2xl font-semibold text-slate-800">324.5</div>
+            <div id="loggedHours" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">324.5</div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-circle-exclamation mr-1"></i> Missing Entries
             </div>
-            <div id="missingEntries" class="mt-1 text-2xl font-semibold text-slate-800">7</div>
+            <div id="missingEntries" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">7</div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-check-circle mr-1"></i> Approved</div>
-            <div id="approvedHours" class="mt-1 text-2xl font-semibold text-slate-800">256.0</div>
+            <div id="approvedHours" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">256.0</div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <div class="text-sm text-slate-500"><i class="fa-solid fa-coins mr-1"></i> Payroll Ready</div>
-            <div id="payrollReady" class="mt-1 text-2xl font-semibold text-slate-800">280.25</div>
+            <div id="payrollReady" class="mt-1 text-xl sm:text-2xl font-semibold text-slate-800">280.25</div>
         </div>
     </div>
 
     <!-- Main -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
         <div id="loadingState" class="text-center py-12 hidden">
             <i class="fa-solid fa-spinner fa-spin text-slate-400 text-3xl mb-4"></i>
             <p class="text-slate-600">Loading timesheets…</p>
@@ -105,14 +105,54 @@
 
         <!-- Dashboard -->
         <div id="dashboardView">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div class="lg:col-span-2 rounded-xl border border-slate-200 p-4">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-chart-line mr-2"></i> Hours by
                             Day</h3>
                         <span id="hoursRange" class="text-xs text-slate-500">Jan 8 → Jan 14, 2025</span>
                     </div>
-                    <canvas id="hoursCanvas" height="140"></canvas>
+
+                    ```chartjs
+                    {
+                    "type": "line",
+                    "data": {
+                    "labels": ["Jan 8", "Jan 9", "Jan 10", "Jan 11", "Jan 12", "Jan 13", "Jan 14"],
+                    "datasets": [{
+                    "label": "Hours",
+                    "data": [32, 28, 35, 42, 38, 45, 40],
+                    "borderColor": "#0ea5e9",
+                    "backgroundColor": "rgba(14, 165, 233, 0.2)",
+                    "pointBackgroundColor": "#0ea5e9",
+                    "pointBorderColor": "#fff",
+                    "pointRadius": 4,
+                    "pointHoverRadius": 6,
+                    "fill": true,
+                    "tension": 0.4
+                    }]
+                    },
+                    "options": {
+                    "responsive": true,
+                    "maintainAspectRatio": false,
+                    "scales": {
+                    "y": {
+                    "beginAtZero": true,
+                    "title": { "display": true, "text": "Hours" },
+                    "grid": { "color": "#e5e7eb" }
+                    },
+                    "x": {
+                    "title": { "display": true, "text": "Date" },
+                    "grid": { "display": false }
+                    }
+                    },
+                    "plugins": {
+                    "legend": { "display": false },
+                    "tooltip": { "backgroundColor": "#1e293b", "titleColor": "#fff", "bodyColor": "#fff" }
+                    }
+                    }
+                    }
+                    ```
+
                     <p class="text-xs text-slate-500 mt-2">Total submitted hours per day.</p>
                 </div>
                 <div class="rounded-xl border border-slate-200 p-4">
@@ -154,278 +194,92 @@
 
         <!-- Entries -->
         <div id="entriesView" class="hidden">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-4">
                 <h3 class="font-semibold text-slate-800"><i class="fa-regular fa-clock mr-2"></i> Entries</h3>
-                <div class="flex items-center gap-2">
-                    <button id="bulkSubmitBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button id="bulkSubmitBtn" class="px-3 py-2 border rounded-lg text-sm flex-1 sm:flex-none"><i
                             class="fa-solid fa-paper-plane mr-1"></i> Submit Selected</button>
-                    <button id="bulkDeleteBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                    <button id="bulkDeleteBtn" class="px-3 py-2 border rounded-lg text-sm flex-1 sm:flex-none"><i
                             class="fa-solid fa-trash mr-1"></i> Delete</button>
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full">
+                <table class="min-w-full text-sm text-left">
                     <thead class="bg-slate-50">
                         <tr>
                             <th class="px-4 py-3"><input type="checkbox" id="selectAllRows"></th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Employee</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Project</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Task</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Hours</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase">Date</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase">Employee</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden sm:table-cell">
+                                Project</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden sm:table-cell">Task
+                            </th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase">Hours</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase">Status</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase w-24">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="entriesTableBody" class="bg-white divide-y divide-slate-200">
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="1"></td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-14</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">John Smith</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Website Redesign</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Frontend Development</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">8.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600"><span
-                                    class="pill bg-green-100 text-green-800">Approved</span></td>
-                            <td class="px-4 py-3">
-                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('1')"><i
-                                        class="fa-solid fa-edit"></i></button>
-                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('1')"><i
-                                        class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="2"></td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-13</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Sarah Wilson</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Marketing Campaign</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Content Creation</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">7.5</td>
-                            <td class="px-4 py-3 text-sm text-slate-600"><span
-                                    class="pill bg-yellow-100 text-yellow-800">Submitted</span></td>
-                            <td class="px-4 py-3">
-                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('2')"><i
-                                        class="fa-solid fa-edit"></i></button>
-                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('2')"><i
-                                        class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="3"></td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-13</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Mike Johnson</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">API Development</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Backend Services</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">8.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600"><span
-                                    class="pill bg-blue-100 text-blue-800">Draft</span></td>
-                            <td class="px-4 py-3">
-                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('3')"><i
-                                        class="fa-solid fa-edit"></i></button>
-                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('3')"><i
-                                        class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="4"></td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-12</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Emily Davis</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Sales Analytics</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Data Analysis</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">6.5</td>
-                            <td class="px-4 py-3 text-sm text-slate-600"><span
-                                    class="pill bg-green-100 text-green-800">Approved</span></td>
-                            <td class="px-4 py-3">
-                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('4')"><i
-                                        class="fa-solid fa-edit"></i></button>
-                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('4')"><i
-                                        class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="5"></td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-12</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Alex Brown</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">HR System</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">User Training</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">4.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600"><span
-                                    class="pill bg-yellow-100 text-yellow-800">Submitted</span></td>
-                            <td class="px-4 py-3">
-                                <button class="text-slate-600 hover:text-slate-800 mr-3" onclick="editEntry('5')"><i
-                                        class="fa-solid fa-edit"></i></button>
-                                <button class="text-red-500 hover:text-red-600" onclick="deleteEntry('5')"><i
-                                        class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody id="entriesTableBody" class="bg-white divide-y divide-slate-200"></tbody>
                 </table>
             </div>
         </div>
 
         <!-- Approvals -->
         <div id="approvalsView" class="hidden">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-4">
                 <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-stamp mr-2"></i> Manager Approvals</h3>
-                <div class="flex items-center gap-2">
-                    <button id="approveAllBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button id="approveAllBtn" class="px-3 py-2 border rounded-lg text-sm flex-1 sm:flex-none"><i
                             class="fa-solid fa-check mr-1"></i> Approve All</button>
-                    <button id="rejectAllBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                    <button id="rejectAllBtn" class="px-3 py-2 border rounded-lg text-sm flex-1 sm:flex-none"><i
                             class="fa-solid fa-xmark mr-1"></i> Reject All</button>
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full">
+                <table class="min-w-full text-sm text-left">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Employee</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Period</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Submitted</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Total Hours
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase">Employee</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden sm:table-cell">
+                                Period</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden sm:table-cell">
+                                Submitted</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase">Total Hours</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase w-48">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="approvalsTableBody" class="bg-white divide-y divide-slate-200">
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">John Smith</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Jan 8-14, 2025</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-14</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">40.0</td>
-                            <td class="px-4 py-3">
-                                <button
-                                    class="px-2 py-1 border rounded-lg text-sm mr-2 hover:bg-green-50 hover:border-green-300"
-                                    onclick="approve('John Smith','Jan 8-14, 2025')"><i
-                                        class="fa-solid fa-check mr-1"></i> Approve</button>
-                                <button class="px-2 py-1 border rounded-lg text-sm hover:bg-red-50 hover:border-red-300"
-                                    onclick="reject('John Smith','Jan 8-14, 2025')"><i
-                                        class="fa-solid fa-xmark mr-1"></i> Reject</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">Sarah Wilson</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Jan 8-14, 2025</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-14</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">38.5</td>
-                            <td class="px-4 py-3">
-                                <button
-                                    class="px-2 py-1 border rounded-lg text-sm mr-2 hover:bg-green-50 hover:border-green-300"
-                                    onclick="approve('Sarah Wilson','Jan 8-14, 2025')"><i
-                                        class="fa-solid fa-check mr-1"></i> Approve</button>
-                                <button class="px-2 py-1 border rounded-lg text-sm hover:bg-red-50 hover:border-red-300"
-                                    onclick="reject('Sarah Wilson','Jan 8-14, 2025')"><i
-                                        class="fa-solid fa-xmark mr-1"></i> Reject</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">Mike Johnson</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Jan 8-14, 2025</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-13</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">42.0</td>
-                            <td class="px-4 py-3">
-                                <button
-                                    class="px-2 py-1 border rounded-lg text-sm mr-2 hover:bg-green-50 hover:border-green-300"
-                                    onclick="approve('Mike Johnson','Jan 8-14, 2025')"><i
-                                        class="fa-solid fa-check mr-1"></i> Approve</button>
-                                <button class="px-2 py-1 border rounded-lg text-sm hover:bg-red-50 hover:border-red-300"
-                                    onclick="reject('Mike Johnson','Jan 8-14, 2025')"><i
-                                        class="fa-solid fa-xmark mr-1"></i> Reject</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">Emily Davis</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">Jan 8-14, 2025</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2025-01-13</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">35.5</td>
-                            <td class="px-4 py-3">
-                                <button
-                                    class="px-2 py-1 border rounded-lg text-sm mr-2 hover:bg-green-50 hover:border-green-300"
-                                    onclick="approve('Emily Davis','Jan 8-14, 2025')"><i
-                                        class="fa-solid fa-check mr-1"></i> Approve</button>
-                                <button class="px-2 py-1 border rounded-lg text-sm hover:bg-red-50 hover:border-red-300"
-                                    onclick="reject('Emily Davis','Jan 8-14, 2025')"><i
-                                        class="fa-solid fa-xmark mr-1"></i> Reject</button>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody id="approvalsTableBody" class="bg-white divide-y divide-slate-200"></tbody>
                 </table>
             </div>
         </div>
 
         <!-- Payroll -->
         <div id="payrollView" class="hidden">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-4">
                 <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-file-invoice-dollar mr-2"></i> Payroll
                     Export</h3>
-                <div class="flex items-center gap-2">
-                    <button id="lockPeriodBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button id="lockPeriodBtn" class="px-3 py-2 border rounded-lg text-sm flex-1 sm:flex-none"><i
                             class="fa-solid fa-lock mr-1"></i> Lock Period</button>
-                    <button id="exportPayrollBtn" class="px-3 py-1 border rounded-lg text-sm"><i
+                    <button id="exportPayrollBtn" class="px-3 py-2 border rounded-lg text-sm flex-1 sm:flex-none"><i
                             class="fa-solid fa-download mr-1"></i> Download CSV</button>
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full">
+                <table class="min-w-full text-sm text-left">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Employee</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Regular</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Overtime</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Leave</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Total</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase">Employee</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden sm:table-cell">
+                                Regular</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden sm:table-cell">
+                                Overtime</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden sm:table-cell">
+                                Leave</th>
+                            <th class="px-4 py-3 text-xs font-medium text-slate-500 uppercase">Total</th>
                         </tr>
                     </thead>
-                    <tbody id="payrollTableBody" class="bg-white divide-y divide-slate-200">
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">John Smith</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">40.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">42.0</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">Sarah Wilson</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">38.5</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">8.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">46.5</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">Mike Johnson</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">40.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">4.5</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">44.5</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">Emily Davis</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">35.5</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">4.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">39.5</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">Alex Brown</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">32.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">1.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">8.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">41.0</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">Lisa Garcia</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">40.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">0.5</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">0.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">40.5</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 text-sm text-slate-600">David Chen</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">37.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">1.5</td>
-                            <td class="px-4 py-3 text-sm text-slate-600">2.0</td>
-                            <td class="px-4 py-3 text-sm text-slate-700 font-medium">40.5</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="payrollTableBody" class="bg-white divide-y divide-slate-200"></tbody>
                 </table>
             </div>
         </div>
@@ -434,29 +288,29 @@
     <!-- New Entry Modal -->
     <div id="entryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+            <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-slate-800">New Time Entry</h3>
                     <button id="closeEntryModal" class="text-slate-400 hover:text-slate-600"><i
                             class="fa-solid fa-times"></i></button>
                 </div>
                 <form id="entryForm" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Date</label>
-                            <input id="eDate" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2"
-                                required />
+                            <input id="eDate" type="date"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Hours</label>
                             <input id="eHours" type="number" min="0" step="0.25"
-                                class="w-full rounded-lg border border-slate-300 px-3 py-2" required />
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required />
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Project</label>
-                            <select id="eProject" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <select id="eProject" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                                 <option value="Website Redesign">Website Redesign</option>
                                 <option value="Marketing Campaign">Marketing Campaign</option>
                                 <option value="API Development">API Development</option>
@@ -468,20 +322,20 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Task</label>
-                            <input id="eTask" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            <input id="eTask" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                                 placeholder="e.g., Feature dev" />
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
-                        <textarea id="eNotes" class="w-full rounded-lg border border-slate-300 px-3 py-2" rows="2"
-                            placeholder="Optional"></textarea>
+                        <textarea id="eNotes" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                            rows="2" placeholder="Optional"></textarea>
                     </div>
                     <div class="flex justify-end gap-3 pt-2">
                         <button type="button" id="cancelEntry"
-                            class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                            class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 w-full sm:w-auto">Cancel</button>
                         <button type="submit"
-                            class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Save</button>
+                            class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900 w-full sm:w-auto">Save</button>
                     </div>
                 </form>
             </div>
@@ -491,7 +345,7 @@
     <!-- Import Modal -->
     <div id="importModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-slate-800">Import Timesheets (CSV)</h3>
                     <button id="closeImportModal" class="text-slate-400 hover:text-slate-600"><i
@@ -499,14 +353,14 @@
                 </div>
                 <div class="space-y-3 text-sm">
                     <input id="csvFile" type="file" accept=".csv"
-                        class="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white" />
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white text-sm" />
                     <p class="text-slate-500">Columns: date, employee_email, project, task, hours, notes</p>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
                     <button id="cancelImport"
-                        class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50">Cancel</button>
+                        class="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 w-full sm:w-auto">Cancel</button>
                     <button id="confirmImport"
-                        class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900">Import</button>
+                        class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900 w-full sm:w-auto">Import</button>
                 </div>
             </div>
         </div>
@@ -549,8 +403,30 @@
         color: #475569;
     }
 
-    canvas {
-        width: 100%;
+    @media (max-width: 640px) {
+        .max-w-7xl {
+            max-width: 100%;
+        }
+
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            font-size: 0.75rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem 0.75rem;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font-size: 0.875rem;
+        }
     }
 </style>
 
@@ -620,7 +496,6 @@
                 entry.project.toLowerCase().includes(searchTerm) ||
                 entry.task.toLowerCase().includes(searchTerm);
 
-            // For simplicity, we'll assume department filtering works with employee names
             const matchesDept = !deptFilter || entry.project.includes(deptFilter) || entry.employee.includes(deptFilter);
 
             return matchesSearch && matchesDept;
@@ -650,74 +525,8 @@
     }
 
     function renderDashboard() {
-        drawHoursChart();
+        // Chart is now handled by Chart.js in the HTML
         // Approvals summary is already static in HTML
-    }
-
-    function drawHoursChart() {
-        const canvas = qs('#hoursCanvas');
-        const ctx = canvas.getContext('2d');
-        const W = canvas.width = canvas.clientWidth;
-        const H = canvas.height;
-
-        ctx.clearRect(0, 0, W, H);
-
-        // Sample data for chart (hours by day)
-        const dailyHours = [32, 28, 35, 42, 38, 45, 40]; // 7 days
-        const labels = ['Jan 8', 'Jan 9', 'Jan 10', 'Jan 11', 'Jan 12', 'Jan 13', 'Jan 14'];
-
-        const max = Math.max(...dailyHours);
-        const min = 0;
-        const pad = 20;
-        const x0 = pad;
-        const x1 = W - pad;
-        const y0 = H - pad;
-        const y1 = pad;
-
-        // Draw grid lines
-        ctx.strokeStyle = '#e5e7eb';
-        ctx.lineWidth = 1;
-        for (let i = 0; i <= 4; i++) {
-            const y = y0 - (i / 4) * (y0 - y1);
-            ctx.beginPath();
-            ctx.moveTo(x0, y);
-            ctx.lineTo(x1, y);
-            ctx.stroke();
-        }
-
-        // Draw line chart
-        ctx.strokeStyle = '#0ea5e9';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-
-        dailyHours.forEach((hours, i) => {
-            const x = x0 + (i / (dailyHours.length - 1)) * (x1 - x0);
-            const y = y0 - ((hours - min) / (max - min)) * (y0 - y1);
-
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-
-            // Draw points
-            ctx.fillStyle = '#0ea5e9';
-            ctx.beginPath();
-            ctx.arc(x, y, 4, 0, 2 * Math.PI);
-            ctx.fill();
-        });
-
-        ctx.stroke();
-
-        // Draw labels
-        ctx.fillStyle = '#64748b';
-        ctx.font = '12px system-ui';
-        ctx.textAlign = 'center';
-
-        dailyHours.forEach((hours, i) => {
-            const x = x0 + (i / (dailyHours.length - 1)) * (x1 - x0);
-            ctx.fillText(labels[i], x, H - 5);
-        });
     }
 
     function renderEntries() {
@@ -742,8 +551,8 @@
                 <td class="px-4 py-3"><input type="checkbox" class="rowSel" data-id="${e.id}"></td>
                 <td class="px-4 py-3 text-sm text-slate-600">${e.date}</td>
                 <td class="px-4 py-3 text-sm text-slate-600">${e.employee}</td>
-                <td class="px-4 py-3 text-sm text-slate-600">${e.project}</td>
-                <td class="px-4 py-3 text-sm text-slate-600">${e.task}</td>
+                <td class="px-4 py-3 text-sm text-slate-600 hidden sm:table-cell">${e.project}</td>
+                <td class="px-4 py-3 text-sm text-slate-600 hidden sm:table-cell">${e.task}</td>
                 <td class="px-4 py-3 text-sm text-slate-600">${fmt(e.hours)}</td>
                 <td class="px-4 py-3 text-sm text-slate-600"><span class="${statusClass}">${e.status}</span></td>
                 <td class="px-4 py-3">
@@ -762,19 +571,62 @@
     }
 
     function renderApprovals() {
-        // Approvals are already rendered statically in HTML
-        // In a real app, this would be dynamic
+        const tbody = qs('#approvalsTableBody');
+        tbody.innerHTML = '';
+
+        if (approvals.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500 text-sm">No approvals pending.</td></tr>`;
+            return;
+        }
+
+        approvals.forEach(a => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+                <td class="px-4 py-3 text-sm text-slate-600">${a.employee}</td>
+                <td class="px-4 py-3 text-sm text-slate-600 hidden sm:table-cell">${a.period}</td>
+                <td class="px-4 py-3 text-sm text-slate-600 hidden sm:table-cell">${a.submitted_at}</td>
+                <td class="px-4 py-3 text-sm text-slate-600">${fmt(a.total_hours)}</td>
+                <td class="px-4 py-3">
+                    <button
+                        class="px-2 py-1 border rounded-lg text-sm mr-2 hover:bg-green-50 hover:border-green-300"
+                        onclick="approve('${a.employee}','${a.period}')"><i
+                            class="fa-solid fa-check mr-1"></i> Approve</button>
+                    <button class="px-2 py-1 border rounded-lg text-sm hover:bg-red-50 hover:border-red-300"
+                        onclick="reject('${a.employee}','${a.period}')"><i
+                            class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 
     function renderPayroll() {
-        // Payroll data is already rendered statically in HTML
-        // In a real app, this would be dynamic
+        const tbody = qs('#payrollTableBody');
+        tbody.innerHTML = '';
+
+        if (payroll.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-500 text-sm">No payroll data available.</td></tr>`;
+            return;
+        }
+
+        payroll.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50';
+            tr.innerHTML = `
+                <td class="px-4 py-3 text-sm text-slate-600">${p.employee}</td>
+                <td class="px-4 py-3 text-sm text-slate-600 hidden sm:table-cell">${fmt(p.regular)}</td>
+                <td class="px-4 py-3 text-sm text-slate-600 hidden sm:table-cell">${fmt(p.overtime)}</td>
+                <td class="px-4 py-3 text-sm text-slate-600 hidden sm:table-cell">${fmt(p.leave)}</td>
+                <td class="px-4 py-3 text-sm text-slate-700 font-medium">${fmt(p.total)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 
     // Modal functions
     function openEntryModal() {
         qs('#entryModal').classList.remove('hidden');
-        // Set default date to today
         qs('#eDate').value = new Date().toISOString().split('T')[0];
     }
 
@@ -797,7 +649,7 @@
         const newEntry = {
             id: String(entryIdCounter++),
             date: data.date,
-            employee: 'Current User', // In real app, this would come from session
+            employee: 'Current User',
             employee_email: 'current.user@company.com',
             project: data.project,
             task: data.task,
@@ -807,6 +659,7 @@
         };
 
         entries.unshift(newEntry);
+        filteredEntries.unshift(newEntry);
         loadAll();
         closeEntryModal();
         showSuccess('Time entry saved successfully');
@@ -829,12 +682,10 @@
     // Approval actions
     function approve(employee, period) {
         showSuccess(`Approved timesheet for ${employee} - ${period}`);
-        // In real app, would update entry statuses to 'Approved'
     }
 
     function reject(employee, period) {
         showInfo(`Rejected timesheet for ${employee} - ${period}`);
-        // In real app, would update entry statuses to 'Rejected'
     }
 
     function approveAll() {
@@ -960,7 +811,6 @@
         qs('#searchBox').addEventListener('input', debounce(loadAll, 300));
         qs('#refreshBtn').addEventListener('click', loadAll);
 
-        // Modal events
         qs('#newEntryBtn').addEventListener('click', openEntryModal);
         qs('#closeEntryModal').addEventListener('click', closeEntryModal);
         qs('#cancelEntry').addEventListener('click', closeEntryModal);
@@ -970,7 +820,6 @@
         qs('#cancelImport').addEventListener('click', closeImportModal);
         qs('#confirmImport').addEventListener('click', importCSV);
 
-        // Form submission
         qs('#entryForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -990,31 +839,25 @@
             saveEntry(data);
         });
 
-        // Bulk actions
         qs('#bulkSubmitBtn').addEventListener('click', bulkSubmit);
         qs('#bulkDeleteBtn').addEventListener('click', bulkDelete);
 
-        // Approval actions
         qs('#approveAllBtn')?.addEventListener('click', approveAll);
         qs('#rejectAllBtn')?.addEventListener('click', rejectAll);
 
-        // Select all checkbox
         qs('#selectAllRows').addEventListener('change', (e) => {
             qsa('.rowSel').forEach(cb => cb.checked = e.target.checked);
         });
 
-        // Export actions
         qs('#exportBtn').addEventListener('click', exportCSV);
         qs('#exportPayrollBtn').addEventListener('click', exportCSV);
 
-        // Lock period
         qs('#lockPeriodBtn').addEventListener('click', () => {
             if (confirm('Lock this payroll period? This cannot be undone.')) {
                 showSuccess('Payroll period locked successfully');
             }
         });
 
-        // Close modals when clicking outside
         window.addEventListener('click', (e) => {
             if (e.target.id === 'entryModal') closeEntryModal();
             if (e.target.id === 'importModal') closeImportModal();

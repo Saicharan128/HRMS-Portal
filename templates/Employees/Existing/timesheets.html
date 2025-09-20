@@ -17,10 +17,29 @@
 
     <!-- Raise Exception -->
     <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">
-            <i class="fa-solid fa-triangle-exclamation mr-2"></i> Raise Exception
-        </h2>
-        <form id="exForm" class="grid grid-cols-1 md:grid-cols-7 gap-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800">
+                <i class="fa-solid fa-triangle-exclamation mr-2"></i> Raise Exception
+            </h2>
+            <div class="flex items-center gap-2">
+                <button id="jumpThisWeek"
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">This
+                    week</button>
+                <button id="jumpLastWeek"
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Last
+                    week</button>
+                <button id="exportCsv"
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                    <i class="fa-solid fa-file-arrow-down mr-1"></i> Export CSV
+                </button>
+                <label
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50 cursor-pointer">
+                    <i class="fa-solid fa-file-arrow-up mr-1"></i> Import CSV
+                    <input id="importCsv" type="file" accept=".csv" class="hidden">
+                </label>
+            </div>
+        </div>
+        <form id="exForm" class="grid grid-cols-1 md:grid-cols-7 gap-4 mt-4">
             <div class="md:col-span-2">
                 <label class="block text-sm text-slate-600 mb-1">Employee *</label>
                 <input name="employee" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
@@ -28,7 +47,8 @@
             </div>
             <div class="md:col-span-2">
                 <label class="block text-sm text-slate-600 mb-1">Week (Mon) *</label>
-                <input name="week" type="date" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                <input name="week" id="weekInput" type="date" required
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Type *</label>
@@ -60,7 +80,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-7 gap-2">
         <input id="qEmp" placeholder="Search employee…"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
@@ -79,6 +99,13 @@
             <option>Holiday work</option>
             <option>Manual correction</option>
             <option value="__none__">No exceptions</option>
+        </select>
+        <select id="sortBy" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="week_desc">Sort: Week ↓</option>
+            <option value="week_asc">Sort: Week ↑</option>
+            <option value="hours_desc">Sort: Hours ↓</option>
+            <option value="hours_asc">Sort: Hours ↑</option>
+            <option value="status">Sort: Status</option>
         </select>
         <button id="clearFilters"
             class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
@@ -109,6 +136,7 @@
         <table class="min-w-full text-sm text-left text-slate-700">
             <thead class="bg-slate-50 text-slate-600">
                 <tr>
+                    <th class="px-4 py-2 w-10"><input id="chkAll" type="checkbox"></th>
                     <th class="px-4 py-2">Employee</th>
                     <th class="px-4 py-2">Week</th>
                     <th class="px-4 py-2">Hours</th>
@@ -121,10 +149,31 @@
                 </tr>
             </thead>
             <tbody id="rows" class="divide-y divide-slate-200"></tbody>
+            <tfoot class="bg-slate-50">
+                <tr>
+                    <td class="px-4 py-2"></td>
+                    <td class="px-4 py-2 font-medium" colspan="2">Totals (filtered)</td>
+                    <td class="px-4 py-2" id="tfHours">—</td>
+                    <td class="px-4 py-2" id="tfBillable">—</td>
+                    <td class="px-4 py-2" id="tfOT">—</td>
+                    <td class="px-4 py-2" id="tfEx">—</td>
+                    <td class="px-4 py-2" colspan="3"></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
     <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
+
+    <!-- Tiny bar for selected row -->
+    <div id="chartWrap" class="mt-6 rounded-2xl border border-slate-200 bg-white p-6 hidden">
+        <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-chart-column mr-2"></i> Week
+            breakdown</h3>
+        <canvas id="wkChart" height="120"></canvas>
+    </div>
 </div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
     /* ---------- Dummy store (localStorage) ---------- */
@@ -156,77 +205,103 @@
     const fTo = document.getElementById("fTo");
     const fStatus = document.getElementById("fStatus");
     const fException = document.getElementById("fException");
+    const sortBy = document.getElementById("sortBy");
     const clearFilters = document.getElementById("clearFilters");
 
     const exForm = document.getElementById("exForm");
     const exMsg = document.getElementById("exMsg");
+    const weekInput = document.getElementById("weekInput");
+    const jumpThisWeek = document.getElementById("jumpThisWeek");
+    const jumpLastWeek = document.getElementById("jumpLastWeek");
 
     const kpiPending = document.getElementById("kpiPending");
     const kpiHours = document.getElementById("kpiHours");
     const kpiOT = document.getElementById("kpiOT");
     const kpiEx = document.getElementById("kpiEx");
 
+    const chkAll = document.getElementById("chkAll");
+    const exportCsvBtn = document.getElementById("exportCsv");
+    const importCsvInp = document.getElementById("importCsv");
+
+    const tfHours = document.getElementById("tfHours");
+    const tfBillable = document.getElementById("tfBillable");
+    const tfOT = document.getElementById("tfOT");
+    const tfEx = document.getElementById("tfEx");
+
+    const chartWrap = document.getElementById("chartWrap");
+    let _wkChart;
+
     /* ---------- Helpers ---------- */
     function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2 align-top"; c.appendChild(el); return c; }
     function input(v, cls = "w-28") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
     function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 1; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
-    function select(opts, cur) {
-        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm";
-        opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s;
-    }
+    function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
     function sumHours(days) { return Object.values(days).reduce((a, b) => a + Number(b || 0), 0); }
-    function badge(txt) { const span = document.createElement("span"); span.className = "inline-block rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-800 mr-1"; span.textContent = txt; return span; }
-    function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
+    function statusPill(st) { const m = { Pending: 'bg-amber-50 text-amber-700', Approved: 'bg-emerald-50 text-emerald-700', Rejected: 'bg-rose-50 text-rose-700' }; return `<span class="px-2 py-0.5 rounded-full text-xs ${m[st] || 'bg-slate-100 text-slate-700'}">${st}</span>`; }
+    function chip(txt, tone = 'amber') { const c = { amber: 'border-amber-300 bg-amber-50 text-amber-800', indigo: 'border-indigo-300 bg-indigo-50 text-indigo-800', slate: 'border-slate-300 bg-slate-50 text-slate-800', rose: 'border-rose-300 bg-rose-50 text-rose-800' }; return `<span class="inline-block rounded-full border px-2 py-0.5 text-[11px] ${c[tone]} mr-1">${txt}</span>`; }
+    function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1200); }
+    function mondayOf(date) { const d = new Date(date); const day = (d.getDay() + 6) % 7; d.setDate(d.getDate() - day); d.setHours(0, 0, 0, 0); return d; }
+    function iso(d) { return new Date(d).toISOString().slice(0, 10); }
 
     /* ---------- Filtering ---------- */
-    function withinWeek(week) { // compare week start (Mon)
+    function withinWeek(week) {
         const w = new Date(week).setHours(0, 0, 0, 0);
         const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null;
         const f2 = fTo.value ? new Date(fTo.value).setHours(0, 0, 0, 0) : null;
-        if (f1 && w < f1) return false;
-        if (f2 && w > f2) return false;
-        return true;
+        if (f1 && w < f1) return false; if (f2 && w > f2) return false; return true;
     }
     function filtered() {
         const q = (qEmp.value || "").toLowerCase().trim();
-        const st = fStatus.value;
-        const ex = fException.value;
-        return STORE.filter(r => {
+        const st = fStatus.value; const ex = fException.value;
+        let data = STORE.filter(r => {
             if (q && !r.employee.toLowerCase().includes(q)) return false;
             if (st && r.status !== st) return false;
             if (ex) {
-                if (ex === "__none__" && r.exceptions && r.exceptions.length > 0) return false;
+                if (ex === "__none__" && (r.exceptions || []).length > 0) return false;
                 if (ex !== "__none__" && !(r.exceptions || []).some(e => e.type === ex)) return false;
             }
             if (!withinWeek(r.week)) return false;
             return true;
         });
+        // sort
+        const cmp = {
+            week_desc: (a, b) => b.week.localeCompare(a.week),
+            week_asc: (a, b) => a.week.localeCompare(b.week),
+            hours_desc: (a, b) => sumHours(b.days) - sumHours(a.days),
+            hours_asc: (a, b) => sumHours(a.days) - sumHours(b.days),
+            status: (a, b) => a.status.localeCompare(b.status)
+        }[sortBy.value || "week_desc"];
+        return data.sort(cmp);
     }
 
-    /* ---------- KPIs ---------- */
+    /* ---------- KPIs & footer ---------- */
     function updateKPIs(data) {
         const pending = data.filter(r => r.status === "Pending").length;
         const hours = data.reduce((a, r) => a + sumHours(r.days), 0);
-        const ot = data.reduce((a, r) => { const h = sumHours(r.days); return a + Math.max(0, h - 40); }, 0);
+        const ot = data.reduce((a, r) => a + Math.max(0, sumHours(r.days) - 40), 0);
         const ex = data.filter(r => (r.exceptions || []).length > 0).length;
         kpiPending.textContent = pending;
         kpiHours.textContent = hours.toFixed(1);
         kpiOT.textContent = ot.toFixed(1);
         kpiEx.textContent = ex;
+
+        tfHours.textContent = hours.toFixed(1);
+        tfBillable.textContent = data.reduce((a, r) => a + Number(r.billable || 0), 0).toFixed(1);
+        tfOT.textContent = ot.toFixed(1);
+        tfEx.textContent = data.reduce((a, r) => a + (r.exceptions?.length || 0), 0);
     }
 
-    /* ---------- Row (with expand) ---------- */
-    function dayGrid(daysObj) {
-        const wrap = document.createElement("div");
-        wrap.className = "grid grid-cols-2 md:grid-cols-7 gap-2 mt-3";
-        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(d => {
-            const v = Number(daysObj[d] || 0);
-            const card = document.createElement("div");
-            card.className = "rounded-lg border border-slate-200 p-2";
-            card.innerHTML = `<div class="text-[11px] text-slate-500">${d}</div><div class="text-slate-800 font-medium">${v.toFixed(1)} h</div>`;
-            wrap.appendChild(card);
-        });
-        return wrap;
+    /* ---------- Chart ---------- */
+    function drawChart(r) {
+        if (!r) { chartWrap.classList.add('hidden'); return; }
+        chartWrap.classList.remove('hidden');
+        const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const hours = labels.map(d => Number(r.days[d] || 0));
+        const billableShare = Math.min(1, (Number(r.billable || 0) / Math.max(1, sumHours(r.days))));
+        const billable = hours.map(h => +(h * billableShare).toFixed(2));
+        const ctx = document.getElementById('wkChart').getContext('2d');
+        _wkChart && _wkChart.destroy();
+        _wkChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Hours', data: hours }, { label: 'Billable (est.)', data: billable }] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } });
     }
 
     /* ---------- Render ---------- */
@@ -234,78 +309,132 @@
         rows.innerHTML = "";
         const data = filtered();
         updateKPIs(data);
+        const selectedIds = new Set();
 
         data.forEach(r => {
             const tr = document.createElement("tr");
 
+            const cb = document.createElement("input"); cb.type = "checkbox"; cb.addEventListener('change', () => { cb.checked ? selectedIds.add(r.id) : selectedIds.delete(r.id); });
             const empI = input(r.employee, "w-48");
             const wkI = input(r.week, "w-36"); wkI.type = "date";
-            const hrsS = document.createElement("span"); hrsS.textContent = sumHours(r.days).toFixed(1);
-            const billI = input(r.billable?.toFixed ? r.billable.toFixed(1) : (r.billable || 0), "w-24");
-            const otS = document.createElement("span"); otS.textContent = Math.max(0, sumHours(r.days) - 40).toFixed(1);
+            const hrsS = document.createElement("div"); hrsS.className = "font-medium"; const total = sumHours(r.days); hrsS.textContent = total.toFixed(1);
+            const billI = input((r.billable ?? 0).toFixed(1), "w-24"); billI.type = "number"; billI.step = "0.1";
+            const otS = document.createElement("div"); otS.textContent = Math.max(0, total - 40).toFixed(1);
+
             const exWrap = document.createElement("div");
-            (r.exceptions || []).forEach(e => exWrap.appendChild(badge(e.type)));
+            (r.exceptions || []).forEach(e => exWrap.insertAdjacentHTML('beforeend', chip(e.type, e.hours_delta > 0 ? 'indigo' : (e.hours_delta < 0 ? 'rose' : 'amber'))));
             if (!(r.exceptions || []).length) exWrap.textContent = "—";
+
             const statusS = select(["Pending", "Approved", "Rejected"], r.status);
+            const stSpan = document.createElement("span"); stSpan.innerHTML = statusPill(r.status);
             const noteT = textArea(r.manager_note || "");
 
+            // Actions
             const actions = document.createElement("div");
-            const expandBtn = document.createElement("button");
-            expandBtn.className = "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50";
-            expandBtn.innerHTML = '<i class="fa-solid fa-caret-down mr-1"></i>Details';
-            const approveBtn = document.createElement("button");
-            approveBtn.className = "px-2 py-1 mr-2 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700";
-            approveBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Approve';
-            const rejectBtn = document.createElement("button");
-            rejectBtn.className = "px-2 py-1 mr-2 rounded-md bg-rose-600 text-white text-xs hover:bg-rose-700";
-            rejectBtn.innerHTML = '<i class="fa-solid fa-xmark mr-1"></i>Reject';
-            const saveBtn = document.createElement("button");
-            saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900";
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
-            const delBtn = document.createElement("button");
-            delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50";
-            delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
+            const expandBtn = document.createElement("button"); expandBtn.className = "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; expandBtn.innerHTML = '<i class="fa-solid fa-caret-down mr-1"></i>Details';
+            const approveBtn = document.createElement("button"); approveBtn.className = "px-2 py-1 mr-2 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700"; approveBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Approve';
+            const rejectBtn = document.createElement("button"); rejectBtn.className = "px-2 py-1 mr-2 rounded-md bg-rose-600 text-white text-xs hover:bg-rose-700"; rejectBtn.innerHTML = '<i class="fa-solid fa-xmark mr-1"></i>Reject';
+            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
+            const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
             actions.append(expandBtn, approveBtn, rejectBtn, saveBtn, delBtn);
 
-            tr.append(td(empI), td(wkI), td(hrsS), td(billI), td(otS), td(exWrap), td(statusS), td(noteT), td(actions));
+            tr.append(td(cb), td(empI), td(wkI), td(hrsS), td(billI), td(otS), td(exWrap), td(stSpan), td(noteT), td(actions));
             rows.appendChild(tr);
 
-            // details row
+            // Details row
             const tr2 = document.createElement("tr");
-            const td2 = document.createElement("td"); td2.colSpan = 9; td2.className = "px-4 pb-4";
+            const td2 = document.createElement("td"); td2.colSpan = 10; td2.className = "px-4 pb-4";
             const det = document.createElement("details"); det.className = "rounded-xl border border-slate-200 bg-white p-4";
-            const sum = document.createElement("summary"); sum.className = "cursor-pointer text-slate-800 font-medium"; sum.textContent = "Weekly breakdown";
-            const grid = dayGrid(r.days);
-            // inline editor for days
-            const editWrap = document.createElement("div"); editWrap.className = "grid grid-cols-2 md:grid-cols-7 gap-2 mt-3";
+            const sum = document.createElement("summary"); sum.className = "cursor-pointer text-slate-800 font-medium"; sum.textContent = "Weekly breakdown / Edit";
+            const grid = document.createElement("div"); grid.className = "grid grid-cols-2 md:grid-cols-7 gap-2 mt-3";
             ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(d => {
-                const w = document.createElement("div"); const lab = document.createElement("div"); lab.className = "text-[11px] text-slate-500"; lab.textContent = d;
-                const i = input(r.days[d] ?? 0, "w-full"); i.type = "number"; i.step = "0.1"; w.appendChild(lab); w.appendChild(i); editWrap.appendChild(w);
-                i.addEventListener("change", () => { r.days[d] = Number(i.value || 0); hrsS.textContent = sumHours(r.days).toFixed(1); otS.textContent = Math.max(0, sumHours(r.days) - 40).toFixed(1); });
+                const card = document.createElement("div"); card.className = "rounded-lg border border-slate-200 p-2";
+                const lab = document.createElement("div"); lab.className = "text-[11px] text-slate-500"; lab.textContent = d;
+                const val = input(r.days[d] ?? 0, "w-full"); val.type = "number"; val.step = "0.1";
+                val.addEventListener("input", () => { r.days[d] = Number(val.value || 0); const t = sumHours(r.days); hrsS.textContent = t.toFixed(1); otS.textContent = Math.max(0, t - 40).toFixed(1); drawChart(r); });
+                card.append(lab, val); grid.appendChild(card);
             });
-            det.append(sum, grid, editWrap);
-            td2.appendChild(det);
-            tr2.appendChild(td2);
-            rows.appendChild(tr2);
 
-            expandBtn.addEventListener("click", () => { det.open = !det.open; });
+            // exception editor
+            const exEditor = document.createElement("div"); exEditor.className = "mt-3";
+            const exTitle = document.createElement("div"); exTitle.className = "text-sm font-medium text-slate-700 mb-2"; exTitle.textContent = "Exceptions";
+            const exList = document.createElement("div"); exList.className = "mb-2";
+            function renderExList() {
+                exList.innerHTML = "";
+                (r.exceptions || []).forEach((e, idx) => {
+                    const row = document.createElement("div"); row.className = "flex items-center gap-2 mb-1";
+                    row.innerHTML = `
+          ${chip(e.type, e.hours_delta > 0 ? 'indigo' : (e.hours_delta < 0 ? 'rose' : 'amber'))}
+          <span class="text-xs text-slate-500">${e.note}</span>
+          <span class="text-xs text-slate-500">${(e.hours_delta || 0) >= 0 ? '+' : ''}${(e.hours_delta || 0)}h</span>
+          <button class="px-2 py-0.5 rounded border border-slate-300 text-xs hover:bg-slate-50">Remove</button>`;
+                    row.querySelector("button").addEventListener("click", () => {
+                        r.exceptions.splice(idx, 1); // revert delta on Monday for visibility if present
+                        // (demo only – not reversing accumulative edits to days)
+                        persist(); load();
+                    });
+                    exList.appendChild(row);
+                });
+                if (!(r.exceptions || []).length) exList.textContent = "—";
+            }
+            renderExList();
 
+            const exAddWrap = document.createElement("div"); exAddWrap.className = "grid grid-cols-1 md:grid-cols-6 gap-2";
+            const exType = select(["Missing punch", "Low hours", "Overtime", "Holiday work", "Manual correction"], "Missing punch");
+            const exDelta = input("0", "w-full"); exDelta.type = "number"; exDelta.step = "0.1";
+            const exNote = input("", "w-full");
+            const exAddBtn = document.createElement("button"); exAddBtn.className = "px-3 py-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; exAddBtn.textContent = "Add";
+            const exLbl1 = document.createElement("div"); exLbl1.className = "text-[11px] text-slate-500 md:col-span-2"; exLbl1.textContent = "Type";
+            const exLbl2 = document.createElement("div"); exLbl2.className = "text-[11px] text-slate-500"; exLbl2.textContent = "Hours (±)";
+            const exLbl3 = document.createElement("div"); exLbl3.className = "text-[11px] text-slate-500 md:col-span-2"; exLbl3.textContent = "Note";
+            exAddWrap.append(exLbl1, exLbl2, exLbl3, document.createElement("div"));
+            exAddWrap.append(exType, exDelta, exNote, exAddBtn);
+
+            exAddBtn.addEventListener("click", (ev) => {
+                ev.preventDefault();
+                const eType = exType.value; const delta = Number(exDelta.value || 0); const note = exNote.value.trim();
+                if (!note) { alert("Add a short note"); return; }
+                r.exceptions = r.exceptions || [];
+                r.exceptions.push({ type: eType, note, hours_delta: delta });
+                // demo: add delta to Monday to visualize change
+                r.days.Mon = Number(r.days.Mon || 0) + delta;
+                persist(); load();
+            });
+
+            det.append(sum, grid, exEditor, exTitle, exList, exAddWrap);
+            td2.appendChild(det); tr2.appendChild(td2); rows.appendChild(tr2);
+
+            // Action handlers
+            expandBtn.addEventListener("click", () => { det.open = !det.open; drawChart(r); });
             function saveAndRefresh() {
                 r.employee = empI.value.trim();
                 r.week = wkI.value;
                 r.billable = Number(billI.value || 0);
                 r.status = statusS.value;
                 r.manager_note = noteT.value;
-                persist();
-                load();
+                persist(); load();
                 listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
-                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1000);
             }
-
-            saveBtn.addEventListener("click", saveAndRefresh);
             approveBtn.addEventListener("click", () => { statusS.value = "Approved"; saveAndRefresh(); });
             rejectBtn.addEventListener("click", () => { statusS.value = "Rejected"; saveAndRefresh(); });
+            saveBtn.addEventListener("click", saveAndRefresh);
             delBtn.addEventListener("click", () => { if (!confirm("Delete this timesheet?")) return; STORE = STORE.filter(x => x.id !== r.id); persist(); load(); });
+
+            // clicking row selects for chart
+            [empI, wkI].forEach(el => el.addEventListener('focus', () => drawChart(r)));
+        });
+
+        // bulk actions
+        const checkboxes = rows.querySelectorAll('input[type="checkbox"]');
+        chkAll.addEventListener('change', () => checkboxes.forEach(c => c.checked = chkAll.checked));
+        function selected() { const ids = []; rows.querySelectorAll('tbody input[type="checkbox"]').forEach((c, i) => { if (c.checked) ids.push(filtered()[i].id); }); return ids; }
+        function applyToSelected(fn) { const ids = selected(); if (!ids.length) return; STORE.forEach(s => { if (ids.includes(s.id)) fn(s); }); persist(); load(); }
+        // attach light toolbar via keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'a' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); applyToSelected(s => s.status = "Approved"); }
+            if (e.key === 'r' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); applyToSelected(s => s.status = "Rejected"); }
+            if (e.key === 'Backspace' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (confirm('Delete selected?')) applyToSelected(s => STORE = STORE.filter(x => x.id !== s.id)); }
         });
 
         listMsg.textContent = data.length ? "" : "No timesheets.";
@@ -320,28 +449,80 @@
         const type = (fd.get("type") || "").toString();
         const hours_delta = Number(fd.get("hours_delta") || 0);
         const note = (fd.get("note") || "").toString().trim();
-        if (!employee || !week || !type || !note) { flash(exMsg, "Missing required fields.", true); return; }
-
-        // find or create sheet for that employee/week
+        if (!employee || !week || !type || !note) { flash(exMsg, "Missing required fields.", false); return; }
         let sheet = STORE.find(s => s.employee === employee && s.week === week);
         if (!sheet) {
-            sheet = { id: Math.max(0, ...STORE.map(x => x.id)) + 1, employee, week, status: "Pending", days: { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 }, billable: 0, exceptions: [] };
+            sheet = {
+                id: Math.max(0, ...STORE.map(x => x.id)) + 1, employee, week, status: "Pending",
+                days: { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 }, billable: 0, exceptions: []
+            };
             STORE.unshift(sheet);
         }
         sheet.exceptions = sheet.exceptions || [];
         sheet.exceptions.push({ type, note, hours_delta });
-        // apply hour delta to Monday for visibility (purely dummy)
-        sheet.days.Mon = Number(sheet.days.Mon || 0) + hours_delta;
-        persist();
-        exForm.reset();
-        flash(exMsg, "Exception added ✓");
-        load();
+        sheet.days.Mon = Number(sheet.days.Mon || 0) + hours_delta; // demo visibility
+        persist(); exForm.reset(); flash(exMsg, "Exception added ✓", true); load();
     });
 
-    /* ---------- Filters + Init ---------- */
-    [qEmp, fFrom, fTo, fStatus, fException].forEach(el => el.addEventListener("input", load));
-    clearFilters.addEventListener("click", () => { qEmp.value = ""; fFrom.value = ""; fTo.value = ""; fStatus.value = ""; fException.value = ""; load(); });
+    /* ---------- CSV export/import ---------- */
+    exportCsvBtn.addEventListener('click', () => {
+        const cols = ["id", "employee", "week", "status", "billable", "days.Mon", "days.Tue", "days.Wed", "days.Thu", "days.Fri", "days.Sat", "days.Sun", "exceptions_json", "manager_note"];
+        const lines = [cols.join(",")].concat(STORE.map(r => {
+            const exJson = JSON.stringify(r.exceptions || []).replaceAll('"', '""');
+            const vals = [
+                r.id, r.employee, r.week, r.status, Number(r.billable || 0).toFixed(1),
+                r.days.Mon || 0, r.days.Tue || 0, r.days.Wed || 0, r.days.Thu || 0, r.days.Fri || 0, r.days.Sat || 0, r.days.Sun || 0,
+                `"${exJson}"`, (r.manager_note || "").replaceAll('"', '""')
+            ];
+            return vals.map(v => /[",\n]/.test(String(v)) ? `"${v}"` : v).join(",");
+        }));
+        const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = "timesheets.csv"; a.click(); URL.revokeObjectURL(url);
+    });
+    importCsvInp.addEventListener('change', async (e) => {
+        const f = e.target.files?.[0]; if (!f) return;
+        const txt = await f.text(); const [header, ...rowsCsv] = txt.split(/\r?\n/).filter(Boolean);
+        const cols = header.split(","); const idx = k => cols.indexOf(k);
+        function parseLine(line) {
+            const parts = []; let cur = ""; let q = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (ch == '"') { if (q && line[i + 1] == '"') { cur += '"'; i++; } else { q = !q; } }
+                else if (ch == "," && !q) { parts.push(cur); cur = ""; }
+                else cur += ch;
+            }
+            parts.push(cur);
+            return parts;
+        }
+        const incoming = rowsCsv.map(line => {
+            const p = parseLine(line);
+            const d = {
+                id: Number(p[idx("id")] || 0) || Math.max(0, ...STORE.map(x => x.id)) + 1,
+                employee: p[idx("employee")] || "", week: p[idx("week")] || "", status: p[idx("status")] || "Pending",
+                billable: Number(p[idx("billable")] || 0),
+                days: { Mon: Number(p[idx("days.Mon")] || 0), Tue: Number(p[idx("days.Tue")] || 0), Wed: Number(p[idx("days.Wed")] || 0), Thu: Number(p[idx("days.Thu")] || 0), Fri: Number(p[idx("days.Fri")] || 0), Sat: Number(p[idx("days.Sat")] || 0), Sun: Number(p[idx("days.Sun")] || 0) },
+                exceptions: (() => { try { return JSON.parse((p[idx("exceptions_json")] || "[]").replaceAll('""', '"')); } catch { return []; } })(),
+                manager_note: p[idx("manager_note")] || ""
+            };
+            return d;
+        });
+        const map = new Map(STORE.map(s => [s.id, s]));
+        incoming.forEach(s => map.set(s.id, s));
+        STORE = Array.from(map.values()).sort((a, b) => b.id - a.id);
+        persist(); load(); flash(exMsg, "CSV imported ✓", true); importCsvInp.value = "";
+    });
 
+    /* ---------- Week jump helpers ---------- */
+    function setWeek(date) { weekInput.value = iso(mondayOf(date)); }
+    jumpThisWeek.addEventListener('click', () => setWeek(new Date()));
+    jumpLastWeek.addEventListener('click', () => { const d = mondayOf(new Date()); d.setDate(d.getDate() - 7); setWeek(d); });
+
+    /* ---------- Filters + Init ---------- */
+    [qEmp, fFrom, fTo, fStatus, fException, sortBy].forEach(el => el.addEventListener("input", load));
+    clearFilters.addEventListener("click", () => { qEmp.value = ""; fFrom.value = ""; fTo.value = ""; fStatus.value = ""; fException.value = ""; sortBy.value = "week_desc"; load(); });
+
+    /* ---------- Initial ---------- */
+    setWeek(new Date());
     load();
 </script>
 {% endblock %}

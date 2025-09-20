@@ -18,6 +18,13 @@
                 <label class="block text-sm font-medium text-slate-700 mb-1">Search</label>
                 <input id="searchInput" placeholder="Search title/category/period…"
                     class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+                <div class="mt-2 flex flex-wrap gap-2">
+                    <button class="chip" data-cat="Offer">Offer</button>
+                    <button class="chip" data-cat="Resume">Resume</button>
+                    <button class="chip" data-cat="Payslip">Payslip</button>
+                    <button class="chip" data-cat="Personal">Personal</button>
+                    <button id="clearChips" class="chip-secondary">Clear</button>
+                </div>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-5">
                 <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
@@ -32,12 +39,18 @@
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-5">
                 <label class="block text-sm font-medium text-slate-700 mb-1">Period</label>
-                <input id="periodFilter" placeholder="YYYY-MM"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+                <div class="flex gap-2">
+                    <input id="periodFilter" placeholder="YYYY-MM"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+                    <button id="perThis"
+                        class="px-3 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">This</button>
+                    <button id="perLast"
+                        class="px-3 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">Last</button>
+                </div>
             </div>
         </div>
 
-        <!-- Self upload (Personal/Resume) -->
+        <!-- Self upload (Personal/Resume) + DnD -->
         <form id="selfUploadForm" class="mt-6 rounded-2xl border border-slate-200 p-5" enctype="multipart/form-data">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-slate-800">Upload (you)</h2>
@@ -65,8 +78,12 @@
                 </div>
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-slate-700 mb-1">File *</label>
-                    <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required
+                    <input id="fileInput" type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required
                         class="w-full rounded-xl border px-3 py-2" />
+                    <div id="dropZone"
+                        class="mt-2 rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500 text-center">
+                        Drag & drop files here (or click above). Multiple files supported.
+                    </div>
                 </div>
                 <div class="md:col-span-1 flex items-end justify-end">
                     <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900"
@@ -76,107 +93,246 @@
             <div id="selfUploadMsg" class="mt-2 text-sm"></div>
         </form>
 
-        <!-- Table -->
-        <div class="mt-6 rounded-2xl border border-slate-200 p-5">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-slate-800">Your documents</h2>
+        <!-- Toolbar -->
+        <div class="mt-6 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800">Your documents</h2>
+            <div class="flex items-center gap-2">
                 <button id="refreshBtn"
                     class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Refresh</button>
+                <button id="bulkCopy" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm"
+                    disabled>Copy links</button>
+                <button id="bulkDelete" class="px-3 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-700 text-sm"
+                    disabled>Delete selected</button>
             </div>
+        </div>
 
-            <div class="mt-4 overflow-auto">
-                <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-600 border-b">
-                        <tr>
-                            <th class="py-2 pr-3">Title</th>
-                            <th class="py-2 pr-3">Category</th>
-                            <th class="py-2 pr-3">Period</th>
-                            <th class="py-2 pr-3">Uploaded</th>
-                            <th class="py-2 pr-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody" class="align-top"></tbody>
-                </table>
-                <div id="listMsg" class="mt-3 text-sm"></div>
+        <!-- Table -->
+        <div class="mt-4 overflow-auto">
+            <table class="min-w-full text-sm">
+                <thead class="text-left text-slate-600 border-b">
+                    <tr>
+                        <th class="py-2 pr-3 w-10"><input id="chkAll" type="checkbox" /></th>
+                        <th class="py-2 pr-3">Title</th>
+                        <th class="py-2 pr-3">Category</th>
+                        <th class="py-2 pr-3">Period</th>
+                        <th class="py-2 pr-3">Uploaded</th>
+                        <th class="py-2 pr-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody" class="align-top"></tbody>
+            </table>
+            <div id="listMsg" class="mt-3 text-sm"></div>
+
+            <!-- Pagination -->
+            <div class="mt-3 flex items-center justify-between">
+                <div class="text-xs text-slate-500" id="pageInfo"></div>
+                <div class="flex items-center gap-2">
+                    <button id="prevPage"
+                        class="px-2 py-1 rounded border border-slate-300 text-xs hover:bg-slate-50">Prev</button>
+                    <button id="nextPage"
+                        class="px-2 py-1 rounded border border-slate-300 text-xs hover:bg-slate-50">Next</button>
+                    <select id="pageSize" class="px-2 py-1 rounded border border-slate-300 text-xs">
+                        <option>10</option>
+                        <option>20</option>
+                        <option>50</option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Preview Modal -->
+<div id="previewModal" class="hidden fixed inset-0 z-50 bg-black/60">
+    <div class="mx-auto mt-10 max-w-3xl bg-white rounded-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b">
+            <div id="pvTitle" class="font-medium text-slate-800">Preview</div>
+            <button id="pvClose"
+                class="px-2 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50">Close</button>
+        </div>
+        <div id="pvBody" class="max-h-[75vh] overflow-auto p-3"></div>
+    </div>
+</div>
+
 <script>
+    /* ---------- Utils ---------- */
     async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    const $ = (id) => document.getElementById(id);
+    const tbody = $("tbody"), listMsg = $("listMsg"), refreshBtn = $("refreshBtn");
+    const searchInput = $("searchInput"), categoryFilter = $("categoryFilter"), periodFilter = $("periodFilter");
+    const selfUploadForm = $("selfUploadForm"), selfUploadMsg = $("selfUploadMsg");
+    const chkAll = $("chkAll"), bulkDelete = $("bulkDelete"), bulkCopy = $("bulkCopy");
+    const pageInfo = $("pageInfo"), prevPage = $("prevPage"), nextPage = $("nextPage"), pageSize = $("pageSize");
+    const perThis = $("perThis"), perLast = $("perLast");
+    const previewModal = $("previewModal"), pvTitle = $("pvTitle"), pvBody = $("pvBody"), pvClose = $("pvClose");
+    const dropZone = $("dropZone"), fileInput = $("fileInput");
 
-    const tbody = document.getElementById("tbody");
-    const listMsg = document.getElementById("listMsg");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const searchInput = document.getElementById("searchInput");
-    const categoryFilter = document.getElementById("categoryFilter");
-    const periodFilter = document.getElementById("periodFilter");
-    const selfUploadForm = document.getElementById("selfUploadForm");
-    const selfUploadMsg = document.getElementById("selfUploadMsg");
+    let ROWS = [];
+    let SELECTED = new Set();
+    let PAGE = 1;
 
-    function render(rows) {
-        const q = (searchInput.value || "").toLowerCase().trim();
-        const cat = categoryFilter.value;
-        const per = periodFilter.value;
-        const filtered = rows.filter(r => {
+    function monthStr(d = new Date()) { return d.toISOString().slice(0, 7); }
+    perThis.addEventListener("click", () => { periodFilter.value = monthStr(); debouncedLoad(); });
+    perLast.addEventListener("click", () => { const d = new Date(); d.setMonth(d.getMonth() - 1); periodFilter.value = monthStr(d); debouncedLoad(); });
+
+    // chips
+    document.querySelectorAll(".chip").forEach(c => {
+        c.addEventListener("click", () => { categoryFilter.value = c.dataset.cat || ""; debouncedLoad(); });
+    });
+    $("clearChips").addEventListener("click", () => { categoryFilter.value = ""; debouncedLoad(); });
+
+    function iconFor(url) {
+        const ext = (url.split(".").pop() || "").toLowerCase();
+        if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) return '<i class="fa-solid fa-file-image text-indigo-500"></i>';
+        if (["pdf"].includes(ext)) return '<i class="fa-solid fa-file-pdf text-rose-600"></i>';
+        if (["doc", "docx"].includes(ext)) return '<i class="fa-solid fa-file-word text-blue-600"></i>';
+        return '<i class="fa-solid fa-file-lines text-slate-500"></i>';
+    }
+    function toast(msg, ok = true) { listMsg.textContent = msg; listMsg.className = "mt-3 text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm"; }, 1500); }
+
+    function applyFilters(rows) {
+        const q = (searchInput.value || "").toLowerCase().trim(), cat = categoryFilter.value, per = periodFilter.value;
+        return rows.filter(r => {
             const hay = [r.title, r.category, r.period].map(x => (x || "").toLowerCase()).join(" ");
             const okQ = !q || hay.includes(q);
             const okC = !cat || r.category === cat;
             const okP = !per || (r.period || "").startsWith(per);
             return okQ && okC && okP;
         });
+    }
+
+    function paginate(rows) {
+        const size = Number(pageSize.value || 10);
+        const total = rows.length || 0;
+        const pages = Math.max(1, Math.ceil(total / size));
+        PAGE = Math.min(Math.max(1, PAGE), pages);
+        const start = (PAGE - 1) * size, end = start + size;
+        pageInfo.textContent = `Page ${PAGE}/${pages} • ${total} item${total === 1 ? "" : "s"}`;
+        prevPage.disabled = PAGE <= 1; nextPage.disabled = PAGE >= pages;
+        return rows.slice(start, end);
+    }
+
+    function render() {
+        const filtered = applyFilters(ROWS);
+        const pageRows = paginate(filtered);
 
         tbody.innerHTML = "";
-        filtered.forEach(r => {
+        SELECTED = new Set([...SELECTED].filter(id => pageRows.some(r => r.id === id))); // keep only visible selections
+        chkAll.checked = pageRows.length > 0 && pageRows.every(r => SELECTED.has(r.id));
+
+        pageRows.forEach(r => {
             const tr = document.createElement("tr");
+            const checked = SELECTED.has(r.id);
             tr.innerHTML = `
-      <td class="py-2 pr-3 font-medium text-slate-800">${r.title}</td>
-      <td class="py-2 pr-3">${r.category || "-"}</td>
-      <td class="py-2 pr-3">${r.period || "-"}</td>
-      <td class="py-2 pr-3">${new Date(r.uploaded_at).toLocaleString()}</td>
-      <td class="py-2 pr-3 space-x-2">
-        <a class="px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900" href="${r.url}" target="_blank">Open</a>
-        <button class="delBtn px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50" data-id="${r.id}">Delete</button>
-      </td>
-    `;
+        <td class="py-2 pr-3 w-10"><input type="checkbox" data-id="${r.id}" ${checked ? "checked" : ""}></td>
+        <td class="py-2 pr-3 font-medium text-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="w-5 text-center">${iconFor(r.url)}</span>
+            <button class="link-preview text-left hover:underline" data-id="${r.id}">${r.title || "(untitled)"}</button>
+          </div>
+        </td>
+        <td class="py-2 pr-3">${r.category || "-"}</td>
+        <td class="py-2 pr-3">${r.period || "-"}</td>
+        <td class="py-2 pr-3">${new Date(r.uploaded_at).toLocaleString()}</td>
+        <td class="py-2 pr-3 space-x-2">
+          <a class="px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900" href="${r.url}" target="_blank">Open</a>
+          <button class="px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50 copyBtn" data-url="${r.url}">Copy</button>
+          <button class="delBtn px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50" data-id="${r.id}">Delete</button>
+        </td>`;
             tbody.appendChild(tr);
         });
 
-        document.querySelectorAll(".delBtn").forEach(btn => {
+        // wire selection
+        tbody.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', e => {
+                const id = Number(cb.dataset.id);
+                if (cb.checked) SELECTED.add(id); else SELECTED.delete(id);
+                chkAll.checked = pageRows.length > 0 && pageRows.every(r => SELECTED.has(r.id));
+                updateBulkButtons();
+            });
+        });
+        chkAll.onchange = () => { const setTo = chkAll.checked; pageRows.forEach(r => setTo ? SELECTED.add(r.id) : SELECTED.delete(r.id)); render(); updateBulkButtons(); };
+
+        // actions
+        tbody.querySelectorAll(".delBtn").forEach(btn => {
             btn.addEventListener("click", async () => {
                 if (!confirm("Delete this document?")) return;
                 try {
                     const r = await fetch("/api/docs/" + btn.dataset.id, { method: "DELETE" });
-                    if (!r.ok) {
-                        const t = await r.text();
-                        try { const j = JSON.parse(t); alert(j.error || "Delete failed."); }
-                        catch { alert("Delete failed."); }
-                        return;
-                    }
-                    loadList();
-                } catch (e) { alert("Delete failed."); console.error(e); }
+                    if (!r.ok) { toast("Delete failed.", false); return; }
+                    await loadList();
+                    toast("Deleted ✓");
+                } catch (e) { console.error(e); toast("Delete failed.", false); }
             });
         });
+        tbody.querySelectorAll(".copyBtn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                try { await navigator.clipboard.writeText(btn.dataset.url); toast("Link copied ✓"); } catch { toast("Copy failed", false); }
+            });
+        });
+        tbody.querySelectorAll(".link-preview").forEach(a => {
+            a.addEventListener("click", (e) => {
+                e.preventDefault();
+                const row = ROWS.find(x => x.id === Number(a.dataset.id));
+                openPreview(row);
+            });
+        });
+
+        listMsg.textContent = filtered.length ? "" : "No documents yet.";
+        updateBulkButtons();
+    }
+
+    function updateBulkButtons() {
+        const any = SELECTED.size > 0;
+        bulkDelete.disabled = !any;
+        bulkCopy.disabled = !any;
     }
 
     async function loadList() {
         try {
-            listMsg.textContent = "Loading...";
+            listMsg.textContent = "Loading…";
             const rows = await getJSON("/api/docs");
-            render(rows);
-            listMsg.textContent = rows.length ? "" : "No documents yet.";
+            ROWS = rows;
+            PAGE = 1;
+            render();
+            listMsg.textContent = "";
         } catch (e) {
+            console.error(e);
             listMsg.className = "mt-3 text-sm text-rose-700";
             listMsg.textContent = "Failed to load.";
-            console.error(e);
         }
     }
-    refreshBtn.addEventListener("click", loadList);
-    searchInput.addEventListener("input", () => { clearTimeout(window.__d); window.__d = setTimeout(loadList, 200); });
-    categoryFilter.addEventListener("change", loadList);
-    periodFilter.addEventListener("input", () => { clearTimeout(window.__p); window.__p = setTimeout(loadList, 200); });
 
+    refreshBtn.addEventListener("click", loadList);
+
+    // filters & pagination
+    let __timer; function debouncedLoad() { clearTimeout(__timer); __timer = setTimeout(() => { PAGE = 1; render(); }, 200); }
+    searchInput.addEventListener("input", debouncedLoad);
+    categoryFilter.addEventListener("change", debouncedLoad);
+    periodFilter.addEventListener("input", debouncedLoad);
+    pageSize.addEventListener("change", () => { PAGE = 1; render(); });
+    prevPage.addEventListener("click", () => { PAGE--; render(); });
+    nextPage.addEventListener("click", () => { PAGE++; render(); });
+
+    // bulk actions
+    bulkDelete.addEventListener("click", async () => {
+        if (!SELECTED.size) return;
+        if (!confirm(`Delete ${SELECTED.size} document(s)?`)) return;
+        try {
+            // delete one by one (API: DELETE /api/docs/:id)
+            for (const id of SELECTED) { await fetch("/api/docs/" + id, { method: "DELETE" }); }
+            SELECTED.clear();
+            await loadList();
+            toast("Deleted selected ✓");
+        } catch (e) { console.error(e); toast("Some deletes failed", false); }
+    });
+    bulkCopy.addEventListener("click", async () => {
+        if (!SELECTED.size) return;
+        const urls = ROWS.filter(r => SELECTED.has(r.id)).map(r => r.url).join("\n");
+        try { await navigator.clipboard.writeText(urls); toast("Links copied ✓"); } catch { toast("Copy failed", false); }
+    });
+
+    // upload (single submit supports one file; DnD can push many sequentially)
     selfUploadForm.addEventListener("submit", async (ev) => {
         ev.preventDefault();
         selfUploadMsg.textContent = ""; selfUploadMsg.className = "mt-2 text-sm";
@@ -189,17 +345,75 @@
                 catch { selfUploadMsg.className = "mt-2 text-sm text-rose-700"; selfUploadMsg.textContent = "Upload failed."; }
                 return;
             }
-            selfUploadMsg.className = "mt-2 text-sm text-emerald-700";
-            selfUploadMsg.textContent = "Uploaded.";
+            selfUploadMsg.className = "mt-2 text-sm text-emerald-700"; selfUploadMsg.textContent = "Uploaded ✓";
             selfUploadForm.reset();
             loadList();
         } catch (e) {
-            selfUploadMsg.className = "mt-2 text-sm text-rose-700";
-            selfUploadMsg.textContent = "Upload failed.";
-            console.error(e);
+            console.error(e); selfUploadMsg.className = "mt-2 text-sm text-rose-700"; selfUploadMsg.textContent = "Upload failed.";
         }
     });
 
+    // Drag & Drop multi-upload
+    ;["dragenter", "dragover", "dragleave", "drop"].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
+    ;["dragenter", "dragover"].forEach(ev => dropZone.addEventListener(ev, () => dropZone.classList.add("ring-2", "ring-slate-300", "bg-slate-50")));
+    ;["dragleave", "drop"].forEach(ev => dropZone.addEventListener(ev, () => dropZone.classList.remove("ring-2", "ring-slate-300", "bg-slate-50")));
+    dropZone.addEventListener("drop", async (e) => {
+        const files = [...(e.dataTransfer?.files || [])];
+        if (!files.length) return;
+        const formEl = selfUploadForm;
+        const base = new FormData(formEl);
+        const cat = base.get("category"); const title = base.get("title"); const period = base.get("period");
+        for (const f of files) {
+            const fd = new FormData();
+            fd.set("category", cat || "Personal");
+            fd.set("title", title ? `${title} • ${f.name}` : f.name);
+            if (period) fd.set("period", period);
+            fd.set("file", f, f.name);
+            try {
+                const r = await fetch("/api/docs/upload", { method: "POST", body: fd });
+                if (!r.ok) throw new Error("Upload failed");
+            } catch (err) { console.error(err); toast(`Failed: ${f.name}`, false); }
+        }
+        toast("Files uploaded ✓");
+        loadList();
+    });
+    dropZone.addEventListener("click", () => fileInput?.click());
+
+    // Preview modal
+    function openPreview(row) {
+        pvTitle.textContent = row.title || "Preview";
+        pvBody.innerHTML = "";
+        const url = row.url || "";
+        const ext = (url.split(".").pop() || "").toLowerCase();
+        if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) {
+            const img = new Image(); img.src = url; img.className = "max-w-full h-auto mx-auto";
+            pvBody.appendChild(img);
+        } else if (ext === "pdf") {
+            const iframe = document.createElement("iframe");
+            iframe.src = url; iframe.className = "w-full h-[70vh]"; pvBody.appendChild(iframe);
+        } else {
+            pvBody.innerHTML = `
+        <div class="p-4 text-slate-700">
+          This file type opens in a new tab.
+          <a class="ml-2 px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900" target="_blank" href="${url}">Open</a>
+        </div>`;
+        }
+        previewModal.classList.remove("hidden");
+    }
+    pvClose.addEventListener("click", () => previewModal.classList.add("hidden"));
+    previewModal.addEventListener("click", (e) => { if (e.target === previewModal) previewModal.classList.add("hidden"); });
+
+    // initial load
     loadList();
 </script>
+
+<style>
+    .chip {
+        @apply px-2 py-1 rounded-lg border border-slate-300 text-xs hover:bg-slate-50;
+    }
+
+    .chip-secondary {
+        @apply px-2 py-1 rounded-lg border border-slate-300 text-xs text-slate-600 hover:bg-slate-50;
+    }
+</style>
 {% endblock %}

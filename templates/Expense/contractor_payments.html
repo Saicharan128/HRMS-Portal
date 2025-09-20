@@ -1,20 +1,21 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Contractor Payments
             </h1>
             <p class="text-slate-600 text-sm">Manage payments and contracts for freelance/contract staff.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="newVendorBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+        <div class="flex flex-wrap items-center gap-2">
+            <button id="newVendorBtn"
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm w-full xs:w-auto">
                 <i class="fa-solid fa-user-plus mr-1"></i> New Vendor
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full xs:w-auto text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
@@ -22,18 +23,25 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="vendorsTab" class="cp-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+        <div
+            class="flex space-x-1 bg-slate-100 p-1 rounded-xl overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-slate-300">
+            <button id="vendorsTab"
+                class="cp-tab active px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-people-line mr-1"></i> Vendors</button>
-            <button id="contractsTab" class="cp-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="contractsTab"
+                class="cp-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-file-contract mr-1"></i> Contracts</button>
-            <button id="invoicesTab" class="cp-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="invoicesTab"
+                class="cp-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-file-invoice mr-1"></i> Invoices</button>
-            <button id="paymentsTab" class="cp-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="paymentsTab"
+                class="cp-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-building-columns mr-1"></i> Payments</button>
-            <button id="complianceTab" class="cp-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="complianceTab"
+                class="cp-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
-            <button id="reportsTab" class="cp-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="reportsTab"
+                class="cp-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-chart-line mr-1"></i> Reports</button>
         </div>
     </div>
@@ -41,17 +49,19 @@
     <!-- Vendors -->
     <section id="vendorsPanel" class="cp-panel">
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between p-4 border-b border-slate-200">
-                <div class="relative w-full md:w-96">
+            <div
+                class="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between p-4 border-b border-slate-200">
+                <div class="relative w-full lg:w-96">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input id="vendorSearch" placeholder="Search vendor, skill, or location"
                         class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
                     <button id="vendorClear"
-                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        aria-label="Clear search">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <select id="vendorStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
                         <option value="active">Active</option>
@@ -64,13 +74,13 @@
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
+                <table class="min-w-full text-xs sm:text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
                             <th class="py-2 px-4">Vendor</th>
                             <th class="py-2 px-4">Skill</th>
-                            <th class="py-2 px-4">Rate</th>
-                            <th class="py-2 px-4">Location</th>
+                            <th class="py-2 px-4 hidden md:table-cell">Rate</th>
+                            <th class="py-2 px-4 hidden lg:table-cell">Location</th>
                             <th class="py-2 px-4">Status</th>
                             <th class="py-2 px-4 w-28"></th>
                         </tr>
@@ -84,11 +94,12 @@
     <!-- Contracts -->
     <section id="contractsPanel" class="cp-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-contract mr-2"></i>
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800"><i
+                            class="fa-solid fa-file-contract mr-2"></i>
                         Contract Register</h3>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <button id="newContract"
                             class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
                                 class="fa-solid fa-plus mr-1"></i> New</button>
@@ -101,15 +112,15 @@
                     </div>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
+                    <table class="min-w-full text-xs sm:text-sm">
                         <thead class="text-left text-slate-500 border-b">
                             <tr>
                                 <th class="py-2 px-4">Vendor</th>
-                                <th class="py-2 px-4">Type</th>
-                                <th class="py-2 px-4">Start</th>
+                                <th class="py-2 px-4 hidden sm:table-cell">Type</th>
+                                <th class="py-2 px-4 hidden md:table-cell">Start</th>
                                 <th class="py-2 px-4">End</th>
-                                <th class="py-2 px-4">Cap</th>
-                                <th class="py-2 px-4">Used</th>
+                                <th class="py-2 px-4 hidden lg:table-cell">Cap</th>
+                                <th class="py-2 px-4 hidden lg:table-cell">Used</th>
                                 <th class="py-2 px-4 w-28"></th>
                             </tr>
                         </thead>
@@ -118,8 +129,8 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
                         class="fa-solid fa-triangle-exclamation mr-2"></i> Contract Health</h3>
                 <ul id="contractHealth" class="space-y-2 text-sm"><!-- injected --></ul>
             </div>
@@ -128,11 +139,12 @@
 
     <!-- Invoices -->
     <section id="invoicesPanel" class="cp-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-invoice mr-2"></i> Invoices
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800"><i
+                        class="fa-solid fa-file-invoice mr-2"></i> Invoices
                 </h3>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <select id="invoiceFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
                         <option value="pending">Pending</option>
@@ -146,15 +158,15 @@
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
+                <table class="min-w-full text-xs sm:text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
                             <th class="py-2 px-4">Invoice #</th>
                             <th class="py-2 px-4">Vendor</th>
-                            <th class="py-2 px-4">Period</th>
+                            <th class="py-2 px-4 hidden sm:table-cell">Period</th>
                             <th class="py-2 px-4">Amount</th>
-                            <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 hidden md:table-cell">Status</th>
+                            <th class="py-2 px-4 w-24 sm:w-28"></th>
                         </tr>
                     </thead>
                     <tbody id="invoiceRows" class="text-slate-800"><!-- injected --></tbody>
@@ -166,11 +178,12 @@
     <!-- Payments -->
     <section id="paymentsPanel" class="cp-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-building-columns mr-2"></i>
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800"><i
+                            class="fa-solid fa-building-columns mr-2"></i>
                         Payment Batches</h3>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <select id="payFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
                             <option value="all">All</option>
                             <option value="queued">Queued</option>
@@ -182,14 +195,14 @@
                     </div>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
+                    <table class="min-w-full text-xs sm:text-sm">
                         <thead class="text-left text-slate-500 border-b">
                             <tr>
                                 <th class="py-2 px-4">Batch</th>
                                 <th class="py-2 px-4">Count</th>
                                 <th class="py-2 px-4">Amount</th>
-                                <th class="py-2 px-4">Status</th>
-                                <th class="py-2 px-4 w-24"></th>
+                                <th class="py-2 px-4 hidden md:table-cell">Status</th>
+                                <th class="py-2 px-4 w-20 sm:w-24"></th>
                             </tr>
                         </thead>
                         <tbody id="payRows" class="text-slate-800"><!-- injected --></tbody>
@@ -197,8 +210,9 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-wallet mr-2"></i> Next
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-wallet mr-2"></i> Next
                     Disbursement</h3>
                 <ul id="nextDisb" class="space-y-2 text-sm"><!-- injected --></ul>
             </div>
@@ -208,21 +222,24 @@
     <!-- Compliance -->
     <section id="compliancePanel" class="cp-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-shield mr-2"></i>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-file-shield mr-2"></i>
                     Compliance Checklist</h3>
                 <div id="compList" class="space-y-3"><!-- injected --></div>
                 <button id="compAll"
                     class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
                         class="fa-solid fa-check mr-1"></i> Mark All Complete</button>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-scale-balanced mr-2"></i>
                     Withholding Summary</h3>
                 <ul id="withholdList" class="space-y-2 text-sm"><!-- injected --></ul>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-user-shield mr-2"></i>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-user-shield mr-2"></i>
                     Classification</h3>
                 <ul id="classRisk" class="space-y-2 text-sm"><!-- injected --></ul>
             </div>
@@ -232,15 +249,21 @@
     <!-- Reports -->
     <section id="reportsPanel" class="cp-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Spend
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-chart-pie mr-2"></i> Spend
                     by Category</h3>
-                <canvas id="spendChart" height="220"></canvas>
+                <div class="h-64 sm:h-72">
+                    <canvas id="spendChart"></canvas>
+                </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-stopwatch mr-2"></i>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-stopwatch mr-2"></i>
                     Approval SLA</h3>
-                <canvas id="slaChart" height="220"></canvas>
+                <div class="h-64 sm:h-72">
+                    <canvas id="slaChart"></canvas>
+                </div>
             </div>
         </div>
     </section>
@@ -249,23 +272,24 @@
 <!-- New Vendor Modal -->
 <div id="vendorModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w/full max-w-lg">
-                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex min-h-full items-end sm:items-center justify-center p-2 sm:p-4">
+            <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-800">Create Vendor</h3>
-                    <button id="closeVendorModal" class="text-slate-400 hover:text-slate-600"><i
-                            class="fa-solid fa-times text-xl"></i></button>
+                    <button id="closeVendorModal" class="text-slate-400 hover:text-slate-600" aria-label="Close">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
                 </div>
-                <div class="p-6 space-y-4">
+                <div class="p-4 sm:p-6 space-y-4">
                     <input id="vName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="Vendor name">
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input id="vSkill" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Skill e.g., UI/UX">
                         <input id="vRate" type="number" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Rate / hr">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input id="vLoc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Location">
                         <select id="vStatus" class="w-full rounded-lg border border-slate-300 px-3 py-2">
@@ -273,10 +297,11 @@
                             <option value="inactive">Inactive</option>
                         </select>
                     </div>
-                    <div class="flex items-center justify-end gap-2 pt-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-2 pt-2">
                         <button id="cancelVendor"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="saveVendor" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 w-full sm:w-auto">Cancel</button>
+                        <button id="saveVendor"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 w-full sm:w-auto"><i
                                 class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
                     </div>
                 </div>
@@ -333,14 +358,14 @@
         $('cancelVendor').addEventListener('click', closeVendorModal);
         $('saveVendor').addEventListener('click', saveVendor);
         $('inviteVendor').addEventListener('click', () => alert('✉️ Invite sent'));
-        $('vendorStatus').addEventListener('change', renderVendors);
+        $('vendorStatus').addEventListener('change', () => { renderVendors(); });
         const vs = $('vendorSearch'), vc = $('vendorClear');
         vs.addEventListener('input', () => { vc.classList.toggle('hidden', !vs.value.trim()); renderVendors(); });
         vc.addEventListener('click', () => { vs.value = ''; vc.classList.add('hidden'); renderVendors(); });
 
         // Contracts / Invoices / Payments / Compliance
         $('contractFilter').addEventListener('change', renderContracts);
-        $('invoiceFilter').addEventListener('change', renderInvoices);
+        $('invoiceFilter').addEventListener('change', () => { renderInvoices(); renderNextDisb(); renderWithhold(); });
         $('payFilter').addEventListener('change', renderPayments);
         $('genFile').addEventListener('click', () => alert('✅ Bank file generated'));
         $('compAll').addEventListener('click', () => { COMPLIANCE = COMPLIANCE.map(c => ({ ...c, done: true })); renderCompliance(); });
@@ -361,8 +386,8 @@
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${v.name}</td>
         <td class="py-2 px-4">${v.skill}</td>
-        <td class="py-2 px-4">${fmt(v.rate)}/hr</td>
-        <td class="py-2 px-4">${v.loc}</td>
+        <td class="py-2 px-4 hidden md:table-cell">${fmt(v.rate)}/hr</td>
+        <td class="py-2 px-4 hidden lg:table-cell">${v.loc}</td>
         <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(v.status)}</span></td>
         <td class="py-2 px-4 text-right">
           <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Open ${v.name}')">Open</button>
@@ -392,11 +417,11 @@
             return `
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${v?.name || '—'}</td>
-        <td class="py-2 px-4">${c.type}</td>
-        <td class="py-2 px-4">${c.start}</td>
-        <td class="py-2 px-4">${c.end} <span class="text-xs text-slate-500">(${daysFromNow(c.end)}d)</span></td>
-        <td class="py-2 px-4">${fmt(c.cap)}</td>
-        <td class="py-2 px-4">${fmt(c.used)}</td>
+        <td class="py-2 px-4 hidden sm:table-cell">${c.type}</td>
+        <td class="py-2 px-4 hidden md:table-cell">${c.start}</td>
+        <td class="py-2 px-4">${c.end} <span class="text-[10px] sm:text-xs text-slate-500">(${daysFromNow(c.end)}d)</span></td>
+        <td class="py-2 px-4 hidden lg:table-cell">${fmt(c.cap)}</td>
+        <td class="py-2 px-4 hidden lg:table-cell">${fmt(c.used)}</td>
         <td class="py-2 px-4 text-right">
           <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Contract details')">Details</button>
         </td>
@@ -424,9 +449,9 @@
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${i.id}</td>
         <td class="py-2 px-4">${v?.name || '—'}</td>
-        <td class="py-2 px-4">${i.period}</td>
+        <td class="py-2 px-4 hidden sm:table-cell">${i.period}</td>
         <td class="py-2 px-4">${fmt(i.amt)}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${labelStatus(i.status)}</span></td>
+        <td class="py-2 px-4 hidden md:table-cell"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${labelStatus(i.status)}</span></td>
         <td class="py-2 px-4 text-right">
           <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${i.id}')">Approve</button>
         </td>
@@ -446,7 +471,7 @@
         <td class="py-2 px-4 font-medium">${b.id}</td>
         <td class="py-2 px-4">${b.count}</td>
         <td class="py-2 px-4">${fmt(b.amount)}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(b.status)}</span></td>
+        <td class="py-2 px-4 hidden md:table-cell"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${capitalize(b.status)}</span></td>
         <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button></td>
       </tr>`;
         }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No batches</td></tr>`;
@@ -506,8 +531,16 @@
         const c2 = document.getElementById('slaChart').getContext('2d');
         spendC && spendC.destroy(); slaC && slaC.destroy();
         const byCat = { 'Design': 6200, 'Engineering': 9800, 'Content': 2100, 'Ops': 700 };
-        spendC = new Chart(c1, { type: 'pie', data: { labels: Object.keys(byCat), datasets: [{ data: Object.values(byCat), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
-        slaC = new Chart(c2, { type: 'bar', data: { labels: ['Submit', 'Approve', 'Pay'], datasets: [{ label: 'Median Hours', data: [6, 18, 10], backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+        spendC = new Chart(c1, {
+            type: 'pie',
+            data: { labels: Object.keys(byCat), datasets: [{ data: Object.values(byCat), borderWidth: 2, borderColor: '#fff' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+        slaC = new Chart(c2, {
+            type: 'bar',
+            data: { labels: ['Submit', 'Approve', 'Pay'], datasets: [{ label: 'Median Hours', data: [6, 18, 10] }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
     }
 
     /* ------ Utils ------ */
@@ -531,6 +564,16 @@
     .cp-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    /* Minimal scrollbar for horizontal tab scroller (optional) */
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

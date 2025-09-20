@@ -1,29 +1,29 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 py-4 sm:py-6 gap-4">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-diagram-project mr-2"></i> Projects
             </h1>
-            <p class="text-slate-600 text-sm">Assign, monitor, and track projects and resource allocation.</p>
+            <p class="text-slate-600 text-sm mt-1">Assign, monitor, and track projects and resource allocation.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
             <i class="fa-solid fa-arrow-left mr-1"></i> Back
         </a>
     </div>
 
     <!-- Create project -->
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
         <h2 class="text-lg font-semibold text-slate-800 mb-3">
             <i class="fa-solid fa-square-plus mr-2"></i> New Project
         </h2>
         <form id="createForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Name *</label>
-                <input name="name" required class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <input name="name" required class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Status</label>
@@ -36,27 +36,29 @@
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Start date</label>
-                <input name="start_date" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <input name="start_date" type="date"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">End date</label>
-                <input name="end_date" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                <input name="end_date" type="date"
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
             </div>
             <div class="md:col-span-2">
                 <label class="block text-sm text-slate-600 mb-1">Description</label>
                 <textarea name="description" rows="2"
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea>
+                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></textarea>
             </div>
 
             <!-- Team picker -->
             <div class="md:col-span-2">
                 <label class="block text-sm text-slate-600 mb-1">Team (select users)</label>
                 <div class="flex flex-wrap gap-2" id="teamChips"></div>
-                <div class="mt-2 flex gap-2">
+                <div class="mt-2 flex flex-col sm:flex-row gap-2">
                     <input id="userSearch" placeholder="Search users…"
-                        class="w-64 rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+                        class="w-full sm:w-64 rounded-xl border border-slate-300 px-3 py-2 text-sm" />
                     <button id="addUserBtn" type="button"
-                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                        class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
                         <i class="fa-solid fa-user-plus mr-1"></i> Add
                     </button>
                 </div>
@@ -70,9 +72,9 @@
                     <table class="min-w-full text-sm">
                         <thead class="text-left text-slate-600">
                             <tr>
-                                <th class="py-2 pr-3">Member</th>
-                                <th class="py-2 pr-3 w-40">Hours</th>
-                                <th class="py-2 pr-3"></th>
+                                <th class="py-2 px-3">Member</th>
+                                <th class="py-2 px-3 w-24">Hours</th>
+                                <th class="py-2 px-3 w-16"></th>
                             </tr>
                         </thead>
                         <tbody id="allocBody"></tbody>
@@ -80,9 +82,10 @@
                 </div>
             </div>
 
-            <div class="md:col-span-2 flex items-center justify-between">
+            <div class="md:col-span-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <p class="text-xs text-slate-500">Fields marked * are required.</p>
-                <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900" type="submit">
+                <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"
+                    type="submit">
                     Create
                 </button>
             </div>
@@ -91,14 +94,15 @@
     </div>
 
     <!-- Projects list -->
-    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
-        <div class="flex items-center justify-between">
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 class="text-lg font-semibold text-slate-800">
                 <i class="fa-solid fa-list-check mr-2"></i> My Projects
             </h2>
-            <div class="flex items-center gap-2">
-                <input id="q" placeholder="Search…" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
-                <select id="fStatus" class="rounded-xl border border-slate-300 px-3 py-2 text-sm">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                <input id="q" placeholder="Search…"
+                    class="w-full sm:w-64 rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <select id="fStatus" class="w-full sm:w-auto rounded-xl border border-slate-300 px-3 py-2 text-sm">
                     <option value="">All</option>
                     <option>Planned</option>
                     <option>Active</option>
@@ -106,7 +110,7 @@
                     <option>Completed</option>
                 </select>
                 <button id="refreshBtn"
-                    class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                    class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
                     <i class="fa-solid fa-rotate mr-1"></i> Refresh
                 </button>
             </div>
@@ -116,12 +120,12 @@
             <table class="min-w-full text-sm">
                 <thead class="text-left text-slate-600 border-b">
                     <tr>
-                        <th class="py-2 pr-3">Name</th>
-                        <th class="py-2 pr-3">Status</th>
-                        <th class="py-2 pr-3">Progress</th>
-                        <th class="py-2 pr-3">Dates</th>
-                        <th class="py-2 pr-3">Team</th>
-                        <th class="py-2 pr-3 w-56">Actions</th>
+                        <th class="py-2 px-3">Name</th>
+                        <th class="py-2 px-3 hidden sm:table-cell">Status</th>
+                        <th class="py-2 px-3">Progress</th>
+                        <th class="py-2 px-3 hidden sm:table-cell">Dates</th>
+                        <th class="py-2 px-3 hidden sm:table-cell">Team</th>
+                        <th class="py-2 px-3 w-48">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="rows" class="align-top"></tbody>
@@ -131,6 +135,34 @@
     </div>
 </div>
 
+<style>
+    @media (max-width: 640px) {
+        .max-w-7xl {
+            max-width: 100%;
+        }
+
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            font-size: 0.75rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem 0.75rem;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font-size: 0.875rem;
+        }
+    }
+</style>
+
 <script>
     async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(await r.text()); return r.json(); }
     async function postJSON(url, data) { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
@@ -139,7 +171,6 @@
 
     const usersCache = { all: [] };
     async function loadUsers() {
-        // default: all employees to assign
         usersCache.all = await fetchJSON("/api/users?type=Employees");
     }
     function findUserMatches(q) {
@@ -160,8 +191,8 @@
     const addUserBtn = document.getElementById("addUserBtn");
     const allocBody = document.getElementById("allocBody");
 
-    const team = new Set();               // usernames
-    const allocations = new Map();        // username -> hours
+    const team = new Set();
+    const allocations = new Map();
 
     function renderTeam() {
         teamChips.innerHTML = "";
@@ -176,10 +207,10 @@
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
-      <td class="py-2 pr-3">${u}</td>
-      <td class="py-2 pr-3"><input type="number" min="0" value="${allocations.get(u) || 0}"
-           class="w-28 rounded-lg border border-slate-300 px-2 py-1 text-sm"></td>
-      <td class="py-2 pr-3"><button type="button" class="px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50">Set</button></td>`;
+      <td class="py-2 px-3">${u}</td>
+      <td class="py-2 px-3"><input type="number" min="0" value="${allocations.get(u) || 0}"
+           class="w-20 rounded-lg border border-slate-300 px-2 py-1 text-sm"></td>
+      <td class="py-2 px-3"><button type="button" class="px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50">Set</button></td>`;
             const input = tr.querySelector("input");
             tr.querySelector("button").addEventListener("click", () => { allocations.set(u, parseInt(input.value || 0)); });
             allocBody.appendChild(tr);
@@ -189,7 +220,6 @@
     addUserBtn.addEventListener("click", () => {
         const matches = findUserMatches(userSearch.value);
         if (!matches.length) { createMsg.className = "mt-3 text-sm text-rose-700"; createMsg.textContent = "No user match."; return; }
-        // add first match quickly; you can upgrade to a dropdown later
         const u = matches[0].username;
         if (!team.has(u)) team.add(u);
         renderTeam();
@@ -200,7 +230,6 @@
         e.preventDefault();
         createMsg.textContent = "Saving…";
         try {
-            // lock in allocations present in inputs
             allocBody.querySelectorAll("tr").forEach(tr => {
                 const u = tr.children[0].textContent.trim();
                 const v = tr.querySelector("input").value;
@@ -250,9 +279,8 @@
         data.forEach(p => {
             const tr = document.createElement("tr");
 
-            // editable fields
             const nameI = document.createElement("input");
-            nameI.value = p.name; nameI.className = "w-56 rounded-lg border border-slate-300 px-2 py-1 text-sm";
+            nameI.value = p.name; nameI.className = "w-full sm:w-56 rounded-lg border border-slate-300 px-2 py-1 text-sm";
 
             const statusS = select(["Planned", "Active", "On Hold", "Completed"], p.status);
             const progressI = document.createElement("input");
@@ -261,7 +289,7 @@
 
             const dates = document.createElement("div");
             dates.className = "text-xs text-slate-600";
-            dates.textContent = `${p.start_date || "—"} → ${p.end_date || "—"}`;
+            dates.innerHTML = `${p.start_date || "—"}<br class="sm:hidden"> → ${p.end_date || "—"}<br class="sm:hidden"><span class="sm:hidden text-xs text-slate-600">${p.status} • ${p.team.join(", ")}</span>`;
 
             const teamDiv = document.createElement("div");
             teamDiv.className = "flex flex-wrap gap-1";
@@ -281,13 +309,11 @@
             delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
             actions.append(saveBtn, delBtn);
 
-            // build row
             const tds = [nameI, statusS, (() => { const box = progressBar(p.progress); box.style.minWidth = "10rem"; return box; })(), dates, teamDiv, actions]
-                .map(el => { const td = document.createElement("td"); td.className = "py-2 pr-3 align-middle"; td.appendChild(el); return td; });
+                .map(el => { const td = document.createElement("td"); td.className = "py-2 px-3 align-middle"; td.appendChild(el); return td; });
             tds.forEach(td => tr.appendChild(td));
             rows.appendChild(tr);
 
-            // events
             saveBtn.addEventListener("click", async () => {
                 try {
                     await putJSON(`/api/projects/${p.id}`, { name: nameI.value.trim(), status: statusS.value, progress: progressI.value });

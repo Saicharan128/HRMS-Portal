@@ -79,9 +79,12 @@
                         <option>Jul 2025</option>
                     </select>
                     <select id="regimePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
-                        <option value="new">New Regime</option>
-                        <option value="old">Old Regime</option>
+                        <option value="new">New Regime (what-if)</option>
+                        <option value="old">Old Regime (what-if)</option>
                     </select>
+                </div>
+                <div class="mt-2 text-xs text-slate-500">
+                    Tax shown is a <b>simulation</b> for comparison only.
                 </div>
             </div>
 
@@ -131,12 +134,14 @@
                     <h3 class="text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-list-check mr-2"></i> Earnings & Deductions
                     </h3>
-                    <div class="text-sm text-slate-600">
+                    <div class="text-sm text-slate-600 flex items-center gap-2">
                         <select id="bdCycle" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
                             <option>Sep 2025</option>
                             <option>Aug 2025</option>
                             <option>Jul 2025</option>
                         </select>
+                        <span id="bdRegimeTag"
+                            class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs">—</span>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -157,7 +162,7 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-slate-800">
-                        <i class="fa-solid fa-percent mr-2"></i> Tax Split
+                        <i class="fa-solid fa-percent mr-2"></i> Tax Split (simulated)
                     </h3>
                 </div>
                 <div class="relative h-56">
@@ -252,7 +257,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Dummy Data ----
+    /* ---- Dummy Data ---- */
     const CYCLES = {
         'Sep 2025': {
             earnings: [
@@ -287,13 +292,15 @@
         { month: '2024-10', gross: 91500, ded: 18000, net: 73500, status: 'Processed' }
     ];
 
-    // ---- Panels/Tabs ----
+    /* ---- Panels/Tabs ---- */
     const panels = {
         overview: document.getElementById('overviewPanel'),
         breakdown: document.getElementById('breakdownPanel'),
         history: document.getElementById('historyPanel'),
         settings: document.getElementById('settingsPanel')
     };
+
+    let _mixChart, _pieChart, _taxChart, _trendChart;
 
     document.addEventListener('DOMContentLoaded', () => {
         setupTabs();
@@ -319,99 +326,145 @@
         });
     }
 
+    /* ---- Buttons / events ---- */
     function wireButtons() {
-        document.getElementById('downloadPayslipBtn').addEventListener('click', () => alert('📄 Payslip downloaded ()'));
-        document.getElementById('exportCsvBtn').addEventListener('click', () => alert('✅ CSV exported ()'));
-        document.getElementById('viewStructureBtn').addEventListener('click', () => alert('🧩 Salary structure ()'));
-        document.getElementById('optimizeTaxBtn').addEventListener('click', () => alert('🧮 Running what-if ()'));
-        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened ()'));
-        document.getElementById('verifyBankBtn')?.addEventListener('click', () => alert('🏦 Bank verified ()'));
-        document.getElementById('submitBillsBtn')?.addEventListener('click', () => alert('🧾 Upload bills ()'));
+        document.getElementById('downloadPayslipBtn').addEventListener('click', printPayslip);
+        document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+        document.getElementById('viewStructureBtn').addEventListener('click', () => alert('🧩 Salary structure (demo)'));
+        document.getElementById('optimizeTaxBtn').addEventListener('click', () => alert('🧮 Optimization sandbox (demo)'));
+        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query form opened (demo)'));
+        document.getElementById('verifyBankBtn')?.addEventListener('click', () => alert('🏦 Bank verified (demo)'));
+        document.getElementById('submitBillsBtn')?.addEventListener('click', () => alert('🧾 Upload bills (demo)'));
         document.getElementById('notifEmail')?.addEventListener('change', () => alert('🔔 Email alerts toggled'));
         document.getElementById('notifSMS')?.addEventListener('change', () => alert('🔔 SMS alerts toggled'));
         document.getElementById('cyclePicker').addEventListener('change', onCycleChange);
-        document.getElementById('regimePicker').addEventListener('change', () => alert('⚖️ Regime toggle ()'));
+        document.getElementById('regimePicker').addEventListener('change', onCycleChange);
         document.getElementById('bdCycle').addEventListener('change', renderBreakdown);
         document.getElementById('searchInput').addEventListener('input', renderHistory);
         document.getElementById('typeFilter').addEventListener('change', renderHistory);
     }
 
-    // ---- Overview ----
+    /* ---- Regime simulation helpers (very simplified) ----
+       - Old regime: HRA 50% exempt (as given in data)
+       - New regime: HRA exemption not applied (taxable = full HRA)
+       - TDS simulated = 10% of taxable earnings (monthly), for demo only */
+    function simulateCycle(cycName, regime) {
+        const src = CYCLES[cycName] || { earnings: [], deductions: [], gross: 0, ded: 0, net: 0 };
+        if (!src.earnings) return { ...src, sim: { gross: src.gross, ded: src.ded, net: src.net, tds: (src.deductions || []).find(x => x.name === 'TDS')?.amt || 0, taxable: 0 } };
+
+        const earnings = JSON.parse(JSON.stringify(src.earnings));
+        const deductions = JSON.parse(JSON.stringify(src.deductions || []));
+
+        // apply regime rule to HRA
+        const hra = earnings.find(e => e.name === 'HRA');
+        if (hra) {
+            hra.taxable = (regime === 'new') ? hra.amt : (hra.taxable ?? hra.amt);
+        }
+
+        // taxable income = sum of taxable for earnings
+        const taxable = earnings.reduce((s, e) => s + (Number(e.taxable || 0)), 0);
+
+        // simulated TDS = 10% taxable (demo)
+        const simTds = Math.round(taxable * 0.10);
+
+        // replace/insert TDS in deductions for display
+        const tdsIdx = deductions.findIndex(d => d.name === 'TDS');
+        if (tdsIdx >= 0) deductions[tdsIdx].amt = simTds; else deductions.unshift({ name: 'TDS', amt: simTds, note: '(simulated)' });
+
+        const gross = earnings.reduce((s, e) => s + (e.amt || 0), 0);
+        const ded = deductions.reduce((s, d) => s + (d.amt || 0), 0);
+        const net = gross - ded;
+
+        return { earnings, deductions, sim: { gross, ded, net, tds: simTds, taxable } };
+    }
+
+    /* ---- Overview ---- */
     function onCycleChange() { renderOverview(); renderBreakdown(); drawMix(); drawPie(); drawTax(); }
+
     function renderOverview() {
         const cyc = document.getElementById('cyclePicker').value;
-        const { gross = 0, ded = 0, net = 0 } = CYCLES[cyc] || {};
-        document.getElementById('earnAmt').textContent = fmt(gross);
-        document.getElementById('dedAmt').textContent = fmt(ded);
-        document.getElementById('netAmt').textContent = fmt(net);
+        const regime = document.getElementById('regimePicker').value;
+        const calc = simulateCycle(cyc, regime);
+
+        document.getElementById('earnAmt').textContent = fmt(calc.sim.gross);
+        document.getElementById('dedAmt').textContent = fmt(calc.sim.ded);
+        document.getElementById('netAmt').textContent = fmt(calc.sim.net);
+
         const badge = document.getElementById('cycleBadge');
-        badge.textContent = net >= 78000 ? 'On Track' : 'Lower Net';
-        badge.className = 'px-2 py-1 text-xs rounded ' + (net >= 78000 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700');
+        badge.textContent = calc.sim.net >= 78000 ? 'On Track' : 'Lower Net';
+        badge.className = 'px-2 py-1 text-xs rounded ' + (calc.sim.net >= 78000 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700');
     }
 
-    // ---- Breakdown ----
+    /* ---- Breakdown ---- */
     function renderBreakdown() {
         const cyc = document.getElementById('bdCycle').value;
-        const data = CYCLES[cyc] || {};
+        const regime = document.getElementById('regimePicker').value;
+        const calc = simulateCycle(cyc, regime);
+
+        document.getElementById('bdRegimeTag').textContent = (regime === 'new') ? 'New regime (what-if)' : 'Old regime (what-if)';
+
         const rows = []
-            .concat((data.earnings || []).map(x => rowBD(x, 'Earning')))
-            .concat((data.deductions || []).map(x => rowBD({ ...x, taxable: 0 }, 'Deduction')));
-        document.getElementById('bdRows').innerHTML = rows.join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No data.</td></tr>`;
-    }
-    function rowBD(x, type) {
-        return `<tr class="border-b last:border-0">
-      <td class="py-2 pr-4">${x.name}</td>
-      <td class="py-2 pr-4">${type}</td>
-      <td class="py-2 pr-4">₹${fmt(x.amt || 0)}</td>
-      <td class="py-2 pr-4">₹${fmt(x.taxable || 0)}</td>
-      <td class="py-2 pr-4">${x.note || ''}</td>
-    </tr>`;
+            .concat((calc.earnings || []).map(x => rowBD(x, 'Earning')))
+            .concat((calc.deductions || []).map(x => rowBD({ ...x, taxable: 0 }, 'Deduction')));
+        document.getElementById('bdRows').innerHTML = rows.join('') ||
+            `<tr><td colspan="5" class="py-6 text-center text-slate-500">No data.</td></tr>`;
     }
 
-    // ---- History ----
+    function rowBD(x, type) {
+        return `<tr class="border-b last:border-0">
+    <td class="py-2 pr-4">${x.name}</td>
+    <td class="py-2 pr-4">${type}</td>
+    <td class="py-2 pr-4">₹${fmt(x.amt || 0)}</td>
+    <td class="py-2 pr-4">₹${fmt(x.taxable || 0)}</td>
+    <td class="py-2 pr-4">${x.note || ''}</td>
+  </tr>`;
+    }
+
+    /* ---- History ---- */
     function renderHistory() {
         const q = (document.getElementById('searchInput').value || '').toLowerCase();
-        const t = document.getElementById('typeFilter').value;
         const rows = HISTORY
             .filter(h => labelMonth(h.month).toLowerCase().includes(q))
             .slice().sort((a, b) => b.month.localeCompare(a.month));
         document.getElementById('histRows').innerHTML = rows.map(h => `
-      <tr class="border-b last:border-0">
-        <td class="py-2 pr-4">${labelMonth(h.month)}</td>
-        <td class="py-2 pr-4">₹${fmt(h.gross)}</td>
-        <td class="py-2 pr-4">₹${fmt(h.ded)}</td>
-        <td class="py-2 pr-4 font-medium">₹${fmt(h.net)}</td>
-        <td class="py-2 pr-4"><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">${h.status}</span></td>
-        <td class="py-2 pr-4">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('👀 Viewing ${labelMonth(h.month)} ()')">
-            <i class="fa-solid fa-eye mr-1"></i> View
-          </button>
-          <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="alert('📄 Downloading ${labelMonth(h.month)} ()')">
-            <i class="fa-solid fa-download mr-1"></i> PDF
-          </button>
-        </td>
-      </tr>`).join('');
+    <tr class="border-b last:border-0">
+      <td class="py-2 pr-4">${labelMonth(h.month)}</td>
+      <td class="py-2 pr-4">₹${fmt(h.gross)}</td>
+      <td class="py-2 pr-4">₹${fmt(h.ded)}</td>
+      <td class="py-2 pr-4 font-medium">₹${fmt(h.net)}</td>
+      <td class="py-2 pr-4"><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">${h.status}</span></td>
+      <td class="py-2 pr-4">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="printPayslip('${h.month}')">
+          <i class="fa-solid fa-eye mr-1"></i> View
+        </button>
+        <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="printPayslip('${h.month}', true)">
+          <i class="fa-solid fa-download mr-1"></i> PDF
+        </button>
+      </td>
+    </tr>`).join('');
     }
 
-    // ---- Charts ----
-    let _mixChart, _pieChart, _taxChart, _trendChart;
+    /* ---- Charts ---- */
     function drawMix() {
         const cyc = document.getElementById('cyclePicker').value;
-        const { gross = 0, ded = 0, net = 0 } = CYCLES[cyc] || {};
+        const regime = document.getElementById('regimePicker').value;
+        const calc = simulateCycle(cyc, regime);
         const ctx = document.getElementById('mixChart').getContext('2d');
         if (_mixChart) _mixChart.destroy();
         _mixChart = new Chart(ctx, {
             type: 'bar',
-            data: { labels: ['Gross', 'Deductions', 'Net'], datasets: [{ label: 'Amount (₹)', data: [gross, ded, net] }] },
+            data: { labels: ['Gross', 'Deductions', 'Net'], datasets: [{ label: 'Amount (₹)', data: [calc.sim.gross, calc.sim.ded, calc.sim.net] }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
         });
     }
+
     function drawPie() {
         const cyc = document.getElementById('cyclePicker').value;
-        const data = CYCLES[cyc] || { earnings: [], deductions: [] };
+        const regime = document.getElementById('regimePicker').value;
+        const calc = simulateCycle(cyc, regime);
         const comps = [
-            ...data.earnings?.map(e => ({ label: e.name, value: e.amt })) || [],
-            ...data.deductions?.map(d => ({ label: d.name, value: d.amt })) || []
+            ...(calc.earnings?.map(e => ({ label: e.name, value: e.amt })) || []),
+            ...(calc.deductions?.map(d => ({ label: d.name, value: d.amt })) || [])
         ];
         const ctx = document.getElementById('pieChart').getContext('2d');
         if (_pieChart) _pieChart.destroy();
@@ -420,27 +473,47 @@
             data: { labels: comps.map(c => c.label), datasets: [{ data: comps.map(c => c.value) }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '60%', animation: false }
         });
-        document.getElementById('compLegend').innerHTML =
-            comps.map(c => `<div class="flex items-center justify-between text-sm"><span>${c.label}</span><span>₹${fmt(c.value)}</span></div>`).join('');
+        // legend with click-to-highlight
+        const legend = comps.map((c, i) =>
+            `<button data-i="${i}" class="comp-row w-full text-left flex items-center justify-between text-sm px-2 py-1 rounded hover:bg-slate-50">
+      <span>${c.label}</span><span>₹${fmt(c.value)}</span>
+    </button>`).join('');
+        const el = document.getElementById('compLegend');
+        el.innerHTML = legend || '<div class="text-sm text-slate-600">No components.</div>';
+        el.querySelectorAll('.comp-row').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const i = Number(btn.dataset.i);
+                const meta = _pieChart.getDatasetMeta(0).data[i];
+                meta && (meta.$context.active = !meta.$context.active);
+                _pieChart.update();
+            });
+        });
     }
+
     function drawTax() {
         const cyc = document.getElementById('cyclePicker').value;
-        const d = (CYCLES[cyc]?.deductions) || [];
-        const tds = d.find(x => x.name === 'TDS')?.amt || 0, epf = d.find(x => x.name === 'EPF')?.amt || 0, other = (d.reduce((a, x) => a + x.amt, 0) - tds - epf);
+        const regime = document.getElementById('regimePicker').value;
+        const calc = simulateCycle(cyc, regime);
+        const d = calc.deductions || [];
+        const tds = d.find(x => x.name === 'TDS')?.amt || 0;
+        const epf = d.find(x => x.name === 'EPF')?.amt || 0;
+        const other = Math.max(0, d.reduce((a, x) => a + (x.amt || 0), 0) - tds - epf);
         const ctx = document.getElementById('taxChart').getContext('2d');
         if (_taxChart) _taxChart.destroy();
         _taxChart = new Chart(ctx, {
             type: 'pie',
-            data: { labels: ['TDS', 'EPF', 'Other'], datasets: [{ data: [tds, epf, other] }] },
+            data: { labels: ['TDS (sim)', 'EPF', 'Other'], datasets: [{ data: [tds, epf, other] }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, animation: false }
         });
     }
+
     function drawTrend() {
         const ctx = document.getElementById('trendChart').getContext('2d');
-        const labels = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => labelMonth(h.month));
-        const gross = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => h.gross);
-        const ded = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => h.ded);
-        const net = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month)).map(h => h.net);
+        const ordered = HISTORY.slice().sort((a, b) => a.month.localeCompare(b.month));
+        const labels = ordered.map(h => labelMonth(h.month));
+        const gross = ordered.map(h => h.gross);
+        const ded = ordered.map(h => h.ded);
+        const net = ordered.map(h => h.net);
         if (_trendChart) _trendChart.destroy();
         _trendChart = new Chart(ctx, {
             type: 'line',
@@ -455,7 +528,64 @@
         });
     }
 
-    // ---- Helpers ----
+    /* ---- Export CSV ---- */
+    function exportCsv() {
+        const cyc = document.getElementById('cyclePicker').value;
+        const regime = document.getElementById('regimePicker').value;
+        const calc = simulateCycle(cyc, regime);
+
+        const rows = [
+            ['Cycle', cyc], ['Regime', regime.toUpperCase()], [],
+            ['Component', 'Type', 'Amount', 'Taxable', 'Note'],
+            ...calc.earnings.map(e => [e.name, 'Earning', e.amt, e.taxable || 0, e.note || '']),
+            ...calc.deductions.map(d => [d.name, 'Deduction', d.amt, 0, d.note || '']),
+            [],
+            ['Gross', calc.sim.gross], ['Deductions', calc.sim.ded], ['Net', calc.sim.net], ['Taxable (sim)', calc.sim.taxable], ['TDS (sim)', calc.sim.tds]
+        ];
+
+        const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `pay-${cyc.replace(' ', '-')}.csv`; a.click(); URL.revokeObjectURL(url);
+    }
+
+    /* ---- Printable payslip (simple HTML → print) ---- */
+    function printPayslip(monthKey = null, download = false) {
+        const cyc = monthKey ? labelMonth(monthKey) : document.getElementById('cyclePicker').value;
+        const regime = document.getElementById('regimePicker').value;
+        const calc = simulateCycle(cyc, regime); // when monthKey used, this still works for Sep/Aug/Jul; for history others, it’s a basic sheet
+
+        const html = `
+  <html><head><title>Payslip - ${cyc}</title>
+    <style>
+      body{font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:24px;color:#0f172a;}
+      h1{font-size:18px;margin:0 0 4px} .muted{color:#64748b;font-size:12px}
+      table{width:100%;border-collapse:collapse;margin-top:16px}
+      th,td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:12px}
+      .right{text-align:right} .tot{font-weight:600}
+    </style>
+  </head><body>
+    <h1>Payslip — ${cyc}</h1>
+    <div class="muted">Regime (sim): ${regime.toUpperCase()} • Generated ${new Date().toLocaleString()}</div>
+    <table>
+      <thead><tr><th>Component</th><th>Type</th><th class="right">Amount (₹)</th><th class="right">Taxable (₹)</th></tr></thead>
+      <tbody>
+        ${(calc.earnings || []).map(e => `<tr><td>${e.name}</td><td>Earning</td><td class="right">${fmt(e.amt)}</td><td class="right">${fmt(e.taxable || 0)}</td></tr>`).join('')}
+        ${(calc.deductions || []).map(d => `<tr><td>${d.name}</td><td>Deduction</td><td class="right">${fmt(d.amt)}</td><td class="right">—</td></tr>`).join('')}
+        <tr><td class="tot">Gross</td><td></td><td class="right tot">₹${fmt(calc.sim.gross)}</td><td></td></tr>
+        <tr><td class="tot">Deductions</td><td></td><td class="right tot">₹${fmt(calc.sim.ded)}</td><td></td></tr>
+        <tr><td class="tot">Net Pay</td><td></td><td class="right tot">₹${fmt(calc.sim.net)}</td><td></td></tr>
+      </tbody>
+    </table>
+  </body></html>`;
+
+        const w = window.open('', '_blank'); if (!w) return;
+        w.document.open(); w.document.write(html); w.document.close();
+        w.focus(); w.print();
+        if (!download) return;
+    }
+
+    /* ---- Helpers ---- */
     function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
     function labelMonth(ym) { const [y, m] = ym.split('-'); return new Date(Number(y), Number(m) - 1, 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' }); }
 </script>

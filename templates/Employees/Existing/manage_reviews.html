@@ -9,10 +9,15 @@
             </h1>
             <p class="text-slate-600 text-sm">Schedule, conduct, and store structured employee reviews.</p>
         </div>
-        <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-            <i class="fa-solid fa-arrow-left mr-1"></i> Back
-        </a>
+        <div class="flex items-center gap-2">
+            <button id="exportCsv" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                <i class="fa-solid fa-file-arrow-down mr-1"></i> Export CSV
+            </button>
+            <a href="{{ url_for('dashboard') }}"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
     </div>
 
     <!-- Schedule (Dummy) -->
@@ -62,13 +67,17 @@
                 <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
                     <i class="fa-solid fa-plus mr-1"></i> Schedule
                 </button>
+                <button id="printAgenda" type="button"
+                    class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-sm">
+                    <i class="fa-solid fa-print mr-1"></i> Print agenda
+                </button>
                 <span id="schedMsg" class="text-sm text-slate-600"></span>
             </div>
         </form>
     </div>
 
     <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-7 gap-2">
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-8 gap-2">
         <input id="q" placeholder="Search employee/reviewer/notes…"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <select id="fType" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
@@ -89,12 +98,20 @@
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fTo" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fSort" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            <option value="date desc">Sort: Date ↓</option>
+            <option value="date asc">Sort: Date ↑</option>
+            <option value="employee asc">Employee A→Z</option>
+            <option value="reviewer asc">Reviewer A→Z</option>
+            <option value="status asc">Status</option>
+            <option value="rating desc">Rating ↓</option>
+        </select>
         <button id="clearFilters"
             class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
     </div>
 
     <!-- KPIs -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Upcoming</div>
             <div id="kpiUpcoming" class="text-xl font-semibold text-slate-800">0</div>
@@ -111,6 +128,10 @@
             <div class="text-xs text-slate-500">Overdue</div>
             <div id="kpiOverdue" class="text-xl font-semibold text-slate-800">0</div>
         </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+            <div class="text-xs text-slate-500"><i class="fa-solid fa-signal mr-1"></i> Rating mix</div>
+            <canvas id="ratingChart" height="40"></canvas>
+        </div>
     </div>
 
     <!-- Reviews Table -->
@@ -125,7 +146,7 @@
                     <th class="px-4 py-2">Date</th>
                     <th class="px-4 py-2">Status</th>
                     <th class="px-4 py-2">Rating</th>
-                    <th class="px-4 py-2 w-64">Actions</th>
+                    <th class="px-4 py-2 w-[22rem]">Actions</th>
                 </tr>
             </thead>
             <tbody id="rows" class="divide-y divide-slate-200"></tbody>
@@ -134,17 +155,24 @@
     <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
 </div>
 
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <script>
     /* -------- Dummy store (localStorage) -------- */
     const KEY = "dummy_reviews";
     let STORE = JSON.parse(localStorage.getItem(KEY) || "null") || [
         {
-            id: 1, employee: "E001 - Charan", reviewer: "U014 - Priya", type: "Quarterly", cycle: "2025-Q3", date: "2025-09-20", status: "Scheduled",
-            form: { goals: "Ship HRMS MVP", competencies: [], feedback: "", answers: [], overall: null, attachments: [] }, notes: "Focus on delivery"
+            id: 1, employee: "E001 - Charan", reviewer: "U014 - Priya", type: "Quarterly",
+            cycle: "2025-Q3", date: "2025-09-20", status: "Scheduled",
+            form: { goals: "Ship HRMS MVP", competencies: [], feedback: "", answers: [], overall: null, attachments: [] },
+            notes: "Focus on delivery"
         },
         {
-            id: 2, employee: "E009 - Arjun", reviewer: "U001 - Charan", type: "Annual", cycle: "2025", date: "2025-08-31", status: "Completed",
-            form: { goals: "Improve reliability", competencies: [], feedback: "Solid work on on-call.", answers: [{ q: "Quality", r: 4 }, { q: "Ownership", r: 5 }], overall: 4.5 }, rating: 4.5, notes: "Promote-ready?"
+            id: 2, employee: "E009 - Arjun", reviewer: "U001 - Charan", type: "Annual",
+            cycle: "2025", date: "2025-08-31", status: "Completed",
+            form: { goals: "Improve reliability", competencies: [], feedback: "Solid work on on-call.", answers: [{ q: "Quality", r: 4 }, { q: "Ownership", r: 5 }], overall: 4.5 },
+            rating: 4.5, notes: "Promote-ready?"
         }
     ];
     function persist() { localStorage.setItem(KEY, JSON.stringify(STORE)); }
@@ -152,9 +180,13 @@
     /* -------- Elements -------- */
     const rows = document.getElementById("rows"), listMsg = document.getElementById("listMsg");
     const schedForm = document.getElementById("schedForm"), schedMsg = document.getElementById("schedMsg");
-    const q = document.getElementById("q"), fType = document.getElementById("fType"), fStatus = document.getElementById("fStatus"), fReviewer = document.getElementById("fReviewer"), fFrom = document.getElementById("fFrom"), fTo = document.getElementById("fTo");
+    const q = document.getElementById("q"), fType = document.getElementById("fType"), fStatus = document.getElementById("fStatus"),
+        fReviewer = document.getElementById("fReviewer"), fFrom = document.getElementById("fFrom"), fTo = document.getElementById("fTo"),
+        fSort = document.getElementById("fSort");
     const clearFilters = document.getElementById("clearFilters");
-    const kpiUpcoming = document.getElementById("kpiUpcoming"), kpiCompleted = document.getElementById("kpiCompleted"), kpiAvg = document.getElementById("kpiAvg"), kpiOverdue = document.getElementById("kpiOverdue");
+    const kpiUpcoming = document.getElementById("kpiUpcoming"), kpiCompleted = document.getElementById("kpiCompleted"),
+        kpiAvg = document.getElementById("kpiAvg"), kpiOverdue = document.getElementById("kpiOverdue");
+    let _ratingChart;
 
     /* -------- Helpers -------- */
     function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2 align-top"; c.appendChild(el); return c; }
@@ -162,19 +194,26 @@
     function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 2; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
     function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
     function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
-    function withinDate(d) {
-        const v = new Date(d).setHours(0, 0, 0, 0);
-        const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null;
-        const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null;
-        if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true;
-    }
+    function withinDate(d) { const v = new Date(d).setHours(0, 0, 0, 0); const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null; const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null; if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true; }
     function avg(nums) { return nums.length ? (nums.reduce((a, b) => a + b, 0) / nums.length) : null; }
+    function pill(status) {
+        const m = {
+            "Scheduled": "bg-amber-50 text-amber-700", "In Progress": "bg-blue-50 text-blue-700",
+            "Completed": "bg-emerald-50 text-emerald-700", "Cancelled": "bg-slate-100 text-slate-700"
+        };
+        return `<span class="px-2 py-0.5 rounded-full text-xs ${m[status] || 'bg-slate-100 text-slate-700'}">${status}</span>`;
+    }
+    function starRating(value) {
+        const v = Number(value || 0);
+        const stars = [1, 2, 3, 4, 5].map(n => `<button data-v="${n}" class="star ${n <= v ? 'text-amber-500' : 'text-slate-300'}"><i class="fa-solid fa-star"></i></button>`).join('');
+        return `<div class="inline-flex items-center gap-1">${stars}<span class="ml-1 text-xs text-slate-600">${v ? v.toFixed(1) : ''}</span></div>`;
+    }
 
     /* -------- Filters -------- */
     function filtered() {
         const term = (q.value || "").toLowerCase().trim();
         const t = fType.value, st = fStatus.value, rv = (fReviewer.value || "").toLowerCase().trim();
-        return STORE.filter(r => {
+        let data = STORE.filter(r => {
             if (term && !(`${r.employee} ${r.reviewer} ${r.notes}`.toLowerCase().includes(term))) return false;
             if (t && r.type !== t) return false;
             if (st && r.status !== st) return false;
@@ -182,9 +221,21 @@
             if (!withinDate(r.date)) return false;
             return true;
         });
+        const [k, dir] = fSort.value.split(' ');
+        data = data.sort((a, b) => {
+            const mul = dir === 'desc' ? -1 : 1;
+            if (k === 'date') return mul * (a.date.localeCompare(b.date));
+            if (k === 'employee') return mul * (a.employee.localeCompare(b.employee));
+            if (k === 'reviewer') return mul * (a.reviewer.localeCompare(b.reviewer));
+            if (k === 'status') return mul * (a.status.localeCompare(b.status));
+            if (k === 'rating') return mul * ((a.rating || 0) - (b.rating || 0));
+            return 0;
+        });
+        if (k === 'date' && dir === 'desc') data.reverse(); // so "Date ↓" is newest first
+        return data;
     }
 
-    /* -------- KPIs -------- */
+    /* -------- KPIs & chart -------- */
     function updateKPIs() {
         const today = new Date().setHours(0, 0, 0, 0);
         const up = STORE.filter(r => r.status === "Scheduled" && new Date(r.date).setHours(0, 0, 0, 0) >= today).length;
@@ -192,13 +243,20 @@
         const ratings = STORE.filter(r => r.status === "Completed" && r.rating != null).map(r => Number(r.rating));
         const mean = avg(ratings);
         const overdue = STORE.filter(r => r.status !== "Completed" && new Date(r.date).setHours(0, 0, 0, 0) < today).length;
-        kpiUpcoming.textContent = String(up);
-        kpiCompleted.textContent = String(comp);
-        kpiAvg.textContent = (mean != null) ? mean.toFixed(2) : "—";
-        kpiOverdue.textContent = String(overdue);
+        kpiUpcoming.textContent = String(up); kpiCompleted.textContent = String(comp); kpiAvg.textContent = (mean != null) ? mean.toFixed(2) : "—"; kpiOverdue.textContent = String(overdue);
+
+        const buckets = [0, 0, 0, 0, 0]; // 1..5
+        ratings.forEach(r => { const i = Math.min(4, Math.max(0, Math.round(r) - 1)); buckets[i]++; });
+        const ctx = document.getElementById('ratingChart').getContext('2d');
+        _ratingChart && _ratingChart.destroy();
+        _ratingChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['★1', '★2', '★3', '★4', '★5'], datasets: [{ data: buckets }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+        });
     }
 
-    /* -------- Form Builder (inline) -------- */
+    /* -------- Form UI -------- */
     function buildFormUI(r, container) {
         container.innerHTML = "";
         const wrap = document.createElement("div");
@@ -215,12 +273,9 @@
         compBox.className = "rounded-lg border border-slate-200 p-3";
         compBox.innerHTML = '<div class="text-sm font-medium text-slate-700 mb-2"><i class="fa-solid fa-list-check mr-1"></i>Competencies</div>';
         const qWrap = document.createElement("div"); qWrap.className = "space-y-2";
-        const ensureDefault = () => {
-            if (!r.form.answers || !r.form.answers.length) {
-                r.form.answers = [{ q: "Quality of work", r: 3 }, { q: "Ownership", r: 3 }, { q: "Communication", r: 3 }];
-            }
-        };
-        ensureDefault();
+        if (!r.form.answers || !r.form.answers.length) {
+            r.form.answers = [{ q: "Quality of work", r: 3 }, { q: "Ownership", r: 3 }, { q: "Communication", r: 3 }];
+        }
         r.form.answers.forEach((a, idx) => {
             const row = document.createElement("div"); row.className = "grid grid-cols-12 gap-2 items-center";
             const qi = input(a.q, "col-span-8"); const ri = input(a.r, "col-span-3"); ri.type = "number"; ri.min = 1; ri.max = 5; ri.step = 1;
@@ -230,32 +285,46 @@
         });
         const addQ = document.createElement("button"); addQ.className = "mt-2 px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; addQ.innerHTML = '<i class="fa-solid fa-plus"></i> Add question';
         addQ.addEventListener("click", () => { r.form.answers.push({ q: "New competency", r: 3 }); buildFormUI(r, container); });
-        compBox.appendChild(qWrap); compBox.appendChild(addQ);
+        compBox.append(qWrap, addQ);
 
-        // Feedback + Overall
+        // Feedback + Overall (star widget)
         const fbBox = document.createElement("div"); fbBox.className = "rounded-lg border border-slate-200 p-3 md:col-span-2";
         fbBox.innerHTML = '<div class="text-sm font-medium text-slate-700 mb-2"><i class="fa-solid fa-pen mr-1"></i>Manager Feedback</div>';
         const fbI = textArea(r.form.feedback || ""); fbBox.appendChild(fbI);
 
         const overallBox = document.createElement("div"); overallBox.className = "rounded-lg border border-slate-200 p-3 md:col-span-2";
-        overallBox.innerHTML = '<div class="text-sm font-medium text-slate-700 mb-2"><i class="fa-solid fa-star mr-1"></i>Overall Rating (1–5)</div>';
-        const ovI = input(r.form.overall ?? ""); ovI.type = "number"; ovI.min = 1; ovI.max = 5; ovI.step = 0.1; overallBox.appendChild(ovI);
+        overallBox.innerHTML = '<div class="text-sm font-medium text-slate-700 mb-2"><i class="fa-solid fa-star mr-1"></i>Overall Rating</div>';
+        const starWrap = document.createElement("div"); starWrap.innerHTML = starRating(r.form.overall ?? 0);
+        overallBox.appendChild(starWrap);
 
         wrap.append(goalsBox, compBox, fbBox, overallBox);
         container.appendChild(wrap);
 
-        // Expose a save hook
+        // star events
+        starWrap.querySelectorAll('.star').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const v = Number(btn.getAttribute('data-v'));
+                r.form.overall = v; r.rating = v;
+                starWrap.innerHTML = starRating(v);
+                // rebind:
+                starWrap.querySelectorAll('.star').forEach(b => b.addEventListener('click', () => { /* no-op; kept simple */ }));
+            });
+        });
+
         container._readFormValues = () => {
             r.form.goals = goalsI.value;
             r.form.feedback = fbI.value;
-            r.form.overall = ovI.value ? Number(ovI.value) : null;
             // read answers
             const rows = qWrap.querySelectorAll(".grid");
             r.form.answers = Array.from(rows).map(row => {
                 const [qi, ri] = row.querySelectorAll("input");
                 return { q: qi.value.trim(), r: Math.min(5, Math.max(1, Number(ri.value || 3))) };
             });
-            r.rating = r.form.overall ?? avg(r.form.answers.map(a => a.r));
+            if (r.form.overall == null) {
+                r.rating = avg(r.form.answers.map(a => a.r));
+            } else {
+                r.rating = r.form.overall;
+            }
         };
     }
 
@@ -273,20 +342,28 @@
             const cycI = input(r.cycle || "", "w-28");
             const dateI = input(r.date, "w-32"); dateI.type = "date";
             const statusS = select(["Scheduled", "In Progress", "Completed", "Cancelled"], r.status);
+
+            const overdue = (r.status !== "Completed" && new Date(r.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0));
+            const stSpan = document.createElement("span");
+            stSpan.innerHTML = pill(r.status) + (overdue ? ' <span class="text-red-600 text-xs ml-1">• overdue</span>' : '');
+
             const rateS = document.createElement("span"); rateS.textContent = (r.rating != null) ? Number(r.rating).toFixed(2) : "—";
 
             const actions = document.createElement("div");
-            const detailsBtn = document.createElement("button"); detailsBtn.className = "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; detailsBtn.innerHTML = '<i class="fa-solid fa-caret-down mr-1"></i>Form';
-            const startBtn = document.createElement("button"); startBtn.className = "px-2 py-1 mr-2 rounded-md bg-indigo-600 text-white text-xs hover:bg-indigo-700"; startBtn.innerHTML = '<i class="fa-solid fa-play mr-1"></i>Start';
-            const completeBtn = document.createElement("button"); completeBtn.className = "px-2 py-1 mr-2 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700"; completeBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Complete';
-            const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
-            const delBtn = document.createElement("button"); delBtn.className = "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"; delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
-            actions.append(detailsBtn, startBtn, completeBtn, saveBtn, delBtn);
+            const detailsBtn = btn('border', '<i class="fa-solid fa-caret-down mr-1"></i>Form');
+            const startBtn = btn('primary', '<i class="fa-solid fa-play mr-1"></i>Start');
+            const doneBtn = btn('green', '<i class="fa-solid fa-check mr-1"></i>Complete');
+            const dupBtn = btn('border', '<i class="fa-solid fa-clone mr-1"></i>Duplicate');
+            const remindBtn = btn('border', '<i class="fa-solid fa-bell mr-1"></i>Remind');
+            const icsBtn = btn('border', '<i class="fa-solid fa-calendar-plus mr-1"></i>iCal');
+            const saveBtn = btn('dark', '<i class="fa-solid fa-floppy-disk mr-1"></i>Save');
+            const delBtn = btn('plain', '<i class="fa-solid fa-trash-can mr-1"></i>Delete');
+            actions.append(detailsBtn, startBtn, doneBtn, dupBtn, remindBtn, icsBtn, saveBtn, delBtn);
 
-            tr.append(td(empI), td(revI), td(typeS), td(cycI), td(dateI), td(statusS), td(rateS), td(actions));
+            tr.append(td(empI), td(revI), td(typeS), td(cycI), td(dateI), td(stSpan), td(rateS), td(actions));
             rows.appendChild(tr);
 
-            // details row with form
+            // details row
             const tr2 = document.createElement("tr");
             const td2 = document.createElement("td"); td2.colSpan = 8; td2.className = "px-4 pb-4";
             const det = document.createElement("details"); det.className = "rounded-xl border border-slate-200 bg-white p-4";
@@ -304,19 +381,32 @@
                 if (formWrap._readFormValues) formWrap._readFormValues();
                 r.notes = notesI.value;
                 persist(); load();
-                listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
-                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+                toast("Saved ✓", true);
             }
-            saveBtn.addEventListener("click", save);
             startBtn.addEventListener("click", () => { statusS.value = "In Progress"; save(); });
-            completeBtn.addEventListener("click", () => { if (formWrap._readFormValues) formWrap._readFormValues(); statusS.value = "Completed"; save(); });
+            doneBtn.addEventListener("click", () => { if (formWrap._readFormValues) formWrap._readFormValues(); statusS.value = "Completed"; save(); });
+            saveBtn.addEventListener("click", save);
             delBtn.addEventListener("click", () => { if (!confirm("Delete this review?")) return; STORE = STORE.filter(x => x !== r); persist(); load(); });
+            dupBtn.addEventListener("click", () => { const id = Math.max(0, ...STORE.map(x => x.id || 0)) + 1; const copy = JSON.parse(JSON.stringify(r)); copy.id = id; copy.status = "Scheduled"; copy.date = new Date().toISOString().slice(0, 10); STORE.unshift(copy); persist(); load(); toast("Duplicated ✓", true); });
+            remindBtn.addEventListener("click", () => alert('🔔 Reminder sent (demo)'));
+            icsBtn.addEventListener("click", () => downloadIcs(r));
         });
 
         listMsg.textContent = data.length ? "" : "No reviews.";
     }
 
-    /* -------- Scheduling (dummy) -------- */
+    function btn(kind, html) {
+        const map = {
+            border: "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50",
+            primary: "px-2 py-1 mr-2 rounded-md bg-indigo-600 text-white text-xs hover:bg-indigo-700",
+            green: "px-2 py-1 mr-2 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700",
+            dark: "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900",
+            plain: "px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50"
+        };
+        const b = document.createElement("button"); b.className = map[kind] || map.border; b.innerHTML = html; return b;
+    }
+
+    /* -------- Schedule (dummy) -------- */
     schedForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const fd = new FormData(schedForm);
@@ -337,9 +427,38 @@
         persist(); schedForm.reset(); flash(schedMsg, "Scheduled ✓"); load();
     });
 
+    /* -------- Actions: export / print / ICS -------- */
+    document.getElementById('exportCsv').addEventListener('click', () => {
+        const data = filtered();
+        const headers = ["id", "employee", "reviewer", "type", "cycle", "date", "status", "rating", "notes"];
+        const rows = [headers].concat(data.map(r => headers.map(h => r[h] ?? "")));
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'reviews.csv'; a.click(); URL.revokeObjectURL(url);
+    });
+    document.getElementById('printAgenda').addEventListener('click', () => window.print());
+
+    function downloadIcs(r) {
+        // simple, all-day event on given date
+        const dt = r.date.replace(/-/g, '');
+        const body = [
+            "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//HRMS Demo//EN", "BEGIN:VEVENT",
+            `UID:review-${r.id}@example.com`,
+            `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+            `DTSTART;VALUE=DATE:${dt}`, `DTEND;VALUE=DATE:${dt}`,
+            `SUMMARY:Review — ${r.employee} (${r.type})`,
+            `DESCRIPTION:Reviewer: ${r.reviewer}\\nCycle: ${r.cycle || ''}\\nNotes: ${r.notes || ''}`,
+            "END:VEVENT", "END:VCALENDAR"
+        ].join("\r\n");
+        const blob = new Blob([body], { type: 'text/calendar' }); const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `review-${r.id}.ics`; a.click(); URL.revokeObjectURL(url);
+    }
+
     /* -------- Live filters + init -------- */
-    [q, fType, fStatus, fReviewer, fFrom, fTo].forEach(el => el.addEventListener("input", load));
-    clearFilters.addEventListener("click", () => { q.value = ""; fType.value = ""; fStatus.value = ""; fReviewer.value = ""; fFrom.value = ""; fTo.value = ""; load(); });
+    [q, fType, fStatus, fReviewer, fFrom, fTo, fSort].forEach(el => el.addEventListener("input", load));
+    clearFilters.addEventListener("click", () => { q.value = ""; fType.value = ""; fStatus.value = ""; fReviewer.value = ""; fFrom.value = ""; fTo.value = ""; fSort.value = "date desc"; load(); });
+
+    function toast(msg, ok) { listMsg.textContent = msg; listMsg.className = "mt-3 text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200); }
 
     load();
 </script>

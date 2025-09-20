@@ -1,50 +1,52 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 py-4 sm:py-6 gap-4">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-user-check mr-2"></i> Attendance
             </h1>
-            <p class="text-slate-600 text-sm">Admin corrections and approvals.</p>
+            <p class="text-slate-600 text-sm mt-1">Admin corrections and approvals.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
             <i class="fa-solid fa-arrow-left mr-1"></i> Back
         </a>
     </div>
 
     <!-- Create/Correct (Dummy) -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 mb-8">
         <h2 class="text-lg font-semibold text-slate-800 mb-4">
             <i class="fa-solid fa-pen-to-square mr-2"></i> Log/Correct Attendance (Dummy)
         </h2>
-        <form id="corrForm" class="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <div class="md:col-span-2">
+        <form id="corrForm" class="grid grid-cols-1 sm:grid-cols-6 gap-4">
+            <div class="sm:col-span-2">
                 <label class="block text-sm text-slate-600 mb-1">Employee *</label>
-                <input name="employee" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                <input name="employee" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="e.g., E001 - Charan">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Date *</label>
-                <input name="date" type="date" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                <input name="date" type="date" required
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">In Time</label>
-                <input name="in_time" type="time" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                <input name="in_time" type="time" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Out Time</label>
-                <input name="out_time" type="time" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                <input name="out_time" type="time" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             </div>
-            <div class="md:col-span-3">
+            <div class="sm:col-span-3">
                 <label class="block text-sm text-slate-600 mb-1">Reason *</label>
-                <input name="reason" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                <input name="reason" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="Missed punch / shift swap / manual correction">
             </div>
-            <div class="md:col-span-3 flex items-center gap-3">
-                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+            <div class="sm:col-span-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"
+                    type="submit">
                     <i class="fa-solid fa-save mr-1"></i> Submit for Approval
                 </button>
                 <span id="corrMsg" class="text-sm text-slate-600"></span>
@@ -53,26 +55,26 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+    <div class="mb-4 grid grid-cols-1 sm:grid-cols-6 gap-2">
         <input id="qEmp" placeholder="Search employee…"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fTo" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fFrom" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fTo" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fStatus" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
             <option value="">All</option>
             <option>Pending</option>
             <option>Approved</option>
             <option>Rejected</option>
             <option>Corrected</option>
         </select>
-        <select id="fShift" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fShift" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
             <option value="">All Shifts</option>
             <option>General</option>
             <option>Morning</option>
             <option>Night</option>
         </select>
         <button id="clearFilters"
-            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
+            class="w-full rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
     </div>
 
     <!-- Pending/All Records Table -->
@@ -82,12 +84,12 @@
                 <tr>
                     <th class="px-4 py-2">Employee</th>
                     <th class="px-4 py-2">Date</th>
-                    <th class="px-4 py-2">In</th>
-                    <th class="px-4 py-2">Out</th>
-                    <th class="px-4 py-2">Shift</th>
-                    <th class="px-4 py-2">Reason</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">In</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">Out</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">Shift</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">Reason</th>
                     <th class="px-4 py-2">Status</th>
-                    <th class="px-4 py-2 w-64">Admin Note</th>
+                    <th class="px-4 py-2 hidden sm:table-cell w-48">Admin Note</th>
                     <th class="px-4 py-2 w-64">Actions</th>
                 </tr>
             </thead>
@@ -96,6 +98,50 @@
     </div>
     <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
 </div>
+
+<style>
+    @media (max-width: 640px) {
+        .max-w-7xl {
+            max-width: 100%;
+        }
+
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            font-size: 0.75rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem 0.75rem;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font-size: 0.875rem;
+        }
+
+        .w-24 {
+            width: 5rem;
+        }
+
+        .w-32 {
+            width: 7rem;
+        }
+
+        .w-48 {
+            width: 9rem;
+        }
+
+        .w-64 {
+            width: 12rem;
+        }
+    }
+</style>
 
 <script>
     /* -------- Dummy in-browser store (localStorage) -------- */
@@ -125,7 +171,7 @@
     function input(v, cls = "w-24") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
     function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 1; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
     function select(opts, cur) {
-        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm";
+        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm w-24";
         opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o || "—"; if (o === cur) op.selected = true; s.appendChild(op); }); return s;
     }
     function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
@@ -185,8 +231,15 @@
             actions.append(approveBtn, rejectBtn, saveBtn, delBtn);
 
             tr.append(
-                td(empI), td(dateI), td(inI), td(outI),
-                td(shiftS), td(reasonI), td(statusS), td(noteT), td(actions)
+                td(empI),
+                td(dateI),
+                td(inI).classList.add('hidden', 'sm:table-cell'),
+                td(outI).classList.add('hidden', 'sm:table-cell'),
+                td(shiftS).classList.add('hidden', 'sm:table-cell'),
+                td(reasonI).classList.add('hidden', 'sm:table-cell'),
+                td(statusS),
+                td(noteT).classList.add('hidden', 'sm:table-cell'),
+                td(actions)
             );
             rows.appendChild(tr);
 
@@ -235,7 +288,7 @@
         const in_time = (fd.get("in_time") || "").toString();
         const out_time = (fd.get("out_time") || "").toString();
         const reason = (fd.get("reason") || "").toString().trim();
-        if (!employee || !date || !reason) { flash(corrMsg, "Missing required fields.", true); return; }
+        if (!employee || !date || !reason) { flash(corrMsg, "Missing required fields.", false); return; }
         const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
         STORE.unshift({ id, employee, date, in_time, out_time, shift: "General", reason, status: "Pending", admin_note: "", created_at: new Date().toISOString() });
         persist(); corrForm.reset(); flash(corrMsg, "Submitted ✓"); load();

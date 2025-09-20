@@ -7,7 +7,7 @@
             <h1 class="text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-business-time mr-2"></i> Time tracking
             </h1>
-            <p class="text-slate-600 text-sm">Monitor hours/shifts/productivity.</p>
+            <p class="text-slate-600 text-sm">Monitor hours, shifts & productivity. Local-only demo.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
             class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
@@ -15,12 +15,31 @@
         </a>
     </div>
 
-    <!-- Manual Entry (Dummy) -->
+    <!-- Manual Entry -->
     <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">
-            <i class="fa-solid fa-clipboard-list mr-2"></i> Add Manual Entry (Dummy)
-        </h2>
-        <form id="entryForm" class="grid grid-cols-1 md:grid-cols-8 gap-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800">
+                <i class="fa-solid fa-clipboard-list mr-2"></i> Add Manual Entry (Dummy)
+            </h2>
+            <div class="flex items-center gap-2">
+                <label class="text-sm text-slate-600">Rounding</label>
+                <select id="roundMode" class="rounded-lg border border-slate-300 px-2 py-1 text-sm">
+                    <option value="none">None</option>
+                    <option value="15">Nearest 15 min</option>
+                </select>
+                <button id="exportCsv"
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                    <i class="fa-solid fa-file-arrow-down mr-1"></i> Export CSV
+                </button>
+                <label
+                    class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50 cursor-pointer">
+                    <i class="fa-solid fa-file-arrow-up mr-1"></i> Import CSV
+                    <input id="importCsv" type="file" accept=".csv" class="hidden">
+                </label>
+            </div>
+        </div>
+
+        <form id="entryForm" class="grid grid-cols-1 md:grid-cols-8 gap-4 mt-4">
             <div class="md:col-span-2">
                 <label class="block text-sm text-slate-600 mb-1">Employee *</label>
                 <input name="employee" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
@@ -70,8 +89,8 @@
         </form>
     </div>
 
-    <!-- Filters + Metrics -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+    <!-- Filters -->
+    <div class="mb-4 grid grid-cols-1 md:grid-cols-7 gap-2">
         <input id="qEmp" placeholder="Search employee / project…"
             class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
@@ -90,9 +109,17 @@
             <option>Approved</option>
             <option>Rejected</option>
         </select>
+        <div class="flex items-center gap-2">
+            <button id="bulkApprove"
+                class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-700">Approve</button>
+            <button id="bulkReject"
+                class="px-3 py-2 rounded-lg bg-rose-600 text-white text-sm hover:bg-rose-700">Reject</button>
+            <button id="bulkDelete"
+                class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Delete</button>
+        </div>
     </div>
 
-    <!-- KPI Chips -->
+    <!-- KPIs -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Total Hours</div>
@@ -117,6 +144,7 @@
         <table class="min-w-full text-sm text-left text-slate-700">
             <thead class="bg-slate-50 text-slate-600">
                 <tr>
+                    <th class="px-4 py-2 w-10"><input id="chkAll" type="checkbox"></th>
                     <th class="px-4 py-2">Employee</th>
                     <th class="px-4 py-2">Date</th>
                     <th class="px-4 py-2">In</th>
@@ -131,12 +159,30 @@
                 </tr>
             </thead>
             <tbody id="rows" class="divide-y divide-slate-200"></tbody>
+            <tfoot class="bg-slate-50">
+                <tr>
+                    <td class="px-4 py-2"></td>
+                    <td class="px-4 py-2 font-medium" colspan="4">Totals (filtered)</td>
+                    <td class="px-4 py-2" id="tfBreak">—</td>
+                    <td class="px-4 py-2" id="tfHours">—</td>
+                    <td class="px-4 py-2" colspan="5"></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
-    <div class="mt-2 text-xs text-slate-500">*Productivity is a simple dummy score = (approved hours / total hours) ×
-        100.</div>
+    <div class="mt-2 text-xs text-slate-500">*Productivity = (approved hours / total hours) × 100.</div>
     <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
+
+    <!-- Weekly summary -->
+    <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 class="text-lg font-semibold text-slate-800 mb-3"><i class="fa-solid fa-chart-column mr-2"></i> Last 7 days
+        </h3>
+        <canvas id="wkChart" height="140"></canvas>
+    </div>
 </div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
     /* ---------- Dummy store (localStorage) ---------- */
@@ -153,6 +199,9 @@
     const listMsg = document.getElementById("listMsg");
     const entryForm = document.getElementById("entryForm");
     const entryMsg = document.getElementById("entryMsg");
+    const roundMode = document.getElementById("roundMode");
+    const exportCsvBtn = document.getElementById("exportCsv");
+    const importCsvInp = document.getElementById("importCsv");
 
     const qEmp = document.getElementById("qEmp");
     const fFrom = document.getElementById("fFrom");
@@ -166,22 +215,54 @@
     const kpiOT = document.getElementById("kpiOT");
     const kpiProd = document.getElementById("kpiProd");
 
+    const chkAll = document.getElementById("chkAll");
+    const bulkApprove = document.getElementById("bulkApprove");
+    const bulkReject = document.getElementById("bulkReject");
+    const bulkDelete = document.getElementById("bulkDelete");
+
+    const tfBreak = document.getElementById("tfBreak");
+    const tfHours = document.getElementById("tfHours");
+
+    let _wkChart;
+
     /* ---------- Helpers ---------- */
     function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2"; c.appendChild(el); return c; }
     function input(v, cls = "w-28") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
     function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 1; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
     function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
     function minutes(hhmm) { if (!hhmm) return null; const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; }
+    function pad2(n) { return String(n).padStart(2, "0"); }
+    function hhmmFromMin(m) { m = ((m % (24 * 60)) + (24 * 60)) % (24 * 60); return `${pad2(Math.floor(m / 60))}:${pad2(m % 60)}`; }
     function hoursStr(min) { return (min / 60).toFixed(1) + " h"; }
+    function roundMin(min, mode) { if (mode !== "15") return min; const q = 15; return Math.round(min / q) * q; }
     function workMinutes(r) {
-        const inM = minutes(r.in_time), outM = minutes(r.out_time);
+        let inM = minutes(r.in_time), outM = minutes(r.out_time);
         if (inM == null || outM == null) return 0;
-        // handle overnight
-        let diff = outM - inM; if (diff < 0) diff += 24 * 60;
+        let diff = outM - inM; if (diff < 0) diff += 24 * 60; // overnight
         const br = Number(r.break_min || 0);
-        return Math.max(0, diff - br);
+        const rounded = roundMin(Math.max(0, diff - br), roundMode.value);
+        return rounded;
     }
     function flash(el, msg, ok = true) { el.textContent = msg; el.className = "text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { el.textContent = ""; el.className = "text-sm text-slate-600"; }, 1500); }
+    function statusPill(st) { const m = { Logged: 'bg-amber-50 text-amber-700', Approved: 'bg-emerald-50 text-emerald-700', Rejected: 'bg-rose-50 text-rose-700' }; return `<span class="px-2 py-0.5 rounded-full text-xs ${m[st] || 'bg-slate-100 text-slate-700'}">${st}</span>`; }
+
+    /* ---- Overlap detection (same employee+date) ---- */
+    function overlaps(entry, others) {
+        const aStart = minutes(entry.in_time);
+        let aEnd = minutes(entry.out_time);
+        if (aStart == null || aEnd == null) return false;
+        if (aEnd <= aStart) aEnd += 24 * 60; // overnight segment
+        for (const o of others) {
+            if (o.id === entry.id) continue;
+            if (o.employee !== entry.employee || o.date !== entry.date) continue;
+            let bStart = minutes(o.in_time), bEnd = minutes(o.out_time);
+            if (bStart == null || bEnd == null) continue;
+            if (bEnd <= bStart) bEnd += 24 * 60;
+            // simple overlap check ignoring break
+            if (Math.max(aStart, bStart) < Math.min(aEnd, bEnd)) return true;
+        }
+        return false;
+    }
 
     /* ---------- Filtering ---------- */
     function withinDate(d) {
@@ -204,15 +285,15 @@
         });
     }
 
-    /* ---------- KPIs ---------- */
+    /* ---------- KPIs + footer totals ---------- */
     function updateKPIs(data) {
-        if (!data.length) { kpiTotal.textContent = "0.0 h"; kpiAvg.textContent = "0.0 h"; kpiOT.textContent = "0.0 h"; kpiProd.textContent = "—"; return; }
+        if (!data.length) { kpiTotal.textContent = "0.0 h"; kpiAvg.textContent = "0.0 h"; kpiOT.textContent = "0.0 h"; kpiProd.textContent = "—"; tfBreak.textContent = "—"; tfHours.textContent = "—"; return; }
         const mins = data.map(workMinutes);
         const sum = mins.reduce((a, b) => a + b, 0);
-        const perDayMap = {};
-        data.forEach(r => { perDayMap[r.date] = (perDayMap[r.date] || 0) + workMinutes(r); });
-        const days = Object.keys(perDayMap).length || 1;
-        const ot = mins.reduce((a, b) => a + Math.max(0, b - 480), 0); // >8h
+        const perDay = {}; const breaks = data.map(r => Number(r.break_min || 0)).reduce((a, b) => a + b, 0);
+        data.forEach(r => { perDay[r.date] = (perDay[r.date] || 0) + workMinutes(r); });
+        const days = Object.keys(perDay).length || 1;
+        const ot = mins.reduce((a, b) => a + Math.max(0, b - 480), 0);
         const approvedMin = data.filter(r => r.status === "Approved").map(workMinutes).reduce((a, b) => a + b, 0);
         const prod = sum ? Math.round((approvedMin / sum) * 100) : 0;
 
@@ -220,28 +301,60 @@
         kpiAvg.textContent = hoursStr(sum / days);
         kpiOT.textContent = hoursStr(ot);
         kpiProd.textContent = prod + " %";
+
+        tfBreak.textContent = breaks + " min";
+        tfHours.textContent = hoursStr(sum);
     }
 
-    /* ---------- Render ---------- */
+    /* ---------- Weekly chart ---------- */
+    function drawWeekChart(data) {
+        const map = {}; // date => min
+        const today = new Date(); for (let i = 6; i >= 0; i--) { const d = new Date(today); d.setDate(d.getDate() - i); map[d.toISOString().slice(0, 10)] = 0; }
+        data.forEach(r => { if (map[r.date] != null) map[r.date] += workMinutes(r); });
+        const labels = Object.keys(map);
+        const mins = Object.values(map).map(m => +(m / 60).toFixed(2));
+        const ctx = document.getElementById('wkChart').getContext('2d');
+        if (_wkChart) _wkChart.destroy();
+        _wkChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Hours', data: mins }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+    }
+
+    /* ---------- Render table ---------- */
     function load() {
         rows.innerHTML = "";
         const data = filtered();
         updateKPIs(data);
+        drawWeekChart(STORE);
+
+        const selectedIds = new Set();
 
         data.forEach(r => {
             const tr = document.createElement("tr");
 
+            const cb = document.createElement("input"); cb.type = "checkbox"; cb.addEventListener('change', () => { cb.checked ? selectedIds.add(r.id) : selectedIds.delete(r.id); });
             const empI = input(r.employee, "w-48");
             const dateI = input(r.date, "w-32"); dateI.type = "date";
             const inI = input(r.in_time || "", "w-24"); inI.type = "time";
             const outI = input(r.out_time || "", "w-24"); outI.type = "time";
             const brI = input(r.break_min ?? 0, "w-20"); brI.type = "number"; brI.min = 0;
-            const hrs = document.createElement("span"); hrs.textContent = hoursStr(workMinutes(r));
+            const hrs = document.createElement("div");
             const projI = input(r.project || "", "w-48");
             const shiftS = select(["General", "Morning", "Night"], r.shift || "General");
             const statusS = select(["Logged", "Approved", "Rejected"], r.status || "Logged");
             const notesT = textArea(r.notes || "");
 
+            // lock approved row fields except notes
+            const locked = r.status === "Approved";
+            [empI, dateI, inI, outI, brI, projI, shiftS, statusS].forEach(el => { el.disabled = locked; el.classList.toggle('opacity-70', locked); });
+
+            // hours & warnings
+            function refreshComputed() {
+                // warnings: overlap, >12h
+                const mins = workMinutes(r);
+                hrs.innerHTML = `<span>${hoursStr(mins)}</span>` + ((mins > 12 * 60) ? ` <span title=">12h shift" class="ml-1 text-rose-600">⚠︎</span>` : "") + (overlaps(r, STORE) ? ` <span title="Overlapping with another entry" class="ml-1 text-amber-600">⚠︎</span>` : "");
+            }
+            refreshComputed();
+
+            // actions
             const actions = document.createElement("div");
             const approveBtn = document.createElement("button");
             approveBtn.className = "px-2 py-1 mr-2 rounded-md bg-emerald-600 text-white text-xs hover:bg-emerald-700";
@@ -257,8 +370,16 @@
             delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
             actions.append(approveBtn, rejectBtn, saveBtn, delBtn);
 
-            tr.append(td(empI), td(dateI), td(inI), td(outI), td(brI), td(hrs),
-                td(projI), td(shiftS), td(statusS), td(notesT), td(actions));
+            // status pill
+            const stSpan = document.createElement("span");
+            stSpan.innerHTML = statusPill(r.status || "Logged");
+
+            tr.append(
+                td(cb),
+                td(empI), td(dateI), td(inI), td(outI), td(brI),
+                td(hrs), td(projI), td(shiftS),
+                td(stSpan), td(notesT), td(actions)
+            );
             rows.appendChild(tr);
 
             function recalcAndSave() {
@@ -269,28 +390,42 @@
                 r.break_min = Number(brI.value || 0);
                 r.project = projI.value.trim();
                 r.shift = shiftS.value;
-                r.status = statusS.value;
+                // keep current status
                 r.notes = notesT.value;
                 persist();
-                hrs.textContent = hoursStr(workMinutes(r));
+                refreshComputed();
+                stSpan.innerHTML = statusPill(r.status);
                 updateKPIs(filtered());
                 listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
-                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
+                setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1000);
             }
 
             saveBtn.addEventListener("click", recalcAndSave);
-            approveBtn.addEventListener("click", () => { statusS.value = "Approved"; recalcAndSave(); });
-            rejectBtn.addEventListener("click", () => { statusS.value = "Rejected"; recalcAndSave(); });
-            delBtn.addEventListener("click", () => {
-                if (!confirm("Delete this entry?")) return;
-                STORE = STORE.filter(x => x.id !== r.id); persist(); load();
-            });
+            approveBtn.addEventListener("click", () => { r.status = "Approved"; persist(); load(); });
+            rejectBtn.addEventListener("click", () => { r.status = "Rejected"; persist(); load(); });
+            delBtn.addEventListener("click", () => { if (!confirm("Delete this entry?")) return; STORE = STORE.filter(x => x.id !== r.id); persist(); load(); });
+
+            // live recompute when editing fields
+            [empI, dateI, inI, outI, brI, projI, shiftS, notesT].forEach(el => el.addEventListener('input', refreshComputed));
+
+            // bulk hooks
+            chkAll.addEventListener('change', () => { cb.checked = chkAll.checked; if (cb.checked) selectedIds.add(r.id); else selectedIds.delete(r.id); });
+            bulkApprove.onclick = () => { if (!selectedIds.size) return; STORE.forEach(x => { if (selectedIds.has(x.id)) x.status = "Approved"; }); persist(); load(); };
+            bulkReject.onclick = () => { if (!selectedIds.size) return; STORE.forEach(x => { if (selectedIds.has(x.id)) x.status = "Rejected"; }); persist(); load(); };
+            bulkDelete.onclick = () => { if (!selectedIds.size) return; if (!confirm("Delete selected entries?")) return; STORE = STORE.filter(x => !selectedIds.has(x.id)); persist(); load(); };
         });
+
+        // footer totals (already computed in updateKPIs)
+        const d = filtered();
+        const totalBreak = d.map(r => Number(r.break_min || 0)).reduce((a, b) => a + b, 0);
+        const totalMin = d.map(workMinutes).reduce((a, b) => a + b, 0);
+        tfBreak.textContent = totalBreak + " min";
+        tfHours.textContent = hoursStr(totalMin);
 
         listMsg.textContent = data.length ? "" : "No entries.";
     }
 
-    /* ---------- Create (dummy) ---------- */
+    /* ---------- Create ---------- */
     entryForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const fd = new FormData(entryForm);
@@ -303,14 +438,61 @@
         const project = (fd.get("project") || "").toString().trim();
         const notes = (fd.get("notes") || "").toString().trim();
 
-        if (!employee || !date || !in_time || !out_time) { flash(entryMsg, "Missing required fields.", true); return; }
+        if (!employee || !date || !in_time || !out_time) { flash(entryMsg, "Missing required fields.", false); return; }
+
+        // cheap overlap hint
+        const draft = { id: -1, employee, date, in_time, out_time };
+        if (overlaps(draft, STORE.filter(x => x.employee === employee && x.date === date))) { flash(entryMsg, "Warning: overlaps another entry", false); }
+
         const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
         STORE.unshift({ id, employee, date, in_time, out_time, break_min, project, shift, status: "Logged", notes });
-        persist(); entryForm.reset(); flash(entryMsg, "Entry added ✓"); load();
+        persist(); entryForm.reset(); flash(entryMsg, "Entry added ✓", true); load();
     });
 
-    /* ---------- Live filtering ---------- */
-    [qEmp, fFrom, fTo, fProject, fShift, fStatus].forEach(el => el.addEventListener("input", load));
+    /* ---------- CSV export/import ---------- */
+    exportCsvBtn.addEventListener('click', () => {
+        const cols = ["id", "employee", "date", "in_time", "out_time", "break_min", "project", "shift", "status", "notes"];
+        const lines = [cols.join(",")].concat(STORE.map(r => cols.map(k => {
+            const v = (r[k] ?? "").toString().replaceAll('"', '""');
+            return /[",\n]/.test(v) ? `"${v}"` : v;
+        }).join(",")));
+        const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = "time_entries.csv"; a.click(); URL.revokeObjectURL(url);
+    });
+    importCsvInp.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0]; if (!file) return;
+        const text = await file.text();
+        const [header, ...rowsCsv] = text.split(/\r?\n/).filter(Boolean);
+        const cols = header.split(",");
+        const idx = (k) => cols.indexOf(k);
+        const incoming = rowsCsv.map(line => {
+            // naive CSV parse for demo (handles quoted commas)
+            const parts = []; let cur = ""; let q = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (ch == '"') { if (q && line[i + 1] == '"') { cur += '"'; i++; } else { q = !q; } }
+                else if (ch == "," && !q) { parts.push(cur); cur = ""; }
+                else cur += ch;
+            }
+            parts.push(cur);
+            const row = {};
+            ["id", "employee", "date", "in_time", "out_time", "break_min", "project", "shift", "status", "notes"].forEach(k => {
+                const v = parts[idx(k)];
+                row[k] = k === "break_min" ? Number(v || 0) : (k === "id" ? Number(v || 0) : v || "");
+            });
+            if (!row.id) row.id = Math.max(0, ...STORE.map(x => x.id)) + 1;
+            return row;
+        });
+        // merge by id (replace if same id)
+        const map = new Map(STORE.map(x => [x.id, x]));
+        incoming.forEach(r => map.set(r.id, r));
+        STORE = Array.from(map.values()).sort((a, b) => b.id - a.id);
+        persist(); load(); flash(entryMsg, "CSV imported ✓", true);
+        importCsvInp.value = "";
+    });
+
+    /* ---------- Live filtering & settings ---------- */
+    [qEmp, fFrom, fTo, fProject, fShift, fStatus, roundMode].forEach(el => el.addEventListener("input", load));
 
     /* ---------- Init ---------- */
     load();

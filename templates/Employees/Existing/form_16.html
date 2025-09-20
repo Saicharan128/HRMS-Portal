@@ -18,6 +18,10 @@
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-envelope mr-1"></i> Email to me
             </button>
+            <button id="exportCsvBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+            </button>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
@@ -65,9 +69,19 @@
                         </select>
                     </div>
                     <div class="rounded-lg bg-slate-50 p-3 text-sm">
-                        <div><b>PAN:</b> ABCDE1234F</div>
-                        <div><b>Employer TAN:</b> BLRE01234A</div>
-                        <div><b>Regime:</b> New (FY25)</div>
+                        <div><b>PAN:</b> <span id="panVal">ABCDE1234F</span>
+                            <button class="ml-2 text-slate-500 hover:text-slate-700 text-xs underline"
+                                id="copyPan">copy</button>
+                        </div>
+                        <div><b>Employer TAN:</b> <span id="tanVal">BLRE01234A</span>
+                            <button class="ml-2 text-slate-500 hover:text-slate-700 text-xs underline"
+                                id="copyTan">copy</button>
+                        </div>
+                        <div><b>Regime:</b> <span id="regimeVal">New (FY25)</span></div>
+                    </div>
+                    <div class="rounded-lg bg-slate-50 p-3 text-xs">
+                        <div><b>PDF Password:</b> PAN (uppercase) + DOB in DDMMYYYY. <button id="copyPwd"
+                                class="underline">copy hint</button></div>
                     </div>
                     <div class="flex items-center gap-2">
                         <button id="downloadA"
@@ -117,13 +131,19 @@
                     <i class="fa-solid fa-file-lines mr-2"></i> Form 16 Certificates
                 </h3>
                 <div class="flex items-center gap-2">
-                    <input id="searchInput" type="text" placeholder="Search FY or note..."
+                    <input id="searchInput" type="text" placeholder="Search FY, part or note..."
                         class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
                     <select id="statusFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
                         <option value="available">Available</option>
                         <option value="processing">Processing</option>
                         <option value="regenerate">Regenerate</option>
+                    </select>
+                    <select id="fyFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                        <option value="all">All FYs</option>
+                        <option>2024-25</option>
+                        <option>2023-24</option>
+                        <option>2022-23</option>
                     </select>
                 </div>
             </div>
@@ -143,6 +163,7 @@
                     <tbody id="formRows" class="text-slate-800"></tbody>
                 </table>
             </div>
+            <div id="formsInfo" class="pt-3 text-sm text-slate-600"></div>
         </div>
     </section>
 
@@ -184,11 +205,11 @@
                 <div class="space-y-3 text-sm text-slate-700">
                     <details class="rounded-lg bg-slate-50 p-3">
                         <summary class="font-medium cursor-pointer">What is Form 16?</summary>
-                        <p class="mt-2">Certificate of TDS on salary issued by employer (Part A & Part B).</p>
+                        <p class="mt-2">Certificate of TDS on salary issued by employer (Part A &amp; Part B).</p>
                     </details>
                     <details class="rounded-lg bg-slate-50 p-3">
                         <summary class="font-medium cursor-pointer">How to open the PDF?</summary>
-                        <p class="mt-2">Password is your PAN in uppercase followed by DOB in DDMMYYYY ().</p>
+                        <p class="mt-2">Password is your PAN in uppercase followed by DOB in DDMMYYYY.</p>
                     </details>
                     <details class="rounded-lg bg-slate-50 p-3">
                         <summary class="font-medium cursor-pointer">Mismatch in TDS?</summary>
@@ -255,8 +276,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Dummy Data ----
-    const FORMS = [
+    /* --------- Persistence --------- */
+    const K_FORMS = "f16_forms";
+    const K_REQS = "f16_requests";
+    const K_ACT = "f16_activity";
+
+    let FORMS = JSON.parse(localStorage.getItem(K_FORMS) || "null") || [
         { id: 1, fy: '2024-25', part: 'A', tds: 142000, net: 1184000, status: 'available', note: 'Signed on 10 Jun 2025' },
         { id: 2, fy: '2024-25', part: 'B', tds: 142000, net: 1184000, status: 'available', note: '' },
         { id: 3, fy: '2023-24', part: 'A', tds: 126500, net: 1099000, status: 'available', note: '' },
@@ -264,162 +289,239 @@
         { id: 5, fy: '2022-23', part: 'A', tds: 98000, net: 930000, status: 'regenerate', note: 'Mismatch reported' },
         { id: 6, fy: '2022-23', part: 'B', tds: 98000, net: 930000, status: 'processing', note: 'Re-gen in progress' }
     ];
-    const REQUESTS = [
+    let REQUESTS = JSON.parse(localStorage.getItem(K_REQS) || "null") || [
         { ts: '2025-09-11 16:40', fy: '2022-23', reason: 'Name update', status: 'Processing' },
         { ts: '2025-07-02 10:15', fy: '2023-24', reason: 'PAN masked PDF', status: 'Resolved' }
     ];
-    const ACTIVITY = [
+    let ACTIVITY = JSON.parse(localStorage.getItem(K_ACT) || "null") || [
         { ts: '2025-09-12 09:20', text: 'Downloaded Part B (FY 2024-25).' },
         { ts: '2025-06-10 12:05', text: 'Form 16 (FY 2024-25) published.' }
     ];
+    function persist() { localStorage.setItem(K_FORMS, JSON.stringify(FORMS)); localStorage.setItem(K_REQS, JSON.stringify(REQUESTS)); localStorage.setItem(K_ACT, JSON.stringify(ACTIVITY)); }
 
-    // ---- Panels/Tabs ----
+    /* --------- Tabs --------- */
     const panels = {
         overview: document.getElementById('overviewPanel'),
         forms: document.getElementById('formsPanel'),
         requests: document.getElementById('requestsPanel'),
         help: document.getElementById('helpPanel')
     };
-
-    document.addEventListener('DOMContentLoaded', () => {
-        setupTabs();
-        wireButtons();
-        renderOverview();
-        renderActivity();
-        renderForms();
-        renderRequests();
-        drawTdsQuarter();
+    document.querySelectorAll('.f16-tab').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.f16-tab').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            const name = e.currentTarget.id.replace('Tab', '');
+            Object.values(panels).forEach(p => p.classList.add('hidden'));
+            panels[name].classList.remove('hidden');
+            if (name === 'overview') { drawTdsQuarter(true); }
+        });
     });
 
-    function setupTabs() {
-        document.querySelectorAll('.f16-tab').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.f16-tab').forEach(b => b.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                const name = e.currentTarget.id.replace('Tab', '');
-                Object.values(panels).forEach(p => p.classList.add('hidden'));
-                panels[name].classList.remove('hidden');
-            });
-        });
-    }
+    /* --------- Wire Buttons --------- */
+    document.getElementById('downloadA').addEventListener('click', () => singleDownload('A'));
+    document.getElementById('downloadB').addEventListener('click', () => singleDownload('B'));
+    document.getElementById('emailBtn').addEventListener('click', emailSelected);
+    document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+    document.getElementById('refreshBtn').addEventListener('click', renderActivity);
+    document.getElementById('downloadSelectedBtn').addEventListener('click', bulkDownload);
+    document.getElementById('searchInput').addEventListener('input', renderForms);
+    document.getElementById('statusFilter').addEventListener('change', renderForms);
+    document.getElementById('fyFilter').addEventListener('change', renderForms);
+    document.getElementById('selectAll').addEventListener('change', e => {
+        document.querySelectorAll('.rowCheck').forEach(c => c.checked = e.target.checked);
+    });
+    document.getElementById('newReqBtn').addEventListener('click', openReqModal);
+    document.getElementById('closeReqModal').addEventListener('click', closeReqModal);
+    document.getElementById('cancelReq').addEventListener('click', closeReqModal);
+    document.getElementById('saveReq').addEventListener('click', saveRequest);
+    document.getElementById('fyPicker').addEventListener('change', () => { renderOverview(); drawTdsQuarter(true); });
+    document.getElementById('contactBtn').addEventListener('click', () => toast('📬 Opening support ticket (demo)'));
+    document.getElementById('copyPan').addEventListener('click', () => copyText('ABCDE1234F', 'PAN copied'));
+    document.getElementById('copyTan').addEventListener('click', () => copyText('BLRE01234A', 'TAN copied'));
+    document.getElementById('copyPwd').addEventListener('click', () => copyText('PAN(UPPERCASE)+DDMMYYYY', 'Password hint copied'));
 
-    // ---- Buttons ----
-    function wireButtons() {
-        document.getElementById('downloadA').addEventListener('click', () => alert('📄 Downloading Part A ()'));
-        document.getElementById('downloadB').addEventListener('click', () => alert('📄 Downloading Part B ()'));
-        document.getElementById('emailBtn').addEventListener('click', () => alert('✉️ Sent to your email ()'));
-        document.getElementById('refreshBtn').addEventListener('click', renderActivity);
-        document.getElementById('downloadSelectedBtn').addEventListener('click', () => {
-            const ids = Array.from(document.querySelectorAll('.rowCheck:checked')).map(c => Number(c.value));
-            alert('📦 Downloading ' + ids.length + ' item(s) ()');
-        });
-        document.getElementById('searchInput').addEventListener('input', renderForms);
-        document.getElementById('statusFilter').addEventListener('change', renderForms);
-        document.getElementById('selectAll').addEventListener('change', e => {
-            document.querySelectorAll('.rowCheck').forEach(c => c.checked = e.target.checked);
-        });
-        document.getElementById('newReqBtn').addEventListener('click', openReqModal);
-        document.getElementById('closeReqModal').addEventListener('click', closeReqModal);
-        document.getElementById('cancelReq').addEventListener('click', closeReqModal);
-        document.getElementById('saveReq').addEventListener('click', saveRequest);
-        document.getElementById('fyPicker').addEventListener('change', renderOverview);
-        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket ()'));
-    }
-
-    // ---- Overview ----
+    /* --------- Overview --------- */
     function renderOverview() {
         const fy = document.getElementById('fyPicker').value;
         const parts = FORMS.filter(f => f.fy === fy);
-        const available = parts.every(p => p.status === 'available');
+        const available = parts.length && parts.every(p => p.status === 'available');
         const badge = document.getElementById('availBadge');
         badge.textContent = available ? 'Available' : 'Partial';
         badge.className = 'px-2 py-1 text-xs rounded ' + (available ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700');
     }
-
     function renderActivity() {
         document.getElementById('activityFeed').innerHTML = ACTIVITY.map(a => `
-      <div class="rounded-lg bg-slate-50 p-3">
-        <div class="text-xs text-slate-500">${a.ts}</div>
-        <div class="text-sm text-slate-800">${a.text}</div>
-      </div>`).join('');
+    <div class="rounded-lg bg-slate-50 p-3">
+      <div class="text-xs text-slate-500">${a.ts}</div>
+      <div class="text-sm text-slate-800">${a.text}</div>
+    </div>`).join('');
     }
 
-    // ---- Certificates table ----
+    /* --------- Certificates Table --------- */
     function renderForms() {
         const q = (document.getElementById('searchInput').value || '').toLowerCase();
         const st = document.getElementById('statusFilter').value;
+        const fyf = document.getElementById('fyFilter').value;
+
         const rows = FORMS
             .filter(f => (st === 'all' ? true : f.status === st))
-            .filter(f => f.fy.toLowerCase().includes(q) || f.note.toLowerCase().includes(q))
+            .filter(f => (fyf === 'all' ? true : f.fy === fyf))
+            .filter(f => [f.fy, 'Part ' + f.part, f.note].some(t => String(t).toLowerCase().includes(q)))
             .slice().sort((a, b) => b.fy.localeCompare(a.fy) || a.part.localeCompare(b.part));
+
         document.getElementById('formRows').innerHTML = rows.map(rowForm).join('') ||
             `<tr><td colspan="7" class="py-6 text-center text-slate-500">No matching records.</td></tr>`;
-    }
 
+        // re-bind row action buttons (since rows re-render)
+        rows.forEach(f => {
+            const dlBtn = document.getElementById(`dl_${f.id}`);
+            if (dlBtn) dlBtn.addEventListener('click', () => download(f.fy, f.part));
+            const prBtn = document.getElementById(`pr_${f.id}`);
+            if (prBtn) prBtn.addEventListener('click', () => preview(f.fy, f.part));
+            const rgBtn = document.getElementById(`rg_${f.id}`);
+            if (rgBtn) rgBtn.addEventListener('click', () => raiseRegenInline(f.id));
+        });
+
+        document.getElementById('formsInfo').textContent = rows.length ? `${rows.length} item(s)` : '—';
+    }
     function rowForm(f) {
+        const badge = statusBadgePlain(f.status);
+        const disabled = f.status !== 'available';
+        const regenBtn = f.status === 'regenerate' || f.status === 'processing'
+            ? ''
+            : `<button id="rg_${f.id}" class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50">
+           <i class="fa-solid fa-arrows-rotate mr-1"></i> Regenerate
+         </button>`;
         return `
-      <tr class="border-b last:border-0">
-        <td class="py-2 pr-4"><input class="rowCheck" type="checkbox" value="${f.id}"></td>
-        <td class="py-2 pr-4">${f.fy}</td>
-        <td class="py-2 pr-4">Part ${f.part}</td>
-        <td class="py-2 pr-4">₹${fmt(f.tds)}</td>
-        <td class="py-2 pr-4">₹${fmt(f.net)}</td>
-        <td class="py-2 pr-4">${statusBadgePlain(f.status)}</td>
-        <td class="py-2 pr-4">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="preview('${f.fy}','${f.part}')">
-            <i class="fa-solid fa-eye mr-1"></i> Preview
-          </button>
-          <button class="px-2 py-1 rounded text-white ${f.status === 'available' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-400 cursor-not-allowed'} text-xs" ${f.status !== 'available' ? 'disabled' : ''} onclick="download('${f.fy}','${f.part}')">
-            <i class="fa-solid fa-download mr-1"></i> PDF
-          </button>
-        </td>
-      </tr>`;
+  <tr class="border-b last:border-0">
+    <td class="py-2 pr-4"><input class="rowCheck" type="checkbox" value="${f.id}"></td>
+    <td class="py-2 pr-4">${f.fy}</td>
+    <td class="py-2 pr-4">Part ${f.part}</td>
+    <td class="py-2 pr-4">₹${fmtIN(f.tds)}</td>
+    <td class="py-2 pr-4">₹${fmtIN(f.net)}</td>
+    <td class="py-2 pr-4">${badge}</td>
+    <td class="py-2 pr-4 space-x-2">
+      <button id="pr_${f.id}" class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50">
+        <i class="fa-solid fa-eye mr-1"></i> Preview
+      </button>
+      <button id="dl_${f.id}" class="px-2 py-1 rounded text-white ${disabled ? 'bg-slate-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'} text-xs" ${disabled ? 'disabled' : ''}>
+        <i class="fa-solid fa-download mr-1"></i> PDF
+      </button>
+      ${regenBtn}
+    </td>
+  </tr>`;
     }
 
-    // ---- Requests ----
+    /* --------- Requests --------- */
     function renderRequests() {
         document.getElementById('reqRows').innerHTML = REQUESTS.map(r => `
-      <tr class="border-b last:border-0">
-        <td class="py-2 pr-4 text-slate-600">${r.ts}</td>
-        <td class="py-2 pr-4">${r.fy}</td>
-        <td class="py-2 pr-4">${r.reason}</td>
-        <td class="py-2 pr-4">${statusBadgePlain(r.status.toLowerCase())}</td>
-      </tr>`).join('');
+    <tr class="border-b last:border-0">
+      <td class="py-2 pr-4 text-slate-600">${r.ts}</td>
+      <td class="py-2 pr-4">${r.fy}</td>
+      <td class="py-2 pr-4">${r.reason}</td>
+      <td class="py-2 pr-4">${statusBadgePlain(r.status.toLowerCase())}</td>
+    </tr>`).join('');
     }
     function openReqModal() { document.getElementById('reqModal').classList.remove('hidden'); }
     function closeReqModal() { document.getElementById('reqModal').classList.add('hidden'); }
     function saveRequest() {
         const fy = document.getElementById('reqFY').value;
         const reason = (document.getElementById('reqReason').value || '').trim();
-        if (!reason) { alert('❌ Reason required'); return; }
+        if (!reason) { toast('❌ Reason required', true); return; }
         REQUESTS.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), fy, reason, status: 'Processing' });
-        closeReqModal(); renderRequests(); alert('✅ Request submitted');
+        persist(); closeReqModal(); renderRequests(); toast('✅ Request submitted');
     }
 
-    // ---- Charts ----
-    function drawTdsQuarter() {
-        const ctx = document.getElementById('tdsQuarterChart').getContext('2d');
+    /* --------- Inline Regenerate (row) --------- */
+    function raiseRegenInline(id) {
+        const reason = prompt('Reason for regeneration (e.g., name/address correction, mismatch):');
+        if (!reason) return;
+        const f = FORMS.find(x => x.id === id); if (!f) return;
+        f.status = 'processing'; f.note = `Re-gen requested: ${reason}`;
+        REQUESTS.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), fy: f.fy, reason, status: 'Processing' });
+        persist(); renderForms(); renderRequests(); toast('🔁 Regeneration requested');
+    }
+
+    /* --------- Actions --------- */
+    function preview(fy, part) { toast('👀 Preview Form 16 ' + fy + ' Part ' + part + ' (demo)'); }
+    function download(fy, part) {
+        toast('📄 Downloading Form 16 ' + fy + ' Part ' + part + ' (demo)');
+        ACTIVITY.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), text: `Downloaded Part ${part} (FY ${fy}).` });
+        persist(); renderActivity();
+    }
+    function singleDownload(part) {
         const fy = document.getElementById('fyPicker').value;
-        const t = FORMS.filter(f => f.fy === fy && f.part === 'B')[0]?.tds || 0;
+        const row = FORMS.find(f => f.fy === fy && f.part === part);
+        if (!row || row.status !== 'available') { toast('⚠️ Not available for ' + fy + ' Part ' + part, true); return; }
+        download(fy, part);
+    }
+    function bulkDownload() {
+        const ids = Array.from(document.querySelectorAll('.rowCheck:checked')).map(c => Number(c.value));
+        if (!ids.length) return toast('Select at least one certificate', true);
+        const ok = FORMS.filter(f => ids.includes(f.id) && f.status === 'available');
+        if (!ok.length) return toast('No selected items are available', true);
+        toast('📦 Downloading ' + ok.length + ' item(s) (demo)');
+        ok.forEach(f => ACTIVITY.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), text: `Downloaded Part ${f.part} (FY ${f.fy}).` }));
+        persist(); renderActivity();
+    }
+    function emailSelected() {
+        const ids = Array.from(document.querySelectorAll('.rowCheck:checked')).map(c => Number(c.value));
+        if (!ids.length) return toast('Select at least one certificate', true);
+        toast('✉️ Email queued for ' + ids.length + ' item(s) (demo)');
+    }
+    /* CSV export of current table */
+    function exportCsv() {
+        const q = (document.getElementById('searchInput').value || '').toLowerCase();
+        const st = document.getElementById('statusFilter').value;
+        const fyf = document.getElementById('fyFilter').value;
+        const rows = [["id", "fy", "part", "tds", "net", "status", "note"]];
+        FORMS.filter(f => (st === 'all' || f.status === st))
+            .filter(f => (fyf === 'all' || f.fy === fyf))
+            .filter(f => [f.fy, 'Part ' + f.part, f.note].some(t => String(t).toLowerCase().includes(q)))
+            .forEach(f => rows.push([f.id, f.fy, f.part, f.tds, f.net, f.status, f.note || ""]));
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'form16_list.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    /* --------- Charts --------- */
+    let _tdsChart;
+    function drawTdsQuarter(redraw = false) {
+        const canvas = document.getElementById('tdsQuarterChart');
+        const ctx = canvas.getContext('2d');
+        const fy = document.getElementById('fyPicker').value;
+        const t = (FORMS.find(f => f.fy === fy && f.part === 'B') || { tds: 0 }).tds || 0;
         const q = [Math.round(t * 0.22), Math.round(t * 0.26), Math.round(t * 0.25), Math.round(t * 0.27)];
-        new Chart(ctx, {
+        if (_tdsChart && redraw) { _tdsChart.destroy(); }
+        _tdsChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: ['Q1', 'Q2', 'Q3', 'Q4'], datasets: [{ label: 'TDS (₹)', data: q }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
         });
     }
 
-    // ---- Actions ----
-    function preview(fy, part) { alert('👀 Preview Form 16 ' + fy + ' Part ' + part + ' ()'); }
-    function download(fy, part) { alert('📄 Downloading Form 16 ' + fy + ' Part ' + part + ' ()'); }
-
-    // ---- Helpers ----
-    function fmt(n) { return n.toLocaleString('en-IN'); }
+    /* --------- Helpers --------- */
+    function fmtIN(n) { return (n || 0).toLocaleString('en-IN'); }
     function statusBadgePlain(s) {
         const m = { available: 'bg-emerald-50 text-emerald-700', processing: 'bg-amber-50 text-amber-700', regenerate: 'bg-red-50 text-red-700', resolved: 'bg-emerald-50 text-emerald-700' };
         const label = s.charAt(0).toUpperCase() + s.slice(1);
         return `<span class="px-2 py-0.5 rounded-full ${m[s] || 'bg-slate-100 text-slate-700'} text-xs">${label}</span>`;
     }
+    function toast(msg, bad = false) {
+        const t = document.createElement('div');
+        t.className = 'fixed bottom-5 right-5 px-3 py-2 rounded-lg shadow text-sm ' + (bad ? 'bg-rose-600 text-white' : 'bg-slate-800 text-white');
+        t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 1600);
+    }
+    function copyText(txt, ok = 'Copied') { navigator.clipboard?.writeText(txt).then(() => toast('📋 ' + ok)).catch(() => toast('Could not copy', true)); }
+
+    /* --------- Init --------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        renderOverview();
+        renderActivity();
+        renderForms();
+        renderRequests();
+        drawTdsQuarter();
+    });
 </script>
 
 <style>

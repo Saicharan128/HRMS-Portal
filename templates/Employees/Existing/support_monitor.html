@@ -13,6 +13,15 @@
             <button id="newWorkflowBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> New Workflow
             </button>
+            <button id="exportJsonBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-export mr-1"></i> Export JSON
+            </button>
+            <label
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-import mr-1"></i> Import
+                <input id="importJsonInput" type="file" accept="application/json" class="hidden">
+            </label>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
@@ -86,6 +95,11 @@
                     <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-layer-group mr-2"></i> Canvas
                     </h3>
                     <div class="flex items-center gap-2">
+                        <button id="validateBtn"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Validate</button>
+                        <button id="testRunBtn"
+                            class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-700"><i
+                                class="fa-solid fa-play mr-1"></i> Test Run</button>
                         <button id="clearCanvas"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">Clear</button>
                         <button id="saveWorkflow"
@@ -96,7 +110,9 @@
                                 class="fa-solid fa-rocket mr-1"></i> Publish</button>
                     </div>
                 </div>
-                <ul id="canvas" class="space-y-2 text-sm min-h-[120px]"><!-- items injected --></ul>
+                <ul id="canvas" class="space-y-2 text-sm min-h-[140px]" aria-live="polite"><!-- items injected --></ul>
+                <div id="canvasHint" class="text-xs text-slate-500 mt-2">Tip: drag rows to reorder • click “Edit” to
+                    configure.</div>
             </div>
 
             <!-- Right: Inspector -->
@@ -116,9 +132,13 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-box-archive mr-2"></i> Templates
                 </h3>
-                <button id="newTemplate"
-                    class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
-                        class="fa-solid fa-plus mr-1"></i> New</button>
+                <div class="flex items-center gap-2">
+                    <input id="tplSearch" placeholder="Search templates…"
+                        class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <button id="newTemplate"
+                        class="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-sm"><i
+                            class="fa-solid fa-plus mr-1"></i> New</button>
+                </div>
             </div>
             <div id="templateList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"><!-- injected --></div>
         </div>
@@ -148,6 +168,10 @@
                     </thead>
                     <tbody id="runRows" class="text-slate-800"><!-- injected --></tbody>
                 </table>
+            </div>
+            <div id="runDetail" class="hidden mt-4 rounded-xl border border-slate-200">
+                <div class="px-4 py-2 bg-slate-50 border-b text-sm font-medium">Run Log</div>
+                <div id="runLog" class="p-4 text-xs space-y-2"></div>
             </div>
         </div>
     </section>
@@ -202,16 +226,20 @@
 </div>
 
 <script>
-    /* ------------ Mock Data ------------ */
-    let CANVAS = [];
+    /* ---------------- Mock Data / Persistence ---------------- */
+    const LS_TPL = "support_wf_templates_v1";
+    const LS_CANVAS = "support_wf_canvas_v1";
+    const LS_RUNS = "support_wf_runs_v1";
+
+    let CANVAS = JSON.parse(localStorage.getItem(LS_CANVAS) || "null") || [];
     let SELECTED = null;
 
-    let TEMPLATES = [
+    let TEMPLATES = JSON.parse(localStorage.getItem(LS_TPL) || "null") || [
         {
             id: 1, name: 'General HR • Auto-triage', nodes: [
                 { type: 'trigger', key: 'ticket_created' },
                 { type: 'step', key: 'auto_triage', cfg: { categories: 'Payroll,Benefits,Leave,IT-Routed' } },
-                { type: 'step', key: 'assign_agent', cfg: { group: 'HR Helpdesk' } },
+                { type: 'step', key: 'assign_agent', cfg: { group: 'HR Helpdesk', routing: 'round_robin' } },
                 { type: 'step', key: 'kb_suggest' },
                 { type: 'step', key: 'send_email', cfg: { subject: 'We got your ticket' } }
             ]
@@ -228,10 +256,10 @@
         }
     ];
 
-    let RUNS = [
-        { id: 801, at: '2025-09-14 10:20', wf: 'General HR • Auto-triage', who: 'System', status: 'success' },
-        { id: 802, at: '2025-09-14 13:02', wf: 'Payroll Change • Controlled', who: 'Anaya J', status: 'success' },
-        { id: 803, at: '2025-09-15 08:41', wf: 'Benefits Query • Escalation', who: 'System', status: 'failed' }
+    let RUNS = JSON.parse(localStorage.getItem(LS_RUNS) || "null") || [
+        { id: 801, at: '2025-09-14 10:20', wf: 'General HR • Auto-triage', who: 'System', status: 'success', log: ['Trigger matched', 'Auto triage → Payroll', 'Assigned HR Helpdesk', 'Suggested KB: 3', 'Email ack sent'] },
+        { id: 802, at: '2025-09-14 13:02', wf: 'Payroll Change • Controlled', who: 'Anaya J', status: 'success', log: ['Trigger matched', 'Auto triage → Payroll', 'Approval granted', 'HRIS updated', 'Closed', 'CSAT sent'] },
+        { id: 803, at: '2025-09-15 08:41', wf: 'Benefits Query • Escalation', who: 'System', status: 'failed', log: ['Trigger matched', 'Slack post failed: 403'] }
     ];
 
     let INTEGRATIONS = [
@@ -242,7 +270,9 @@
         { name: 'Google Workspace', state: 'Connected' }
     ];
 
-    /* ------------ Elements & Init ------------ */
+    function persist() { localStorage.setItem(LS_TPL, JSON.stringify(TEMPLATES)); localStorage.setItem(LS_CANVAS, JSON.stringify(CANVAS)); localStorage.setItem(LS_RUNS, JSON.stringify(RUNS)); }
+
+    /* ---------------- Elements & Init ---------------- */
     const $ = (id) => document.getElementById(id);
     document.addEventListener('DOMContentLoaded', () => {
         // Tabs
@@ -257,213 +287,244 @@
             });
         });
 
-        // Builder interactions
+        // Builder chips
         document.querySelectorAll('.wf-chip').forEach(chip => {
             chip.addEventListener('click', () => {
                 addNode({ type: chip.dataset.type, key: chip.dataset.key, cfg: defaultCfg(chip.dataset.key) });
             });
         });
-        $('clearCanvas').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); });
-        $('saveWorkflow').addEventListener('click', () => alert('✅ Workflow saved'));
-        $('publishWorkflow').addEventListener('click', () => alert('🚀 Workflow published'));
+
+        // Canvas buttons
+        $('clearCanvas').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); persist(); });
+        $('saveWorkflow').addEventListener('click', () => { persist(); alert('✅ Workflow saved'); });
+        $('publishWorkflow').addEventListener('click', () => { const v = validate(); if (!v.ok) { alert('❌ ' + v.msg); return; } alert('🚀 Workflow published'); });
+        $('validateBtn').addEventListener('click', () => { const v = validate(); alert((v.ok ? '✅ Valid: ' : '❌ Invalid: ') + v.msg); });
+        $('testRunBtn').addEventListener('click', testRun);
         $('newWorkflowBtn').addEventListener('click', () => { CANVAS = []; SELECTED = null; renderCanvas(); renderInspector(); alert('✨ New workflow started'); });
 
         // Library
-        $('newTemplate').addEventListener('click', () => { TEMPLATES.push({ id: Date.now(), name: 'Untitled Template', nodes: [...CANVAS] }); renderTemplates(); alert('✅ Template created'); });
+        $('newTemplate').addEventListener('click', () => {
+            const name = prompt('Template name?', 'Untitled Template');
+            if (!name) return;
+            TEMPLATES.unshift({ id: Date.now(), name, nodes: [...CANVAS] });
+            persist(); renderTemplates();
+        });
+        $('tplSearch').addEventListener('input', renderTemplates);
 
         // Runs
         $('runFilter').addEventListener('change', renderRuns);
 
-        // Settings
-        renderIntegrations();
+        // Import/Export
+        $('exportJsonBtn').addEventListener('click', exportJSON);
+        $('importJsonInput').addEventListener('change', importJSON);
 
-        // Initial renders
-        renderCanvas(); renderInspector(); renderTemplates(); renderRuns();
+        renderCanvas(); renderInspector(); renderTemplates(); renderRuns(); renderIntegrations();
     });
 
-    /* ------------ Builder ------------ */
-    function addNode(n) { CANVAS.push(n); renderCanvas(); }
-    function moveNode(i, d) { const j = i + d; if (j < 0 || j >= CANVAS.length) return;[CANVAS[i], CANVAS[j]] = [CANVAS[j], CANVAS[i]]; renderCanvas(); }
-    function removeNode(i) { CANVAS.splice(i, 1); if (SELECTED === i) SELECTED = null; renderCanvas(); renderInspector(); }
+    /* ---------------- Builder ---------------- */
+    function addNode(n) { CANVAS.push(n); renderCanvas(); persist(); }
+    function moveNode(i, d) { const j = i + d; if (j < 0 || j >= CANVAS.length) return;[CANVAS[i], CANVAS[j]] = [CANVAS[j], CANVAS[i]]; renderCanvas(); persist(); }
+    function removeNode(i) { CANVAS.splice(i, 1); if (SELECTED === i) SELECTED = null; renderCanvas(); renderInspector(); persist(); }
     function selectNode(i) { SELECTED = i; renderInspector(); }
+
+    /* Drag & drop reorder */
+    let dragIdx = null;
+    function onDragStart(e, i) { dragIdx = i; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(i)); }
+    function onDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+    function onDrop(e, i) { e.preventDefault(); const from = dragIdx; const to = i; if (from === null || from === to) return; const [it] = CANVAS.splice(from, 1); CANVAS.splice(to, 0, it); dragIdx = null; renderCanvas(); persist(); }
 
     function renderCanvas() {
         $('canvas').innerHTML = CANVAS.map((n, i) => `
-      <li class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200 ${SELECTED === i ? 'ring-2 ring-blue-200' : ''}">
-        <div class="flex items-center gap-2">${icon(n.key)} <span class="font-medium">${label(n)}</span> ${n.type === 'trigger' ? badge('Trigger', 'amber') : ''}</div>
-        <div class="flex items-center gap-2">
-          <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},-1)">↑</button>
-          <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},1)">↓</button>
-          <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="selectNode(${i})">Edit</button>
-          <button class="px-2 py-1 text-xs rounded text-white bg-red-600 hover:bg-red-700" onclick="removeNode(${i})">Remove</button>
-        </div>
-      </li>
-    `).join('') || `<li class="text-slate-500 text-sm">No nodes yet. Click a Trigger or Step to add.</li>`;
+    <li class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200 ${SELECTED === i ? 'ring-2 ring-blue-200' : ''}"
+        draggable="true" ondragstart="onDragStart(event,${i})" ondragover="onDragOver(event)" ondrop="onDrop(event,${i})">
+      <div class="flex items-center gap-2">
+        <span class="cursor-grab text-slate-400" title="Drag"><i class="fa-solid fa-grip-lines"></i></span>
+        ${icon(n.key)} <span class="font-medium">${label(n)}</span>
+        ${n.type === 'trigger' ? badge('Trigger', 'amber') : ''}
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},-1)">↑</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="moveNode(${i},1)">↓</button>
+        <button class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50" onclick="selectNode(${i})">Edit</button>
+        <button class="px-2 py-1 text-xs rounded text-white bg-red-600 hover:bg-red-700" onclick="removeNode(${i})">Remove</button>
+      </div>
+    </li>
+  `).join('') || `<li class="text-slate-500 text-sm">No nodes yet. Click a Trigger or Step to add.</li>`;
     }
 
     function renderInspector() {
         const box = $('inspector');
         if (SELECTED === null) { box.innerHTML = '<div class="text-slate-500">Select a node to edit settings.</div>'; return; }
-        const n = CANVAS[SELECTED];
-        const cfg = n.cfg || {};
+        const n = CANVAS[SELECTED]; const cfg = n.cfg || {};
         box.innerHTML = `
-      <div class="space-y-3">
-        <div class="flex items-center gap-2"><div>${icon(n.key)}</div><div class="font-medium">${label(n)}</div></div>
-        ${n.type === 'trigger' ? triggerEditor(cfg) : stepEditor(n.key, cfg)}
-        <div class="flex items-center justify-end gap-2">
+    <div class="space-y-3">
+      <div class="flex items-center gap-2"><div>${icon(n.key)}</div><div class="font-medium">${label(n)}</div></div>
+      ${(n.type === 'trigger') ? triggerEditor(cfg) : stepEditor(n.key, cfg)}
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-xs text-slate-500">Node #${SELECTED + 1}</span>
+        <div class="flex items-center gap-2">
           <button class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50" onclick="cancelEdit()">Cancel</button>
           <button class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700" onclick="saveEdit()">Save</button>
         </div>
       </div>
-    `;
+    </div>`;
     }
     function cancelEdit() { SELECTED = null; renderInspector(); }
     function saveEdit() {
-        const form = document.querySelector('#inspector form');
-        if (!form) { SELECTED = null; renderInspector(); return; }
+        const form = document.querySelector('#inspector form'); if (!form) { SELECTED = null; renderInspector(); return; }
         const data = Object.fromEntries(new FormData(form).entries());
         const n = CANVAS[SELECTED]; n.cfg = { ...n.cfg, ...data };
-        alert('✅ Node updated'); SELECTED = null; renderInspector();
+        alert('✅ Node updated'); SELECTED = null; renderInspector(); persist();
     }
 
+    /* Editors */
     function triggerEditor(cfg) {
-        return `
-      <form class="space-y-3">
-        <div>
-          <label class="block text-xs text-slate-500 mb-1">When</label>
-          <select name="when" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-            <option value="immediate" ${sel(cfg.when, 'immediate')}>Immediate</option>
-            <option value="scheduled" ${sel(cfg.when, 'scheduled')}>Scheduled</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs text-slate-500 mb-1">Filter (JEXL)</label>
-          <input name="filter" value="${esc(cfg.filter || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., priority=='high' || category=='Payroll'">
-        </div>
-      </form>`;
+        return `<form class="space-y-3">
+    <div><label class="block text-xs text-slate-500 mb-1">When</label>
+      <select name="when" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+        <option value="immediate" ${sel(cfg.when, 'immediate')}>Immediate</option>
+        <option value="scheduled" ${sel(cfg.when, 'scheduled')}>Scheduled</option>
+      </select></div>
+    <div><label class="block text-xs text-slate-500 mb-1">Filter (JEXL)</label>
+      <input name="filter" value="${esc(cfg.filter || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="priority=='high' || category=='Payroll'"></div>
+  </form>`;
     }
     function stepEditor(key, cfg) {
-        if (key === 'send_email') {
-            return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">To</label><input name="to" value="${esc(cfg.to || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="employee@company.com"></div>
-          <div><label class="block text-xs text-slate-500 mb-1">Subject</label><input name="subject" value="${esc(cfg.subject || 'Ticket Update')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        </form>`;
-        }
-        if (key === 'post_to_slack') {
-            return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">Channel</label><input name="channel" value="${esc(cfg.channel || '#hr-support')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-          <div><label class="block text-xs text-slate-500 mb-1">Mention</label><input name="mention" value="${esc(cfg.mention || '@here')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        </form>`;
-        }
-        if (key === 'approval') {
-            return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">Approver</label><input name="approver" value="${esc(cfg.approver || 'HR Manager')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-          <div><label class="block text-xs text-slate-500 mb-1">SLA (hours)</label><input type="number" name="sla" value="${esc(cfg.sla || 8)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        </form>`;
-        }
+        if (key === 'send_email') { return formRows([['To', 'to', cfg.to || 'employee@company.com'], ['Subject', 'subject', cfg.subject || 'Ticket Update']]); }
+        if (key === 'post_to_slack') { return formRows([['Channel', 'channel', cfg.channel || '#hr-support'], ['Mention', 'mention', cfg.mention || '@here']]); }
+        if (key === 'approval') { return formRows([['Approver', 'approver', cfg.approver || 'HR Manager'], ['SLA (hours)', 'sla', cfg.sla || 8, 'number']]); }
         if (key === 'assign_agent') {
             return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">Group</label><input name="group" value="${esc(cfg.group || 'HR Helpdesk')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-          <div><label class="block text-xs text-slate-500 mb-1">Routing</label>
-            <select name="routing" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-              <option ${sel(cfg.routing, 'round_robin')}>round_robin</option>
-              <option ${sel(cfg.routing, 'load_based')}>load_based</option>
-            </select>
-          </div>
-        </form>`;
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">Group</label><input name="group" value="${esc(cfg.group || 'HR Helpdesk')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">Routing</label>
+        <select name="routing" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option ${sel(cfg.routing, 'round_robin')}>round_robin</option>
+          <option ${sel(cfg.routing, 'load_based')}>load_based</option>
+        </select>
+      </div>
+    </form>`;
         }
-        if (key === 'auto_triage') {
-            return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">Categories</label><input name="categories" value="${esc(cfg.categories || 'Payroll,Benefits,Leave')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-          <div><label class="block text-xs text-slate-500 mb-1">Priority Rules</label><input name="rules" value="${esc(cfg.rules || 'Payroll:high,Leave:medium')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        </form>`;
-        }
-        if (key === 'kb_suggest') {
-            return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">KB Space</label><input name="space" value="${esc(cfg.space || 'HR')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-          <div><label class="block text-xs text-slate-500 mb-1">Top N</label><input type="number" name="topn" value="${esc(cfg.topn || 3)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        </form>`;
-        }
+        if (key === 'auto_triage') { return formRows([['Categories', 'categories', cfg.categories || 'Payroll,Benefits,Leave'], ['Priority Rules', 'rules', cfg.rules || 'Payroll:high,Leave:medium']]); }
+        if (key === 'kb_suggest') { return formRows([['KB Space', 'space', cfg.space || 'HR'], ['Top N', 'topn', cfg.topn || 3, 'number']]); }
         if (key === 'webhook') {
             return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">URL</label><input name="url" value="${esc(cfg.url || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="https://api.example.com/hook"></div>
-          <div><label class="block text-xs text-slate-500 mb-1">Method</label>
-            <select name="method" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-              <option ${sel(cfg.method, 'POST')}>POST</option><option ${sel(cfg.method, 'PUT')}>PUT</option>
-            </select>
-          </div>
-        </form>`;
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">URL</label><input name="url" value="${esc(cfg.url || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="https://api.example.com/hook"></div>
+      <div><label class="block text-xs text-slate-500 mb-1">Method</label>
+        <select name="method" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option ${sel(cfg.method, 'POST')}>POST</option><option ${sel(cfg.method, 'PUT')}>PUT</option>
+        </select>
+      </div>
+    </form>`;
         }
-        if (key === 'update_hris') {
-            return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">Field</label><input name="field" value="${esc(cfg.field || 'address')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-          <div><label class="block text-xs text-slate-500 mb-1">Value</label><input name="value" value="${esc(cfg.value || '')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        </form>`;
-        }
-        if (key === 'close_ticket') {
-            return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">Resolution Code</label><input name="code" value="${esc(cfg.code || 'Solved')}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>
-        </form>`;
-        }
+        if (key === 'update_hris') { return formRows([['Field', 'field', cfg.field || 'address'], ['Value', 'value', cfg.value || '']]); }
+        if (key === 'close_ticket') { return formRows([['Resolution Code', 'code', cfg.code || 'Solved']]); }
         if (key === 'send_survey') {
             return `
-        <form class="space-y-3">
-          <div><label class="block text-xs text-slate-500 mb-1">CSAT Scale</label>
-            <select name="scale" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-              <option ${sel(cfg.scale, '1-5')}>1-5</option><option ${sel(cfg.scale, 'NPS')}>NPS</option>
-            </select>
-          </div>
-        </form>`;
+    <form class="space-y-3">
+      <div><label class="block text-xs text-slate-500 mb-1">CSAT Scale</label>
+        <select name="scale" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+          <option ${sel(cfg.scale, '1-5')}>1-5</option><option ${sel(cfg.scale, 'NPS')}>NPS</option>
+        </select>
+      </div>
+    </form>`;
         }
-        // generic
         return `<form class="space-y-3"><div class="text-slate-500">No configurable fields.</div></form>`;
     }
-
-    /* ------------ Library ------------ */
-    function renderTemplates() {
-        $('templateList').innerHTML = TEMPLATES.map(t => `
-      <div class="rounded-xl border border-slate-200 p-4 flex items-center justify-between">
-        <div>
-          <div class="font-medium text-slate-800">${t.name}</div>
-          <div class="text-xs text-slate-600">${t.nodes.map(label).join(' • ')}</div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="loadTemplate(${t.id})"><i class="fa-solid fa-arrow-down mr-1"></i> Load</button>
-          <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteTemplate(${t.id})"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
-        </div>
-      </div>
-    `).join('') || `<div class="text-slate-500 text-sm">No templates</div>`;
+    function formRows(rows) {
+        return `<form class="space-y-3">${rows.map(([lbl, name, val, type]) => `
+    <div><label class="block text-xs text-slate-500 mb-1">${lbl}</label>
+    <input ${type ? `type="${type}"` : ''} name="${name}" value="${esc(val)}" class="w-full rounded-lg border border-slate-300 px-3 py-2"></div>`).join('')
+            }</form>`;
     }
-    function loadTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; CANVAS = t.nodes.map(n => ({ ...n, cfg: defaultCfg(n.key), ...n })); SELECTED = null; renderCanvas(); renderInspector(); }
-    function deleteTemplate(id) { TEMPLATES = TEMPLATES.filter(t => t.id !== id); renderTemplates(); }
 
-    /* ------------ Runs ------------ */
+    /* ---------------- Validation & Test Run ---------------- */
+    function validate() {
+        if (!CANVAS.length) return { ok: false, msg: 'No nodes on canvas' };
+        const first = CANVAS[0];
+        if (first.type !== 'trigger') return { ok: false, msg: 'First node must be a Trigger' };
+        const badWebhook = CANVAS.find(n => n.key === 'webhook' && !(n.cfg && n.cfg.url));
+        if (badWebhook) return { ok: false, msg: 'Webhook step missing URL' };
+        return { ok: true, msg: `${CANVAS.length} node(s), looks good` };
+    }
+    function testRun() {
+        const v = validate(); if (!v.ok) { alert('❌ ' + v.msg); return; }
+        const wfName = prompt('Name this workflow run (for logs):', 'Ad-hoc Test');
+        const id = Date.now();
+        const steps = [];
+        steps.push('Trigger matched');
+        CANVAS.forEach(n => {
+            if (n.key === 'auto_triage') steps.push('Auto triage → ' + ((n.cfg?.categories || 'Payroll').split(',')[0] || 'Payroll'));
+            else if (n.key === 'assign_agent') steps.push(`Assigned ${n.cfg?.group || 'HR Helpdesk'} (${n.cfg?.routing || 'round_robin'})`);
+            else if (n.key === 'approval') steps.push('Approval granted by ' + (n.cfg?.approver || 'HR Manager'));
+            else if (n.key === 'webhook') steps.push('Webhook ' + (n.cfg?.method || 'POST') + ' → ' + (n.cfg?.url || ''));
+            else if (n.key === 'send_email') steps.push('Email sent: ' + (n.cfg?.subject || 'Ticket Update'));
+            else if (n.key === 'post_to_slack') steps.push('Slack post to ' + (n.cfg?.channel || '#hr-support'));
+            else if (n.key === 'kb_suggest') steps.push('Suggested KB: ' + (n.cfg?.topn || 3));
+            else if (n.key === 'update_hris') steps.push('HRIS field updated: ' + (n.cfg?.field || 'address'));
+            else if (n.key === 'close_ticket') steps.push('Ticket closed (' + (n.cfg?.code || 'Solved') + ')');
+            else if (n.key === 'send_survey') steps.push('CSAT survey sent (' + (n.cfg?.scale || '1-5') + ')');
+        });
+        const failed = Math.random() < 0.1;
+        const status = failed ? 'failed' : 'success';
+        if (failed) steps.push('Error: simulated failure during execution');
+        RUNS.unshift({ id, at: new Date().toISOString().slice(0, 16).replace('T', ' '), wf: wfName || 'Ad-hoc Test', who: 'You', status, log: steps });
+        persist(); renderRuns();
+        // jump to runs tab
+        document.getElementById('runsTab').click();
+        showRunLog(id);
+    }
+
+    /* ---------------- Library ---------------- */
+    function renderTemplates() {
+        const q = ($('tplSearch').value || '').toLowerCase();
+        const list = q ? TEMPLATES.filter(t => t.name.toLowerCase().includes(q)) : TEMPLATES;
+        $('templateList').innerHTML = list.map(t => `
+    <div class="rounded-xl border border-slate-200 p-4 flex items-center justify-between">
+      <div>
+        <div class="font-medium text-slate-800">${t.name}</div>
+        <div class="text-xs text-slate-600 truncate max-w-[18rem]" title="${t.nodes.map(label).join(' • ')}">${t.nodes.map(label).join(' • ')}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="loadTemplate(${t.id})"><i class="fa-solid fa-arrow-down mr-1"></i> Load</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="renameTemplate(${t.id})"><i class="fa-solid fa-pen mr-1"></i> Rename</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="duplicateTemplate(${t.id})"><i class="fa-solid fa-clone mr-1"></i> Duplicate</button>
+        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteTemplate(${t.id})"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
+      </div>
+    </div>
+  `).join('') || `<div class="text-slate-500 text-sm">No templates</div>`;
+    }
+    function loadTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; CANVAS = t.nodes.map(n => ({ ...n, cfg: defaultCfg(n.key), ...n })); SELECTED = null; renderCanvas(); renderInspector(); persist(); document.getElementById('builderTab').click(); }
+    function deleteTemplate(id) { if (!confirm('Delete template?')) return; TEMPLATES = TEMPLATES.filter(t => t.id !== id); persist(); renderTemplates(); }
+    function duplicateTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; const c = structuredClone(t); c.id = Date.now(); c.name = t.name + ' (Copy)'; TEMPLATES.unshift(c); persist(); renderTemplates(); }
+    function renameTemplate(id) { const t = TEMPLATES.find(x => x.id === id); if (!t) return; const name = prompt('New name:', t.name); if (!name) return; t.name = name; persist(); renderTemplates(); }
+
+    /* ---------------- Runs ---------------- */
     function renderRuns() {
         const f = $('runFilter').value;
         const data = f === 'all' ? RUNS : RUNS.filter(r => r.status === f);
         $('runRows').innerHTML = data.map(r => {
             const pill = r.status === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700';
-            return `
-        <tr class="border-b last:border-0">
-          <td class="py-2 px-4 text-slate-600">${r.at}</td>
-          <td class="py-2 px-4">${r.wf}</td>
-          <td class="py-2 px-4">${r.who}</td>
-          <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${r.status}</span></td>
-          <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Run details coming soon')">Details</button></td>
-        </tr>`;
+            return `<tr class="border-b last:border-0">
+      <td class="py-2 px-4 text-slate-600">${r.at}</td>
+      <td class="py-2 px-4">${r.wf}</td>
+      <td class="py-2 px-4">${r.who}</td>
+      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${r.status}</span></td>
+      <td class="py-2 px-4 text-right">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="showRunLog(${r.id})">Details</button>
+      </td>
+    </tr>`;
         }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No runs</td></tr>`;
     }
+    function showRunLog(id) {
+        const r = RUNS.find(x => x.id === id); if (!r) return;
+        const box = $('runDetail'); box.classList.remove('hidden');
+        $('runLog').innerHTML = r.log.map((l, i) => `<div>• ${l}</div>`).join('');
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 
-    /* ------------ Analytics ------------ */
+    /* ---------------- Analytics ---------------- */
     let chartsReady = false, ttcC, successC;
     function ensureCharts() {
         if (typeof Chart !== 'undefined') { chartsReady = true; return; }
@@ -475,51 +536,61 @@
         const tctx = document.getElementById('ttcChart').getContext('2d');
         const sctx = document.getElementById('successChart').getContext('2d');
         ttcC && ttcC.destroy(); successC && successC.destroy();
-        ttcC = new Chart(tctx, { type: 'bar', data: { labels: ['Payroll', 'Benefits', 'Leave', 'Other'], datasets: [{ label: 'Median Hours to Resolve', data: [10, 8, 6, 5], backgroundColor: '#3b82f6' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
-        successC = new Chart(sctx, { type: 'pie', data: { labels: ['Payroll', 'Benefits', 'Leave', 'Other'], datasets: [{ data: [84, 90, 92, 88], borderWidth: 2, borderColor: '#fff', backgroundColor: ['#ef4444', '#10b981', '#f59e0b', '#06b6d4'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
+        ttcC = new Chart(tctx, { type: 'bar', data: { labels: ['Payroll', 'Benefits', 'Leave', 'Other'], datasets: [{ label: 'Median Hours to Resolve', data: [10, 8, 6, 5] }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+        successC = new Chart(sctx, { type: 'pie', data: { labels: ['Payroll', 'Benefits', 'Leave', 'Other'], datasets: [{ data: [84, 90, 92, 88] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
     }
 
-    /* ------------ Settings ------------ */
+    /* ---------------- Settings (Integrations) ---------------- */
     function renderIntegrations() {
         $('intList').innerHTML = INTEGRATIONS.map(i => `
-      <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-        <div class="font-medium text-slate-800">${i.name}</div>
-        <div class="flex items-center gap-2">
-          <span class="px-2 py-0.5 rounded-full text-xs ${i.state === 'Connected' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${i.state}</span>
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleInt('${i.name}')">${i.state === 'Connected' ? 'Disconnect' : 'Connect'}</button>
-        </div>
-      </div>`).join('');
+    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+      <div class="font-medium text-slate-800">${i.name}</div>
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded-full text-xs ${i.state === 'Connected' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${i.state}</span>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="toggleInt('${i.name}')">${i.state === 'Connected' ? 'Disconnect' : 'Connect'}</button>
+        <button class="px-2 py-1 rounded bg-blue-600 text-white text-xs hover:bg-blue-700" onclick="testInt('${i.name}')"><i class="fa-solid fa-plug-circle-check mr-1"></i> Test</button>
+      </div>
+    </div>`).join('');
     }
     function toggleInt(name) { INTEGRATIONS = INTEGRATIONS.map(x => x.name === name ? { ...x, state: x.state === 'Connected' ? 'Pending' : 'Connected' } : x); renderIntegrations(); }
+    function testInt(name) { const ok = Math.random() < 0.85; alert(ok ? `✅ ${name} connection OK` : `❌ ${name} test failed`); }
 
-    /* ------------ Helpers ------------ */
+    /* ---------------- Import / Export ---------------- */
+    function exportJSON() {
+        const payload = { templates: TEMPLATES, canvas: CANVAS };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'workflows.json'; a.click(); URL.revokeObjectURL(a.href);
+    }
+    function importJSON(evt) {
+        const f = evt.target.files[0]; if (!f) return;
+        const r = new FileReader();
+        r.onload = () => {
+            try {
+                const data = JSON.parse(r.result);
+                if (data.templates) TEMPLATES = data.templates;
+                if (data.canvas) CANVAS = data.canvas;
+                persist(); renderTemplates(); renderCanvas(); renderInspector();
+                alert('✅ Imported');
+            } catch (e) { alert('❌ Invalid JSON'); }
+        };
+        r.readAsText(f);
+    }
+
+    /* ---------------- Helpers ---------------- */
     function icon(k) {
         const m = {
-            ticket_created: '<i class="fa-solid fa-ticket"></i>',
-            ticket_updated: '<i class="fa-solid fa-pen-to-square"></i>',
-            sla_breached: '<i class="fa-solid fa-clock-rotate-left"></i>',
-            csat_submitted: '<i class="fa-solid fa-face-smile"></i>',
-            auto_triage: '<i class="fa-solid fa-wand-magic-sparkles"></i>',
-            assign_agent: '<i class="fa-solid fa-user-gear"></i>',
-            send_email: '<i class="fa-solid fa-envelope"></i>',
-            post_to_slack: '<i class="fa-brands fa-slack"></i>',
-            kb_suggest: '<i class="fa-solid fa-book-open"></i>',
-            approval: '<i class="fa-solid fa-thumbs-up"></i>',
-            update_hris: '<i class="fa-solid fa-database"></i>',
-            webhook: '<i class="fa-solid fa-plug"></i>',
-            close_ticket: '<i class="fa-solid fa-check-double"></i>',
-            send_survey: '<i class="fa-solid fa-list-ul"></i>'
+            ticket_created: '<i class="fa-solid fa-ticket"></i>', ticket_updated: '<i class="fa-solid fa-pen-to-square"></i>', sla_breached: '<i class="fa-solid fa-clock-rotate-left"></i>', csat_submitted: '<i class="fa-solid fa-face-smile"></i>',
+            auto_triage: '<i class="fa-solid fa-wand-magic-sparkles"></i>', assign_agent: '<i class="fa-solid fa-user-gear"></i>', send_email: '<i class="fa-solid fa-envelope"></i>', post_to_slack: '<i class="fa-brands fa-slack"></i>',
+            kb_suggest: '<i class="fa-solid fa-book-open"></i>', approval: '<i class="fa-solid fa-thumbs-up"></i>', update_hris: '<i class="fa-solid fa-database"></i>', webhook: '<i class="fa-solid fa-plug"></i>',
+            close_ticket: '<i class="fa-solid fa-check-double"></i>', send_survey: '<i class="fa-solid fa-list-ul"></i>'
         }; return m[k] || '<i class="fa-solid fa-circle-dot"></i>';
     }
     function label(n) {
         const names = {
-            ticket_created: 'Ticket Created', ticket_updated: 'Ticket Updated',
-            sla_breached: 'SLA Breached', csat_submitted: 'CSAT Submitted',
-            auto_triage: 'Auto Triage', assign_agent: 'Assign Agent', send_email: 'Send Email',
-            post_to_slack: 'Post to Slack', kb_suggest: 'Suggest KB', approval: 'Approval',
+            ticket_created: 'Ticket Created', ticket_updated: 'Ticket Updated', sla_breached: 'SLA Breached', csat_submitted: 'CSAT Submitted',
+            auto_triage: 'Auto Triage', assign_agent: 'Assign Agent', send_email: 'Send Email', post_to_slack: 'Post to Slack', kb_suggest: 'Suggest KB', approval: 'Approval',
             update_hris: 'Update HRIS', webhook: 'Webhook', close_ticket: 'Close Ticket', send_survey: 'Send Survey'
-        };
-        return names[n.key] || n.key;
+        }; return names[n.key] || n.key;
     }
     function defaultCfg(key) {
         if (key === 'send_email') return { to: '', subject: 'Ticket Update' };
@@ -542,7 +613,7 @@
 <style>
     .wf-tab.active {
         background-color: #1e293b;
-        color: white;
+        color: #fff;
     }
 
     .wf-tab:not(.active) {
@@ -559,7 +630,7 @@
         align-items: center;
         gap: .375rem;
         border: 1px solid rgb(203, 213, 225);
-        background: white;
+        background: #fff;
         border-radius: .5rem;
         padding: .375rem .5rem;
         font-size: .875rem;
@@ -567,6 +638,10 @@
 
     .wf-chip:hover {
         background: #f8fafc;
+    }
+
+    #canvas li[draggable="true"] {
+        user-select: none;
     }
 </style>
 {% endblock %}

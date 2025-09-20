@@ -1,20 +1,21 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-3 sm:px-4">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-globe mr-2"></i> Remote Invoices
             </h1>
             <p class="text-slate-600 text-sm">Process invoices for remote employees and contractors globally.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <button id="newInvBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
+        <div class="flex flex-wrap items-center gap-2">
+            <button id="newInvBtn"
+                class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm w-full xs:w-auto">
                 <i class="fa-solid fa-file-circle-plus mr-1"></i> New Invoice
             </button>
             <a href="{{ url_for('dashboard') }}"
-                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full xs:w-auto text-center">
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back
             </a>
         </div>
@@ -22,18 +23,22 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
-            <button id="queueTab" class="ri-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
+        <div
+            class="flex space-x-1 bg-slate-100 p-1 rounded-xl overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-slate-300">
+            <button id="queueTab"
+                class="ri-tab active px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-inbox mr-1"></i> Queue</button>
-            <button id="createTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="createTab"
+                class="ri-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-pen-to-square mr-1"></i> Create</button>
-            <button id="taxfxTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="taxfxTab" class="ri-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-scale-balanced mr-1"></i> Tax & FX</button>
-            <button id="payTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="payTab" class="ri-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-building-columns mr-1"></i> Disburse</button>
-            <button id="compTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="compTab" class="ri-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-shield-halved mr-1"></i> Compliance</button>
-            <button id="reportsTab" class="ri-tab px-4 py-2 rounded-lg text-sm font-medium"><i
+            <button id="reportsTab"
+                class="ri-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shrink-0"><i
                     class="fa-solid fa-chart-line mr-1"></i> Reports</button>
         </div>
     </div>
@@ -41,50 +46,55 @@
     <!-- Queue -->
     <section id="queuePanel" class="ri-panel">
         <div class="rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between p-4 border-b border-slate-200">
-                <div class="relative w-full md:w-[28rem]">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input id="qSearch" placeholder="Search invoice #, name, country or currency"
-                        class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
-                    <button id="qClear"
-                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-                <div class="flex items-center gap-2">
-                    <select id="qStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
-                        <option value="all">All</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="paid">Paid</option>
-                    </select>
-                    <select id="qType" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
-                        <option value="all">All Types</option>
-                        <option value="employee">Employee</option>
-                        <option value="contractor">Contractor</option>
-                    </select>
-                    <select id="homeCcy" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
-                        <option value="USD">USD</option>
-                        <option value="INR">INR</option>
-                        <option value="EUR">EUR</option>
-                        <option value="GBP">GBP</option>
-                    </select>
+            <div
+                class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 p-4 border-b border-slate-200">
+                <div class="flex flex-col md:flex-row md:items-center gap-2 w-full">
+                    <div class="relative w-full md:w-[28rem]">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input id="qSearch" placeholder="Search invoice #, name, country or currency"
+                            class="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-200">
+                        <button id="qClear"
+                            class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            aria-label="Clear search">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="qStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="paid">Paid</option>
+                        </select>
+                        <select id="qType" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="all">All Types</option>
+                            <option value="employee">Employee</option>
+                            <option value="contractor">Contractor</option>
+                        </select>
+                        <select id="homeCcy" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                            <option value="USD">USD</option>
+                            <option value="INR">INR</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
+                <table class="min-w-full text-xs sm:text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
                             <th class="py-2 px-4">Invoice #</th>
                             <th class="py-2 px-4">Name</th>
-                            <th class="py-2 px-4">Country</th>
-                            <th class="py-2 px-4">Type</th>
+                            <th class="py-2 px-4 hidden sm:table-cell">Country</th>
+                            <th class="py-2 px-4 hidden md:table-cell">Type</th>
                             <th class="py-2 px-4">Amount</th>
-                            <th class="py-2 px-4">In Home CCY</th>
-                            <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 hidden sm:table-cell">In Home CCY</th>
+                            <th class="py-2 px-4 hidden md:table-cell">Status</th>
+                            <th class="py-2 px-4 w-20 sm:w-24"></th>
                         </tr>
                     </thead>
                     <tbody id="qRows" class="text-slate-800"><!-- injected --></tbody>
@@ -96,10 +106,10 @@
     <!-- Create -->
     <section id="createPanel" class="ri-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-pen-to-square mr-2"></i> New
-                        Invoice</h3>
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800"><i
+                            class="fa-solid fa-pen-to-square mr-2"></i> New Invoice</h3>
                     <div class="flex items-center gap-2">
                         <button id="saveDraft"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
@@ -176,8 +186,9 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-gear mr-2"></i> Options</h3>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-gear mr-2"></i>
+                    Options</h3>
                 <div class="space-y-3 text-sm">
                     <label class="flex items-center gap-2"><input id="opAutoApprove" type="checkbox"> Auto-approve if ≤
                         set cap</label>
@@ -193,10 +204,10 @@
     <!-- Tax & FX -->
     <section id="taxfxPanel" class="ri-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-scale-balanced mr-2"></i> FX
-                        & Tax Simulator</h3>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 lg:col-span-2">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-800"><i
+                            class="fa-solid fa-scale-balanced mr-2"></i> FX & Tax Simulator</h3>
                     <button id="recalcFx"
                         class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
                             class="fa-solid fa-rotate mr-1"></i> Recalculate</button>
@@ -258,9 +269,9 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-language mr-2"></i> Country
-                    Presets</h3>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-language mr-2"></i> Country Presets</h3>
                 <ul id="countryPresets" class="space-y-2 text-sm"><!-- injected --></ul>
             </div>
         </div>
@@ -268,10 +279,10 @@
 
     <!-- Disburse -->
     <section id="payPanel" class="ri-panel hidden">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-building-columns mr-2"></i>
-                    Batches</h3>
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800"><i
+                        class="fa-solid fa-building-columns mr-2"></i> Batches</h3>
                 <div class="flex items-center gap-2">
                     <select id="payFilter" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
@@ -284,15 +295,15 @@
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
+                <table class="min-w-full text-xs sm:text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
                             <th class="py-2 px-4">Batch</th>
-                            <th class="py-2 px-4">Currency</th>
+                            <th class="py-2 px-4 hidden sm:table-cell">Currency</th>
                             <th class="py-2 px-4">Count</th>
                             <th class="py-2 px-4">Amount</th>
-                            <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-24"></th>
+                            <th class="py-2 px-4 hidden md:table-cell">Status</th>
+                            <th class="py-2 px-4 w-20 sm:w-24"></th>
                         </tr>
                     </thead>
                     <tbody id="payRows" class="text-slate-800"><!-- injected --></tbody>
@@ -304,22 +315,22 @@
     <!-- Compliance -->
     <section id="compPanel" class="ri-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-file-shield mr-2"></i>
-                    Checklist</h3>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-file-shield mr-2"></i> Checklist</h3>
                 <div id="compList" class="space-y-3"><!-- injected --></div>
                 <button id="compAll"
                     class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
                         class="fa-solid fa-check mr-1"></i> Mark All Complete</button>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>
-                    Withholding Summary</h3>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-scale-balanced mr-2"></i> Withholding Summary</h3>
                 <ul id="withholdList" class="space-y-2 text-sm"><!-- injected --></ul>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-user-shield mr-2"></i>
-                    Residency & Docs</h3>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-user-shield mr-2"></i> Residency & Docs</h3>
                 <ul id="residency" class="space-y-2 text-sm"><!-- injected --></ul>
             </div>
         </div>
@@ -328,15 +339,15 @@
     <!-- Reports -->
     <section id="reportsPanel" class="ri-panel hidden">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie mr-2"></i> Spend
-                    by Currency</h3>
-                <canvas id="spendChart" height="220"></canvas>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-chart-pie mr-2"></i> Spend by Currency</h3>
+                <div class="h-64 sm:h-72"><canvas id="spendChart"></canvas></div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-stopwatch mr-2"></i>
-                    Approval SLA</h3>
-                <canvas id="slaChart" height="220"></canvas>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold text-slate-800 mb-4"><i
+                        class="fa-solid fa-stopwatch mr-2"></i> Approval SLA</h3>
+                <div class="h-64 sm:h-72"><canvas id="slaChart"></canvas></div>
             </div>
         </div>
     </section>
@@ -345,21 +356,21 @@
 <!-- New Invoice Modal -->
 <div id="invModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex min-h-full items-end sm:items-center justify-center p-2 sm:p-4">
+            <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-800">Quick Invoice</h3>
-                    <button id="closeInvModal" class="text-slate-400 hover:text-slate-600"><i
+                    <button id="closeInvModal" class="text-slate-400 hover:text-slate-600" aria-label="Close"><i
                             class="fa-solid fa-times text-xl"></i></button>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 sm:p-6 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input id="mName" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Name">
                         <input id="mCountry" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                             placeholder="Country">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <select id="mCcy" class="w-full rounded-lg border border-slate-300 px-3 py-2">
                             <option>USD</option>
                             <option>INR</option>
@@ -371,10 +382,11 @@
                     </div>
                     <input id="mDesc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="Description">
-                    <div class="flex items-center justify-end gap-2 pt-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-end gap-2 pt-2">
                         <button id="cancelInv"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
-                        <button id="saveInv" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 w-full sm:w-auto">Cancel</button>
+                        <button id="saveInv"
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 w-full sm:w-auto"><i
                                 class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
                     </div>
                 </div>
@@ -485,11 +497,11 @@
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${i.id}</td>
         <td class="py-2 px-4">${i.name}</td>
-        <td class="py-2 px-4">${i.country}</td>
-        <td class="py-2 px-4 capitalize">${i.type}</td>
+        <td class="py-2 px-4 hidden sm:table-cell">${i.country}</td>
+        <td class="py-2 px-4 capitalize hidden md:table-cell">${i.type}</td>
         <td class="py-2 px-4">${fmt(i.amt, i.ccy)}</td>
-        <td class="py-2 px-4">${fmt(Math.round(inHome), home)}</td>
-        <td class="py-2 px-4">${badge(i.status.charAt(0).toUpperCase() + i.status.slice(1), pill)}</td>
+        <td class="py-2 px-4 hidden sm:table-cell">${fmt(Math.round(inHome), home)}</td>
+        <td class="py-2 px-4 hidden md:table-cell">${badge(i.status.charAt(0).toUpperCase() + i.status.slice(1), pill)}</td>
         <td class="py-2 px-4 text-right">
           <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${i.id}')">Approve</button>
         </td>
@@ -558,10 +570,10 @@
             return `
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${b.id}</td>
-        <td class="py-2 px-4">${b.ccy}</td>
+        <td class="py-2 px-4 hidden sm:table-cell">${b.ccy}</td>
         <td class="py-2 px-4">${b.count}</td>
         <td class="py-2 px-4">${fmt(b.amount, b.ccy)}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${b.status}</span></td>
+        <td class="py-2 px-4 hidden md:table-cell"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${b.status}</span></td>
         <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button></td>
       </tr>`;
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No batches</td></tr>`;
@@ -618,8 +630,8 @@
         const c2 = document.getElementById('slaChart').getContext('2d');
         spendC && spendC.destroy(); slaC && slaC.destroy();
         const byCcy = { USD: 6000, INR: 215000, EUR: 0, GBP: 0 };
-        spendC = new Chart(c1, { type: 'pie', data: { labels: Object.keys(byCcy), datasets: [{ data: Object.values(byCcy), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
-        slaC = new Chart(c2, { type: 'bar', data: { labels: ['Submit', 'Approve', 'Pay'], datasets: [{ label: 'Median Hours', data: [8, 20, 12], backgroundColor: '#06b6d4' }] }, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+        spendC = new Chart(c1, { type: 'pie', data: { labels: Object.keys(byCcy), datasets: [{ data: Object.values(byCcy), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+        slaC = new Chart(c2, { type: 'bar', data: { labels: ['Submit', 'Approve', 'Pay'], datasets: [{ label: 'Median Hours', data: [8, 20, 12], backgroundColor: '#06b6d4' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
     }
 </script>
 
@@ -636,6 +648,16 @@
     .ri-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    /* Minimal horizontal scrollbar styling for tabs (optional) */
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

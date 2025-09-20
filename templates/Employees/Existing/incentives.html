@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -22,7 +22,7 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+        <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl">
             <button id="programsTab" class="in-tab active px-4 py-2 rounded-lg text-sm font-medium"><i
                     class="fa-solid fa-layer-group mr-1"></i> Programs</button>
             <button id="rulesTab" class="in-tab px-4 py-2 rounded-lg text-sm font-medium"><i
@@ -42,7 +42,8 @@
     <section id="programsPanel" class="in-panel">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white">
-                <div class="flex items-center justify-between p-4 border-b border-slate-200">
+                <div
+                    class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 border-b border-slate-200">
                     <div class="relative w-full md:w-[28rem]">
                         <i
                             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -62,14 +63,23 @@
                         </select>
                         <button id="dupProgram"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
-                            <i class="fa-solid fa-copy mr-1"></i> Duplicate
+                            <i class="fa-solid fa-copy mr-1"></i> Duplicate selected
+                        </button>
+                        <button id="archiveSelected"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                            <i class="fa-solid fa-box-archive mr-1"></i> Archive
+                        </button>
+                        <button id="exportPrograms"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                            <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
                         </button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
-                        <thead class="text-left text-slate-500 border-b">
+                        <thead class="sticky top-0 bg-slate-50 text-slate-500 border-b z-10">
                             <tr>
+                                <th class="py-2 px-4 w-10"><input id="progAll" type="checkbox"></th>
                                 <th class="py-2 px-4">Program</th>
                                 <th class="py-2 px-4">Owner</th>
                                 <th class="py-2 px-4">Period</th>
@@ -86,6 +96,12 @@
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-circle-info mr-2"></i>
                     Summary</h3>
                 <ul id="progSummary" class="space-y-2 text-sm"><!-- injected --></ul>
+                <div id="budgetBar" class="mt-4">
+                    <div class="text-xs text-slate-500 mb-1">Active budget burn (payouts / active budget)</div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div id="budgetFill" class="h-2 bg-emerald-500" style="width:0%"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -101,13 +117,23 @@
                         <select id="rProgram"
                             class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"></select>
                         <button id="newRule"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
-                                class="fa-solid fa-plus mr-1"></i> Add rule</button>
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                            <i class="fa-solid fa-plus mr-1"></i> Add rule
+                        </button>
                     </div>
                 </div>
+
+                <div class="mb-3 flex items-center gap-3">
+                    <div class="text-sm text-slate-600">Total weight:</div>
+                    <div id="weightBadge" class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">0%</div>
+                    <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="weightFill" class="h-2 bg-purple-500" style="width:0%"></div>
+                    </div>
+                </div>
+
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
-                        <thead class="text-left text-slate-500 border-b">
+                        <thead class="sticky top-0 bg-slate-50 text-slate-500 border-b z-10">
                             <tr>
                                 <th class="py-2 px-4">Condition</th>
                                 <th class="py-2 px-4">Operator</th>
@@ -120,17 +146,26 @@
                     </table>
                 </div>
             </div>
+
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-slate-800 mb-3"><i
-                        class="fa-solid fa-wand-magic-sparkles mr-2"></i> Preview</h3>
+                <h3 class="text-lg font-semibold text-slate-800 mb-3">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Preview
+                </h3>
                 <div class="space-y-2 text-sm">
                     <input id="pvDept" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="Department e.g., Sales">
                     <input id="pvRole" class="w-full rounded-lg border border-slate-300 px-3 py-2"
                         placeholder="Role e.g., AE">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="pvQuota" type="number" class="rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Quota (e.g., 100000)">
+                        <input id="pvAttain" type="number" class="rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="Attainment % (e.g., 95)">
+                    </div>
                     <button id="runPreview"
-                        class="w-full px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm">Calculate
-                        potential bonus</button>
+                        class="w-full px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                        Calculate potential bonus
+                    </button>
                     <div id="pvBox" class="text-slate-700"></div>
                 </div>
             </div>
@@ -140,20 +175,31 @@
     <!-- Payouts -->
     <section id="payoutsPanel" class="in-panel hidden">
         <div class="rounded-2xl border border-slate-200 bg-white p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-sack-dollar mr-2"></i> Payouts
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">
+                    <i class="fa-solid fa-sack-dollar mr-2"></i> Payouts
                 </h3>
                 <div class="flex items-center gap-2">
                     <select id="payPeriod"
                         class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"></select>
+                    <select id="payStatus" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm">
+                        <option value="all">Any status</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                    </select>
+                    <button id="approveAllPayouts"
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                        <i class="fa-solid fa-check-double mr-1"></i> Approve all pending
+                    </button>
                     <button id="exportPayouts"
-                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50"><i
-                            class="fa-solid fa-file-export mr-1"></i> Export</button>
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-file-export mr-1"></i> Export CSV
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="sticky top-0 bg-slate-50 text-slate-500 border-b z-10">
                         <tr>
                             <th class="py-2 px-4">Employee</th>
                             <th class="py-2 px-4">Program</th>
@@ -161,7 +207,7 @@
                             <th class="py-2 px-4">Attainment</th>
                             <th class="py-2 px-4">Payout</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-24"></th>
+                            <th class="py-2 px-4 w-28">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="payRows" class="text-slate-800"><!-- injected --></tbody>
@@ -184,13 +230,18 @@
                         <option value="rejected">Rejected</option>
                     </select>
                     <button id="bulkApprove"
-                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
-                            class="fa-solid fa-check mr-1"></i> Approve all</button>
+                        class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                        <i class="fa-solid fa-check mr-1"></i> Approve all
+                    </button>
+                    <button id="exportApprovals"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm hover:bg-slate-50">
+                        <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
-                    <thead class="text-left text-slate-500 border-b">
+                    <thead class="sticky top-0 bg-slate-50 text-slate-500 border-b z-10">
                         <tr>
                             <th class="py-2 px-4">Request</th>
                             <th class="py-2 px-4">Program</th>
@@ -214,8 +265,9 @@
                     Checklist</h3>
                 <div id="cList" class="space-y-3"><!-- injected --></div>
                 <button id="cAll"
-                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
-                        class="fa-solid fa-check mr-1"></i> Mark all</button>
+                    class="mt-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+                    <i class="fa-solid fa-check mr-1"></i> Mark all
+                </button>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>
@@ -270,9 +322,9 @@
                         <input id="prEnd" type="month" class="rounded-lg border border-slate-300 px-3 py-2">
                     </div>
                     <div class="flex items-center justify-end gap-2">
-                        <button id="saveProgram"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
-                                class="fa-solid fa-floppy-disk mr-1"></i> Save</button>
+                        <button id="saveProgram" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                        </button>
                     </div>
                 </div>
             </div>
@@ -308,8 +360,9 @@
                             placeholder="Weight %">
                     </div>
                     <div class="flex items-center justify-end gap-2">
-                        <button id="saveRule" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
-                                class="fa-solid fa-plus mr-1"></i> Add</button>
+                        <button id="saveRule" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                            <i class="fa-solid fa-plus mr-1"></i> Add
+                        </button>
                     </div>
                 </div>
             </div>
@@ -351,6 +404,18 @@
     const money = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n || 0));
     function pill(s) { return s === 'active' ? 'bg-emerald-50 text-emerald-700' : s === 'draft' ? 'bg-amber-50 text-amber-700' : s === 'archived' ? 'bg-slate-100 text-slate-700' : 'bg-blue-50 text-blue-700'; }
     function apPill(s) { return s === 'approved' ? 'bg-emerald-50 text-emerald-700' : s === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'; }
+    const debounce = (fn, w = 250) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), w); }; };
+    function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function opText(o) { return o === 'gt' ? '≥' : (o === 'lt' ? '≤' : 'is'); }
+    function downloadCSV(filename, rows) {
+        const esc = v => {
+            const s = String(v ?? "");
+            return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const csv = rows.map(r => r.map(esc).join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); const url = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+    }
 
     /* ---------- Init ---------- */
     document.addEventListener('DOMContentLoaded', () => {
@@ -362,33 +427,42 @@
                 const name = e.currentTarget.id.replace('Tab', '');
                 document.querySelectorAll('.in-panel').forEach(p => p.classList.add('hidden'));
                 document.getElementById(name + 'Panel').classList.remove('hidden');
-                if (name === 'reports') ensureCharts(), drawCharts();
+                if (name === 'reports') { ensureCharts(); drawCharts(); }
             });
         });
 
         // Programs
         $('pStatus').addEventListener('change', renderPrograms);
         const s = $('pSearch'), c = $('pClear');
-        s.addEventListener('input', () => { c.classList.toggle('hidden', !s.value.trim()); renderPrograms(); });
+        s.addEventListener('input', debounce(() => { c.classList.toggle('hidden', !s.value.trim()); renderPrograms(); }, 200));
         c.addEventListener('click', () => { s.value = ''; c.classList.add('hidden'); renderPrograms(); });
         $('newProgramBtn').addEventListener('click', () => $('programModal').classList.remove('hidden'));
         $('closeProgram').addEventListener('click', () => $('programModal').classList.add('hidden'));
         $('saveProgram').addEventListener('click', saveProgram);
-        $('dupProgram').addEventListener('click', () => alert('📄 Duplicated latest program (mock)'));
+        $('dupProgram').addEventListener('click', duplicateSelected);
+        $('archiveSelected').addEventListener('click', archiveSelected);
+        $('exportPrograms').addEventListener('click', exportProgramsCSV);
+        $('progAll').addEventListener('change', (e) => {
+            document.querySelectorAll('.progRowChk').forEach(ch => ch.checked = e.target.checked);
+        });
 
         // Rules
         $('newRule').addEventListener('click', () => $('ruleModal').classList.remove('hidden'));
         $('closeRule').addEventListener('click', () => $('ruleModal').classList.add('hidden'));
         $('saveRule').addEventListener('click', saveRule);
         $('runPreview').addEventListener('click', runPreview);
+        $('rProgram').addEventListener('change', () => { renderRules(); updateWeightUI(); });
 
         // Payouts
-        $('exportPayouts').addEventListener('click', () => alert('📄 Exported (mock)'));
+        $('exportPayouts').addEventListener('click', exportPayoutsCSV);
+        $('payStatus').addEventListener('change', renderPayouts);
+        $('approveAllPayouts').addEventListener('click', approveAllPayouts);
         $('payPeriod').innerHTML = PAY_PERIODS.map(p => `<option>${p}</option>`).join('');
 
         // Approvals
         $('apFilter').addEventListener('change', renderApprovals);
         $('bulkApprove').addEventListener('click', () => { APPROVALS = APPROVALS.map(a => ({ ...a, status: 'approved' })); renderApprovals(); alert('✅ Approved'); });
+        $('exportApprovals').addEventListener('click', exportApprovalsCSV);
 
         // Compliance
         $('cAll').addEventListener('click', () => { COMPLIANCE = COMPLIANCE.map(x => ({ ...x, done: true })); renderCompliance(); });
@@ -398,7 +472,7 @@
 
         // First paint
         renderPrograms(); renderProgSummary();
-        renderRules();
+        renderRules(); updateWeightUI();
         renderPayouts();
         renderApprovals();
         renderCompliance(); renderTaxNotes(); renderDocs();
@@ -411,21 +485,30 @@
         const data = PROGRAMS.filter(p => (st === 'all' || p.status === st) && (!q || [p.name, p.owner, p.id].some(x => String(x).toLowerCase().includes(q))));
         $('progRows').innerHTML = data.map(p => `
     <tr class="border-b last:border-0">
+      <td class="py-2 px-4"><input type="checkbox" class="progRowChk" data-id="${p.id}"></td>
       <td class="py-2 px-4 font-medium">${p.name}</td>
       <td class="py-2 px-4">${p.owner}</td>
       <td class="py-2 px-4">${p.period}</td>
       <td class="py-2 px-4">${money(p.budget)}</td>
       <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill(p.status)}">${p.status}</span></td>
       <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Open ${p.id}')">Open</button></td>
-    </tr>`).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No programs</td></tr>`;
+    </tr>`).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No programs</td></tr>`;
     }
     function renderProgSummary() {
         const active = PROGRAMS.filter(p => p.status === 'active');
-        const budget = active.reduce((s, p) => s + p.budget, 0);
+        const draft = PROGRAMS.filter(p => p.status === 'draft').length;
+        const archived = PROGRAMS.filter(p => p.status === 'archived').length;
+        const activeBudget = active.reduce((s, p) => s + p.budget, 0);
+        const burn = PAYOUTS.reduce((s, x) => s + (x.status !== 'rejected' ? x.payout : 0), 0);
         $('progSummary').innerHTML = `
-    <li class="flex items-center justify-between"><span>Active programs</span><span class="font-semibold">${active.length}</span></li>
-    <li class="flex items-center justify-between"><span>Active budget</span><span class="font-semibold">${money(budget)}</span></li>
-  `;
+        <li class="flex items-center justify-between"><span>Active programs</span><span class="font-semibold">${active.length}</span></li>
+        <li class="flex items-center justify-between"><span>Draft programs</span><span class="font-semibold">${draft}</span></li>
+        <li class="flex items-center justify-between"><span>Archived</span><span class="font-semibold">${archived}</span></li>
+        <li class="flex items-center justify-between"><span>Active budget</span><span class="font-semibold">${money(activeBudget)}</span></li>
+        <li class="flex items-center justify-between"><span>Payout burn (all)</span><span class="font-semibold">${money(burn)}</span></li>
+    `;
+        const pct = activeBudget ? Math.min(100, Math.round((burn / activeBudget) * 100)) : 0;
+        $('budgetFill').style.width = pct + '%';
     }
     function saveProgram() {
         const name = val('prName').trim(), owner = val('prOwner').trim(), budget = Number(val('prBudget') || 0);
@@ -433,6 +516,28 @@
         const start = val('prStart') || '', end = val('prEnd') || '';
         PROGRAMS.push({ id: 'INC-' + Date.now(), name, owner, period: `${start} → ${end}`, budget, status: 'draft' });
         $('programModal').classList.add('hidden'); renderPrograms(); renderProgSummary(); syncProgramSelects();
+    }
+    function selectedProgramIds() {
+        return Array.from(document.querySelectorAll('.progRowChk:checked')).map(ch => ch.dataset.id);
+    }
+    function duplicateSelected() {
+        const ids = selectedProgramIds(); if (!ids.length) return alert('Select at least one program');
+        ids.forEach(id => {
+            const src = PROGRAMS.find(p => p.id === id);
+            if (src) PROGRAMS.push({ ...src, id: 'INC-' + Date.now() + Math.floor(Math.random() * 1000), name: src.name + ' (copy)', status: 'draft' });
+        });
+        renderPrograms(); renderProgSummary(); syncProgramSelects();
+    }
+    function archiveSelected() {
+        const ids = selectedProgramIds(); if (!ids.length) return alert('Select at least one program');
+        PROGRAMS = PROGRAMS.map(p => ids.includes(p.id) ? { ...p, status: 'archived' } : p);
+        renderPrograms(); renderProgSummary(); syncProgramSelects();
+    }
+    function exportProgramsCSV() {
+        downloadCSV("programs.csv", [
+            ["ID", "Name", "Owner", "Period", "Budget", "Status"],
+            ...PROGRAMS.map(p => [p.id, p.name, p.owner, p.period, p.budget, p.status])
+        ]);
     }
 
     /* ---------- Rules ---------- */
@@ -449,47 +554,100 @@
       <td class="py-2 px-4">${opText(r.op)}</td>
       <td class="py-2 px-4">${r.value}</td>
       <td class="py-2 px-4">${r.weight}%</td>
-      <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="delRule('${pid}',${i})">Delete</button></td>
+      <td class="py-2 px-4 text-right">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="delRule('${pid}',${i})">Delete</button>
+      </td>
     </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No rules</td></tr>`;
     }
-    $('rProgram').addEventListener('change', renderRules);
+    function updateWeightUI() {
+        const pid = val('rProgram') || PROGRAMS[0]?.id; if (!pid) return;
+        const sum = RULES.filter(r => r.pid === pid).reduce((s, r) => s + r.weight, 0);
+        $('weightBadge').textContent = sum + '%';
+        const fill = Math.min(100, sum);
+        $('weightFill').style.width = fill + '%';
+        $('weightFill').className = 'h-2 ' + (sum <= 100 ? 'bg-purple-500' : 'bg-rose-500');
+    }
     function saveRule() {
         const pid = val('rProgram') || PROGRAMS[0]?.id; if (!pid) return;
-        RULES.push({ pid, field: val('rField'), op: val('rOp'), value: val('rVal'), weight: Number(val('rWeight') || 0) });
-        $('ruleModal').classList.add('hidden'); $('rVal').value = ''; $('rWeight').value = ''; renderRules();
+        const weight = Number(val('rWeight') || 0);
+        if (weight <= 0) { alert('Weight must be > 0'); return; }
+        RULES.push({ pid, field: val('rField'), op: val('rOp'), value: val('rVal'), weight });
+        $('ruleModal').classList.add('hidden'); $('rVal').value = ''; $('rWeight').value = '';
+        renderRules(); updateWeightUI();
+        const sum = RULES.filter(r => r.pid === pid).reduce((s, r) => s + r.weight, 0);
+        if (sum > 100) alert('⚠️ Rule weights exceed 100%. Consider rebalancing.');
     }
     function delRule(pid, idx) {
         const list = RULES.filter(r => r.pid === pid);
         const del = list[idx]; const i = RULES.indexOf(del); if (i > -1) RULES.splice(i, 1);
-        renderRules();
+        renderRules(); updateWeightUI();
     }
     function runPreview() {
         const pid = val('rProgram') || PROGRAMS[0]?.id; if (!pid) return;
         const rules = RULES.filter(r => r.pid === pid);
-        const base = 1000; // mock base bonus
+        const quota = Number(val('pvQuota') || 0);
+        const attain = Number(val('pvAttain') || 0);
+        const base = 1000; // mock base
+        // Simple illustrative formula: weight-adjusted bonus * attainment factor (+10% boost if rules match quota/attainment thresholds)
         const weightSum = rules.reduce((s, r) => s + r.weight, 0) || 100;
-        const potential = Math.round(base * (weightSum / 100));
+        let factor = attain ? Math.max(0, attain) / 100 : 1;
+        rules.forEach(r => {
+            if (r.field === 'quota' && r.op === 'gt' && quota > Number(r.value)) factor *= 1.10;
+            if (r.field === 'attainment' && r.op === 'gt' && attain > Number(r.value)) factor *= 1.10;
+        });
+        const potential = Math.round(base * (weightSum / 100) * factor);
         $('pvBox').innerHTML = `<div class="p-2 rounded bg-emerald-50 text-emerald-700">Estimated bonus: ${money(potential)}</div>`;
     }
 
     /* ---------- Payouts ---------- */
     function renderPayouts() {
-        $('payRows').innerHTML = PAYOUTS.map(x => {
+        const statusFilter = val('payStatus');
+        const data = statusFilter === 'all' ? PAYOUTS : PAYOUTS.filter(p => p.status === statusFilter);
+        $('payRows').innerHTML = data.map(x => {
             const prog = PROGRAMS.find(p => p.id === x.pid);
-            const status = x.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
+            const statusCls = x.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
             return `
       <tr class="border-b last:border-0">
         <td class="py-2 px-4 font-medium">${x.emp}</td>
         <td class="py-2 px-4">${prog?.name || '—'}</td>
-        <td class="py-2 px-4">${money(x.quota)}</td>
-        <td class="py-2 px-4">${x.attain}%</td>
+        <td class="py-2 px-4">
+            <input type="number" class="w-28 rounded border border-slate-300 px-2 py-1 text-sm"
+                   value="${x.quota}" onchange="editPayout('${x.emp}','${x.pid}','quota', this.value)">
+        </td>
+        <td class="py-2 px-4">
+            <input type="number" class="w-24 rounded border border-slate-300 px-2 py-1 text-sm"
+                   value="${x.attain}" onchange="editPayout('${x.emp}','${x.pid}','attain', this.value)">%
+        </td>
         <td class="py-2 px-4">${money(x.payout)}</td>
-        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${status}">${x.status}</span></td>
-        <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approvePayout('${x.emp}','${x.pid}')">Approve</button></td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${statusCls}">${x.status}</span></td>
+        <td class="py-2 px-4 text-right">
+            <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approvePayout('${x.emp}','${x.pid}')">Approve</button>
+        </td>
       </tr>`;
         }).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No payouts</td></tr>`;
     }
-    function approvePayout(emp, pid) { const x = PAYOUTS.find(p => p.emp === emp && p.pid === pid); if (x) { x.status = 'approved'; renderPayouts(); } }
+    function approvePayout(emp, pid) { const x = PAYOUTS.find(p => p.emp === emp && p.pid === pid); if (x) { x.status = 'approved'; renderPayouts(); renderProgSummary(); } }
+    function editPayout(emp, pid, field, value) {
+        const x = PAYOUTS.find(p => p.emp === emp && p.pid === pid); if (!x) return;
+        x[field] = Number(value) || 0;
+        // Recalc payout: simple mock = 0.04 * quota * (attain/100), bounded
+        x.payout = Math.round(0.04 * x.quota * (Math.max(0, x.attain) / 100));
+        renderPayouts(); renderProgSummary();
+    }
+    function approveAllPayouts() {
+        let n = 0; PAYOUTS.forEach(p => { if (p.status === 'pending') { p.status = 'approved'; n++; } });
+        renderPayouts(); renderProgSummary();
+        alert(n ? `✅ Approved ${n} payout(s)` : 'No pending payouts');
+    }
+    function exportPayoutsCSV() {
+        downloadCSV("payouts.csv", [
+            ["Employee", "Program", "Quota", "Attainment", "Payout", "Status"],
+            ...PAYOUTS.map(x => {
+                const p = PROGRAMS.find(pp => pp.id === x.pid);
+                return [x.emp, (p?.name || x.pid), x.quota, x.attain, x.payout, x.status];
+            })
+        ]);
+    }
 
     /* ---------- Approvals ---------- */
     function renderApprovals() {
@@ -509,21 +667,32 @@
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No requests</td></tr>`;
     }
     function toggleApproval(id) { const x = APPROVALS.find(a => a.id === id); if (!x) return; x.status = x.status === 'approved' ? 'pending' : 'approved'; renderApprovals(); }
+    function exportApprovalsCSV() {
+        downloadCSV("approvals.csv", [
+            ["Request", "Program", "Requested By", "Amount", "Status"],
+            ...APPROVALS.map(a => {
+                const p = PROGRAMS.find(pp => pp.id === a.pid);
+                return [a.id, (p?.name || a.pid), a.by, a.amt, a.status];
+            })
+        ]);
+    }
 
     /* ---------- Compliance ---------- */
     function renderCompliance() {
         $('cList').innerHTML = COMPLIANCE.map(c => `
-    <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
-      <label class="flex items-center gap-2 text-sm"><input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleC(${c.id}, this.checked)"> ${c.text}</label>
-      ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
-    </div>`).join('');
+        <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+            <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleC(${c.id}, this.checked)"> ${c.text}
+            </label>
+            ${c.done ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Done</span>' : ''}
+        </div>`).join('');
     }
     function toggleC(id, on) { const x = COMPLIANCE.find(c => c.id === id); if (x) { x.done = on; renderCompliance(); } }
     function renderTaxNotes() {
         $('taxNotes').innerHTML = `
-    <li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>Sales bonuses — supplemental withholding</span><span class="text-slate-700">Apply local rate</span></li>
-    <li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>Referral rewards — taxable benefit</span><span class="text-slate-700">Gross up optional</span></li>
-  `;
+        <li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>Sales bonuses — supplemental withholding</span><span class="text-slate-700">Apply local rate</span></li>
+        <li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>Referral rewards — taxable benefit</span><span class="text-slate-700">Gross up optional</span></li>
+    `;
     }
     function renderDocs() {
         $('docs').innerHTML = DOCS.map(d => `<li class="flex items-center justify-between p-2 rounded bg-slate-50"><span>${d.k}</span><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50">Open</button></li>`).join('');
@@ -542,23 +711,26 @@
         const aCtx = document.getElementById('attChart'); const pCtx = document.getElementById('payChart');
         attC && attC.destroy(); payC && payC.destroy();
 
+        // Derive simple mock series from PAYOUTS
+        const teams = ['Eng', 'Sales', 'CS', 'Mkt', 'Ops'];
+        const attain = [78, 92, 85, 74, 80];
         attC = new Chart(aCtx, {
             type: 'bar',
-            data: { labels: ['Eng', 'Sales', 'CS', 'Mkt', 'Ops'], datasets: [{ data: [78, 92, 85, 74, 80], backgroundColor: '#06b6d4' }] },
+            data: { labels: teams, datasets: [{ data: attain, backgroundColor: '#06b6d4' }] },
             options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
         });
 
+        const months = ['May', 'Jun', 'Jul', 'Aug', 'Sep'];
+        const payouts = [18, 22, 21, 24, 26];
         payC = new Chart(pCtx, {
             type: 'line',
-            data: { labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep'], datasets: [{ data: [18, 22, 21, 24, 26], fill: false }] },
+            data: { labels: months, datasets: [{ data: payouts, fill: false }] },
             options: { plugins: { legend: { display: false } } }
         });
     }
 
     /* ---------- Utils ---------- */
     function val(id) { const el = $(id); return el ? el.value : ''; }
-    function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-    function opText(o) { return o === 'gt' ? '≥' : (o === 'lt' ? '≤' : 'is'); }
 </script>
 
 <style>
@@ -574,6 +746,10 @@
     .in-tab:not(.active):hover {
         background-color: #f1f5f9;
         color: #334155;
+    }
+
+    thead.sticky {
+        box-shadow: 0 1px 0 0 rgba(15, 23, 42, .06);
     }
 </style>
 {% endblock %}

@@ -14,7 +14,8 @@
         <!-- Progress -->
         <div class="mt-6">
             <div class="flex items-center justify-between text-sm text-slate-600 mb-1">
-                <span>Progress</span>
+                <span>Progress (<span id="reqDone">0</span>/<span id="reqTotal">0</span> required<span id="optSpan">,
+                        <span id="optDone">0</span>/<span id="optTotal">0</span> optional</span>)</span>
                 <span id="progressText">0%</span>
             </div>
             <div class="w-full bg-slate-100 rounded-full h-2">
@@ -25,40 +26,49 @@
 
         <!-- Personal Info -->
         <div class="mt-8 rounded-xl border border-slate-200 p-5">
-            <h2 class="text-lg font-semibold text-slate-800 mb-3">Personal Information</h2>
-            <form id="personalForm" class="grid md:grid-cols-2 gap-4">
+            <h2 class="text-lg font-semibold text-slate-800 mb-3">Personal Information <span
+                    class="text-rose-600">*</span></h2>
+            <form id="personalForm" class="grid md:grid-cols-2 gap-4" autocomplete="on">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                    <input name="full_name" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
+                    <input name="full_name" required class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <p class="hint text-xs text-rose-600 mt-1 hidden">Required</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Date of Birth</label>
-                    <input name="dob" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Date of Birth *</label>
+                    <input name="dob" type="date" required
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <p class="hint text-xs text-rose-600 mt-1 hidden">Required</p>
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Address</label>
-                    <input name="address" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Address *</label>
+                    <input name="address" required class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <p class="hint text-xs text-rose-600 mt-1 hidden">Required</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                    <input name="phone" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Phone *</label>
+                    <input name="phone" required class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <p class="hint text-xs text-rose-600 mt-1 hidden">Required</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Emergency Contact</label>
-                    <input name="emergency_contact" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Emergency Contact *</label>
+                    <input name="emergency_contact" required
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2" />
+                    <p class="hint text-xs text-rose-600 mt-1 hidden">Required</p>
                 </div>
-                <div class="md:col-span-2 flex justify-end">
+                <div class="md:col-span-2 flex justify-between items-center">
+                    <span class="text-xs text-slate-500" id="personalDraft"></span>
                     <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900" type="submit">Save
                         Personal Info</button>
                 </div>
             </form>
-            <div id="personalMsg" class="mt-2 text-sm"></div>
+            <div id="personalMsg" class="mt-2 text-sm" aria-live="polite"></div>
         </div>
 
-        <!-- Bank Info -->
+        <!-- Bank Info (optional but tracked) -->
         <div class="mt-6 rounded-xl border border-slate-200 p-5">
             <h2 class="text-lg font-semibold text-slate-800 mb-3">Bank Information</h2>
-            <form id="bankForm" class="grid md:grid-cols-2 gap-4">
+            <form id="bankForm" class="grid md:grid-cols-2 gap-4" autocomplete="on">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Account Holder Name</label>
                     <input name="account_name" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
@@ -75,30 +85,32 @@
                     <label class="block text-sm font-medium text-slate-700 mb-1">Bank Name</label>
                     <input name="bank_name" class="w-full rounded-xl border border-slate-300 px-3 py-2" />
                 </div>
-                <div class="md:col-span-2 flex justify-end">
+                <div class="md:col-span-2 flex justify-between items-center">
+                    <span class="text-xs text-slate-500" id="bankDraft"></span>
                     <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900" type="submit">Save
                         Bank Info</button>
                 </div>
             </form>
-            <div id="bankMsg" class="mt-2 text-sm"></div>
+            <div id="bankMsg" class="mt-2 text-sm" aria-live="polite"></div>
         </div>
 
         <!-- Documents -->
         <div class="mt-6 rounded-xl border border-slate-200 p-5">
-            <h2 class="text-lg font-semibold text-slate-800 mb-3">Documents</h2>
+            <h2 class="text-lg font-semibold text-slate-800 mb-3">Documents <span class="text-rose-600">*</span></h2>
+            <p class="text-xs text-slate-600 mb-2">Required: PAN, Aadhaar, Photo. Cancelled Cheque is optional.</p>
             <form id="docsForm" class="grid md:grid-cols-2 gap-4" enctype="multipart/form-data">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">PAN (pdf/jpg/png)</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">PAN (pdf/jpg/png) *</label>
                     <input type="file" name="pan" accept=".pdf,.jpg,.jpeg,.png"
                         class="w-full rounded-xl border px-3 py-2" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Aadhaar (pdf/jpg/png)</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Aadhaar (pdf/jpg/png) *</label>
                     <input type="file" name="aadhaar" accept=".pdf,.jpg,.jpeg,.png"
                         class="w-full rounded-xl border px-3 py-2" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Photo (jpg/png)</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Photo (jpg/png) *</label>
                     <input type="file" name="photo" accept=".jpg,.jpeg,.png"
                         class="w-full rounded-xl border px-3 py-2" />
                 </div>
@@ -112,21 +124,22 @@
                         Documents</button>
                 </div>
             </form>
-            <div id="docsMsg" class="mt-2 text-sm"></div>
+            <div id="docsMsg" class="mt-2 text-sm" aria-live="polite"></div>
             <div id="docsLinks" class="mt-2 text-sm text-slate-700 space-y-1"></div>
         </div>
 
         <!-- Tasks / Acks -->
         <div class="mt-6 rounded-xl border border-slate-200 p-5">
-            <h2 class="text-lg font-semibold text-slate-800 mb-3">Tasks & Acknowledgements</h2>
+            <h2 class="text-lg font-semibold text-slate-800 mb-3">Tasks & Acknowledgements <span
+                    class="text-rose-600">*</span></h2>
             <form id="tasksForm" class="space-y-2">
                 <label class="flex items-center gap-2 text-sm">
                     <input type="checkbox" name="policy_ack" class="rounded border-slate-300" />
-                    I have read & acknowledge the Employee Policies / Handbook.
+                    I have read & acknowledge the Employee Policies / Handbook. *
                 </label>
                 <label class="flex items-center gap-2 text-sm">
                     <input type="checkbox" name="code_of_conduct" class="rounded border-slate-300" />
-                    I agree to the Code of Conduct.
+                    I agree to the Code of Conduct. *
                 </label>
                 <label class="flex items-center gap-2 text-sm">
                     <input type="checkbox" name="it_form" class="rounded border-slate-300" />
@@ -136,56 +149,132 @@
                     <input type="checkbox" name="pf_form" class="rounded border-slate-300" />
                     I have submitted PF/ESI Forms.
                 </label>
-                <div class="pt-2 flex justify-end">
+                <div class="pt-2 flex justify-between items-center">
+                    <span class="text-xs text-slate-500" id="tasksDraft"></span>
                     <button class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900" type="submit">Save
                         Tasks</button>
                 </div>
             </form>
-            <div id="tasksMsg" class="mt-2 text-sm"></div>
+            <div id="tasksMsg" class="mt-2 text-sm" aria-live="polite"></div>
         </div>
 
         <!-- Final -->
-        <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 hidden" id="doneBox">
-            <p class="font-semibold">You're all set! ✅</p>
-            <p class="text-sm">HR has everything they need to complete your onboarding.</p>
+        <div class="mt-6 flex items-center justify-between">
+            <div id="doneBox" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 hidden">
+                <p class="font-semibold">You're all set! ✅</p>
+                <p class="text-sm">HR has everything they need to complete your onboarding.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="markComplete"
+                    class="px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">Mark
+                    complete</button>
+                <button id="undoComplete"
+                    class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm hidden">Undo</button>
+            </div>
         </div>
+
     </div>
 </div>
 
 <script>
+    // ---------- utils ----------
     async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
     async function postJSON(u, d) { const r = await fetch(u, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d || {}) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-
-    function setMsg(el, ok, msg) {
-        el.className = "mt-2 text-sm " + (ok ? "text-emerald-700" : "text-rose-700");
-        el.textContent = msg;
-        setTimeout(() => { el.textContent = ""; }, 1500);
-    }
-
+    function setMsg(el, ok, msg) { el.className = "mt-2 text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); el.textContent = msg; setTimeout(() => { el.textContent = ""; }, 1500); }
     function pct(n) { return Math.max(0, Math.min(100, Math.round(n))); }
+    const LSKEY = "onboarding_autosave";
 
+    // ---------- progress model (required vs optional) ----------
     function computeProgress(data) {
-        let steps = 0, done = 0;
+        // Required sets
+        const req = {
+            personal: ["full_name", "dob", "address", "phone", "emergency_contact"],
+            documents: ["pan", "aadhaar", "photo"],
+            tasks: ["policy_ack", "code_of_conduct"]
+        };
+        const opt = {
+            bank: ["account_name", "account_number", "ifsc", "bank_name"],
+            documents: ["cancelled_cheque"],
+            tasks: ["it_form", "pf_form"]
+        };
 
-        // personal fields (5)
-        const p = data.personal || {};
-        steps += 5; done += ["full_name", "dob", "address", "phone", "emergency_contact"].filter(k => (p[k] || "").trim()).length;
+        let reqTotal = 0, reqDone = 0, optTotal = 0, optDone = 0;
 
-        // bank fields (4) - optional to count but we will include
-        const b = data.bank || {};
-        steps += 4; done += ["account_name", "account_number", "ifsc", "bank_name"].filter(k => (b[k] || "").trim()).length;
+        // required
+        reqTotal += req.personal.length;
+        reqDone += req.personal.filter(k => (data.personal?.[k] || "").toString().trim()).length;
 
-        // docs (3 mandatory + 1 optional)
-        const d = data.documents || {};
-        steps += 4; done += ["pan", "aadhaar", "photo", "cancelled_cheque"].filter(k => d[k]).length;
+        reqTotal += req.documents.length;
+        reqDone += req.documents.filter(k => !!data.documents?.[k]).length;
 
-        // tasks (4)
-        const t = data.tasks || {};
-        steps += 4; done += ["policy_ack", "code_of_conduct", "it_form", "pf_form"].filter(k => !!t[k]).length;
+        reqTotal += req.tasks.length;
+        reqDone += req.tasks.filter(k => !!data.tasks?.[k]).length;
 
-        return pct((done / steps) * 100);
+        // optional
+        optTotal += opt.bank.length;
+        optDone += opt.bank.filter(k => (data.bank?.[k] || "").toString().trim()).length;
+
+        optTotal += opt.documents.length;
+        optDone += opt.documents.filter(k => !!data.documents?.[k]).length;
+
+        optTotal += opt.tasks.length;
+        optDone += opt.tasks.filter(k => !!data.tasks?.[k]).length;
+
+        const progress = pct((reqDone / Math.max(1, reqTotal)) * 100 * 0.9 + (optDone / Math.max(1, optTotal)) * 10); // 90% weight to required
+        return { progress, reqTotal, reqDone, optTotal, optDone, allRequiredComplete: reqDone === reqTotal };
     }
 
+    function applyProgressUI(m, completed) {
+        document.getElementById("progressBar").style.width = m.progress + "%";
+        document.getElementById("progressText").textContent = m.progress + "%";
+        document.getElementById("reqTotal").textContent = m.reqTotal;
+        document.getElementById("reqDone").textContent = m.reqDone;
+        document.getElementById("optTotal").textContent = m.optTotal;
+        document.getElementById("optDone").textContent = m.optDone;
+        document.getElementById("optSpan").style.display = m.optTotal ? "" : "none";
+        const doneBox = document.getElementById("doneBox");
+        const compMsg = document.getElementById("compMsg");
+        if (completed || m.allRequiredComplete) {
+            doneBox.classList.remove("hidden");
+            compMsg.textContent = "All required items complete.";
+            document.getElementById("markComplete").disabled = false;
+        } else {
+            doneBox.classList.add("hidden");
+            compMsg.textContent = "Complete all required items (marked *) to finish onboarding.";
+        }
+    }
+
+    // ---------- autosave (per form) ----------
+    function readDraft() { try { return JSON.parse(localStorage.getItem(LSKEY) || "{}"); } catch { return {}; } }
+    function writeDraft(d) { try { localStorage.setItem(LSKEY, JSON.stringify(d)); } catch { } }
+    function attachAutosave(form, key, draftLabelEl) {
+        const save = () => {
+            const fd = new FormData(form); const obj = Object.fromEntries(fd.entries());
+            const cur = readDraft(); cur[key] = obj; writeDraft(cur);
+            if (draftLabelEl) { draftLabelEl.textContent = "Draft saved locally"; setTimeout(() => draftLabelEl.textContent = "", 1200); }
+        };
+        let t; form.addEventListener("input", () => { clearTimeout(t); t = setTimeout(save, 300); });
+    }
+    function restoreDraftToForm(form, key) {
+        const d = readDraft()[key]; if (!d) return;
+        [...form.elements].forEach(el => { if (el.name && d[el.name] !== undefined) { if (el.type === "checkbox") el.checked = !!d[el.name]; else el.value = d[el.name]; } });
+    }
+
+    // ---------- validation (required) ----------
+    function wireValidation(form) {
+        const show = (inp, show) => { const hint = inp.parentElement.querySelector(".hint"); if (!hint) return; hint.classList.toggle("hidden", !show); inp.classList.toggle("border-rose-400", show); };
+        form.addEventListener("submit", (e) => {
+            let ok = true;[...form.elements].forEach(inp => {
+                if (inp.name && inp.hasAttribute("required") && !String(inp.value || "").trim()) { ok = false; show(inp, true); }
+            });
+            if (!ok) { e.preventDefault(); e.stopPropagation(); }
+        });
+        [...form.elements].forEach(inp => {
+            inp.addEventListener("input", () => { if (inp.hasAttribute("required")) { const empty = !String(inp.value || "").trim(); const hint = inp.parentElement.querySelector(".hint"); if (hint) { hint.classList.toggle("hidden", !empty); inp.classList.toggle("border-rose-400", empty); } } });
+        });
+    }
+
+    // ---------- fill helpers ----------
     function fillForm(form, values) {
         if (!values) return;
         [...form.elements].forEach(el => {
@@ -196,100 +285,124 @@
         });
     }
 
+    // ---------- load & UI wiring ----------
     async function loadAll() {
         const data = await getJSON("/api/self_onboarding");
 
         // fill forms
         fillForm(document.getElementById("personalForm"), data.personal);
         fillForm(document.getElementById("bankForm"), data.bank);
-        const t = data.tasks || {};
         const tf = document.getElementById("tasksForm");
-        tf.policy_ack.checked = !!t.policy_ack;
-        tf.code_of_conduct.checked = !!t.code_of_conduct;
-        tf.it_form.checked = !!t.it_form;
-        tf.pf_form.checked = !!t.pf_form;
+        tf.policy_ack.checked = !!data.tasks?.policy_ack;
+        tf.code_of_conduct.checked = !!data.tasks?.code_of_conduct;
+        tf.it_form.checked = !!data.tasks?.it_form;
+        tf.pf_form.checked = !!data.tasks?.pf_form;
 
-        // docs links
+        // docs links (server truth)
         const dl = document.getElementById("docsLinks");
         dl.innerHTML = "";
         const docs = data.documents || {};
         Object.entries(docs).forEach(([k, v]) => {
             if (v) {
-                const a = document.createElement("a");
-                a.href = v; a.target = "_blank"; a.className = "underline text-indigo-700 block";
-                a.textContent = k + ": open";
-                dl.appendChild(a);
+                const row = document.createElement("div");
+                row.innerHTML = `<span class="text-slate-600">${k}:</span> <a class="underline text-indigo-700" href="${v}" target="_blank">open</a>`;
+                dl.appendChild(row);
             }
         });
 
-        // progress UI
-        const progress = computeProgress(data);
-        document.getElementById("progressBar").style.width = progress + "%";
-        document.getElementById("progressText").textContent = progress + "%";
-        const doneBox = document.getElementById("doneBox");
-        const compMsg = document.getElementById("compMsg");
-        if (data.completed) {
-            doneBox.classList.remove("hidden");
-            compMsg.textContent = "All required items complete.";
-        } else {
-            doneBox.classList.add("hidden");
-            compMsg.textContent = "Complete the items below to finish onboarding.";
-        }
+        // progress
+        const model = computeProgress(data);
+        applyProgressUI(model, !!data.completed);
+
+        // toggle complete buttons
+        document.getElementById("undoComplete").classList.toggle("hidden", !data.completed);
     }
 
-    document.getElementById("personalForm").addEventListener("submit", async (e) => {
+    // initial wiring
+    const personalForm = document.getElementById("personalForm");
+    const bankForm = document.getElementById("bankForm");
+    const tasksForm = document.getElementById("tasksForm");
+    const docsForm = document.getElementById("docsForm");
+
+    wireValidation(personalForm);
+    attachAutosave(personalForm, "personal", document.getElementById("personalDraft"));
+    attachAutosave(bankForm, "bank", document.getElementById("bankDraft"));
+    attachAutosave(tasksForm, "tasks", document.getElementById("tasksDraft"));
+
+    // restore local drafts (non-destructive; server data wins because we call restore BEFORE server load and then server fill overwrites)
+    restoreDraftToForm(personalForm, "personal");
+    restoreDraftToForm(bankForm, "bank");
+    restoreDraftToForm(tasksForm, "tasks");
+
+    // submits
+    personalForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         const payload = { personal: Object.fromEntries(fd.entries()) };
-        try {
-            await postJSON("/api/self_onboarding", payload);
-            setMsg(document.getElementById("personalMsg"), true, "Saved.");
-            loadAll();
-        } catch (err) { setMsg(document.getElementById("personalMsg"), false, "Save failed."); console.error(err); }
+        try { await postJSON("/api/self_onboarding", payload); setMsg(document.getElementById("personalMsg"), true, "Saved."); await loadAll(); }
+        catch (err) { setMsg(document.getElementById("personalMsg"), false, "Save failed."); console.error(err); }
     });
 
-    document.getElementById("bankForm").addEventListener("submit", async (e) => {
+    bankForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         const payload = { bank: Object.fromEntries(fd.entries()) };
-        try {
-            await postJSON("/api/self_onboarding", payload);
-            setMsg(document.getElementById("bankMsg"), true, "Saved.");
-            loadAll();
-        } catch (err) { setMsg(document.getElementById("bankMsg"), false, "Save failed."); console.error(err); }
+        try { await postJSON("/api/self_onboarding", payload); setMsg(document.getElementById("bankMsg"), true, "Saved."); await loadAll(); }
+        catch (err) { setMsg(document.getElementById("bankMsg"), false, "Save failed."); console.error(err); }
     });
 
-    document.getElementById("tasksForm").addEventListener("submit", async (e) => {
+    tasksForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         const payload = { tasks: {} };
         ["policy_ack", "code_of_conduct", "it_form", "pf_form"].forEach(k => payload.tasks[k] = fd.get(k) === "on");
-        try {
-            await postJSON("/api/self_onboarding", payload);
-            setMsg(document.getElementById("tasksMsg"), true, "Saved.");
-            loadAll();
-        } catch (err) { setMsg(document.getElementById("tasksMsg"), false, "Save failed."); console.error(err); }
+        try { await postJSON("/api/self_onboarding", payload); setMsg(document.getElementById("tasksMsg"), true, "Saved."); await loadAll(); }
+        catch (err) { setMsg(document.getElementById("tasksMsg"), false, "Save failed."); console.error(err); }
     });
 
-    document.getElementById("docsForm").addEventListener("submit", async (e) => {
+    docsForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
         try {
             const r = await fetch("/api/self_onboarding/upload", { method: "POST", body: fd });
             if (!r.ok) throw new Error(await r.text());
-            await r.json();
-            document.getElementById("docsMsg").className = "mt-2 text-sm text-emerald-700";
-            document.getElementById("docsMsg").textContent = "Uploaded.";
-            setTimeout(() => { document.getElementById("docsMsg").textContent = ""; }, 1500);
+            const res = await r.json(); // assume it returns keys=>urls
+            const msg = document.getElementById("docsMsg");
+            msg.className = "mt-2 text-sm text-emerald-700";
+            msg.textContent = "Uploaded.";
+            setTimeout(() => { msg.textContent = ""; }, 1500);
             e.target.reset();
-            loadAll();
+            await loadAll();
         } catch (err) {
-            document.getElementById("docsMsg").className = "mt-2 text-sm text-rose-700";
-            document.getElementById("docsMsg").textContent = "Upload failed.";
+            const msg = document.getElementById("docsMsg");
+            msg.className = "mt-2 text-sm text-rose-700";
+            msg.textContent = "Upload failed.";
             console.error(err);
         }
     });
 
+    // complete/undo (optional endpoints)
+    document.getElementById("markComplete").addEventListener("click", async () => {
+        try {
+            await postJSON("/api/self_onboarding/complete", {});
+            await loadAll();
+            document.getElementById("undoComplete").classList.remove("hidden");
+        } catch (e) {
+            // 409 when required not complete; 403 when not allowed
+            alert((e && e.message) || "Could not mark complete.");
+        }
+    });
+    document.getElementById("undoComplete").addEventListener("click", async () => {
+        try {
+            await postJSON("/api/self_onboarding/uncomplete", {});
+            await loadAll();
+            document.getElementById("undoComplete").classList.add("hidden");
+        } catch (e) {
+            alert("Could not undo.");
+        }
+    });
+
+    // boot
     loadAll();
 </script>
 {% endblock %}

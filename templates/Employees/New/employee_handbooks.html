@@ -12,29 +12,43 @@
         </div>
 
         <!-- Search & Filter -->
-        <div class="mt-6 flex flex-col sm:flex-row sm:items-end gap-3">
-            <div class="sm:w-72">
-                <label class="block text-sm font-medium text-slate-700 mb-1">Search</label>
-                <input id="searchInput" placeholder="Search title/category/version..."
-                    class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+        <div class="mt-6 flex flex-col gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                <div class="sm:w-72">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Search</label>
+                    <input id="searchInput" placeholder="Search title/category/version..."
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                </div>
+                <div class="sm:w-56">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                    <select id="categoryFilter" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                        <option value="">All</option>
+                        <option>General</option>
+                        <option>HR Policies</option>
+                        <option>Code of Conduct</option>
+                        <option>IT & Security</option>
+                        <option>Leave & Attendance</option>
+                        <option>Compensation & Benefits</option>
+                    </select>
+                </div>
+                <div class="flex-1"></div>
+                <div class="flex items-center gap-2">
+                    <button id="toggleUpload"
+                        class="hidden px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Upload</button>
+                    <button id="refreshBtn"
+                        class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Refresh</button>
+                </div>
             </div>
-            <div class="sm:w-56">
-                <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
-                <select id="categoryFilter" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
-                    <option value="">All</option>
-                    <option>General</option>
-                    <option>HR Policies</option>
-                    <option>Code of Conduct</option>
-                    <option>IT & Security</option>
-                    <option>Leave & Attendance</option>
-                    <option>Compensation & Benefits</option>
-                </select>
+            <!-- quick chips -->
+            <div class="flex flex-wrap gap-2">
+                <button class="chip" data-cat="General">General</button>
+                <button class="chip" data-cat="HR Policies">HR Policies</button>
+                <button class="chip" data-cat="Code of Conduct">Code of Conduct</button>
+                <button class="chip" data-cat="IT & Security">IT & Security</button>
+                <button class="chip" data-cat="Leave & Attendance">Leave & Attendance</button>
+                <button class="chip" data-cat="Compensation & Benefits">Comp & Benefits</button>
+                <button id="chipClear" class="chip-secondary">Clear</button>
             </div>
-            <div class="flex-1"></div>
-
-            <!-- Uploader (hidden if user lacks permission; shown via JS) -->
-            <button id="toggleUpload"
-                class="hidden px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm">Upload</button>
         </div>
 
         <!-- Upload form -->
@@ -76,144 +90,292 @@
             </div>
         </form>
 
+        <!-- Bulk toolbar -->
+        <div class="mt-6 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-800">Handbooks</h2>
+            <div class="flex items-center gap-2">
+                <button id="bulkCopy" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-sm"
+                    disabled>Copy links</button>
+                <button id="bulkDelete" class="px-3 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-700 text-sm"
+                    disabled>Delete selected</button>
+            </div>
+        </div>
+
         <!-- Table -->
-        <div class="mt-6 overflow-auto">
+        <div class="mt-4 overflow-auto">
             <table class="min-w-full text-sm">
                 <thead class="text-left text-slate-600 border-b">
                     <tr>
+                        <th class="py-2 pr-3 w-10"><input id="chkAll" type="checkbox"></th>
                         <th class="py-2 pr-3">Title</th>
                         <th class="py-2 pr-3">Category</th>
                         <th class="py-2 pr-3">Version</th>
                         <th class="py-2 pr-3">Uploaded</th>
+                        <th class="py-2 pr-3">Ack</th>
                         <th class="py-2 pr-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tbody" class="align-top"></tbody>
             </table>
             <div id="listMsg" class="mt-3 text-sm"></div>
+
+            <!-- Pagination -->
+            <div class="mt-3 flex items-center justify-between">
+                <div class="text-xs text-slate-500" id="pageInfo"></div>
+                <div class="flex items-center gap-2">
+                    <button id="prevPage"
+                        class="px-2 py-1 rounded border border-slate-300 text-xs hover:bg-slate-50">Prev</button>
+                    <button id="nextPage"
+                        class="px-2 py-1 rounded border border-slate-300 text-xs hover:bg-slate-50">Next</button>
+                    <select id="pageSize" class="px-2 py-1 rounded border border-slate-300 text-xs">
+                        <option>10</option>
+                        <option>20</option>
+                        <option>50</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Preview modal -->
+<div id="pv" class="hidden fixed inset-0 z-50 bg-black/60">
+    <div class="mx-auto mt-10 max-w-3xl bg-white rounded-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b">
+            <div id="pvTitle" class="font-medium text-slate-800">Preview</div>
+            <div class="flex items-center gap-2">
+                <button id="pvAck"
+                    class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs hover:bg-emerald-700 hidden">I’ve
+                    read</button>
+                <button id="pvClose"
+                    class="px-2 py-1 rounded border border-slate-300 text-sm hover:bg-slate-50">Close</button>
+            </div>
+        </div>
+        <div id="pvBody" class="max-h-[75vh] overflow-auto p-3"></div>
+    </div>
+</div>
+
 <script>
+    /* ------------ helpers ------------ */
     async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    const $ = (id) => document.getElementById(id);
+    const tbody = $("tbody"), listMsg = $("listMsg"), refreshBtn = $("refreshBtn");
+    const searchInput = $("searchInput"), categoryFilter = $("categoryFilter");
+    const toggleUpload = $("toggleUpload"), uploadForm = $("uploadForm"), uploadMsg = $("uploadMsg"), cancelUpload = $("cancelUpload");
+    const chkAll = $("chkAll"), bulkDelete = $("bulkDelete"), bulkCopy = $("bulkCopy");
+    const pageInfo = $("pageInfo"), prevPage = $("prevPage"), nextPage = $("nextPage"), pageSize = $("pageSize");
+    const pv = $("pv"), pvTitle = $("pvTitle"), pvBody = $("pvBody"), pvClose = $("pvClose"), pvAck = $("pvAck");
+    const chipClear = $("chipClear");
 
-    const tbody = document.getElementById("tbody");
-    const listMsg = document.getElementById("listMsg");
-    const searchInput = document.getElementById("searchInput");
-    const categoryFilter = document.getElementById("categoryFilter");
-    const toggleUpload = document.getElementById("toggleUpload");
-    const uploadForm = document.getElementById("uploadForm");
-    const uploadMsg = document.getElementById("uploadMsg");
-    const cancelUpload = document.getElementById("cancelUpload");
+    let ROWS = [], PAGE = 1, SELECTED = new Set(), CURRENT = null;
 
-    // We can't read server session from here; expose upload UI optimistically and hide delete if 403 is returned.
-    // Simple heuristic: try HEAD/POST permission check by making a tiny request when toggling upload.
-    toggleUpload.addEventListener("click", () => uploadForm.classList.toggle("hidden"));
-    cancelUpload.addEventListener("click", () => uploadForm.classList.add("hidden"));
+    function toast(msg, ok = true) { listMsg.textContent = msg; listMsg.className = "mt-3 text-sm " + (ok ? "text-emerald-700" : "text-rose-700"); setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm"; }, 1400); }
+    function ackKey(r) { return `${r.id}@${r.version || "v1"}`; }
+    function isAcked(r) { try { return localStorage.getItem("hb_ack_" + ackKey(r)) === "1"; } catch { return false; } }
+    function setAck(r) { try { localStorage.setItem("hb_ack_" + ackKey(r), "1"); } catch { } }
 
-    async function loadList() {
-        try {
-            listMsg.textContent = "Loading...";
-            const rows = await getJSON("/api/handbooks");
-            render(rows);
-            listMsg.textContent = rows.length ? "" : "No handbooks yet.";
-        } catch (e) {
-            listMsg.className = "mt-3 text-sm text-rose-700";
-            listMsg.textContent = "Failed to load.";
-            console.error(e);
-        }
-    }
-
-    function render(rows) {
-        const q = (searchInput.value || "").toLowerCase().trim();
-        const cat = categoryFilter.value;
-        const filtered = rows.filter(r => {
+    /* ------------ filters/paging ------------ */
+    function applyFilters(rows) {
+        const q = (searchInput.value || "").toLowerCase().trim(), cat = categoryFilter.value;
+        return rows.filter(r => {
             const hay = [r.title, r.category, r.version].map(x => (x || "").toLowerCase()).join(" ");
             const okQ = !q || hay.includes(q);
             const okC = !cat || r.category === cat;
             return okQ && okC;
         });
+    }
+    function paginate(rows) {
+        const size = Number(pageSize.value || 10), total = rows.length || 0, pages = Math.max(1, Math.ceil(total / size));
+        PAGE = Math.min(Math.max(1, PAGE), pages);
+        const start = (PAGE - 1) * size, end = start + size;
+        pageInfo.textContent = `Page ${PAGE}/${pages} • ${total} item${total === 1 ? "" : "s"}`;
+        prevPage.disabled = PAGE <= 1; nextPage.disabled = PAGE >= pages;
+        return rows.slice(start, end);
+    }
+
+    /* ------------ render ------------ */
+    function render() {
+        const filtered = applyFilters(ROWS);
+        const pageRows = paginate(filtered);
         tbody.innerHTML = "";
-        filtered.forEach(r => {
+
+        // keep selection to visible rows only
+        SELECTED = new Set([...SELECTED].filter(id => pageRows.some(r => r.id === id)));
+        chkAll.checked = pageRows.length > 0 && pageRows.every(r => SELECTED.has(r.id));
+
+        pageRows.forEach(r => {
             const tr = document.createElement("tr");
+            const ack = isAcked(r);
             tr.innerHTML = `
-      <td class="py-2 pr-3 font-medium text-slate-800">${r.title}</td>
-      <td class="py-2 pr-3">${r.category || "-"}</td>
-      <td class="py-2 pr-3">${r.version || "-"}</td>
-      <td class="py-2 pr-3">${new Date(r.uploaded_at).toLocaleString()}</td>
-      <td class="py-2 pr-3 space-x-2">
-        <a class="px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900" href="${r.url}" target="_blank">Open</a>
-        <button class="delBtn px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50" data-id="${r.id}">Delete</button>
-      </td>
-    `;
+        <td class="py-2 pr-3 w-10"><input type="checkbox" data-id="${r.id}" ${SELECTED.has(r.id) ? "checked" : ""}></td>
+        <td class="py-2 pr-3 font-medium text-slate-800">
+          <button class="link-preview hover:underline" data-id="${r.id}">${r.title}</button>
+        </td>
+        <td class="py-2 pr-3">${r.category || "-"}</td>
+        <td class="py-2 pr-3">${r.version || "-"}</td>
+        <td class="py-2 pr-3">${new Date(r.uploaded_at).toLocaleString()}</td>
+        <td class="py-2 pr-3">${ack ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px]">Read</span>' : '<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px]">Pending</span>'}</td>
+        <td class="py-2 pr-3 space-x-2">
+          <a class="px-2 py-1 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900" href="${r.url}" target="_blank">Open</a>
+          <button class="copyBtn px-2 py-1 rounded-md border border-slate-300 text-xs hover:bg-slate-50" data-url="${r.url}">Copy</button>
+          <button class="delBtn px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50" data-id="${r.id}">Delete</button>
+        </td>`;
             tbody.appendChild(tr);
         });
 
-        // Bind delete with graceful 403 handling
-        document.querySelectorAll(".delBtn").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                const id = btn.dataset.id;
-                if (!confirm("Delete this handbook?")) return;
-                try {
-                    const r = await fetch(`/api/handbooks/${id}`, { method: "DELETE" });
-                    if (r.status === 403) {
-                        alert("You are not authorized to delete handbooks.");
-                        return;
-                    }
-                    if (!r.ok) throw new Error(await r.text());
-                    loadList();
-                } catch (e) {
-                    alert("Failed to delete.");
-                    console.error(e);
-                }
+        // selection
+        tbody.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener("change", () => {
+                const id = Number(cb.dataset.id);
+                if (cb.checked) SELECTED.add(id); else SELECTED.delete(id);
+                chkAll.checked = pageRows.length > 0 && pageRows.every(r => SELECTED.has(r.id));
+                updateBulkButtons();
             });
         });
+        chkAll.onchange = () => { const setTo = chkAll.checked; pageRows.forEach(r => setTo ? SELECTED.add(r.id) : SELECTED.delete(r.id)); render(); updateBulkButtons(); };
+
+        // actions
+        tbody.querySelectorAll(".copyBtn").forEach(b => b.addEventListener("click", async () => {
+            try { await navigator.clipboard.writeText(b.dataset.url); toast("Link copied ✓"); } catch { toast("Copy failed", false); }
+        }));
+        tbody.querySelectorAll(".delBtn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                if (!confirm("Delete this handbook?")) return;
+                try {
+                    const r = await fetch(`/api/handbooks/${btn.dataset.id}`, { method: "DELETE" });
+                    if (r.status === 403) { alert("You are not authorized to delete handbooks."); return; }
+                    if (!r.ok) throw new Error(await r.text());
+                    await loadList(); toast("Deleted ✓");
+                } catch (e) { console.error(e); toast("Delete failed.", false); }
+            });
+        });
+        tbody.querySelectorAll(".link-preview").forEach(a => {
+            a.addEventListener("click", (e) => {
+                e.preventDefault();
+                const row = ROWS.find(x => x.id === Number(a.dataset.id));
+                openPreview(row);
+            });
+        });
+
+        listMsg.textContent = filtered.length ? "" : "No handbooks yet.";
+        updateBulkButtons();
     }
 
-    // Try to discover upload permission by attempting a 0-byte form submit (will fail at server validation but return 403 if no permission)
-    (async function detectPermission() {
+    function updateBulkButtons() {
+        const any = SELECTED.size > 0;
+        bulkDelete.disabled = !any;
+        bulkCopy.disabled = !any;
+    }
+
+    /* ------------ load ------------ */
+    async function loadList() {
+        try {
+            listMsg.textContent = "Loading...";
+            const rows = await getJSON("/api/handbooks");
+            ROWS = rows;
+            PAGE = 1;
+            render();
+            listMsg.textContent = "";
+        } catch (e) {
+            console.error(e);
+            listMsg.className = "mt-3 text-sm text-rose-700";
+            listMsg.textContent = "Failed to load.";
+        }
+    }
+    refreshBtn.addEventListener("click", loadList);
+
+    // detect upload permission (optimistic)
+    (async function detectUploadPermission() {
         try {
             const fd = new FormData();
             const r = await fetch("/api/handbooks", { method: "POST", body: fd });
-            if (r.status === 403) {
-                toggleUpload.classList.add("hidden");
-            } else {
-                toggleUpload.classList.remove("hidden");
-            }
-        } catch (e) {
-            // If network error, hide
-            toggleUpload.classList.add("hidden");
-        }
+            if (r.status === 403) toggleUpload.classList.add("hidden"); else toggleUpload.classList.remove("hidden");
+        } catch { toggleUpload.classList.add("hidden"); }
     })();
 
+    // upload
+    toggleUpload.addEventListener("click", () => uploadForm.classList.toggle("hidden"));
+    cancelUpload.addEventListener("click", () => uploadForm.classList.add("hidden"));
     uploadForm.addEventListener("submit", async (ev) => {
         ev.preventDefault();
         uploadMsg.textContent = ""; uploadMsg.className = "text-sm";
-        const fd = new FormData(uploadForm);
         try {
+            const fd = new FormData(uploadForm);
             const r = await fetch("/api/handbooks", { method: "POST", body: fd });
-            if (r.status === 403) {
-                uploadMsg.className = "text-sm text-rose-700";
-                uploadMsg.textContent = "You are not authorized to upload.";
-                return;
-            }
+            if (r.status === 403) { uploadMsg.className = "text-sm text-rose-700"; uploadMsg.textContent = "You are not authorized to upload."; return; }
             if (!r.ok) throw new Error(await r.text());
-            uploadMsg.className = "text-sm text-emerald-700";
-            uploadMsg.textContent = "Uploaded.";
-            uploadForm.reset();
-            uploadForm.classList.add("hidden");
+            uploadMsg.className = "text-sm text-emerald-700"; uploadMsg.textContent = "Uploaded.";
+            uploadForm.reset(); uploadForm.classList.add("hidden");
             loadList();
-        } catch (e) {
-            uploadMsg.className = "text-sm text-rose-700";
-            uploadMsg.textContent = "Upload failed.";
-            console.error(e);
-        }
+        } catch (e) { console.error(e); uploadMsg.className = "text-sm text-rose-700"; uploadMsg.textContent = "Upload failed."; }
     });
 
-    searchInput.addEventListener("input", () => { clearTimeout(window.__hb); window.__hb = setTimeout(loadList, 200); });
-    categoryFilter.addEventListener("change", loadList);
+    // search & chips & paging
+    let __t; function debounced() { clearTimeout(__t); __t = setTimeout(render, 200); }
+    searchInput.addEventListener("input", debounced);
+    categoryFilter.addEventListener("change", render);
+    document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { categoryFilter.value = c.dataset.cat; render(); }));
+    chipClear.addEventListener("click", () => { categoryFilter.value = ""; render(); });
+    pageSize.addEventListener("change", () => { PAGE = 1; render(); });
+    prevPage.addEventListener("click", () => { PAGE--; render(); });
+    nextPage.addEventListener("click", () => { PAGE++; render(); });
 
+    // bulk
+    bulkCopy.addEventListener("click", async () => {
+        const urls = ROWS.filter(r => SELECTED.has(r.id)).map(r => r.url).join("\n");
+        try { await navigator.clipboard.writeText(urls); toast("Links copied ✓"); } catch { toast("Copy failed", false); }
+    });
+    bulkDelete.addEventListener("click", async () => {
+        if (!SELECTED.size) return;
+        if (!confirm(`Delete ${SELECTED.size} document(s)?`)) return;
+        try {
+            for (const id of SELECTED) { await fetch(`/api/handbooks/${id}`, { method: "DELETE" }); }
+            SELECTED.clear(); await loadList(); toast("Deleted selected ✓");
+        } catch (e) { console.error(e); toast("Some deletes failed", false); }
+    });
+
+    /* ------------ preview + acknowledge ------------ */
+    function openPreview(row) {
+        CURRENT = row;
+        pvTitle.textContent = `${row.title} ${row.version ? `• ${row.version}` : ""}`;
+        pvBody.innerHTML = `<iframe src="${row.url}" class="w-full h-[70vh]"></iframe>`;
+        // show ack button only if not acked yet
+        if (!isAcked(row)) { pvAck.classList.remove("hidden"); } else { pvAck.classList.add("hidden"); }
+        pv.classList.remove("hidden");
+    }
+    pvClose.addEventListener("click", () => pv.classList.add("hidden"));
+    pv.addEventListener("click", (e) => { if (e.target === pv) pv.classList.add("hidden"); });
+    pvAck.addEventListener("click", () => {
+        if (!CURRENT) return;
+        setAck(CURRENT);
+        pvAck.classList.add("hidden");
+        pv.classList.add("hidden");
+        render(); // refresh ack pill
+        toast("Acknowledged ✓");
+    });
+
+    // init
     loadList();
 </script>
+
+<style>
+    .chip {
+        padding: .25rem .5rem;
+        border: 1px solid rgb(203, 213, 225);
+        border-radius: .5rem;
+        font-size: .75rem;
+    }
+
+    .chip:hover {
+        background: #f8fafc;
+    }
+
+    .chip-secondary {
+        padding: .25rem .5rem;
+        border: 1px solid rgb(203, 213, 225);
+        border-radius: .5rem;
+        font-size: .75rem;
+        color: #475569;
+    }
+</style>
 {% endblock %}

@@ -13,9 +13,17 @@
             <button id="submitDeclBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-paper-plane mr-1"></i> Submit Declaration
             </button>
-            <button id="downloadSummaryBtn"
+            <button id="printSummaryBtn"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
-                <i class="fa-solid fa-download mr-1"></i> Download Summary (PDF)
+                <i class="fa-solid fa-file-pdf mr-1"></i> Print / Save PDF
+            </button>
+            <button id="exportCsvBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+            </button>
+            <button id="exportJsonBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-code mr-1"></i> Export JSON
             </button>
             <a href="{{ url_for('dashboard') }}"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
@@ -26,7 +34,7 @@
 
     <!-- Tabs -->
     <div class="mb-6">
-        <div class="flex space-x-1 bg-slate-100 p-1 rounded-xl">
+        <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl">
             <button id="overviewTab" class="tx-tab active px-4 py-2 rounded-lg text-sm font-medium">
                 <i class="fa-solid fa-chart-line mr-1"></i> Overview
             </button>
@@ -54,10 +62,20 @@
                     <h3 class="text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-diagram-project mr-2"></i> Allocation (FY 2025-26)
                     </h3>
-                    <select id="regimePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
-                        <option value="new">New Regime</option>
-                        <option value="old">Old Regime</option>
-                    </select>
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs text-slate-500">Regime</label>
+                        <select id="regimePicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
+                            <option value="new">New Regime</option>
+                            <option value="old" selected>Old Regime</option>
+                        </select>
+                        <label class="text-xs text-slate-500">Bracket</label>
+                        <select id="bracketPicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm"
+                            title="Approx marginal rate (no cess)">
+                            <option value="0.05">5%</option>
+                            <option value="0.20" selected>20%</option>
+                            <option value="0.30">30%</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="grid grid-cols-3 gap-3 mb-4">
                     <div class="rounded-lg bg-slate-50 p-3">
@@ -129,7 +147,7 @@
                         <select id="sectionPicker" class="px-2 py-1 rounded-lg border border-slate-300 text-sm">
                             <option value="80C">80C (PF/PPF/ELSS)</option>
                             <option value="80D">80D (Health Insurance)</option>
-                            <option value="80CCD1B">80CCD(1B) (NPS)</option>
+                            <option value="80CCD(1B)">80CCD(1B) (NPS)</option>
                             <option value="HRA">HRA</option>
                             <option value="LTA">LTA</option>
                             <option value="HOME-INT">Home Loan Interest</option>
@@ -144,6 +162,7 @@
                         <label class="block text-sm font-medium text-slate-700 mb-1">Amount (₹)</label>
                         <input id="decAmt" type="number" min="0"
                             class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="e.g., 50000">
+                        <div id="capHint" class="text-xs text-slate-500 mt-1"></div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Period</label>
@@ -203,9 +222,7 @@
                 <h3 class="text-lg font-semibold text-slate-800">
                     <i class="fa-solid fa-file-circle-check mr-2"></i> Proof Submission
                 </h3>
-                <div class="text-sm text-slate-600">
-                    Window: <span id="proofWindow">Dec 01 – Jan 15</span>
-                </div>
+                <div class="text-sm text-slate-600">Window: <span id="proofWindow">Dec 01 – Jan 15</span></div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
@@ -254,7 +271,7 @@
                     <i class="fa-solid fa-table mr-2"></i> Declaration History
                 </h3>
                 <div class="flex items-center gap-2">
-                    <input id="searchHist" type="text" placeholder="Search section or note..."
+                    <input id="searchHist" type="text" placeholder="Search section or note…"
                         class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
                     <select id="statusHist" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
@@ -285,43 +302,127 @@
     </section>
 </div>
 
+<!-- Upload Proof Modal -->
+<div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Upload Proof</h3>
+                    <button id="closeUploadModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-3 text-sm">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Section</label>
+                        <select id="upSection" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                            <option>80C</option>
+                            <option>80D</option>
+                            <option>80CCD(1B)</option>
+                            <option>HRA</option>
+                            <option>LTA</option>
+                            <option>HOME-INT</option>
+                            <option>EDU-INT</option>
+                            <option>DON</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">File</label>
+                        <input id="upFile" type="file" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                        <input id="upNotes" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                            placeholder="optional">
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="cancelUpload"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="saveUpload"
+                            class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- What-if Modal -->
+<div id="whatIfModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">What-if Optimizer</h3>
+                    <button id="closeWhatIf" class="text-slate-400 hover:text-slate-600"><i
+                            class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 text-sm space-y-4">
+                    <div class="rounded-lg bg-slate-50 p-3">
+                        <div class="font-medium text-slate-800 mb-1">Strategy</div>
+                        <div class="text-slate-600">Auto-maximize under 80C (₹1.5L) and 80CCD(1B) (₹50k). Uses your
+                            selected tax bracket for savings estimate.</div>
+                    </div>
+                    <div id="whatIfPreview" class="space-y-2"></div>
+                </div>
+                <div class="px-6 pb-6 flex items-center justify-end gap-2">
+                    <button id="applyWhatIf"
+                        class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                        <i class="fa-solid fa-magic-wand-sparkles mr-1"></i> Apply changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Chart.js CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Dummy Data ----
-    const DECLS = [
+    /* ---------------- Persistence ---------------- */
+    const LS_DECLS = "tax_decls_v1";
+    const LS_PROOFS = "tax_proofs_v1";
+    const LS_HIST = "tax_hist_v1";
+
+    let DECLS = JSON.parse(localStorage.getItem(LS_DECLS) || "null") || [
         { id: 1, sec: '80C', amt: 90000, period: 'Annual', status: 'pending', note: 'PPF + ELSS' },
         { id: 2, sec: '80D', amt: 24000, period: 'Annual', status: 'approved', note: 'Family floater' },
         { id: 3, sec: '80CCD(1B)', amt: 50000, period: 'One-time', status: 'pending', note: 'NPS Tier-I' },
         { id: 4, sec: 'HRA', amt: 180000, period: 'Annual', status: 'pending', note: 'Metro rent' },
         { id: 5, sec: 'LTA', amt: 30000, period: 'Annual', status: 'rejected', note: 'Missing tickets' }
     ];
-    const LIMITS = [
-        { key: '80C', cap: 150000, note: 'Combined cap for PF/PPF/ELSS/LIC, etc.' },
-        { key: '80D', cap: '₹25,000 / ₹50,000 (senior parents)', note: 'Medical insurance premiums' },
-        { key: '80CCD(1B)', cap: 50000, note: 'Additional NPS deduction' },
-        { key: 'HRA', cap: 'Rule-based', note: 'Least of rent-excess, % of salary, actual HRA' },
-        { key: 'LTA', cap: 'Rule-based', note: '2 journeys in 4 years, economy fare caps' },
-        { key: 'Home Loan Interest', cap: '₹2,00,000 (self-occupied)', note: 'u/s 24(b)' },
-        { key: 'Education Loan Interest', cap: 'No limit (8 yrs)', note: 'u/s 80E' },
-        { key: 'Donations', cap: '50%/100% with/without limit', note: 'u/s 80G' }
-    ];
-    const PROOFS = [
+    let PROOFS = JSON.parse(localStorage.getItem(LS_PROOFS) || "null") || [
         { sec: '80C', amt: 90000, status: 'Pending' },
         { sec: '80D', amt: 24000, status: 'Approved' },
         { sec: '80CCD(1B)', amt: 50000, status: 'Pending' },
         { sec: 'HRA', amt: 180000, status: 'Pending' },
         { sec: 'LTA', amt: 30000, status: 'Rejected' }
     ];
-    const HIST = [
+    let HIST = JSON.parse(localStorage.getItem(LS_HIST) || "null") || [
         { ts: '2025-09-12 10:05', sec: '80C', amt: 20000, status: 'approved', note: 'ELSS SIP' },
         { ts: '2025-08-28 14:20', sec: 'HRA', amt: 150000, status: 'pending', note: 'Rent agreement uploaded' },
         { ts: '2025-06-10 09:10', sec: 'LTA', amt: 30000, status: 'rejected', note: 'Clarify tickets' },
         { ts: '2025-04-02 11:45', sec: '80D', amt: 24000, status: 'approved', note: 'Policy renewed' }
     ];
+    function persist() { localStorage.setItem(LS_DECLS, JSON.stringify(DECLS)); localStorage.setItem(LS_PROOFS, JSON.stringify(PROOFS)); localStorage.setItem(LS_HIST, JSON.stringify(HIST)); }
 
-    // ---- Panels/Tabs ----
+    /* ---------------- Limits Model (caps are indicative) ---------------- */
+    const LIMITS = [
+        { key: '80C', cap: 150000, note: 'Combined cap for PF/PPF/ELSS/LIC, etc.' },
+        { key: '80D', cap: 25000, note: 'Medical insurance premiums (base cap)' },
+        { key: '80CCD(1B)', cap: 50000, note: 'Additional NPS deduction' },
+        { key: 'HRA', cap: 'Rule-based', note: 'Least of rent-excess, % of salary, actual HRA' },
+        { key: 'LTA', cap: 'Rule-based', note: '2 journeys in 4 years, fare caps' },
+        { key: 'HOME-INT', cap: '₹2,00,000 (self-occupied)', note: 'u/s 24(b)' },
+        { key: 'EDU-INT', cap: 'No limit (8 yrs)', note: 'u/s 80E' },
+        { key: 'DON', cap: '50%/100% with/without limit', note: 'u/s 80G' }
+    ];
+
+    /* ---------------- Panels/Tabs ---------------- */
     const panels = {
         overview: document.getElementById('overviewPanel'),
         declare: document.getElementById('declarePanel'),
@@ -329,23 +430,13 @@
         limits: document.getElementById('limitsPanel'),
         history: document.getElementById('historyPanel')
     };
-
-    // ---- Charts refs ----
     let _allocChart, _mixChart, _trendChart;
 
     document.addEventListener('DOMContentLoaded', () => {
-        setupTabs();
-        wireButtons();
-        renderOverview();
-        renderDecls();
-        renderProofs();
-        renderLimits();
-        renderHistory();
-        drawAlloc();
-        drawMix();
-        drawTrend();
+        setupTabs(); wireButtons(); renderAll();
     });
 
+    /* ---------------- UI Bindings ---------------- */
     function setupTabs() {
         document.querySelectorAll('.tx-tab').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -354,37 +445,63 @@
                 const name = e.currentTarget.id.replace('Tab', '');
                 Object.values(panels).forEach(p => p.classList.add('hidden'));
                 panels[name].classList.remove('hidden');
+                if (name === 'history') drawTrend();
             });
         });
     }
-
     function wireButtons() {
-        document.getElementById('submitDeclBtn').addEventListener('click', () => alert('✅ Declaration submitted ()'));
-        document.getElementById('downloadSummaryBtn').addEventListener('click', () => alert('📄 Summary PDF downloaded ()'));
-        document.getElementById('whatIfBtn').addEventListener('click', () => alert('🧮 Running what-if ()'));
-        document.getElementById('proofWindowBtn').addEventListener('click', () => alert('🗓️ Proof window details ()'));
-        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query opened ()'));
+        document.getElementById('submitDeclBtn').addEventListener('click', submitDeclarations);
+        document.getElementById('printSummaryBtn').addEventListener('click', printSummary);
+        document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+        document.getElementById('exportJsonBtn').addEventListener('click', exportJSON);
+
+        document.getElementById('whatIfBtn').addEventListener('click', openWhatIf);
+        document.getElementById('proofWindowBtn').addEventListener('click', () => alert('🗓️ Proof window: Dec 01–Jan 15 (demo)'));
+        document.getElementById('raiseQueryBtn').addEventListener('click', () => alert('📩 Query raised (demo)'));
+
         document.getElementById('regimePicker').addEventListener('change', renderOverview);
+        document.getElementById('bracketPicker').addEventListener('change', renderOverview);
 
         document.getElementById('addDeclBtn').addEventListener('click', addDecl);
         document.getElementById('resetFormBtn').addEventListener('click', resetForm);
+        document.getElementById('sectionPicker').addEventListener('change', showCapHint);
+        showCapHint();
 
         document.getElementById('searchHist').addEventListener('input', renderHistory);
         document.getElementById('statusHist').addEventListener('change', renderHistory);
+
+        // Proof modal
+        document.getElementById('closeUploadModal').addEventListener('click', closeUpload);
+        document.getElementById('cancelUpload').addEventListener('click', closeUpload);
+        document.getElementById('saveUpload').addEventListener('click', saveUpload);
+
+        // What-if modal
+        document.getElementById('closeWhatIf').addEventListener('click', closeWhatIf);
+        document.getElementById('applyWhatIf').addEventListener('click', applyWhatIf);
     }
 
-    // ---- Overview ----
+    /* ---------------- Renderers ---------------- */
+    function renderAll() {
+        renderOverview(); renderDecls(); renderProofs(); renderLimits(); renderHistory();
+        drawAlloc(); drawMix(); drawTrend();
+    }
     function renderOverview() {
-        const isNew = document.getElementById('regimePicker').value === 'new';
+        const regime = document.getElementById('regimePicker').value;
+        const rate = Number(document.getElementById('bracketPicker').value || 0.2);
+
         const declared = DECLS.reduce((a, d) => a + d.amt, 0);
-        const potentialSave = isNew ? 0 : Math.min(150000, DECLS.find(d => d.sec === '80C')?.amt || 0) * 0.2; //  save
-        const projTax = isNew ? 142000 : 132000; // 
+
+        // Simple estimate: only a few sections affect potential save here (illustrative only)
+        const by = groupSum(DECLS, 'sec', 'amt');
+        const eligible = Math.min(by['80C'] || 0, 150000) + Math.min(by['80CCD(1B)'] || 0, 50000) + Math.min(by['80D'] || 0, 25000);
+        const potentialSave = (regime === 'old') ? Math.round(eligible * rate) : 0;
+
+        const projTax = regime === 'old' ? 132000 : 142000; // demo constants
+
         document.getElementById('declaredAmt').textContent = fmt(declared);
-        document.getElementById('potentialSave').textContent = fmt(Math.round(potentialSave));
+        document.getElementById('potentialSave').textContent = fmt(potentialSave);
         document.getElementById('projTax').textContent = fmt(projTax);
     }
-
-    // ---- Declarations table ----
     function renderDecls() {
         const rows = DECLS.slice().sort((a, b) => a.sec.localeCompare(b.sec)).map(rowDecl).join('');
         document.getElementById('declRows').innerHTML = rows || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No declarations.</td></tr>`;
@@ -392,48 +509,97 @@
     }
     function rowDecl(d) {
         return `<tr class="border-b last:border-0">
-      <td class="py-2 pr-4">${d.sec}</td>
-      <td class="py-2 pr-4">₹${fmt(d.amt)}</td>
-      <td class="py-2 pr-4">${d.period}</td>
-      <td class="py-2 pr-4">${badgePlain(d.status)}</td>
-      <td class="py-2 pr-4">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="editDecl(${d.id})">
-          <i class="fa-solid fa-pen mr-1"></i> Edit
-        </button>
-        <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteDecl(${d.id})">
-          <i class="fa-solid fa-trash mr-1"></i> Remove
-        </button>
-      </td>
-    </tr>`;
+    <td class="py-2 pr-4">${d.sec}</td>
+    <td class="py-2 pr-4">₹${fmt(d.amt)}</td>
+    <td class="py-2 pr-4">${d.period}</td>
+    <td class="py-2 pr-4">${badgePlain(d.status)}</td>
+    <td class="py-2 pr-4">
+      <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="editDecl(${d.id})">
+        <i class="fa-solid fa-pen mr-1"></i> Edit
+      </button>
+      <button class="px-2 py-1 rounded text-white bg-red-600 hover:bg-red-700 text-xs" onclick="deleteDecl(${d.id})">
+        <i class="fa-solid fa-trash mr-1"></i> Remove
+      </button>
+    </td>
+  </tr>`;
     }
     function renderLimitCards() {
-        const map = groupBy(DECLS, 'sec');
+        const by = groupSum(DECLS, 'sec', 'amt');
         const cards = LIMITS.map(l => {
-            const key = l.key.replace(' (self-occupied)', '').replace('Home Loan Interest', 'HOME-INT').replace('Education Loan Interest', 'EDU-INT');
-            const used = Object.keys(map).find(k => norm(k) === norm(l.key)) ? sum(map[Object.keys(map).find(k => norm(k) === norm(l.key))].map(x => x.amt)) : 0;
+            const key = l.key;
+            const used = (by[key] || 0);
+            const capTxt = (typeof l.cap === 'number') ? '₹' + fmt(l.cap) : l.cap;
+            const warn = (typeof l.cap === 'number' && used > l.cap) ? `<div class="text-xs text-amber-700 mt-1">Over cap by ₹${fmt(used - l.cap)}</div>` : '';
             return `<div class="rounded-lg bg-slate-50 p-3 flex items-center justify-between">
-        <div>
-          <div class="font-medium text-slate-800">${l.key}</div>
-          <div class="text-xs text-slate-600">${l.note}</div>
-        </div>
-        <div class="text-right">
-          <div class="text-sm">Used: ₹${fmt(used)}</div>
-          <div class="text-xs text-slate-600">Cap: ${typeof l.cap === 'number' ? '₹' + fmt(l.cap) : l.cap}</div>
-        </div>
-      </div>`;
+      <div>
+        <div class="font-medium text-slate-800">${key}</div>
+        <div class="text-xs text-slate-600">${l.note}</div>
+      </div>
+      <div class="text-right">
+        <div class="text-sm">Used: ₹${fmt(used)}</div>
+        <div class="text-xs text-slate-600">Cap: ${capTxt}</div>
+        ${warn}
+      </div>
+    </div>`;
         }).join('');
         document.getElementById('limitCards').innerHTML = cards;
     }
+    function renderProofs() {
+        const by = groupSum(DECLS, 'sec', 'amt');
+        const rows = Object.keys(by).map(sec => {
+            const rec = PROOFS.find(p => p.sec === sec) || { sec, amt: by[sec], status: 'Pending' };
+            return `<tr class="border-b last:border-0">
+      <td class="py-2 pr-4">${rec.sec}</td>
+      <td class="py-2 pr-4">₹${fmt(by[sec])}</td>
+      <td class="py-2 pr-4">${badgePlain((rec.status || 'Pending').toLowerCase())}</td>
+      <td class="py-2 pr-4">
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openUpload('${sec}')">
+          <i class="fa-solid fa-upload mr-1"></i> Upload
+        </button>
+        <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="alert('👀 Preview ${sec} proof (demo)')">
+          <i class="fa-solid fa-eye mr-1"></i> View
+        </button>
+      </td>
+    </tr>`;
+        }).join('');
+        document.getElementById('proofRows').innerHTML = rows || `<tr><td colspan="4" class="py-6 text-center text-slate-500">No sections to show.</td></tr>`;
+    }
+    function renderLimits() {
+        document.getElementById('limitsList').innerHTML = LIMITS.map(l => `
+    <div class="rounded-lg bg-slate-50 p-3">
+      <div class="font-medium text-slate-800">${l.key} — <span class="text-slate-600">${typeof l.cap === 'number' ? '₹' + fmt(l.cap) : l.cap}</span></div>
+      <div class="text-xs text-slate-600">${l.note}</div>
+    </div>`).join('');
+    }
+    function renderHistory() {
+        const q = (document.getElementById('searchHist').value || '').toLowerCase();
+        const st = document.getElementById('statusHist').value;
+        const rows = HIST
+            .filter(h => (st === 'all' ? true : h.status === st))
+            .filter(h => h.sec.toLowerCase().includes(q) || (h.note || '').toLowerCase().includes(q))
+            .slice().sort((a, b) => b.ts.localeCompare(a.ts))
+            .map(h => `
+      <tr class="border-b last:border-0">
+        <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
+        <td class="py-2 pr-4">${h.sec}</td>
+        <td class="py-2 pr-4">₹${fmt(h.amt)}</td>
+        <td class="py-2 pr-4">${badgePlain(h.status)}</td>
+        <td class="py-2 pr-4">${h.note || ''}</td>
+      </tr>`).join('');
+        document.getElementById('histRows').innerHTML = rows || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No history.</td></tr>`;
+    }
 
-    // ---- Add/Edit/Delete ----
+    /* ---------------- Actions: Decl CRUD ---------------- */
     function addDecl() {
         const sec = document.getElementById('sectionPicker').value;
         const amt = Math.max(0, Number(document.getElementById('decAmt').value || 0));
         const period = document.getElementById('decPeriod').value;
         const note = (document.getElementById('decNotes').value || '').trim();
         if (!amt) { alert('❌ Amount required'); return; }
-        DECLS.push({ id: Date.now(), sec: normOut(sec), amt, period, status: 'pending', note });
-        resetForm(); renderDecls(); renderOverview(); drawMix(); drawAlloc();
+
+        DECLS.push({ id: Date.now(), sec, amt, period, status: 'pending', note });
+        HIST.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), sec, amt, status: 'pending', note: note || 'Added' });
+        persist(); resetForm(); renderDecls(); renderOverview(); drawMix(); drawAlloc(); renderHistory();
     }
     function editDecl(id) {
         const d = DECLS.find(x => x.id === id); if (!d) return;
@@ -444,109 +610,180 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     function deleteDecl(id) {
-        const i = DECLS.findIndex(x => x.id === id); if (i > -1) { DECLS.splice(i, 1); renderDecls(); renderOverview(); drawMix(); drawAlloc(); }
+        const i = DECLS.findIndex(x => x.id === id);
+        if (i > -1) {
+            const d = DECLS[i];
+            DECLS.splice(i, 1);
+            HIST.unshift({ ts: new Date().toISOString().slice(0, 16).replace('T', ' '), sec: d.sec, amt: d.amt, status: 'pending', note: 'Removed' });
+            persist(); renderDecls(); renderOverview(); drawMix(); drawAlloc(); renderHistory();
+        }
     }
     function resetForm() {
-        document.getElementById('decAmt').value = '';
-        document.getElementById('decNotes').value = '';
+        document.getElementById('decAmt').value = ''; document.getElementById('decNotes').value = '';
+    }
+    function showCapHint() {
+        const s = document.getElementById('sectionPicker').value;
+        const limit = LIMITS.find(l => l.key === s);
+        const cap = limit ? limit.cap : null;
+        let h = '';
+        if (typeof cap === 'number') h = `Cap: ₹${fmt(cap)} (old regime)`;
+        else if (cap) h = `Cap: ${cap}`;
+        document.getElementById('capHint').textContent = h;
     }
 
-    // ---- Proofs ----
-    function renderProofs() {
-        const rows = PROOFS.map(p => `
-      <tr class="border-b last:border-0">
-        <td class="py-2 pr-4">${p.sec}</td>
-        <td class="py-2 pr-4">₹${fmt(p.amt)}</td>
-        <td class="py-2 pr-4">${badgePlain(p.status.toLowerCase())}</td>
-        <td class="py-2 pr-4">
-          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('📎 Uploading ${p.sec} proof ()')">
-            <i class="fa-solid fa-upload mr-1"></i> Upload
-          </button>
-          <button class="px-2 py-1 rounded text-white bg-emerald-600 hover:bg-emerald-700 text-xs" onclick="alert('👀 View ${p.sec} proof ()')">
-            <i class="fa-solid fa-eye mr-1"></i> View
-          </button>
-        </td>
-      </tr>`).join('');
-        document.getElementById('proofRows').innerHTML = rows;
+    /* ---------------- Proofs modal ---------------- */
+    function openUpload(sec) { document.getElementById('uploadModal').classList.remove('hidden'); if (sec) document.getElementById('upSection').value = sec; }
+    function closeUpload() { document.getElementById('uploadModal').classList.add('hidden'); }
+    function saveUpload() {
+        const sec = document.getElementById('upSection').value;
+        const file = document.getElementById('upFile').value.split('\\').pop();
+        if (!file) { alert('❌ Choose a file'); return; }
+        const idx = PROOFS.findIndex(p => p.sec === sec);
+        const amt = groupSum(DECLS, 'sec', 'amt')[sec] || 0;
+        const rec = { sec, amt, status: 'Pending' };
+        if (idx > -1) PROOFS[idx] = rec; else PROOFS.push(rec);
+        persist(); closeUpload(); renderProofs(); alert('✅ Proof uploaded (demo)');
     }
 
-    // ---- Limits list ----
-    function renderLimits() {
-        document.getElementById('limitsList').innerHTML = LIMITS.map(l => `
-      <div class="rounded-lg bg-slate-50 p-3">
-        <div class="font-medium text-slate-800">${l.key} — <span class="text-slate-600">${typeof l.cap === 'number' ? '₹' + fmt(l.cap) : l.cap}</span></div>
-        <div class="text-xs text-slate-600">${l.note}</div>
-      </div>`).join('');
+    /* ---------------- What-if ---------------- */
+    let WHATIF = null;
+    function openWhatIf() {
+        const by = groupSum(DECLS, 'sec', 'amt');
+        const rate = Number(document.getElementById('bracketPicker').value || 0.2);
+        const curEligible = Math.min(by['80C'] || 0, 150000) + Math.min(by['80CCD(1B)'] || 0, 50000);
+        const target80C = 150000, targetCCD = 50000;
+
+        const add80C = Math.max(0, target80C - (by['80C'] || 0));
+        const addCCD = Math.max(0, targetCCD - (by['80CCD(1B)'] || 0));
+        const deltaEligible = add80C + addCCD;
+        const estSave = Math.round(deltaEligible * rate);
+
+        WHATIF = { add80C, addCCD, estSave };
+        document.getElementById('whatIfPreview').innerHTML = `
+    <div>Current 80C: ₹${fmt(by['80C'] || 0)} → <b>₹${fmt((by['80C'] || 0) + add80C)}</b> (${add80C ? '+₹' + fmt(add80C) : 'no change'})</div>
+    <div>Current 80CCD(1B): ₹${fmt(by['80CCD(1B)'] || 0)} → <b>₹${fmt((by['80CCD(1B)'] || 0) + addCCD)}</b> (${addCCD ? '+₹' + fmt(addCCD) : 'no change'})</div>
+    <div class="mt-2 text-emerald-700">Estimated extra saving @ bracket: <b>₹${fmt(estSave)}</b></div>
+  `;
+        document.getElementById('whatIfModal').classList.remove('hidden');
+    }
+    function closeWhatIf() { document.getElementById('whatIfModal').classList.add('hidden'); }
+    function applyWhatIf() {
+        if (!WHATIF) { closeWhatIf(); return; }
+        const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+        if (WHATIF.add80C) {
+            DECLS.push({ id: Date.now() + 1, sec: '80C', amt: WHATIF.add80C, period: 'One-time', status: 'pending', note: 'What-if top-up' });
+            HIST.unshift({ ts: now, sec: '80C', amt: WHATIF.add80C, status: 'pending', note: 'What-if applied' });
+        }
+        if (WHATIF.addCCD) {
+            DECLS.push({ id: Date.now() + 2, sec: '80CCD(1B)', amt: WHATIF.addCCD, period: 'One-time', status: 'pending', note: 'What-if top-up' });
+            HIST.unshift({ ts: now, sec: '80CCD(1B)', amt: WHATIF.addCCD, status: 'pending', note: 'What-if applied' });
+        }
+        persist(); closeWhatIf(); renderDecls(); renderOverview(); drawMix(); drawAlloc(); renderHistory();
     }
 
-    // ---- History ----
-    function renderHistory() {
-        const q = (document.getElementById('searchHist').value || '').toLowerCase();
-        const st = document.getElementById('statusHist').value;
-        const rows = HIST
-            .filter(h => (st === 'all' ? true : h.status === st))
-            .filter(h => h.sec.toLowerCase().includes(q) || (h.note || '').toLowerCase().includes(q))
-            .slice().sort((a, b) => b.ts.localeCompare(a.ts));
-        document.getElementById('histRows').innerHTML = rows.map(h => `
-      <tr class="border-b last:border-0">
-        <td class="py-2 pr-4 text-slate-600">${h.ts}</td>
-        <td class="py-2 pr-4">${h.sec}</td>
-        <td class="py-2 pr-4">₹${fmt(h.amt)}</td>
-        <td class="py-2 pr-4">${badgePlain(h.status)}</td>
-        <td class="py-2 pr-4">${h.note || ''}</td>
-      </tr>`).join('');
+    /* ---------------- Submit / Export / Print ---------------- */
+    function submitDeclarations() {
+        alert('✅ Declaration submitted (demo)');
     }
+    function exportCSV() {
+        const headers = ['Section', 'Amount', 'Period', 'Status', 'Notes'];
+        const rows = DECLS.map(d => [d.sec, d.amt, d.period, d.status, (d.note || '').replace(/,/g, ';')]);
+        const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tax_declarations.csv'; a.click(); URL.revokeObjectURL(a.href);
+    }
+    function exportJSON() {
+        const payload = { declarations: DECLS, proofs: PROOFS, history: HIST };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tax_data.json'; a.click(); URL.revokeObjectURL(a.href);
+    }
+    function printSummary() {
+        const by = groupSum(DECLS, 'sec', 'amt');
+        const html = `
+  <html><head><title>Tax Declaration Summary</title>
+  <style>
+    body{font-family:system-ui,ui-sans-serif; padding:24px; color:#0f172a;}
+    h1{font-size:20px;margin:0 0 8px;} h2{font-size:16px;margin:16px 0 8px;}
+    table{border-collapse:collapse;width:100%;font-size:12px} th,td{border:1px solid #e2e8f0;padding:6px;text-align:left}
+  </style></head><body>
+    <h1>Tax Declaration Summary (Demo)</h1>
+    <div>Date: ${new Date().toLocaleString()}</div>
+    <h2>Declarations</h2>
+    <table><thead><tr><th>Section</th><th>Amount (₹)</th><th>Period</th><th>Status</th><th>Notes</th></tr></thead>
+    <tbody>
+      ${DECLS.map(d => `<tr><td>${d.sec}</td><td>${fmt(d.amt)}</td><td>${d.period}</td><td>${d.status}</td><td>${d.note || ''}</td></tr>`).join('')}
+    </tbody></table>
+    <h2>Totals by Section</h2>
+    <table><thead><tr><th>Section</th><th>Total (₹)</th></tr></thead>
+    <tbody>${Object.keys(by).map(k => `<tr><td>${k}</td><td>${fmt(by[k])}</td></tr>`).join('')}</tbody></table>
+    <p style="margin-top:16px;color:#64748b">This is a client-side preview. Use “Save as PDF”.</p>
+    <script>window.print();</script>
+</body>
 
-    // ---- Charts ----
-    function drawAlloc() {
-        const ctx = document.getElementById('allocChart').getContext('2d');
-        const declared = DECLS.reduce((a, d) => a + d.amt, 0);
-        const projTax = 142000; // 
-        if (_allocChart) _allocChart.destroy();
-        _allocChart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: ['Declared', 'Projected Tax'], datasets: [{ label: 'Amount (₹)', data: [declared, projTax] }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: false, scales: { y: { beginAtZero: true } } }
-        });
-    }
-    function drawMix() {
-        const ctx = document.getElementById('mixChart').getContext('2d');
-        const bySec = groupSum(DECLS, 'sec', 'amt');
-        if (_mixChart) _mixChart.destroy();
-        _mixChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: { labels: Object.keys(bySec), datasets: [{ data: Object.values(bySec) }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } }, animation: false }
-        });
-        document.getElementById('mixLegend').innerHTML =
-            Object.entries(bySec).map(([k, v]) => `<div class="flex items-center justify-between text-sm"><span>${k}</span><span>₹${fmt(v)}</span></div>`).join('');
-    }
-    function drawTrend() {
-        const ctx = document.getElementById('trendChart').getContext('2d');
-        if (_trendChart) _trendChart.destroy();
-        const months = ['2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09'];
-        const vals = [20000, 22000, 24000, 26000, 50000, 30000]; //  added declarations
-        _trendChart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: months.map(labelMonth), datasets: [{ label: 'Declared (₹)', data: vals }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, animation: false }
-        });
-    }
+</html>`;
+const w = window.open('', '_blank'); w.document.write(html); w.document.close();
+}
 
-    // ---- Utils ----
-    function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
-    function sum(a) { return a.reduce((x, y) => x + y, 0); }
-    function groupBy(arr, key) { return arr.reduce((m, x) => ((m[x[key]] = m[x[key]] || []).push(x), m), {}); }
-    function groupSum(arr, key, val) { return arr.reduce((m, x) => (m[x[key]] = (m[x[key]] || 0) + (x[val] || 0), m), {}); }
-    function badgePlain(s) {
-        const k = s.toLowerCase();
-        const m = { approved: 'bg-emerald-50 text-emerald-700', pending: 'bg-amber-50 text-amber-700', rejected: 'bg-red-50 text-red-700' };
-        const label = k.charAt(0).toUpperCase() + k.slice(1);
-        return `<span class="px-2 py-0.5 rounded-full ${m[k] || 'bg-slate-100 text-slate-700'} text-xs">${label}</span>`;
-    }
-    function norm(s) { return s.replaceAll(/[^A-Za-z0-9]/g, '').toUpperCase(); }
-    function normOut(s) { return s; }
-    function labelMonth(ym) { const [y, m] = ym.split('-'); return new Date(Number(y), Number(m) - 1, 1).toLocaleString('en-IN', { month: 'short', year: 'numeric' }); }
+/* ---------------- Charts ---------------- */
+function drawAlloc(){
+const ctx = document.getElementById('allocChart').getContext('2d');
+const declared = DECLS.reduce((a,d)=>a+d.amt,0);
+const projTax = (document.getElementById('regimePicker').value === 'old') ? 132000 : 142000;
+_allocChart && _allocChart.destroy();
+_allocChart = new Chart(ctx,{
+type:'bar',
+data:{ labels:['Declared','Projected Tax'], datasets:[{ label:'Amount (₹)', data:[declared, projTax] }]},
+options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, animation:false, scales:{
+y:{ beginAtZero:true } } }
+});
+}
+function drawMix(){
+const ctx = document.getElementById('mixChart').getContext('2d');
+const bySec = groupSum(DECLS,'sec','amt');
+_mixChart && _mixChart.destroy();
+_mixChart = new Chart(ctx,{
+type:'doughnut',
+data:{ labels:Object.keys(bySec), datasets:[{ data:Object.values(bySec) }] },
+options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{ display:false } },
+animation:false }
+});
+document.getElementById('mixLegend').innerHTML =
+Object.entries(bySec).map(([k,v])=>`<div class="flex items-center justify-between text-sm">
+    <span>${k}</span><span>₹${fmt(v)}</span></div>`).join('');
+}
+function drawTrend(){
+const ctx = document.getElementById('trendChart').getContext('2d');
+_trendChart && _trendChart.destroy();
+// Build last 6 months series from HIST for demo
+const map = {};
+HIST.forEach(h=>{
+const ym = h.ts.slice(0,7);
+map[ym] = (map[ym]||0) + Number(h.amt||0);
+});
+const months = [...new Set(Object.keys(map))].sort().slice(-6);
+const vals = months.map(m=>map[m]);
+_trendChart = new Chart(ctx,{
+type:'line',
+data:{ labels: months.map(labelMonth), datasets:[{ label:'Declared (₹)', data: vals }] },
+options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } }, animation:false }
+});
+}
+
+/* ---------------- Utils ---------------- */
+function fmt(n){ return (n||0).toLocaleString('en-IN'); }
+function groupSum(arr,key,val){ return arr.reduce((m,x)=> (m[x[key]] = (m[x[key]]||0) + (x[val]||0), m), {}); }
+function badgePlain(s){
+const k = String(s).toLowerCase();
+const m = { approved:'bg-emerald-50 text-emerald-700', pending:'bg-amber-50 text-amber-700', rejected:'bg-red-50
+text-red-700' };
+const label = k.charAt(0).toUpperCase()+k.slice(1);
+return `<span class="px-2 py-0.5 rounded-full ${m[k]||'bg-slate-100 text-slate-700'} text-xs">${label}</span>`;
+}
+function labelMonth(ym){ const [y,m] = ym.split('-'); return new Date(Number(y), Number(m)-1, 1).toLocaleString('en-IN',
+{ month:'short', year:'numeric' }); }
+
+/* ---------------- Proof modal open helper from table ---------------- */
+function openUploadFromTable(sec){ openUpload(sec); }
 </script>
 
 <style>

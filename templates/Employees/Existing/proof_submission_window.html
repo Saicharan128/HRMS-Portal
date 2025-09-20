@@ -13,6 +13,10 @@
             <button id="uploadBtn" class="px-3 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900 text-sm">
                 <i class="fa-solid fa-upload mr-1"></i> Upload Proof
             </button>
+            <button id="exportCsvBtn"
+                class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+            </button>
             <button id="downloadChecklistBtn"
                 class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
                 <i class="fa-solid fa-list-check mr-1"></i> Download Checklist
@@ -51,7 +55,13 @@
                     <h3 class="text-lg font-semibold text-slate-800">
                         <i class="fa-solid fa-window-restore mr-2"></i> Window
                     </h3>
-                    <span id="winBadge" class="px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700">Open</span>
+                    <div class="flex items-center gap-2">
+                        <button id="editWindowBtn"
+                            class="px-2 py-1 text-xs rounded border border-slate-300 bg-white hover:bg-slate-50">
+                            <i class="fa-solid fa-screwdriver-wrench"></i> Settings
+                        </button>
+                        <span id="winBadge" class="px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700">Open</span>
+                    </div>
                 </div>
                 <div class="mt-3 text-sm text-slate-700">
                     <div><b>Opens:</b> <span id="openDate">Dec 01, 2025</span></div>
@@ -60,7 +70,7 @@
                 </div>
                 <div class="mt-4">
                     <div class="w-full bg-slate-100 rounded-full h-2">
-                        <div id="progressBar" class="h-2 rounded-full bg-emerald-500" style="width: 0%"></div>
+                        <div id="progressBar" class="h-2 rounded-full bg-emerald-500" style="width:0%"></div>
                     </div>
                     <div class="text-xs text-slate-500 mt-1">
                         <span id="progressText">0% of window elapsed</span>
@@ -128,7 +138,7 @@
                     <i class="fa-solid fa-file-circle-check mr-2"></i> Proofs
                 </h3>
                 <div class="flex items-center gap-2">
-                    <input id="searchInput" type="text" placeholder="Search section or note..."
+                    <input id="searchInput" type="text" placeholder="Search section or file..."
                         class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
                     <select id="statusFilter" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
                         <option value="all">All</option>
@@ -136,6 +146,10 @@
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
+                    <button id="addRowBtn"
+                        class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Row
+                    </button>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -177,7 +191,7 @@
                 <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
                     <li>Combine multiple pages into a single PDF per section.</li>
                     <li>Ensure name, amount, dates are clearly visible.</li>
-                    <li>Only PNG/JPG/PDF up to 5 MB each ().</li>
+                    <li>Only PNG/JPG/PDF up to 5 MB each.</li>
                 </ul>
             </div>
         </div>
@@ -227,7 +241,9 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">File</label>
-                        <input id="upFile" type="file" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <input id="upFile" type="file" accept=".pdf,.png,.jpg,.jpeg"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        <div class="text-xs text-slate-500 mt-1">Accepted: PDF/PNG/JPG • Max 5 MB</div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
@@ -248,40 +264,74 @@
     </div>
 </div>
 
+<!-- Window Settings Modal -->
+<div id="winModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-slate-800">Window Settings</h3>
+                    <button id="closeWinModal" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-3 text-sm">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Opens</label>
+                            <input id="winOpen" type="date" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Closes</label>
+                            <input id="winClose" type="date"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button id="cancelWin"
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50">Cancel</button>
+                        <button id="saveWin" class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Chart.js CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-    // ---- Static window () ----
-    const OPEN = new Date('2025-12-01T00:00:00');
-    const CLOSE = new Date('2026-01-15T23:59:59');
+    /* ---------- LocalStorage ---------- */
+    const LS = { get: k => JSON.parse(localStorage.getItem(k) || 'null'), set: (k, v) => localStorage.setItem(k, JSON.stringify(v)) };
+    const K_PROOFS = 'psw_proofs', K_TIMELINE = 'psw_timeline', K_WINDOW = 'psw_window';
 
-    // ---- Dummy Data ----
-    const PROOFS = [
+    /* ---------- Seed Data ---------- */
+    let WINDOW = LS.get(K_WINDOW) || { open: '2025-12-01', close: '2026-01-15' };
+    let PROOFS = LS.get(K_PROOFS) || [
         { id: 1, sec: '80C', declared: 90000, file: 'ppf_receipt.pdf', status: 'approved' },
         { id: 2, sec: '80D', declared: 24000, file: 'health_premium.pdf', status: 'pending' },
         { id: 3, sec: '80CCD(1B)', declared: 50000, file: 'nps_receipt.pdf', status: 'pending' },
         { id: 4, sec: 'HRA', declared: 180000, file: 'rent_bundle.pdf', status: 'rejected' },
         { id: 5, sec: 'LTA', declared: 30000, file: 'tickets.pdf', status: 'pending' }
     ];
-    const TIMELINE = [
+    let TIMELINE = LS.get(K_TIMELINE) || [
         { ts: '2025-12-01 09:00', text: 'Window opened' },
         { ts: '2025-12-05 18:10', text: 'Uploaded 80C proof' },
         { ts: '2025-12-22 11:40', text: 'Uploaded HRA bundle' },
         { ts: '2025-12-30 16:25', text: 'Uploaded 80D receipt' }
     ];
+    function persist() { LS.set(K_PROOFS, PROOFS); LS.set(K_TIMELINE, TIMELINE); LS.set(K_WINDOW, WINDOW); }
 
-    // ---- Panels/Tabs ----
+    /* ---------- Panels/Tabs ---------- */
     const panels = {
         overview: document.getElementById('overviewPanel'),
         uploads: document.getElementById('uploadsPanel'),
         guidelines: document.getElementById('guidelinesPanel'),
         timeline: document.getElementById('timelinePanel')
     };
-
-    // ---- Charts ----
-    let _coverageChart, _statusChart;
-
     document.addEventListener('DOMContentLoaded', () => {
         setupTabs();
         wireButtons();
@@ -293,6 +343,7 @@
         startTick();
     });
 
+    /* ---------- Tabs ---------- */
     function setupTabs() {
         document.querySelectorAll('.psw-tab').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -305,113 +356,160 @@
         });
     }
 
+    /* ---------- Buttons & Events ---------- */
     function wireButtons() {
+        // Upload
         document.getElementById('uploadBtn').addEventListener('click', openUpload);
         document.getElementById('uploadActionBtn').addEventListener('click', openUpload);
         document.getElementById('closeUploadModal').addEventListener('click', closeUpload);
         document.getElementById('cancelUpload').addEventListener('click', closeUpload);
         document.getElementById('saveUpload').addEventListener('click', saveUpload);
 
+        // Upload table controls
         document.getElementById('searchInput').addEventListener('input', renderProofs);
         document.getElementById('statusFilter').addEventListener('change', renderProofs);
+        document.getElementById('addRowBtn').addEventListener('click', addRow);
 
-        document.getElementById('bulkZipBtn').addEventListener('click', () => alert('📦 Downloading all receipts ()'));
-        document.getElementById('downloadChecklistBtn').addEventListener('click', () => alert('📝 Checklist downloaded ()'));
-        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket ()'));
+        // Window settings
+        document.getElementById('editWindowBtn').addEventListener('click', openWinModal);
+        document.getElementById('closeWinModal').addEventListener('click', closeWinModal);
+        document.getElementById('cancelWin').addEventListener('click', closeWinModal);
+        document.getElementById('saveWin').addEventListener('click', saveWindow);
+
+        // Utilities
         document.getElementById('fyPicker').addEventListener('change', drawStatus);
+        document.getElementById('bulkZipBtn').addEventListener('click', makeZip);
+        document.getElementById('downloadChecklistBtn').addEventListener('click', downloadChecklist);
+        document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+        document.getElementById('contactBtn').addEventListener('click', () => alert('📬 Opening support ticket'));
     }
 
-    // ---- Overview ----
+    /* ---------- Overview ---------- */
+    let _coverageChart, _statusChart, _countTick;
     function renderOverview() {
         const submitted = PROOFS.filter(p => p.status !== 'pending').length;
         const rejected = PROOFS.filter(p => p.status === 'rejected').length;
         const pending = PROOFS.filter(p => p.status === 'pending').length;
-        document.getElementById('sumSubmitted').textContent = submitted;
-        document.getElementById('sumPending').textContent = pending;
-        document.getElementById('sumRejected').textContent = rejected;
+        _id('sumSubmitted').textContent = submitted;
+        _id('sumPending').textContent = pending;
+        _id('sumRejected').textContent = rejected;
 
+        const open = new Date(WINDOW.open + 'T00:00:00');
+        const close = new Date(WINDOW.close + 'T23:59:59');
         const now = new Date();
-        const open = OPEN, close = CLOSE;
-        const total = close - open;
-        const elapsed = Math.max(0, Math.min(total, now - open));
-        const pct = total > 0 ? Math.round((elapsed / total) * 100) : 0;
+        const total = Math.max(0, close - open);
+        const elapsed = Math.min(Math.max(0, now - open), total);
+        const pct = total ? Math.round((elapsed / total) * 100) : 0;
 
-        const badge = document.getElementById('winBadge');
-        if (now < open) { badge.textContent = 'Upcoming'; badge.className = 'px-2 py-1 text-xs rounded bg-amber-50 text-amber-700'; }
-        else if (now > close) { badge.textContent = 'Closed'; badge.className = 'px-2 py-1 text-xs rounded bg-red-50 text-red-700'; }
-        else { badge.textContent = 'Open'; badge.className = 'px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700'; }
+        const badge = _id('winBadge');
+        if (now < open) { setBadge(badge, 'Upcoming', 'amber'); }
+        else if (now > close) { setBadge(badge, 'Closed', 'red'); }
+        else { setBadge(badge, 'Open', 'emerald'); }
 
-        document.getElementById('progressBar').style.width = pct + '%';
-        document.getElementById('progressText').textContent = `${pct}% of window elapsed`;
-        document.getElementById('openDate').textContent = open.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-        document.getElementById('closeDate').textContent = close.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        _id('progressBar').style.width = pct + '%';
+        _id('progressText').textContent = `${pct}% of window elapsed`;
+        _id('openDate').textContent = fmtDate(open);
+        _id('closeDate').textContent = fmtDate(close);
 
-        // Coverage
+        // Coverage legend
         const bySec = groupSum(PROOFS, 'sec', 'declared');
-        const legend = Object.entries(bySec).map(([k, v]) => `<div class="flex items-center justify-between text-sm"><span>${k}</span><span>₹${fmt(v)}</span></div>`).join('');
-        document.getElementById('coverageLegend').innerHTML = legend;
+        _id('coverageLegend').innerHTML = Object.entries(bySec).map(([k, v]) => `
+    <div class="flex items-center justify-between text-sm"><span>${k}</span><span>₹${fmtIN(v)}</span></div>
+  `).join('') || '<div class="text-slate-500 text-sm">No declarations yet.</div>';
     }
 
-    // ---- Countdown tick ----
-    function startTick() {
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-    }
+    /* ---------- Countdown ---------- */
+    function startTick() { updateCountdown(); clearInterval(_countTick); _countTick = setInterval(updateCountdown, 1000); }
     function updateCountdown() {
-        const now = new Date();
-        const end = CLOSE;
-        const diff = end - now;
+        const now = new Date(), open = new Date(WINDOW.open + 'T00:00:00'), close = new Date(WINDOW.close + 'T23:59:59');
         let out = 'Window closed';
-        if (now < OPEN) { out = 'Opens soon'; }
-        else if (diff > 0) {
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
+        if (now < open) { out = 'Opens soon'; }
+        else if (now <= close) {
+            const diff = close - now;
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
             out = `${pad(d)}d : ${pad(h)}h : ${pad(m)}m : ${pad(s)}s`;
         }
-        document.getElementById('countdown').textContent = out;
+        _id('countdown').textContent = out;
     }
 
-    // ---- Uploads table ----
+    /* ---------- Uploads Table ---------- */
     function renderProofs() {
-        const q = (document.getElementById('searchInput').value || '').toLowerCase();
-        const st = document.getElementById('statusFilter').value;
+        const q = (_id('searchInput').value || '').toLowerCase();
+        const st = _id('statusFilter').value;
         const rows = PROOFS
-            .filter(p => (st === 'all' ? true : p.status === st))
+            .filter(p => st === 'all' ? true : p.status === st)
             .filter(p => p.sec.toLowerCase().includes(q) || (p.file || '').toLowerCase().includes(q))
             .slice().sort((a, b) => a.sec.localeCompare(b.sec));
-        document.getElementById('proofRows').innerHTML = rows.map(r => `
-      <tr class="border-b last:border-0">
-        <td class="py-2 pr-4">${r.sec}</td>
-        <td class="py-2 pr-4">₹${fmt(r.declared)}</td>
-        <td class="py-2 pr-4">${r.file ? `<i class='fa-solid fa-paperclip mr-1'></i>${r.file}` : '-'}</td>
-        <td class="py-2 pr-4">${badgePlain(r.status)}</td>
-        <td class="py-2 pr-4">
+
+        _id('proofRows').innerHTML = rows.map(r => `
+    <tr class="border-b last:border-0">
+      <td class="py-2 pr-4">
+        <select class="rounded border border-slate-300 px-2 py-1 text-sm" onchange="updateField(${r.id},'sec',this.value)">
+          ${['80C', '80D', '80CCD(1B)', 'HRA', 'LTA'].map(s => `<option ${s === r.sec ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td class="py-2 pr-4">
+        <input type="number" class="w-32 rounded border border-slate-300 px-2 py-1 text-sm"
+               value="${r.declared || 0}" onchange="updateNumber(${r.id},'declared',this.value)">
+      </td>
+      <td class="py-2 pr-4">${r.file ? `<i class="fa-solid fa-paperclip mr-1"></i>${escapeHtml(r.file)}` : '-'}</td>
+      <td class="py-2 pr-4">${badgePlain(r.status)}</td>
+      <td class="py-2 pr-4">
+        <div class="flex items-center gap-2">
           <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="openUpload('${r.sec}')">
             <i class="fa-solid fa-upload mr-1"></i> Upload
           </button>
-          <button class="px-2 py-1 rounded text-white ${r.file ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-400 cursor-not-allowed'} text-xs" ${r.file ? '' : 'disabled'} onclick="alert('👀 Preview ${r.file} ()')">
+          <button class="px-2 py-1 rounded text-white ${r.file ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-400 cursor-not-allowed'} text-xs" ${r.file ? '' : 'disabled'} onclick="alert('Preview: ${escapeHtml(r.file || 'N/A')}')">
             <i class="fa-solid fa-eye mr-1"></i> Preview
           </button>
-        </td>
-      </tr>`).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No records.</td></tr>`;
-    }
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="markStatus(${r.id},'approved')">
+            <i class="fa-solid fa-check mr-1"></i> Approve
+          </button>
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="markStatus(${r.id},'rejected')">
+            <i class="fa-solid fa-xmark mr-1"></i> Reject
+          </button>
+          <button class="px-2 py-1 rounded border border-rose-200 bg-white text-xs hover:bg-rose-50 text-rose-700" onclick="removeRow(${r.id})">
+            <i class="fa-solid fa-trash mr-1"></i> Delete
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No records.</td></tr>`;
 
-    // ---- Timeline ----
+        // refresh analytics
+        renderOverview(); drawCoverage(); drawStatus();
+    }
+    function addRow() {
+        const id = Date.now();
+        PROOFS.unshift({ id, sec: '80C', declared: 0, file: '', status: 'pending' });
+        persist(); renderProofs();
+    }
+    function updateField(id, key, val) { const r = PROOFS.find(x => x.id === id); if (!r) return; r[key] = val; persist(); renderOverview(); drawCoverage(); }
+    function updateNumber(id, key, val) { const n = Number(val) || 0; updateField(id, key, n); }
+    function removeRow(id) { if (!confirm('Delete this row?')) return; PROOFS = PROOFS.filter(x => x.id !== id); persist(); renderProofs(); }
+    function markStatus(id, st) { const r = PROOFS.find(x => x.id === id); if (!r) return; r.status = st; persist(); renderProofs(); addTimeline(`${st === 'approved' ? 'Approved' : 'Rejected'} ${r.sec} proof`); }
+
+    /* ---------- Timeline ---------- */
     function renderTimeline() {
-        document.getElementById('timelineList').innerHTML = TIMELINE.map(t => `
-      <div class="rounded-lg bg-slate-50 p-3">
-        <div class="text-xs text-slate-500">${t.ts}</div>
-        <div class="text-sm text-slate-800">${t.text}</div>
-      </div>`).join('');
+        _id('timelineList').innerHTML = TIMELINE.map(t => `
+    <div class="rounded-lg bg-slate-50 p-3">
+      <div class="text-xs text-slate-500">${t.ts}</div>
+      <div class="text-sm text-slate-800">${escapeHtml(t.text)}</div>
+    </div>`).join('');
+    }
+    function addTimeline(text) {
+        const ts = new Date().toISOString().replace('T', ' ').slice(0, 16);
+        TIMELINE.unshift({ ts, text }); persist(); renderTimeline();
     }
 
-    // ---- Charts ----
+    /* ---------- Charts ---------- */
     function drawCoverage() {
-        const ctx = document.getElementById('coverageChart').getContext('2d');
+        const ctx = _id('coverageChart').getContext('2d');
         const bySec = groupSum(PROOFS, 'sec', 'declared');
-        if (_coverageChart) _coverageChart.destroy();
+        _coverageChart && _coverageChart.destroy();
         _coverageChart = new Chart(ctx, {
             type: 'doughnut',
             data: { labels: Object.keys(bySec), datasets: [{ data: Object.values(bySec) }] },
@@ -419,14 +517,14 @@
         });
     }
     function drawStatus() {
-        const ctx = document.getElementById('statusChart').getContext('2d');
+        const ctx = _id('statusChart').getContext('2d');
         const buckets = ['Approved', 'Pending', 'Rejected'];
         const counts = [
             PROOFS.filter(p => p.status === 'approved').length,
             PROOFS.filter(p => p.status === 'pending').length,
             PROOFS.filter(p => p.status === 'rejected').length
         ];
-        if (_statusChart) _statusChart.destroy();
+        _statusChart && _statusChart.destroy();
         _statusChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: buckets, datasets: [{ label: 'Count', data: counts }] },
@@ -434,30 +532,76 @@
         });
     }
 
-    // ---- Upload Modal ----
-    function openUpload(sec) {
-        document.getElementById('uploadModal').classList.remove('hidden');
-        if (sec) document.getElementById('upSection').value = sec;
-    }
-    function closeUpload() { document.getElementById('uploadModal').classList.add('hidden'); }
+    /* ---------- Upload Modal ---------- */
+    function openUpload(sec) { _id('uploadModal').classList.remove('hidden'); if (sec) _id('upSection').value = sec; _id('upFile').value = ''; _id('upNotes').value = ''; }
+    function closeUpload() { _id('uploadModal').classList.add('hidden'); }
     function saveUpload() {
-        const sec = document.getElementById('upSection').value;
-        const file = document.getElementById('upFile').value.split('\\').pop();
-        if (!file) { alert('❌ Choose a file'); return; }
-        const rec = PROOFS.find(p => p.sec === sec);
-        if (rec) { rec.file = file; rec.status = 'pending'; }
-        closeUpload(); renderProofs(); alert('✅ Proof uploaded ()');
+        const sec = _id('upSection').value;
+        const fileInput = _id('upFile');
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) { alert('Choose a file'); return; }
+        const extOk = /\.(pdf|png|jpg|jpeg)$/i.test(f.name);
+        const sizeOk = f.size <= 5 * 1024 * 1024;
+        if (!extOk) { alert('Only PDF/PNG/JPG allowed'); return; }
+        if (!sizeOk) { alert('Max file size is 5 MB'); return; }
+
+        const rec = PROOFS.find(p => p.sec === sec) || (PROOFS.push({ id: Date.now(), sec, declared: 0, file: '', status: 'pending' }), PROOFS[PROOFS.length - 1]);
+        rec.file = f.name;
+        rec.status = 'pending';
+        persist(); closeUpload(); renderProofs(); addTimeline(`Uploaded ${sec} proof`);
+        alert('✅ Proof uploaded');
     }
 
-    // ---- Helpers ----
-    function groupSum(arr, key, val) { return arr.reduce((m, x) => (m[x[key]] = (m[x[key]] || 0) + (x[val] || 0), m), {}); }
-    function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
+    /* ---------- Window Settings ---------- */
+    function openWinModal() {
+        _id('winOpen').value = WINDOW.open;
+        _id('winClose').value = WINDOW.close;
+        _id('winModal').classList.remove('hidden');
+    }
+    function closeWinModal() { _id('winModal').classList.add('hidden'); }
+    function saveWindow() {
+        const o = _id('winOpen').value, c = _id('winClose').value;
+        if (!o || !c) { alert('Select both dates'); return; }
+        if (new Date(o) > new Date(c)) { alert('Open date must be before close date'); return; }
+        WINDOW = { open: o, close: c }; persist(); closeWinModal();
+        renderOverview(); drawStatus(); startTick();
+    }
+
+    /* ---------- Utilities ---------- */
+    function groupSum(arr, key, val) { return arr.reduce((m, x) => { m[x[key]] = (m[x[key]] || 0) + (x[val] || 0); return m; }, {}); }
+    function fmtIN(n) { return (n || 0).toLocaleString('en-IN'); }
     function pad(n) { return String(n).padStart(2, '0'); }
-    function badgePlain(s) {
-        const k = s.toLowerCase();
-        const m = { approved: 'bg-emerald-50 text-emerald-700', pending: 'bg-amber-50 text-amber-700', rejected: 'bg-red-50 text-red-700' };
-        const label = k.charAt(0).toUpperCase() + k.slice(1);
-        return `<span class="px-2 py-0.5 rounded-full ${m[k] || 'bg-slate-100 text-slate-700'} text-xs">${label}</span>`;
+    function _id(id) { return document.getElementById(id); }
+    function fmtDate(d) { return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); }
+    function setBadge(el, txt, tone) { const m = { emerald: 'bg-emerald-50 text-emerald-700', amber: 'bg-amber-50 text-amber-700', red: 'bg-red-50 text-red-700' }; el.textContent = txt; el.className = `px-2 py-1 text-xs rounded ${m[tone] || 'bg-slate-100 text-slate-700'}`; }
+    function badgePlain(s) { const k = s.toLowerCase(); const m = { approved: 'bg-emerald-50 text-emerald-700', pending: 'bg-amber-50 text-amber-700', rejected: 'bg-red-50 text-red-700' }; const label = k.charAt(0).toUpperCase() + k.slice(1); return `<span class="px-2 py-0.5 rounded-full ${m[k] || 'bg-slate-100 text-slate-700'} text-xs">${label}</span>`; }
+    function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+
+    /* ---------- Downloaders ---------- */
+    function downloadChecklist() {
+        const lines = [
+            'Proof Checklist',
+            '----------------',
+            '80C: PPF/ELSS/LIC receipts; EPF auto-considered',
+            '80D: Health insurance premium with policy no.',
+            'HRA: Rent receipts, agreement, landlord PAN (if applicable)',
+            'LTA: Tickets + boarding passes (eligible travel)',
+            'NPS 80CCD(1B): Contribution receipt'
+        ];
+        const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'proof-checklist.txt'; a.click(); URL.revokeObjectURL(url);
+    }
+    function exportCsv() {
+        const cols = ['sec', 'declared', 'file', 'status'];
+        const header = cols.join(',');
+        const body = PROOFS.map(r => cols.map(k => `"${String(r[k] ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([header + '\n' + body], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'proofs.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+    function makeZip() {
+        // client-only stub (no bundler); create a dummy .zip placeholder so the UX flows
+        const blob = new Blob(['Receipts will be zipped by the server in production.'], { type: 'application/zip' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'receipts.zip'; a.click(); URL.revokeObjectURL(url);
     }
 </script>
 

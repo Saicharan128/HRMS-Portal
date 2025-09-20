@@ -40,7 +40,7 @@
     <section id="minePanel" class="ex-panel">
         <div class="rounded-2xl border border-slate-200 bg-white">
             <div class="flex items-center justify-between p-4 border-b border-slate-200">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <div class="relative w-full md:w-80">
                         <i
                             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -61,24 +61,38 @@
                     </select>
                     <input id="myPeriod" type="month" class="px-3 py-2 rounded-lg border border-slate-300 text-sm">
                 </div>
-                <div class="text-sm text-slate-600">
-                    <span id="kpiPending">Pending: —</span> • <span id="kpiApproved">Approved: —</span>
+                <div class="flex items-center gap-2">
+                    <button id="bulkSubmit"
+                        class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
+                            class="fa-solid fa-paper-plane mr-1"></i> Submit selected</button>
+                    <button id="bulkDelete"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm"><i
+                            class="fa-solid fa-trash mr-1"></i> Delete</button>
+                    <button id="exportMine"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm"><i
+                            class="fa-solid fa-file-csv mr-1"></i> Export CSV</button>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="text-left text-slate-500 border-b">
                         <tr>
+                            <th class="py-2 px-4 w-8"><input id="mySelectAll" type="checkbox"></th>
                             <th class="py-2 px-4">Date</th>
                             <th class="py-2 px-4">Category</th>
                             <th class="py-2 px-4">Merchant</th>
                             <th class="py-2 px-4">Amount</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 w-36"></th>
                         </tr>
                     </thead>
                     <tbody id="myRows" class="text-slate-800"><!-- injected --></tbody>
                 </table>
+            </div>
+            <div class="flex items-center justify-between p-3">
+                <div class="text-sm text-slate-600"><span id="kpiPending">Pending: —</span> • <span
+                        id="kpiApproved">Approved: —</span></div>
+                <div id="mineInfo" class="text-sm text-slate-600"></div>
             </div>
         </div>
     </section>
@@ -98,6 +112,9 @@
                     <button id="approveAll"
                         class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm"><i
                             class="fa-solid fa-check mr-1"></i> Approve All</button>
+                    <button id="exportAp"
+                        class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm"><i
+                            class="fa-solid fa-file-csv mr-1"></i> Export CSV</button>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -109,7 +126,7 @@
                             <th class="py-2 px-4">Amount</th>
                             <th class="py-2 px-4">Policy</th>
                             <th class="py-2 px-4">Status</th>
-                            <th class="py-2 px-4 w-28"></th>
+                            <th class="py-2 px-4 w-36"></th>
                         </tr>
                     </thead>
                     <tbody id="apRows" class="text-slate-800"><!-- injected --></tbody>
@@ -132,8 +149,9 @@
                             <option value="sent">Sent</option>
                         </select>
                         <button id="genRbFile"
-                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"><i
-                                class="fa-solid fa-file-arrow-down mr-1"></i> Generate File</button>
+                            class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm">
+                            <i class="fa-solid fa-file-arrow-down mr-1"></i> Generate File
+                        </button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -144,7 +162,7 @@
                                 <th class="py-2 px-4">Count</th>
                                 <th class="py-2 px-4">Amount</th>
                                 <th class="py-2 px-4">Status</th>
-                                <th class="py-2 px-4 w-24"></th>
+                                <th class="py-2 px-4 w-36"></th>
                             </tr>
                         </thead>
                         <tbody id="rbRows" class="text-slate-800"><!-- injected --></tbody>
@@ -189,13 +207,13 @@
     </section>
 </div>
 
-<!-- New Expense Modal -->
+<!-- New/Edit Expense Modal -->
 <div id="expModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl">
                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-slate-800">New Expense</h3>
+                    <h3 id="expTitle" class="text-lg font-semibold text-slate-800">New Expense</h3>
                     <button id="closeExpModal" class="text-slate-400 hover:text-slate-600"><i
                             class="fa-solid fa-times text-xl"></i></button>
                 </div>
@@ -213,7 +231,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <input id="eMerchant" placeholder="Merchant"
                             class="w-full rounded-lg border border-slate-300 px-3 py-2">
-                        <input id="eAmount" type="number" placeholder="Amount"
+                        <input id="eAmount" type="number" min="0" step="0.01" placeholder="Amount"
                             class="w-full rounded-lg border border-slate-300 px-3 py-2">
                     </div>
                     <input id="eNote" placeholder="Notes (optional)"
@@ -221,9 +239,15 @@
                     <div class="flex items-center justify-between">
                         <label class="flex items-center gap-2 text-sm"><input id="ePolicy" type="checkbox" checked>
                             Within policy</label>
+                        <div class="text-xs text-slate-500" id="policyHint">Meals cap: ₹800 / $10 per day • Travel:
+                            economy only</div>
+                    </div>
+                    <div class="flex items-center justify-between">
                         <button id="uploadReceipt"
-                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm"><i
-                                class="fa-solid fa-upload mr-1"></i> Receipt</button>
+                            class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+                            <i class="fa-solid fa-upload mr-1"></i> Receipt
+                        </button>
+                        <span id="modalMsg" class="text-xs text-slate-500"></span>
                     </div>
                     <div class="flex items-center justify-end gap-2 pt-2">
                         <button id="saveDraft"
@@ -233,6 +257,7 @@
                             class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"><i
                                 class="fa-solid fa-paper-plane mr-1"></i> Submit</button>
                     </div>
+                    <input type="hidden" id="eId">
                 </div>
             </div>
         </div>
@@ -240,71 +265,86 @@
 </div>
 
 <script>
-    /* -------- Mock Data -------- */
-    let MY = [
-        { id: 1, date: '2025-09-10', cat: 'Meals', merch: 'Cafe Deli', amt: 18, st: 'submitted' },
-        { id: 2, date: '2025-09-11', cat: 'Travel', merch: 'Uber', amt: 22, st: 'approved' },
-        { id: 3, date: '2025-09-12', cat: 'Supplies', merch: 'OfficeMart', amt: 45, st: 'draft' },
-        { id: 4, date: '2025-09-08', cat: 'Lodging', merch: 'Hotel Z', amt: 180, st: 'reimbursed' },
-        { id: 5, date: '2025-09-09', cat: 'Travel', merch: 'IndiGo', amt: 120, st: 'rejected' }
+    /* -------- Persistence Keys -------- */
+    const K_MY = "exp_my", K_AP = "exp_ap", K_RB = "exp_rb", K_POL = "exp_pol", K_PREF = "exp_pref";
+
+    /* -------- Seed or Load -------- */
+    let MY = JSON.parse(localStorage.getItem(K_MY) || "null") || [
+        { id: 1, date: '2025-09-10', cat: 'Meals', merch: 'Cafe Deli', amt: 18, st: 'submitted', note: '' },
+        { id: 2, date: '2025-09-11', cat: 'Travel', merch: 'Uber', amt: 22, st: 'approved', note: '' },
+        { id: 3, date: '2025-09-12', cat: 'Supplies', merch: 'OfficeMart', amt: 45, st: 'draft', note: '' },
+        { id: 4, date: '2025-09-08', cat: 'Lodging', merch: 'Hotel Z', amt: 180, st: 'reimbursed', note: '' },
+        { id: 5, date: '2025-09-09', cat: 'Travel', merch: 'IndiGo', amt: 120, st: 'rejected', note: 'Out of policy' }
     ];
-    let AP = [
+    let AP = JSON.parse(localStorage.getItem(K_AP) || "null") || [
         { id: 'R-101', emp: 'Aarav Mehta', cat: 'Travel', amt: 120, policy: 'OK', st: 'submitted' },
         { id: 'R-102', emp: 'Riya Patel', cat: 'Meals', amt: 38, policy: 'Flag', st: 'flagged' },
         { id: 'R-103', emp: 'Noah Kim', cat: 'Supplies', amt: 65, policy: 'OK', st: 'submitted' }
     ];
-    let RB = [
+    let RB = JSON.parse(localStorage.getItem(K_RB) || "null") || [
         { id: 'RB-2301', count: 7, amount: 563, st: 'sent' },
         { id: 'RB-2302', count: 4, amount: 241, st: 'queued' }
     ];
-    let POL = [
+    let POL = JSON.parse(localStorage.getItem(K_POL) || "null") || [
         { name: 'Meals — ₹800/day or $10/day cap', ver: 'v2.0', eff: '2025-07-01' },
         { name: 'Travel — economy, >300km needs approval', ver: 'v1.8', eff: '2025-06-15' }
     ];
+    const PREF = JSON.parse(localStorage.getItem(K_PREF) || "{}");
 
-    /* -------- Helpers -------- */
+    function persist() { localStorage.setItem(K_MY, JSON.stringify(MY)); localStorage.setItem(K_AP, JSON.stringify(AP)); localStorage.setItem(K_RB, JSON.stringify(RB)); localStorage.setItem(K_POL, JSON.stringify(POL)); localStorage.setItem(K_PREF, JSON.stringify(PREF)); }
+
+    /* -------- Utilities -------- */
     const $ = (id) => document.getElementById(id);
-    function money(n) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n || 0)); }
+    const money = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n || 0));
     function badge(s) { return s === 'approved' ? 'bg-emerald-50 text-emerald-700' : s === 'submitted' ? 'bg-amber-50 text-amber-700' : s === 'reimbursed' ? 'bg-blue-50 text-blue-700' : s === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-700'; }
+    function dlCsv(rows, name) { const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n'); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url); }
+    function withinMonth(d, ym) { if (!ym) return true; return (d || '').slice(0, 7) === ym; }
 
     /* -------- Init -------- */
     document.addEventListener('DOMContentLoaded', () => {
         // Tabs
         document.querySelectorAll('.ex-tab').forEach(b => {
             b.addEventListener('click', e => {
-                document.querySelectorAll('.ex-tab').forEach(x => x.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                const name = e.currentTarget.id.replace('Tab', '');
-                document.querySelectorAll('.ex-panel').forEach(p => p.classList.add('hidden'));
-                document.getElementById(name + 'Panel').classList.remove('hidden');
+                document.querySelectorAll('.ex-tab').forEach(x => x.classList.remove('active')); e.currentTarget.classList.add('active');
+                const name = e.currentTarget.id.replace('Tab', ''); document.querySelectorAll('.ex-panel').forEach(p => p.classList.add('hidden')); $(name + 'Panel').classList.remove('hidden');
                 if (name === 'reports') { ensureCharts(); drawCharts(); }
             });
         });
 
         // My expenses filters
-        $('myPeriod').value = new Date().toISOString().slice(0, 7);
-        $('myStatus').addEventListener('change', renderMine);
+        $('myPeriod').value = PREF.period || new Date().toISOString().slice(0, 7);
+        $('myStatus').value = PREF.status || 'all';
+        $('myStatus').addEventListener('change', () => { PREF.status = $('myStatus').value; persist(); renderMine(); });
+        $('myPeriod').addEventListener('change', () => { PREF.period = $('myPeriod').value; persist(); renderMine(); });
+
         const s = $('mySearch'), c = $('myClear');
-        s.addEventListener('input', () => { c.classList.toggle('hidden', !s.value.trim()); renderMine(); });
-        c.addEventListener('click', () => { s.value = ''; c.classList.add('hidden'); renderMine(); });
-        $('myPeriod').addEventListener('change', renderMine);
+        s.value = PREF.q || '';
+        s.addEventListener('input', () => { c.classList.toggle('hidden', !s.value.trim()); PREF.q = s.value; persist(); renderMine(); });
+        c.addEventListener('click', () => { s.value = ''; c.classList.add('hidden'); PREF.q = ''; persist(); renderMine(); });
+
+        // Bulk actions
+        $('mySelectAll').addEventListener('change', e => { document.querySelectorAll('.rowSel').forEach(cb => cb.checked = e.target.checked); });
+        $('bulkSubmit').addEventListener('click', bulkSubmit);
+        $('bulkDelete').addEventListener('click', bulkDelete);
+        $('exportMine').addEventListener('click', exportMine);
 
         // Approvals
         $('apFilter').addEventListener('change', renderApprovals);
-        $('approveAll').addEventListener('click', () => { AP = AP.map(x => ({ ...x, st: 'approved' })); renderApprovals(); });
+        $('approveAll').addEventListener('click', () => { AP = AP.map(x => ({ ...x, st: 'approved' })); persist(); renderApprovals(); });
+        $('exportAp').addEventListener('click', exportApprovals);
 
         // Reimbursements
         $('rbFilter').addEventListener('change', renderBatches);
-        $('genRbFile').addEventListener('click', () => alert('✅ Reimbursement file generated'));
+        $('genRbFile').addEventListener('click', genRbCsv);
 
         // Policies
         $('newPolicy').addEventListener('click', () => alert('📝 New policy form would open'));
 
         // Modal
-        $('newExpenseBtn').addEventListener('click', openExpModal);
+        $('newExpenseBtn').addEventListener('click', () => openExpModal());
         $('closeExpModal').addEventListener('click', closeExpModal);
-        $('saveDraft').addEventListener('click', saveDraft);
-        $('submitExpense').addEventListener('click', submitExpense);
+        $('saveDraft').addEventListener('click', () => saveOrSubmit('draft'));
+        $('submitExpense').addEventListener('click', () => saveOrSubmit('submitted'));
         $('uploadReceipt').addEventListener('click', () => alert('📎 Upload receipt (mock)'));
 
         // Paint
@@ -312,30 +352,97 @@
     });
 
     /* -------- My Expenses -------- */
-    function renderMine() {
+    function filteredMine() {
         const q = ($('mySearch').value || '').toLowerCase();
         const st = $('myStatus').value;
-        const data = MY.filter(x => (st === 'all' || x.st === st) && (!q || [x.cat, x.merch].some(v => v.toLowerCase().includes(q))));
+        const ym = $('myPeriod').value;
+        return MY.filter(x =>
+            (st === 'all' || x.st === st) &&
+            withinMonth(x.date, ym) &&
+            (!q || [x.cat, x.merch, x.note || ''].some(v => String(v).toLowerCase().includes(q)))
+        ).sort((a, b) => b.date.localeCompare(a.date));
+    }
+    function renderMine() {
+        const data = filteredMine();
         $('myRows').innerHTML = data.map(x => `
     <tr class="border-b last:border-0">
+      <td class="py-2 px-4"><input type="checkbox" class="rowSel" data-id="${x.id}"></td>
       <td class="py-2 px-4">${x.date}</td>
       <td class="py-2 px-4">${x.cat}</td>
       <td class="py-2 px-4">${x.merch}</td>
       <td class="py-2 px-4">${money(x.amt)}</td>
       <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${badge(x.st)} capitalize">${x.st}</span></td>
-      <td class="py-2 px-4 text-right">
+      <td class="py-2 px-4 text-right space-x-2">
         <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="editExp(${x.id})">Edit</button>
+        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="dupExp(${x.id})">Duplicate</button>
       </td>
-    </tr>`).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No expenses</td></tr>`;
+    </tr>`).join('') || `<tr><td colspan="7" class="py-6 text-center text-slate-500">No expenses</td></tr>`;
+
         const pSum = MY.filter(x => x.st === 'submitted').reduce((s, i) => s + i.amt, 0);
         const aSum = MY.filter(x => x.st === 'approved' || x.st === 'reimbursed').reduce((s, i) => s + i.amt, 0);
         $('kpiPending').textContent = 'Pending: ' + money(pSum);
         $('kpiApproved').textContent = 'Approved: ' + money(aSum);
+        $('mineInfo').textContent = data.length ? `${data.length} item(s)` : '—';
+
+        // keep charts in sync
+        if (!document.getElementById('reportsPanel').classList.contains('hidden')) { drawCharts(); }
     }
     function editExp(id) {
         const e = MY.find(x => x.id === id); if (!e) return;
-        $('eDate').value = e.date; $('eCategory').value = e.cat; $('eMerchant').value = e.merch; $('eAmount').value = e.amt; $('eNote').value = '';
+        $('eId').value = e.id; $('expTitle').textContent = 'Edit Expense';
+        $('eDate').value = e.date; $('eCategory').value = e.cat; $('eMerchant').value = e.merch; $('eAmount').value = e.amt; $('eNote').value = e.note || '';
+        $('ePolicy').checked = e.st !== 'rejected';
         openExpModal();
+    }
+    function dupExp(id) {
+        const e = MY.find(x => x.id === id); if (!e) return;
+        const copy = { ...e, id: Date.now(), date: new Date().toISOString().slice(0, 10), st: 'draft' };
+        MY.unshift(copy); persist(); renderMine();
+    }
+    function bulkSubmit() {
+        const ids = [...document.querySelectorAll('.rowSel:checked')].map(cb => Number(cb.dataset.id));
+        if (!ids.length) return alert('Select at least one row');
+        MY = MY.map(x => ids.includes(x.id) ? { ...x, st: 'submitted' } : x); persist(); renderMine();
+    }
+    function bulkDelete() {
+        const ids = [...document.querySelectorAll('.rowSel:checked')].map(cb => Number(cb.dataset.id));
+        if (!ids.length) return alert('Select at least one row');
+        if (!confirm('Delete selected expenses?')) return;
+        MY = MY.filter(x => !ids.includes(x.id)); persist(); renderMine();
+    }
+    function exportMine() {
+        const data = filteredMine();
+        const rows = [["id", "date", "category", "merchant", "amount", "status", "note"]];
+        data.forEach(x => rows.push([x.id, x.date, x.cat, x.merch, x.amt, x.st, x.note || ""]));
+        dlCsv(rows, "my_expenses.csv");
+    }
+
+    /* -------- Modal Create/Update -------- */
+    function openExpModal() { $('expModal').classList.remove('hidden'); $('modalMsg').textContent = ''; if (!$('eId').value) { $('expTitle').textContent = 'New Expense'; $('eDate').value = new Date().toISOString().slice(0, 10); $('eCategory').value = 'Meals'; $('eMerchant').value = ''; $('eAmount').value = ''; $('eNote').value = ''; $('ePolicy').checked = true; } }
+    function closeExpModal() { $('expModal').classList.add('hidden'); $('eId').value = ''; }
+    function saveOrSubmit(mode) {
+        const item = readModal(); if (!item) return;
+        // quick policy check: Meals > $10 flag; Travel > $300 flag
+        let flag = false;
+        if (item.cat === 'Meals' && item.amt > 10) flag = true;
+        if (item.cat === 'Travel' && item.amt > 300) flag = true;
+        if (flag) { $('modalMsg').textContent = '⚠️ Over simple cap — will be flagged for review.'; }
+
+        const idVal = $('eId').value;
+        if (idVal) { // update
+            const idx = MY.findIndex(x => x.id == idVal); if (idx > -1) { MY[idx] = { ...MY[idx], ...item, st: mode }; }
+        } else { // create
+            MY.unshift({ ...item, id: Date.now(), st: mode });
+        }
+        persist(); closeExpModal(); renderMine();
+    }
+    function readModal() {
+        const date = $('eDate').value || new Date().toISOString().slice(0, 10);
+        const cat = $('eCategory').value || 'Other';
+        const merch = $('eMerchant').value.trim() || '—';
+        const amt = Number($('eAmount').value || 0); if (!(amt > 0)) { alert('Amount required'); return null; }
+        const note = $('eNote').value.trim();
+        return { date, cat, merch, amt, note };
     }
 
     /* -------- Approvals -------- */
@@ -345,19 +452,28 @@
         $('apRows').innerHTML = data.map(x => {
             const tone = x.st === 'flagged' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700';
             return `
-    <tr class="border-b last:border-0">
-      <td class="py-2 px-4 font-medium">${x.emp}</td>
-      <td class="py-2 px-4">${x.cat}</td>
-      <td class="py-2 px-4">${money(x.amt)}</td>
-      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${x.policy === 'OK' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${x.policy}</span></td>
-      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${tone} capitalize">${x.st}</span></td>
-      <td class="py-2 px-4 text-right">
-        <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${x.id}')">Approve</button>
-      </td>
-    </tr>`;
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${x.emp}</td>
+        <td class="py-2 px-4">${x.cat}</td>
+        <td class="py-2 px-4">${money(x.amt)}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${x.policy === 'OK' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${x.policy}</span></td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${tone} capitalize">${x.st}</span></td>
+        <td class="py-2 px-4 text-right space-x-2">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="approve('${x.id}')">Approve</button>
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="flag('${x.id}')">Flag</button>
+        </td>
+      </tr>`;
         }).join('') || `<tr><td colspan="6" class="py-6 text-center text-slate-500">No items</td></tr>`;
     }
-    function approve(id) { const t = AP.find(x => x.id === id); if (!t) return; t.st = 'approved'; renderApprovals(); }
+    function approve(id) { const t = AP.find(x => x.id === id); if (!t) return; t.st = 'approved'; persist(); renderApprovals(); }
+    function flag(id) { const t = AP.find(x => x.id === id); if (!t) return; t.st = 'flagged'; t.policy = 'Flag'; persist(); renderApprovals(); }
+    function exportApprovals() {
+        const f = $('apFilter').value;
+        const data = f === 'all' ? AP : AP.filter(x => x.st === f);
+        const rows = [["id", "employee", "category", "amount", "policy", "status"]];
+        data.forEach(x => rows.push([x.id, x.emp, x.cat, x.amt, x.policy, x.st]));
+        dlCsv(rows, "approvals.csv");
+    }
 
     /* -------- Reimbursements -------- */
     function renderBatches() {
@@ -366,13 +482,15 @@
         $('rbRows').innerHTML = data.map(b => {
             const pill = b.st === 'sent' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700';
             return `
-    <tr class="border-b last:border-0">
-      <td class="py-2 px-4 font-medium">${b.id}</td>
-      <td class="py-2 px-4">${b.count}</td>
-      <td class="py-2 px-4">${money(b.amount)}</td>
-      <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${b.st}</span></td>
-      <td class="py-2 px-4 text-right"><button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button></td>
-    </tr>`;
+      <tr class="border-b last:border-0">
+        <td class="py-2 px-4 font-medium">${b.id}</td>
+        <td class="py-2 px-4">${b.count}</td>
+        <td class="py-2 px-4">${money(b.amount)}</td>
+        <td class="py-2 px-4"><span class="px-2 py-0.5 rounded-full text-xs ${pill}">${b.st}</span></td>
+        <td class="py-2 px-4 text-right">
+          <button class="px-2 py-1 rounded border border-slate-300 bg-white text-xs hover:bg-slate-50" onclick="alert('Batch details coming soon')">Details</button>
+        </td>
+      </tr>`;
         }).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-500">No batches</td></tr>`;
     }
     function renderNextPayout() {
@@ -382,6 +500,15 @@
       <div><div class="font-medium text-slate-800">${x.cat} • ${x.merch}</div><div class="text-xs text-slate-600">${x.date}</div></div>
       <div class="text-sm font-semibold">${money(x.amt)}</div>
     </li>`).join('') || `<li class="text-slate-500">No approved items</li>`;
+    }
+    function genRbCsv() {
+        // generate a simple payout file from queued batch
+        const q = RB.find(b => b.st === 'queued'); if (!q) return alert('No queued batch');
+        const items = MY.filter(x => x.st === 'approved').slice(0, q.count);
+        if (!items.length) return alert('No approved items to include');
+        const rows = [["employee", "category", "merchant", "date", "amount", "currency"], ...items.map(x => ["(you)", x.cat, x.merch, x.date, x.amt, "USD"])];
+        dlCsv(rows, `${q.id}_payout.csv`);
+        alert('✅ Reimbursement file generated');
     }
 
     /* -------- Policies -------- */
@@ -393,46 +520,28 @@
     </li>`).join('');
     }
 
-    /* -------- Modal -------- */
-    function openExpModal() { $('expModal').classList.remove('hidden'); }
-    function closeExpModal() { $('expModal').classList.add('hidden'); }
-    function saveDraft() {
-        const item = readModal(); if (!item) return;
-        item.st = 'draft'; MY.push(item); closeExpModal(); renderMine();
-    }
-    function submitExpense() {
-        const item = readModal(); if (!item) return;
-        item.st = 'submitted'; MY.push(item); closeExpModal(); renderMine();
-    }
-    function readModal() {
-        const date = $('eDate').value || new Date().toISOString().slice(0, 10);
-        const cat = $('eCategory').value || 'Other';
-        const merch = $('eMerchant').value.trim() || '—';
-        const amt = Number($('eAmount').value || 0); if (!amt) { alert('Amount required'); return null; }
-        return { id: Date.now(), date, cat, merch, amt, st: 'draft' };
-    }
-
     /* -------- Reports -------- */
     let chartsReady = false, catC, travelC;
     function ensureCharts() {
         if (typeof Chart !== 'undefined') { chartsReady = true; return; }
         if (chartsReady) return;
         const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-        s.onload = () => { chartsReady = true; drawCharts(); };
-        document.head.appendChild(s);
+        s.onload = () => { chartsReady = true; drawCharts(); }; document.head.appendChild(s);
     }
     function drawCharts() {
-        const c1 = document.getElementById('catChart'); const c2 = document.getElementById('travelChart');
-        if (!chartsReady || !c1 || !c2) return;
+        const c1 = $('catChart'), c2 = $('travelChart'); if (!chartsReady || !c1 || !c2) return;
         catC && catC.destroy(); travelC && travelC.destroy();
-
-        const byCat = aggregateByCategory(MY);
+        const byCat = MY.reduce((m, i) => { m[i.cat] = (m[i.cat] || 0) + i.amt; return m; }, {});
         catC = new Chart(c1, {
             type: 'pie',
-            data: { labels: Object.keys(byCat), datasets: [{ data: Object.values(byCat), borderWidth: 2, borderColor: '#fff', backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }] },
+            data: {
+                labels: Object.keys(byCat), datasets: [{
+                    data: Object.values(byCat), borderWidth: 2, borderColor: '#fff',
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+                }]
+            },
             options: { plugins: { legend: { position: 'bottom' } } }
         });
-
         const travel = MY.filter(x => x.cat === 'Travel' || x.cat === 'Lodging').reduce((s, i) => s + i.amt, 0);
         const non = MY.reduce((s, i) => s + i.amt, 0) - travel;
         travelC = new Chart(c2, {
@@ -440,9 +549,6 @@
             data: { labels: ['Travel', 'Non-Travel'], datasets: [{ data: [travel, non], backgroundColor: '#06b6d4' }] },
             options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
         });
-    }
-    function aggregateByCategory(items) {
-        return items.reduce((m, i) => { m[i.cat] = (m[i.cat] || 0) + i.amt; return m; }, {});
     }
 </script>
 

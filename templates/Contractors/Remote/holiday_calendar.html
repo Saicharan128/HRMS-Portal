@@ -1,54 +1,54 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 py-4 sm:py-6 gap-4">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
-                <i class="fa-solid fa-calendar-days mr-2"></i> Holiday calendar (upload)
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-calendar-days mr-2"></i> Holiday Calendar (Upload)
             </h1>
-            <p class="text-slate-600 text-sm">Upload official holiday list.</p>
+            <p class="text-slate-600 text-sm mt-1">Upload official holiday list.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
             <i class="fa-solid fa-arrow-left mr-1"></i> Back
         </a>
     </div>
 
     <!-- Upload (Dummy) -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 mb-8">
         <h2 class="text-lg font-semibold text-slate-800 mb-4">
             <i class="fa-solid fa-file-arrow-up mr-2"></i> Upload Holiday List (PDF)
         </h2>
-        <form id="uploadForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form id="uploadForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Title *</label>
-                <input name="title" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                <input name="title" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="e.g., India Holidays 2026">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Year *</label>
                 <input name="year" type="number" min="2000" max="2100" required
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Region / Country</label>
-                <input name="region" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                <input name="region" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="India / APAC">
             </div>
-            <div class="md:col-span-2">
+            <div class="sm:col-span-2">
                 <label class="block text-sm text-slate-600 mb-1">Notes</label>
-                <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="Optional notes (observed rules, exceptions)">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">PDF File *</label>
                 <input name="file" type="file" accept="application/pdf" required
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white">
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white">
             </div>
-
-            <div class="md:col-span-3 flex items-center gap-3">
-                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+            <div class="sm:col-span-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"
+                    type="submit">
                     <i class="fa-solid fa-upload mr-1"></i> Upload (Dummy)
                 </button>
                 <span id="uploadMsg" class="text-sm text-slate-600"></span>
@@ -57,19 +57,20 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-5 gap-2">
+    <div class="mb-4 grid grid-cols-1 sm:grid-cols-5 gap-2">
         <input id="q" placeholder="Search title, notes…"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fYear" type="number" placeholder="Year"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fRegion" placeholder="Region" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fRegion" placeholder="Region"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fStatus" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
             <option value="">All</option>
             <option value="Active">Active</option>
             <option value="Archived">Archived</option>
         </select>
         <button id="clearFilters"
-            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">
+            class="w-full rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">
             Clear
         </button>
     </div>
@@ -81,10 +82,10 @@
                 <tr>
                     <th class="px-4 py-2">Title</th>
                     <th class="px-4 py-2">Year</th>
-                    <th class="px-4 py-2">Region</th>
-                    <th class="px-4 py-2">Uploaded</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">Region</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">Uploaded</th>
                     <th class="px-4 py-2">Status</th>
-                    <th class="px-4 py-2">File</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">File</th>
                     <th class="px-4 py-2 w-56">Actions</th>
                 </tr>
             </thead>
@@ -93,6 +94,45 @@
     </div>
     <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
 </div>
+
+<style>
+    @media (max-width: 640px) {
+        .max-w-7xl {
+            max-width: 100%;
+        }
+
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            font-size: 0.75rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem 0.75rem;
+        }
+
+        input,
+        select,
+        button {
+            font-size: 0.875rem;
+        }
+
+        .w-24 {
+            width: 5rem;
+        }
+
+        .w-40 {
+            width: 7rem;
+        }
+
+        .w-56 {
+            width: 12rem;
+        }
+    }
+</style>
 
 <script>
     /* ---------- Dummy store (in-memory + localStorage) ---------- */
@@ -122,12 +162,33 @@
 
     /* ---------- Helpers ---------- */
     function tdWrap(el) { const td = document.createElement("td"); td.className = "px-4 py-2"; td.appendChild(el); return td; }
-    function input(v, cls = "w-44") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
-    function select(opts, cur) {
-        const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm";
-        opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o || "—"; if (o === cur) op.selected = true; s.appendChild(op); }); return s;
+    function input(v, cls = "w-44") {
+        const i = document.createElement("input");
+        i.value = v ?? "";
+        i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`;
+        return i;
     }
-    function a(href, text) { const x = document.createElement("a"); x.href = href; x.target = "_blank"; x.rel = "noopener"; x.className = "text-slate-700 underline"; x.textContent = text; return x; }
+    function select(opts, cur) {
+        const s = document.createElement("select");
+        s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm w-24";
+        opts.forEach(o => {
+            const op = document.createElement("option");
+            op.value = o;
+            op.textContent = o || "—";
+            if (o === cur) op.selected = true;
+            s.appendChild(op);
+        });
+        return s;
+    }
+    function a(href, text) {
+        const x = document.createElement("a");
+        x.href = href;
+        x.target = "_blank";
+        x.rel = "noopener";
+        x.className = "text-slate-700 underline";
+        x.textContent = text;
+        return x;
+    }
 
     /* ---------- Render ---------- */
     function filtered() {
@@ -151,11 +212,13 @@
             const tr = document.createElement("tr");
 
             const titleI = input(r.title, "w-56");
-            const yearI = input(r.year, "w-24");
+            const yearI = input(r.year, "w-24"); yearI.type = "number"; yearI.min = "2000"; yearI.max = "2100";
             const regionI = input(r.region, "w-40");
-            const uploaded = document.createElement("span"); uploaded.textContent = new Date(r.created_at).toLocaleString();
+            const uploaded = document.createElement("span");
+            uploaded.textContent = new Date(r.created_at).toLocaleString();
             const statusS = select(["Active", "Archived"], r.status);
-            const fileLnk = r.file_url ? a(r.file_url, r.file_name || "PDF") : document.createElement("span"); if (!r.file_url) fileLnk.textContent = "—";
+            const fileLnk = r.file_url ? a(r.file_url, r.file_name || "PDF") : document.createElement("span");
+            if (!r.file_url) fileLnk.textContent = "—";
 
             const actions = document.createElement("div");
             const saveBtn = document.createElement("button");
@@ -164,14 +227,23 @@
             const previewBtn = document.createElement("a");
             previewBtn.className = "px-2 py-1 mr-2 rounded-md border border-slate-300 text-xs hover:bg-slate-50";
             previewBtn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Preview';
-            previewBtn.href = r.file_url || "#"; previewBtn.target = "_blank"; previewBtn.rel = "noopener";
+            previewBtn.href = r.file_url || "#";
+            previewBtn.target = "_blank";
+            previewBtn.rel = "noopener";
             const delBtn = document.createElement("button");
             delBtn.className = "px-2 py-1 rounded-md border border-rose-300 text-rose-700 text-xs hover:bg-rose-50";
             delBtn.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i>Delete';
             actions.append(saveBtn, previewBtn, delBtn);
 
-            tr.append(tdWrap(titleI), tdWrap(yearI), tdWrap(regionI), tdWrap(uploaded),
-                tdWrap(statusS), tdWrap(fileLnk), tdWrap(actions));
+            tr.append(
+                tdWrap(titleI),
+                tdWrap(yearI),
+                tdWrap(regionI).classList.add('hidden', 'sm:table-cell'),
+                tdWrap(uploaded).classList.add('hidden', 'sm:table-cell'),
+                tdWrap(statusS),
+                tdWrap(fileLnk).classList.add('hidden', 'sm:table-cell'),
+                tdWrap(actions)
+            );
             rows.appendChild(tr);
 
             saveBtn.addEventListener("click", () => {
@@ -205,7 +277,10 @@
         const notes = (fd.get("notes") || "").toString().trim();
         const file = fd.get("file");
 
-        if (!title || !year || !file) { flash("Missing required fields.", true); return; }
+        if (!title || !year || !file) {
+            flash("Missing required fields.", true);
+            return;
+        }
 
         const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
         STORE.unshift({
@@ -222,7 +297,13 @@
 
     /* ---------- Filters ---------- */
     [qEl, fYear, fRegion, fStatus].forEach(el => el.addEventListener("input", loadList));
-    clearBtn.addEventListener("click", () => { qEl.value = ""; fYear.value = ""; fRegion.value = ""; fStatus.value = ""; loadList(); });
+    clearBtn.addEventListener("click", () => {
+        qEl.value = "";
+        fYear.value = "";
+        fRegion.value = "";
+        fStatus.value = "";
+        loadList();
+    });
 
     /* ---------- UX ---------- */
     function flash(msg, isErr = false) {

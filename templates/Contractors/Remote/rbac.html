@@ -1,91 +1,94 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 py-4 sm:py-6 gap-4">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
                 <i class="fa-solid fa-user-shield mr-2"></i> RBAC
             </h1>
-            <p class="text-slate-600 text-sm">Role-based access control for secure feature access.</p>
+            <p class="text-slate-600 text-sm mt-1">Role-based access control for secure feature access.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
             <i class="fa-solid fa-arrow-left mr-1"></i> Back
         </a>
     </div>
 
     <!-- Create (Dummy) -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
         <!-- Role -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
             <h2 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-id-badge mr-2"></i> Create Role
             </h2>
             <form id="roleForm" class="grid grid-cols-1 gap-3">
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Role Name *</label>
-                    <input name="name" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="name" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="Manager">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Description</label>
-                    <input name="desc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="desc" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="Approves expenses & timesheets">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Attach Permissions (comma)</label>
-                    <input name="perms" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="perms" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="expense.read, expense.approve">
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit"><i
-                            class="fa-solid fa-plus mr-1"></i>Add</button>
+                    <button
+                        class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"
+                        type="submit"><i class="fa-solid fa-plus mr-1"></i>Add</button>
                     <span id="roleMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
         </div>
 
         <!-- Permission -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
             <h2 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-key mr-2"></i> Create Permission
             </h2>
             <form id="permForm" class="grid grid-cols-1 gap-3">
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Permission Key *</label>
-                    <input name="key" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="key" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="expense.approve">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Description</label>
-                    <input name="desc" class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="desc" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="Approve expense reports">
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit"><i
-                            class="fa-solid fa-plus mr-1"></i>Add</button>
+                    <button
+                        class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"
+                        type="submit"><i class="fa-solid fa-plus mr-1"></i>Add</button>
                     <span id="permMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
         </div>
 
         <!-- Assign -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
             <h2 class="text-lg font-semibold text-slate-800 mb-4"><i class="fa-solid fa-user-plus mr-2"></i> Assign Role
                 to User</h2>
             <form id="assignForm" class="grid grid-cols-1 gap-3">
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">User (ID - Name) *</label>
-                    <input name="user" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="user" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="U001 - Charan">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-600 mb-1">Role *</label>
-                    <input name="role" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    <input name="role" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                         placeholder="Manager">
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit"><i
-                            class="fa-solid fa-plus mr-1"></i>Assign</button>
+                    <button
+                        class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"
+                        type="submit"><i class="fa-solid fa-plus mr-1"></i>Assign</button>
                     <span id="assignMsg" class="text-sm text-slate-600"></span>
                 </div>
             </form>
@@ -93,23 +96,25 @@
     </div>
 
     <!-- Filters + KPIs -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-6 gap-2">
+    <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2">
         <input id="q" placeholder="Search role/perm/user…"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fRole" placeholder="Role" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fRole" placeholder="Role"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fPerm" placeholder="Permission"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fUser" placeholder="User" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fUser" placeholder="User"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fStatus" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
             <option value="">Any Status</option>
             <option>Active</option>
             <option>Paused</option>
         </select>
         <button id="clearFilters"
-            class="rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
+            class="w-full rounded-xl border border-slate-300 bg-white hover:bg-slate-50 px-3 py-2 text-sm">Clear</button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Users</div>
             <div id="kpiUsers" class="text-xl font-semibold text-slate-800">0</div>
@@ -129,7 +134,7 @@
     </div>
 
     <!-- Tables -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <!-- Roles -->
         <div class="rounded-2xl border border-slate-200 bg-white">
             <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
@@ -139,10 +144,10 @@
                     <thead class="bg-slate-50 text-slate-600">
                         <tr>
                             <th class="px-4 py-2">Role</th>
-                            <th class="px-4 py-2">Description</th>
-                            <th class="px-4 py-2">Perms</th>
+                            <th class="px-4 py-2 hidden sm:table-cell">Description</th>
+                            <th class="px-4 py-2 hidden sm:table-cell">Perms</th>
                             <th class="px-4 py-2">Status</th>
-                            <th class="px-4 py-2 w-56">Actions</th>
+                            <th class="px-4 py-2 w-48">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="roleRows" class="divide-y divide-slate-200"></tbody>
@@ -160,8 +165,8 @@
                     <thead class="bg-slate-50 text-slate-600">
                         <tr>
                             <th class="px-4 py-2">Key</th>
-                            <th class="px-4 py-2">Description</th>
-                            <th class="px-4 py-2 w-40">Actions</th>
+                            <th class="px-4 py-2 hidden sm:table-cell">Description</th>
+                            <th class="px-4 py-2 w-36">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="permRows" class="divide-y divide-slate-200"></tbody>
@@ -179,9 +184,9 @@
                     <thead class="bg-slate-50 text-slate-600">
                         <tr>
                             <th class="px-4 py-2">User</th>
-                            <th class="px-4 py-2">Roles</th>
-                            <th class="px-4 py-2">Effective Perms</th>
-                            <th class="px-4 py-2 w-56">Actions</th>
+                            <th class="px-4 py-2 hidden sm:table-cell">Roles</th>
+                            <th class="px-4 py-2 hidden sm:table-cell">Effective Perms</th>
+                            <th class="px-4 py-2 w-48">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="userRows" class="divide-y divide-slate-200"></tbody>
@@ -194,10 +199,10 @@
         <div class="rounded-2xl border border-slate-200 bg-white">
             <div class="p-4 border-b border-slate-200 text-slate-800 font-semibold"><i
                     class="fa-solid fa-vial mr-2"></i> Policy Simulator</div>
-            <div class="p-4 grid grid-cols-1 md:grid-cols-5 gap-3">
-                <input id="simUser" class="md:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            <div class="p-4 grid grid-cols-1 sm:grid-cols-5 gap-3">
+                <input id="simUser" class="sm:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="U001 - Charan">
-                <input id="simResource" class="md:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                <input id="simResource" class="sm:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="expense">
                 <select id="simAction" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option>read</option>
@@ -205,8 +210,9 @@
                     <option>approve</option>
                     <option>edit</option>
                 </select>
-                <div class="md:col-span-5 flex items-center gap-3">
-                    <button id="simBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900"><i
+                <div class="sm:col-span-5 flex items-center gap-3">
+                    <button id="simBtn"
+                        class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"><i
                             class="fa-solid fa-play mr-1"></i>Simulate</button>
                     <span id="simMsg" class="text-sm text-slate-600"></span>
                 </div>
@@ -216,6 +222,33 @@
         </div>
     </div>
 </div>
+
+<style>
+    @media (max-width: 640px) {
+        .max-w-7xl {
+            max-width: 100%;
+        }
+
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            font-size: 0.75rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem 0.75rem;
+        }
+
+        input,
+        select,
+        button {
+            font-size: 0.875rem;
+        }
+    }
+</style>
 
 <script>
     /* ---------- Dummy store (localStorage) ---------- */
@@ -312,9 +345,9 @@
         const data = STORE.roles.filter(passRoleFilter);
         data.forEach(r => {
             const tr = document.createElement("tr");
-            const nameI = input(r.name, "w-40");
-            const descI = input(r.desc || "", "w-48");
-            const permsI = input(r.perms.join(", "), "w-64");
+            const nameI = input(r.name, "w-full sm:w-40");
+            const descI = input(r.desc || "", "w-full sm:w-48 hidden sm:table-cell");
+            const permsI = input(r.perms.join(", "), "w-full sm:w-64 hidden sm:table-cell");
             const statusS = select(["Active", "Paused"], r.status || "Active");
 
             const actions = document.createElement("div");
@@ -329,7 +362,6 @@
                 const newName = nameI.value.trim();
                 if (!newName) { flash(roleListMsg, "Role name required", true); return; }
                 if (newName !== r.name && STORE.roles.some(x => x.name === newName)) { flash(roleListMsg, "Role exists", true); return; }
-                // update user role refs if renamed
                 STORE.users.forEach(u => { u.roles = u.roles.map(x => x === r.name ? newName : x); });
                 r.name = newName; r.desc = descI.value.trim();
                 r.perms = uniq(permsI.value.split(",").map(s => s.trim()).filter(Boolean));
@@ -352,8 +384,8 @@
         const data = STORE.perms.filter(passPermFilter);
         data.forEach(p => {
             const tr = document.createElement("tr");
-            const keyI = input(p.key, "w-56");
-            const descI = input(p.desc || "", "w-64");
+            const keyI = input(p.key, "w-full sm:w-56");
+            const descI = input(p.desc || "", "w-full sm:w-64 hidden sm:table-cell");
 
             const actions = document.createElement("div");
             const saveBtn = document.createElement("button"); saveBtn.className = "px-2 py-1 mr-2 rounded-md bg-slate-800 text-white text-xs hover:bg-slate-900"; saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i>Save';
@@ -367,7 +399,6 @@
                 const newKey = keyI.value.trim();
                 if (!newKey) { flash(permListMsg, "Key required", true); return; }
                 if (newKey !== p.key && STORE.perms.some(x => x.key === newKey)) { flash(permListMsg, "Permission exists", true); return; }
-                // rewrite role permissions if key changed
                 STORE.roles.forEach(r => { r.perms = r.perms.map(k => k === p.key ? newKey : k); });
                 p.key = newKey; p.desc = descI.value.trim();
                 persist(); updateKPIs(); loadRoles(); flash(permListMsg, "Saved ✓");
@@ -388,9 +419,9 @@
         const data = STORE.users.filter(passUserFilter);
         data.forEach(u => {
             const tr = document.createElement("tr");
-            const userI = input(u.user, "w-48");
-            const rolesI = input(u.roles.join(", "), "w-48");
-            const eff = document.createElement("div"); eff.className = "text-xs text-slate-700";
+            const userI = input(u.user, "w-full sm:w-48");
+            const rolesI = input(u.roles.join(", "), "w-full sm:w-48 hidden sm:table-cell");
+            const eff = document.createElement("div"); eff.className = "text-xs text-slate-700 hidden sm:block";
             eff.textContent = userEffectivePerms(u.user).join(", ") || "—";
 
             const actions = document.createElement("div");

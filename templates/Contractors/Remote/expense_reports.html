@@ -1,48 +1,49 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="mx-auto max-w-7xl">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 py-4 sm:py-6 gap-4">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-800">
-                <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Expense reports
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-800">
+                <i class="fa-solid fa-file-invoice-dollar mr-2"></i> Expense Reports
             </h1>
-            <p class="text-slate-600 text-sm">Department/BU summaries.</p>
+            <p class="text-slate-600 text-sm mt-1">Department/BU summaries.</p>
         </div>
         <a href="{{ url_for('dashboard') }}"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm">
+            class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm w-full sm:w-auto">
             <i class="fa-solid fa-arrow-left mr-1"></i> Back
         </a>
     </div>
 
     <!-- Add Expense (Dummy) -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-8">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 mb-8">
         <h2 class="text-lg font-semibold text-slate-800 mb-4">
             <i class="fa-solid fa-plus-square mr-2"></i> Add Expense (Dummy)
         </h2>
-        <form id="expForm" class="grid grid-cols-1 md:grid-cols-8 gap-4">
-            <div class="md:col-span-2">
+        <form id="expForm" class="grid grid-cols-1 sm:grid-cols-8 gap-4">
+            <div class="sm:col-span-2">
                 <label class="block text-sm text-slate-600 mb-1">Employee *</label>
-                <input name="employee" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                <input name="employee" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="E001 - Charan">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Department *</label>
-                <input name="department" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                <input name="department" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="Engineering">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">BU *</label>
-                <input name="bu" required class="w-full rounded-lg border border-slate-300 px-3 py-2"
+                <input name="bu" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     placeholder="Products / Services">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Date *</label>
-                <input name="date" type="date" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                <input name="date" type="date" required
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Category *</label>
-                <select name="category" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                <select name="category" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     <option>Travel</option>
                     <option>Meals</option>
                     <option>Office</option>
@@ -53,22 +54,25 @@
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Amount *</label>
                 <input name="amount" type="number" step="0.01" min="0" required
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2">
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Currency</label>
-                <input name="currency" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="INR">
+                <input name="currency" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    placeholder="INR">
             </div>
             <div class="flex items-center gap-2">
                 <input id="reimb" name="reimb" type="checkbox" class="h-4 w-4">
                 <label for="reimb" class="text-sm text-slate-700">Reimbursable</label>
             </div>
-            <div class="md:col-span-8">
+            <div class="sm:col-span-8">
                 <label class="block text-sm text-slate-600 mb-1">Notes</label>
-                <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="Optional">
+                <input name="notes" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    placeholder="Optional">
             </div>
-            <div class="md:col-span-8 flex items-center gap-3">
-                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900" type="submit">
+            <div class="sm:col-span-8 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <button class="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 text-sm w-full sm:w-auto"
+                    type="submit">
                     <i class="fa-solid fa-plus mr-1"></i> Add
                 </button>
                 <span id="formMsg" class="text-sm text-slate-600"></span>
@@ -77,44 +81,45 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-4 grid grid-cols-1 md:grid-cols-7 gap-2">
+    <div class="mb-4 grid grid-cols-1 sm:grid-cols-7 gap-2">
         <input id="q" placeholder="Search employee / notes…"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
         <input id="fDept" placeholder="Department"
-            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fBU" placeholder="BU" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fCat" placeholder="Category" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <select id="fStatus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fBU" placeholder="BU" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fCat" placeholder="Category"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <select id="fStatus" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
             <option value="">Any Status</option>
             <option>Pending</option>
             <option>Approved</option>
             <option>Rejected</option>
         </select>
-        <input id="fFrom" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
-        <input id="fTo" type="date" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fFrom" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+        <input id="fTo" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
     </div>
 
     <!-- KPIs -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+    <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-4">
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Total Amount</div>
-            <div id="kpiTotal" class="text-xl font-semibold text-slate-800">0</div>
+            <div id="kpiTotal" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Reimbursable</div>
-            <div id="kpiReimb" class="text-xl font-semibold text-slate-800">0</div>
+            <div id="kpiReimb" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Non-reimb.</div>
-            <div id="kpiNonReimb" class="text-xl font-semibold text-slate-800">0</div>
+            <div id="kpiNonReimb" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Pending</div>
-            <div id="kpiPending" class="text-xl font-semibold text-slate-800">0</div>
+            <div id="kpiPending" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-4">
             <div class="text-xs text-slate-500">Avg / Employee</div>
-            <div id="kpiAvgEmp" class="text-xl font-semibold text-slate-800">0</div>
+            <div id="kpiAvgEmp" class="text-lg sm:text-xl font-semibold text-slate-800">0</div>
         </div>
     </div>
 
@@ -124,15 +129,15 @@
             <thead class="bg-slate-50 text-slate-600">
                 <tr>
                     <th class="px-4 py-2">Employee</th>
-                    <th class="px-4 py-2">Dept</th>
-                    <th class="px-4 py-2">BU</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">Dept</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">BU</th>
                     <th class="px-4 py-2">Date</th>
-                    <th class="px-4 py-2">Category</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">Category</th>
                     <th class="px-4 py-2">Amount</th>
-                    <th class="px-4 py-2">Curr</th>
-                    <th class="px-4 py-2">Reimb</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">Curr</th>
+                    <th class="px-4 py-2 hidden sm:table-cell">Reimb</th>
                     <th class="px-4 py-2">Status</th>
-                    <th class="px-4 py-2 w-64">Notes</th>
+                    <th class="px-4 py-2 hidden sm:table-cell w-48">Notes</th>
                     <th class="px-4 py-2 w-56">Actions</th>
                 </tr>
             </thead>
@@ -141,7 +146,7 @@
     </div>
 
     <!-- Department Summary -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-4 mb-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 mb-4">
         <h3 class="text-slate-800 font-semibold mb-3"><i class="fa-solid fa-building mr-2"></i> Department Summary</h3>
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm text-left text-slate-700">
@@ -150,8 +155,8 @@
                         <th class="px-4 py-2">Department</th>
                         <th class="px-4 py-2">Reports</th>
                         <th class="px-4 py-2">Total</th>
-                        <th class="px-4 py-2">Reimbursable</th>
-                        <th class="px-4 py-2">Non-reimb.</th>
+                        <th class="px-4 py-2 hidden sm:table-cell">Reimbursable</th>
+                        <th class="px-4 py-2 hidden sm:table-cell">Non-reimb.</th>
                         <th class="px-4 py-2">Approved</th>
                         <th class="px-4 py-2">Pending</th>
                     </tr>
@@ -162,7 +167,7 @@
     </div>
 
     <!-- BU Summary -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
         <h3 class="text-slate-800 font-semibold mb-3"><i class="fa-solid fa-sitemap mr-2"></i> BU Summary</h3>
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm text-left text-slate-700">
@@ -171,8 +176,8 @@
                         <th class="px-4 py-2">BU</th>
                         <th class="px-4 py-2">Reports</th>
                         <th class="px-4 py-2">Total</th>
-                        <th class="px-4 py-2">Reimbursable</th>
-                        <th class="px-4 py-2">Non-reimb.</th>
+                        <th class="px-4 py-2 hidden sm:table-cell">Reimbursable</th>
+                        <th class="px-4 py-2 hidden sm:table-cell">Non-reimb.</th>
                         <th class="px-4 py-2">Approved</th>
                         <th class="px-4 py-2">Pending</th>
                     </tr>
@@ -184,6 +189,62 @@
 
     <div id="listMsg" class="mt-3 text-sm text-slate-600"></div>
 </div>
+
+<style>
+    @media (max-width: 640px) {
+        .max-w-7xl {
+            max-width: 100%;
+        }
+
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            font-size: 0.75rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem 0.75rem;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font-size: 0.875rem;
+        }
+
+        .w-20 {
+            width: 4rem;
+        }
+
+        .w-28 {
+            width: 5rem;
+        }
+
+        .w-32 {
+            width: 6rem;
+        }
+
+        .w-36 {
+            width: 7rem;
+        }
+
+        .w-44 {
+            width: 9rem;
+        }
+
+        .w-48 {
+            width: 10rem;
+        }
+
+        .w-56 {
+            width: 12rem;
+        }
+    }
+</style>
 
 <script>
     /* ---------- Dummy store (localStorage) ---------- */
@@ -223,13 +284,29 @@
     function td(el) { const c = document.createElement("td"); c.className = "px-4 py-2"; c.appendChild(el); return c; }
     function input(v, cls = "w-32") { const i = document.createElement("input"); i.value = v ?? ""; i.className = `rounded-lg border border-slate-300 px-2 py-1 text-sm ${cls}`; return i; }
     function textArea(v) { const t = document.createElement("textarea"); t.value = v ?? ""; t.rows = 1; t.className = "w-full rounded-lg border border-slate-300 px-2 py-1 text-sm"; return t; }
-    function select(opts, cur) { const s = document.createElement("select"); s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm"; opts.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o; if (o === cur) op.selected = true; s.appendChild(op); }); return s; }
-    function money(n, cur) { const v = Number(n || 0); return (cur || "INR") + " " + v.toLocaleString(undefined, { maximumFractionDigits: 2 }); }
+    function select(opts, cur) {
+        const s = document.createElement("select");
+        s.className = "rounded-lg border border-slate-300 px-2 py-1 text-sm w-24";
+        opts.forEach(o => {
+            const op = document.createElement("option");
+            op.value = o;
+            op.textContent = o;
+            if (o === cur) op.selected = true;
+            s.appendChild(op);
+        });
+        return s;
+    }
+    function money(n, cur) {
+        const v = Number(n || 0);
+        return (cur || "INR") + " " + v.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
     function withinDate(d) {
         const v = new Date(d).setHours(0, 0, 0, 0);
         const f1 = fFrom.value ? new Date(fFrom.value).setHours(0, 0, 0, 0) : null;
         const f2 = fTo.value ? new Date(fTo.value).setHours(23, 59, 59, 999) : null;
-        if (f1 && v < f1) return false; if (f2 && v > f2) return false; return true;
+        if (f1 && v < f1) return false;
+        if (f2 && v > f2) return false;
+        return true;
     }
 
     /* ---------- Filtering ---------- */
@@ -288,12 +365,18 @@
         tbody.innerHTML = "";
         Object.entries(map).sort(([a], [b]) => a.localeCompare(b)).forEach(([name, v]) => {
             const tr = document.createElement("tr");
-            const tdC = (txt) => { const x = document.createElement("td"); x.className = "px-4 py-2"; x.textContent = txt; return x; };
+            const tdC = (txt) => {
+                const x = document.createElement("td");
+                x.className = "px-4 py-2";
+                x.textContent = txt;
+                return x;
+            };
             tr.append(
-                tdC(name), tdC(v.count),
+                tdC(name),
+                tdC(v.count),
                 tdC(money(v.total, currency)),
-                tdC(money(v.reimb, currency)),
-                tdC(money(v.non, currency)),
+                tdC(money(v.reimb, currency)).classList.add('hidden', 'sm:table-cell'),
+                tdC(money(v.non, currency)).classList.add('hidden', 'sm:table-cell'),
                 tdC(money(v.approved, currency)),
                 tdC(money(v.pending, currency))
             );
@@ -336,8 +419,17 @@
             actions.append(approveBtn, rejectBtn, saveBtn, delBtn);
 
             tr.append(
-                td(empI), td(depI), td(buI), td(dateI), td(catI),
-                td(amtI), td(curI), td(reimbS), td(statusS), td(notesT), td(actions)
+                td(empI),
+                td(depI).classList.add('hidden', 'sm:table-cell'),
+                td(buI).classList.add('hidden', 'sm:table-cell'),
+                td(dateI),
+                td(catI).classList.add('hidden', 'sm:table-cell'),
+                td(amtI),
+                td(curI).classList.add('hidden', 'sm:table-cell'),
+                td(reimbS).classList.add('hidden', 'sm:table-cell'),
+                td(statusS),
+                td(notesT).classList.add('hidden', 'sm:table-cell'),
+                td(actions)
             );
             rows.appendChild(tr);
 
@@ -353,13 +445,19 @@
                 r.status = statusS.value;
                 r.notes = notesT.value;
                 persist(); refresh();
-                listMsg.className = "mt-3 text-sm text-emerald-700"; listMsg.textContent = "Saved.";
+                listMsg.className = "mt-3 text-sm text-emerald-700";
+                listMsg.textContent = "Saved.";
                 setTimeout(() => { listMsg.textContent = ""; listMsg.className = "mt-3 text-sm text-slate-600"; }, 1200);
             }
             saveBtn.addEventListener("click", save);
             approveBtn.addEventListener("click", () => { statusS.value = "Approved"; save(); });
             rejectBtn.addEventListener("click", () => { statusS.value = "Rejected"; save(); });
-            delBtn.addEventListener("click", () => { if (!confirm("Delete this expense?")) return; STORE = STORE.filter(x => x.id !== r.id); persist(); refresh(); });
+            delBtn.addEventListener("click", () => {
+                if (!confirm("Delete this expense?")) return;
+                STORE = STORE.filter(x => x.id !== r.id);
+                persist();
+                refresh();
+            });
         });
 
         updateKPIs(data);
@@ -383,14 +481,21 @@
         const currency = (fd.get("currency") || "INR").toString().trim();
         const reimb = !!fd.get("reimb");
         const notes = (fd.get("notes") || "").toString().trim();
-        if (!employee || !department || !bu || !date || !category || !amount) { formFlash("Missing required fields.", true); return; }
+        if (!employee || !department || !bu || !date || !category || !amount) {
+            formFlash("Missing required fields.", true);
+            return;
+        }
 
         const id = Math.max(0, ...STORE.map(x => x.id)) + 1;
         STORE.unshift({ id, employee, department, bu, date, category, amount, currency, reimb, status: "Pending", notes });
-        persist(); expForm.reset(); formFlash("Added ✓"); refresh();
+        persist();
+        expForm.reset();
+        formFlash("Added ✓");
+        refresh();
     });
     function formFlash(msg, bad = false) {
-        formMsg.textContent = msg; formMsg.className = "text-sm " + (bad ? "text-rose-700" : "text-emerald-700");
+        formMsg.textContent = msg;
+        formMsg.className = "text-sm " + (bad ? "text-rose-700" : "text-emerald-700");
         setTimeout(() => { formMsg.textContent = ""; formMsg.className = "text-sm text-slate-600"; }, 1500);
     }
 
